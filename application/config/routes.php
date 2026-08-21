@@ -60,12 +60,18 @@ $route['dashboard/ajukan'] = 'dashboard/ajukan';
 // Dosen Wali Routes
 $route['dosenwali'] = 'DosenWali';
 $route['dosenwali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
+$route['dosenwali/(:any)'] = 'DosenWali/$1';
+$route['dosenwali/(:any)/(:any)'] = 'DosenWali/$1/$2';
 
 // Koordinator TA Routes
 $route['koordinatorta'] = 'KoordinatorTA';
 $route['koordinatorta/detail_mahasiswa/(:any)'] = 'KoordinatorTA/detail_mahasiswa/$1';
+$route['koordinatorta/(:any)'] = 'KoordinatorTA/$1';
+$route['koordinatorta/(:any)/(:any)'] = 'KoordinatorTA/$1/$2';
 $route['koordinator'] = 'KoordinatorTA';
 $route['koordinator/detail_mahasiswa/(:any)'] = 'KoordinatorTA/detail_mahasiswa/$1';
+$route['koordinator/(:any)'] = 'KoordinatorTA/$1';
+$route['koordinator/(:any)/(:any)'] = 'KoordinatorTA/$1/$2';
 
 // Admin Import Email & Token Routes
 $route['import-email'] = 'ImportEmail';

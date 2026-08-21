@@ -13,7 +13,7 @@
 
     <!-- Header Glass Navbar -->
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-orange-100/80 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-4 sm:px-6 lg:px-10">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-3.5">
                     <div class="w-10 h-10 bg-gradient-to-tr from-slate-900 to-slate-800 text-white rounded-2xl font-bold text-xl flex items-center justify-center box-3d">
@@ -25,13 +25,16 @@
                     </div>
                 </div>
 
-                <!-- User Profile Pill -->
+                <!-- User Profile Pill (Kode, Nama, Kejuruan Dosen Wali) -->
                 <div class="flex items-center gap-3">
                     <div class="hidden sm:flex flex-col text-right">
-                        <span class="text-xs font-bold text-slate-800 leading-tight">Dosen Wali IFIK</span>
-                        <span class="text-[10px] font-semibold text-slate-500">NIP: 19850101001</span>
+                        <span class="text-xs font-bold text-slate-800 leading-tight"><?= $dosen_info['nama_dosen'] ?? 'Alif Dosen, S.T., M.T.'; ?></span>
+                        <div class="flex items-center justify-end gap-2 text-[10px] font-semibold text-slate-500 mt-0.5">
+                            <span class="px-2 py-0.5 bg-orange-100/90 text-orange-700 rounded-md border border-orange-200/80 font-bold"><?= $dosen_info['kode_dosen'] ?? 'DW-001'; ?></span>
+                            <span>Prodi: <strong class="text-slate-700"><?= $dosen_info['kejuruan'] ?? 'Informatika / DKV'; ?></strong></span>
+                        </div>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-orange-100 border border-orange-200 text-orange-600 flex items-center justify-center font-bold text-base box-3d">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center font-bold text-base box-3d shadow-xs">
                         <i class="bi bi-person-badge-fill"></i>
                     </div>
                 </div>
@@ -39,8 +42,8 @@
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+    <!-- Main Container (Full Wide Layout) -->
+    <main class="w-full px-4 sm:px-6 lg:px-10 py-10 flex-grow">
 
         <!-- Welcome Banner & Page Title -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
@@ -66,7 +69,7 @@
 
         <!-- Stat Summary Cards Grid (3D Claymorphic) -->
         <?php
-            $totalMhs = !empty($list_mahasiswa) ? count($list_mahasiswa) : 1;
+            $totalMhs = !empty($list_mahasiswa) ? count($list_mahasiswa) : 0;
             $pendingCount = 0;
             $approvedCount = 0;
             $rejectedCount = 0;
@@ -78,8 +81,6 @@
                     else if($st === 'Rejected') $rejectedCount++;
                     else $pendingCount++;
                 }
-            } else {
-                $pendingCount = 1; // mock default
             }
         ?>
 
@@ -207,7 +208,7 @@
                                 <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="<?= $st; ?>" data-nim="<?= strtolower($mhs['nim']); ?>" data-nama="<?= strtolower($mhs['nama_depan'] . ' ' . $mhs['nama_belakang']); ?>" data-judul="<?= strtolower($mhs['judul_1'] ?? ''); ?>" data-stage="<?= strtolower($mhs['current_stage'] ?? 'draft'); ?>">
                                     <td class="py-4 px-5 pl-6 font-bold text-slate-900 mhs-nim"><?= $mhs['nim']; ?></td>
                                     <td class="py-4 px-5 font-semibold text-slate-800 mhs-nama"><?= $mhs['nama_depan'] . ' ' . $mhs['nama_belakang']; ?></td>
-                                    <td class="py-4 px-5 text-slate-600 max-w-xs truncate"><?= $mhs['judul_1'] ? character_limiter($mhs['judul_1'], 45) : '<span class="text-slate-400 italic">Belum Mendaftar</span>'; ?></td>
+                                    <td class="py-4 px-5 text-slate-600 max-w-xs truncate"><?= !empty($mhs['judul_1']) ? character_limiter($mhs['judul_1'], 45) : '<span class="text-slate-400 italic font-normal">Belum Mendaftar</span>'; ?></td>
                                     <td class="py-4 px-5">
                                         <span class="px-3 py-1 font-semibold text-[11px] rounded-full border shadow-xs inline-block <?= $badgeStyle; ?>"><?= $st; ?></span>
                                     </td>
@@ -222,21 +223,18 @@
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <!-- Fallback Mock Data -->
-                            <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="Pending" data-nim="1301210001" data-nama="rivan arshavin" data-judul="pengembangan sistem informasi ifik berbasis web" data-stage="dosen wali">
-                                <td class="py-4 px-5 pl-6 font-bold text-slate-900 mhs-nim">1301210001</td>
-                                <td class="py-4 px-5 font-semibold text-slate-800 mhs-nama">Rivan Arshavin</td>
-                                <td class="py-4 px-5 text-slate-600 max-w-xs truncate">Pengembangan Sistem Informasi IFIK Berbasis Web</td>
-                                <td class="py-4 px-5">
-                                    <span class="px-3 py-1 font-semibold text-[11px] rounded-full bg-amber-100 text-amber-700 border border-amber-300 shadow-xs inline-block">Pending</span>
-                                </td>
-                                <td class="py-4 px-5">
-                                    <span class="px-3 py-1 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 shadow-xs inline-block">Dosen Wali</span>
-                                </td>
-                                <td class="py-4 px-5 pr-6 text-right">
-                                    <a href="<?= site_url('dosenwali/detail_mahasiswa/1301210001'); ?>" class="btn-3d-orange inline-flex items-center gap-1.5 text-white font-bold px-4 py-2 rounded-xl text-xs">
-                                        <i class="bi bi-search text-xs"></i> Detail & Approval
-                                    </a>
+                            <!-- Clean Empty State Row -->
+                            <tr>
+                                <td colspan="6" class="py-12 text-center bg-white">
+                                    <div class="flex flex-col items-center justify-center gap-3">
+                                        <div class="w-12 h-12 rounded-2xl bg-orange-100/80 text-orange-600 flex items-center justify-center text-2xl font-bold box-3d shadow-2xs">
+                                            <i class="bi bi-inbox-fill"></i>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <h4 class="text-sm font-bold text-slate-800">Belum Ada Mahasiswa Mengirim Pendaftaran TA</h4>
+                                            <p class="text-xs text-slate-500 max-w-md mx-auto">Daftar ini akan otomatis terisi secara real-time begitu mahasiswa mengisi & mengirimkan Formulir Pendaftaran TA (6 Langkah).</p>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endif; ?>
