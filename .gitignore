@@ -35,3 +35,8 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 db_check*.php
 *.sql
 
+# React UI & Agents
+/components/
+/lib/
+/.agents/
+
