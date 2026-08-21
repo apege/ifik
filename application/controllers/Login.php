@@ -11,9 +11,14 @@ class Login extends CI_Controller {
 
 	public function index()
 	{
-		// If user is already logged in, redirect to dashboard
+		// If user is already logged in, redirect based on password_changed state
 		if ($this->session->userdata('logged_in')) {
-			redirect('dashboard');
+			if ((int)$this->session->userdata('password_changed') === 0) {
+				redirect('onboarding');
+			} else {
+				redirect('dashboard');
+			}
+			return;
 		}
 		$this->load->view('auth/login');
 	}
@@ -29,8 +34,8 @@ class Login extends CI_Controller {
 			return;
 		}
 
-		// Validate domain @telkomuniversity.ac.id
-		if (!preg_match('/^[^\s@]+@telkomuniversity\.ac\.id$/i', $identity)) {
+		// Validate domain @telkomuniversity.ac.id or @student.telkomuniversity.ac.id
+		if (!preg_match('/@(student\.)?telkomuniversity\.ac\.id$/i', $identity)) {
 			$this->session->set_flashdata('error', 'Email harus menggunakan domain @telkomuniversity.ac.id');
 			redirect('login');
 			return;
@@ -44,15 +49,24 @@ class Login extends CI_Controller {
 			if (password_verify($password, $user->password)) {
 				// Set session data
 				$session_data = array(
-					'user_id'    => $user->id,
-					'role_id'    => $user->role_id,
-					'name'       => $user->name,
-					'email'      => $user->email,
-					'nidn_nim'   => $user->nidn_nim,
-					'status'     => $user->status,
-					'logged_in'  => TRUE
+					'user_id'          => $user->id,
+					'role_id'          => $user->role_id,
+					'name'             => $user->name,
+					'email'            => $user->email,
+					'nidn_nim'         => $user->nidn_nim,
+					'nim'              => $user->nidn_nim,
+					'status'           => $user->status,
+					'password_changed' => (int)$user->password_changed,
+					'logged_in'        => TRUE
 				);
 				$this->session->set_userdata($session_data);
+
+				// If user still uses temporary token (password_changed == 0)
+				if ((int)$user->password_changed === 0) {
+					$this->session->set_flashdata('warning', 'Akun Anda masih menggunakan password sementara (token). Wajib buat password baru dan lengkapi biodata Anda.');
+					redirect('onboarding');
+					return;
+				}
 
 				// Redirect to dashboard
 				redirect('dashboard');
@@ -92,23 +106,6 @@ class Login extends CI_Controller {
 
 	public function onboarding()
 	{
-		$data['title'] = 'Onboarding & Lengkapi Akun — FIK Portal';
-		$data['dosen_wali_list'] = array(
-			'19850101' => 'Dr. Ir. Ahmad Yani, M.T.',
-			'19880205' => 'Prof. Siti Aminah, Ph.D.',
-			'19900312' => 'Hendra Kusuma, S.T., M.T.',
-			'19920720' => 'Dra. Nurul Hidayah, M.Ds.',
-			'19941108' => 'Rian Pratama, S.Kom., M.T.',
-			'19960415' => 'Maya Indriani, S.Ds., M.A.'
-		);
-		$data['konsentrasi_list'] = array(
-			'Desain Komunikasi Visual',
-			'Informatika (Teknologi Informasi)',
-			'Rekayasa Perangkat Lunak',
-			'Desain Produk',
-			'Desain Interior',
-			'Kriya Tekstil & Fashion'
-		);
-		$this->load->view('auth/onboarding', $data);
+		redirect('onboarding');
 	}
 }

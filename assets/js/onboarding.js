@@ -112,7 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Success -> Advance to Step 2
+    // Success -> Store into hidden inputs of formStep2 & Advance to Step 2
+    const hiddenPass = document.getElementById('hidden_password_baru');
+    const hiddenConfirm = document.getElementById('hidden_konfirmasi_password');
+    if (hiddenPass) hiddenPass.value = passNew.value;
+    if (hiddenConfirm) hiddenConfirm.value = passConfirm.value;
+
     goToStep(2);
   });
 
@@ -159,11 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Step 2 Form Handler
   formStep2?.addEventListener('submit', (e) => {
-    // If not submitting to backend yet, show success preview
-    const actionAttr = formStep2.getAttribute('action');
-    if (!actionAttr || actionAttr === '#' || actionAttr.includes('javascript')) {
+    const hiddenPass = document.getElementById('hidden_password_baru');
+    if (!hiddenPass || !hiddenPass.value || hiddenPass.value.length < 6) {
       e.preventDefault();
-      alert('Biodata berhasil disimpan! Akun Anda telah aktif.');
+      alert('Silakan buat password baru Anda di Step 1 terlebih dahulu!');
+      goToStep(1);
+      if (passNew) passNew.focus();
+      return;
     }
   });
 

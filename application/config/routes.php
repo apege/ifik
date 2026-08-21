@@ -75,8 +75,11 @@ $route['koordinator/(:any)/(:any)'] = 'KoordinatorTA/$1/$2';
 
 // Admin Import Email & Token Routes
 $route['import-email'] = 'ImportEmail';
+$route['import-email/(:any)'] = 'ImportEmail/$1';
 $route['admin/import-email'] = 'ImportEmail';
+$route['admin/import-email/(:any)'] = 'ImportEmail/$1';
 $route['admin/import'] = 'ImportEmail';
+$route['admin/import/(:any)'] = 'ImportEmail/$1';
 
 // Admin Kelola Ruangan Routes
 $route['kelolaruangan'] = 'Kelolaruangan';
@@ -84,7 +87,8 @@ $route['admin/ruangan'] = 'Kelolaruangan';
 $route['admin/kelolaruangan'] = 'Kelolaruangan';
 
 // Onboarding & Force Change Password Routes
-$route['onboarding'] = 'login/onboarding';
+$route['onboarding'] = 'Onboarding';
+$route['onboarding/(:any)'] = 'Onboarding/$1';
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

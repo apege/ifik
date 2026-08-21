@@ -35,6 +35,20 @@
     <!-- Main Onboarding Card -->
     <div class="onboarding-card">
 
+      <?php if ($this->session->flashdata('warning')): ?>
+        <div class="p-4 mx-6 mt-6 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm flex items-center gap-3">
+          <svg class="w-5 h-5 flex-shrink-0 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <div><?= $this->session->flashdata('warning'); ?></div>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($this->session->flashdata('error')): ?>
+        <div class="p-4 mx-6 mt-6 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-sm flex items-center gap-3">
+          <svg class="w-5 h-5 flex-shrink-0 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6m0-6l6 6"/></svg>
+          <div><?= $this->session->flashdata('error'); ?></div>
+        </div>
+      <?php endif; ?>
+
       <!-- Stepper Progress Header -->
       <div class="stepper-bar">
         <div class="step-item active" id="stepItem1">
@@ -149,6 +163,9 @@
 
           <form id="formStep2" action="<?= base_url('onboarding/process_biodata'); ?>" method="POST">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+            <!-- Hidden inputs to transfer password from Step 1 -->
+            <input type="hidden" name="password_baru" id="hidden_password_baru">
+            <input type="hidden" name="konfirmasi_password" id="hidden_konfirmasi_password">
 
             <div class="form-grid">
 
@@ -159,7 +176,7 @@
                 </label>
                 <div class="input-wrap">
                   <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-6 0h6"/></svg>
-                  <input type="text" id="nim" name="nim" class="form-input" placeholder="Contoh: 1301210001" value="<?= isset($nim) ? $nim : ''; ?>" required>
+                  <input type="text" id="nim" name="nim" class="form-input" placeholder="Contoh: 1301210001" value="<?= isset($nim) ? htmlspecialchars($nim) : ''; ?>" required>
                 </div>
               </div>
 
@@ -171,7 +188,7 @@
                 </label>
                 <div class="input-wrap">
                   <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  <input type="text" id="nama_depan" name="nama_depan" class="form-input" placeholder="Nama depan tanpa simbol" required>
+                  <input type="text" id="nama_depan" name="nama_depan" class="form-input" placeholder="Nama depan tanpa simbol" value="<?= isset($nama_depan) ? htmlspecialchars($nama_depan) : ''; ?>" required>
                 </div>
                 <p id="hintDepan" class="error-hint hidden"></p>
               </div>
@@ -184,7 +201,7 @@
                 </label>
                 <div class="input-wrap">
                   <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  <input type="text" id="nama_belakang" name="nama_belakang" class="form-input" placeholder="Nama belakang tanpa simbol" required>
+                  <input type="text" id="nama_belakang" name="nama_belakang" class="form-input" placeholder="Nama belakang tanpa simbol" value="<?= isset($nama_belakang) ? htmlspecialchars($nama_belakang) : ''; ?>" required>
                 </div>
                 <p id="hintBelakang" class="error-hint hidden"></p>
               </div>
