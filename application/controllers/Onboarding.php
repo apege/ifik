@@ -38,8 +38,12 @@ class Onboarding extends CI_Controller {
             return;
         }
 
+        $isDosen = ((int)$user->role_id === 4);
         $data['title'] = 'Aktivasi Akun & Lengkapi Biodata — IK Labs Portal';
         $data['user'] = $user;
+        $data['role_id'] = (int)$user->role_id;
+        $data['is_dosen'] = $isDosen;
+        $data['role_name'] = $isDosen ? 'dosen' : 'mahasiswa';
         $data['nim'] = !empty($user->nidn_nim) ? $user->nidn_nim : '';
 
         // Split existing name into nama_depan and nama_belakang if available
@@ -47,45 +51,29 @@ class Onboarding extends CI_Controller {
         $data['nama_depan'] = isset($nameParts[0]) ? $nameParts[0] : '';
         $data['nama_belakang'] = isset($nameParts[1]) ? $nameParts[1] : '';
 
-        // Load Dosen Wali list dynamically from database
+        // Load Dosen Wali list directly from MySQL database `dosen_wali` table
         $dosenList = [];
-        
-        // 1. From dosen_wali table
         if ($this->db->table_exists('dosen_wali')) {
+            $this->db->order_by('jurusan', 'ASC');
+            $this->db->order_by('nama_dosen', 'ASC');
             $queryDW = $this->db->get('dosen_wali')->result_array();
             foreach ($queryDW as $dw) {
                 if (!empty($dw['nip']) && !empty($dw['nama_dosen'])) {
-                    $dosenList[$dw['nip']] = $dw['nama_dosen'];
+                    $dosenList[] = [
+                        'nip'     => $dw['nip'],
+                        'nama'    => $dw['nama_dosen'],
+                        'jurusan' => !empty($dw['jurusan']) ? $dw['jurusan'] : 'Fakultas Industri Kreatif',
+                        'email'   => !empty($dw['email']) ? $dw['email'] : ''
+                    ];
                 }
             }
-        }
-
-        // 2. From users table with role_id = 4 (Dosen)
-        $queryDosenUsers = $this->db->get_where('users', ['role_id' => 4, 'status' => 'active'])->result_array();
-        foreach ($queryDosenUsers as $du) {
-            $nipKey = !empty($du['nidn_nim']) ? $du['nidn_nim'] : 'NIP-' . $du['id'];
-            if (!isset($dosenList[$nipKey])) {
-                $dosenList[$nipKey] = $du['name'];
-            }
-        }
-
-        // Fallback default list if database is empty
-        if (empty($dosenList)) {
-            $dosenList = [
-                '19850101' => 'Dr. Ir. Ahmad Yani, M.T.',
-                '19880205' => 'Prof. Siti Aminah, Ph.D.',
-                '19900312' => 'Hendra Kusuma, S.T., M.T.',
-                '19920720' => 'Dra. Nurul Hidayah, M.Ds.',
-                '19941108' => 'Rian Pratama, S.Kom., M.T.',
-                '19960415' => 'Maya Indriani, S.Ds., M.A.'
-            ];
         }
 
         $data['dosen_wali_list'] = $dosenList;
 
         $data['konsentrasi_list'] = array(
             'Desain Komunikasi Visual',
-            'Informatika (Teknologi Informasi)',
+            'Informatika',
             'Rekayasa Perangkat Lunak',
             'Desain Produk',
             'Desain Interior',
@@ -100,8 +88,24 @@ class Onboarding extends CI_Controller {
      */
     public function process_biodata()
     {
+        $isAjax = $this->input->is_ajax_request() || 
+                  $this->input->get_request_header('X-Requested-With') === 'XMLHttpRequest' || 
+                  $this->input->post('is_ajax') ||
+                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
         // Must be logged in
         if (!$this->session->userdata('logged_in')) {
+            if ($isAjax) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(401)
+                    ->set_output(json_encode([
+                        'status'   => 'error',
+                        'message'  => 'Sesi login telah berakhir. Silakan login kembali.',
+                        'redirect' => base_url('login')
+                    ]));
+                return;
+            }
             redirect('login');
             return;
         }
@@ -110,6 +114,17 @@ class Onboarding extends CI_Controller {
         $user = $this->User_model->get_by_id($userId);
 
         if (!$user) {
+            if ($isAjax) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_status_header(404)
+                    ->set_output(json_encode([
+                        'status'   => 'error',
+                        'message'  => 'Akun pengguna tidak ditemukan.',
+                        'redirect' => base_url('login')
+                    ]));
+                return;
+            }
             redirect('login');
             return;
         }
@@ -128,13 +143,23 @@ class Onboarding extends CI_Controller {
 
         // 1. Validate Password
         if (empty($passwordBaru) || strlen($passwordBaru) < 6) {
-            $this->session->set_flashdata('error', 'Password baru wajib diisi dan minimal 6 karakter!');
+            $msg = 'Password baru wajib diisi dan minimal 6 karakter!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('onboarding');
             return;
         }
 
         if ($passwordBaru !== $konfirmasiPassword) {
-            $this->session->set_flashdata('error', 'Konfirmasi password tidak cocok dengan password baru!');
+            $msg = 'Konfirmasi password tidak cocok dengan password baru!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('onboarding');
             return;
         }
@@ -144,7 +169,12 @@ class Onboarding extends CI_Controller {
         $cleanBelakang = trim(preg_replace('/[^a-zA-Z\s]/', '', $namaBelakangRaw));
 
         if (empty($cleanDepan)) {
-            $this->session->set_flashdata('error', 'Nama depan wajib diisi dengan huruf tanpa simbol atau angka!');
+            $msg = 'Nama depan wajib diisi dengan huruf tanpa simbol atau angka!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('onboarding');
             return;
         }
@@ -173,7 +203,7 @@ class Onboarding extends CI_Controller {
         if ($this->db->table_exists('mahasiswa') && !empty($nim)) {
             $mhsData = [
                 'nim'             => $nim,
-                'nip_dosen_wali'  => $dosenWali,
+                'nip_dosen_wali'  => !empty($dosenWali) ? $dosenWali : null,
                 'nama_depan'      => $cleanDepan,
                 'nama_belakang'   => $cleanBelakang,
                 'alamat'          => $alamat,
@@ -200,11 +230,18 @@ class Onboarding extends CI_Controller {
 
         $this->session->set_flashdata('success', 'Aktivasi akun berhasil! Password Anda telah diperbarui dan profil telah tersimpan.');
 
-        // 7. Redirect to appropriate dashboard based on role
-        if ($user->role_id == 5) {
-            redirect('dashboard'); // or redirect('mahasiswa');
-        } else {
-            redirect('dashboard');
+        if ($isAjax) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status'   => 'success',
+                    'message'  => 'Aktivasi akun berhasil! Password Anda telah diperbarui dan profil telah tersimpan.',
+                    'redirect' => base_url('dashboard')
+                ]));
+            return;
         }
+
+        // 7. Redirect to dashboard
+        redirect('dashboard');
     }
 }
