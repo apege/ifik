@@ -119,4 +119,64 @@ class Mahasiswa extends CI_Controller {
 
         $this->load->view('mahasiswa/ganti_password', $data);
     }
+
+    // Endpoint Auto-Translate Judul ID -> EN
+    public function translate_judul() {
+        header('Content-Type: application/json');
+        $text = trim($this->input->post('text') ?? '');
+
+        if (empty($text)) {
+            echo json_encode(['status' => 'error', 'message' => 'Teks judul tidak boleh kosong!']);
+            return;
+        }
+
+        // 1. Coba Google Translate API
+        $url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=id&tl=en&dt=t&q=" . urlencode($text);
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
+        $response = curl_exec($ch);
+        $err = curl_error($ch);
+        curl_close($ch);
+
+        if (!$err && !empty($response)) {
+            $data = json_decode($response, true);
+            $translated_text = '';
+            if (isset($data[0]) && is_array($data[0])) {
+                foreach ($data[0] as $segment) {
+                    $translated_text .= $segment[0] ?? '';
+                }
+            }
+            if (!empty($translated_text)) {
+                echo json_encode(['status' => 'success', 'translated' => trim($translated_text)]);
+                return;
+            }
+        }
+
+        // 2. Fallback: MyMemory Translation API
+        $url_fallback = "https://api.mymemory.translated.net/get?q=" . urlencode($text) . "&langpair=id|en";
+        $fallback_res = @file_get_contents($url_fallback);
+        if ($fallback_res) {
+            $json = json_decode($fallback_res, true);
+            $translated = $json['responseData']['translatedText'] ?? '';
+            if ($translated) {
+                echo json_encode(['status' => 'success', 'translated' => trim($translated)]);
+                return;
+            }
+        }
+
+        echo json_encode(['status' => 'error', 'message' => 'Gagal menerjemahkan secara online, silakan ketik judul Inggris secara manual.']);
+    }
+
+    // Fitur Reset Pengajuan TA
+    public function reset_pendaftaran() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $this->Mahasiswa_model->reset_pendaftaran_ta($nim);
+        $this->session->set_flashdata('success', 'Pengajuan Tugas Akhir berhasil di-reset!');
+        redirect('mahasiswa');
+    }
 }
