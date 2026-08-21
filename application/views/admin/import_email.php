@@ -1264,17 +1264,26 @@
             }
         };
 
-        async function fetchUsersFromBackend() {
+        let isSyncingUsers = false;
+        async function fetchUsersFromBackend(silent = false) {
+            if (isSyncingUsers) return;
             try {
+                isSyncingUsers = true;
                 const res = await fetch('<?= site_url("import-email/get_users_json") ?>');
                 const data = await res.json();
                 if (data.status === 'success' && Array.isArray(data.accounts)) {
-                    state.accounts = data.accounts;
-                    renderStats();
-                    renderTable();
+                    const currentJson = JSON.stringify(state.accounts);
+                    const newJson = JSON.stringify(data.accounts);
+                    if (currentJson !== newJson) {
+                        state.accounts = data.accounts;
+                        renderStats();
+                        renderTable();
+                    }
                 }
             } catch (err) {
-                console.error('Failed to sync users from backend:', err);
+                if (!silent) console.error('Failed to sync users from backend:', err);
+            } finally {
+                isSyncingUsers = false;
             }
         }
 
@@ -1285,6 +1294,21 @@
             renderTable();
             initEmailTemplateFields();
             fetchUsersFromBackend();
+
+            // Real-time Background Polling (Every 4 seconds auto-sync)
+            setInterval(() => {
+                fetchUsersFromBackend(true);
+            }, 4000);
+
+            // Instant Sync when Admin switches back to this tab/window
+            window.addEventListener('focus', () => {
+                fetchUsersFromBackend(true);
+            });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    fetchUsersFromBackend(true);
+                }
+            });
         });
 
         // 1. GENERATE 8-CHARACTER TOKEN UTILITY (Huruf Besar, Huruf Kecil, Simbol, Angka)
