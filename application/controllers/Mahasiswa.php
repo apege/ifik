@@ -20,6 +20,65 @@ class Mahasiswa extends CI_Controller {
         $this->load->view('mahasiswa/dashboard', $data);
     }
 
+    // Detail Lengkap Pendaftaran Tugas Akhir (Single Page View)
+    public function detail_pendaftaran() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $data['title'] = 'Detail Pengajuan Tugas Akhir';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        $this->load->view('mahasiswa/detail_pendaftaran', $data);
+    }
+
+    // Formulir Edit Pendaftaran TA (Single Page Non-Wizard Form)
+    public function edit_pendaftaran() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $data['title'] = 'Edit Formulir Tugas Akhir';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        if ($this->input->post()) {
+            $config['upload_path']   = './uploads/persyaratan_ta/';
+            $config['allowed_types'] = 'pdf';
+            $config['max_size']      = 5120; // 5MB
+
+            if (!is_dir($config['upload_path'])) {
+                mkdir($config['upload_path'], 0777, true);
+            }
+
+            $this->load->library('upload', $config);
+
+            $file_step3 = $this->_do_upload('file_ksm', $config);
+            $file_step4 = $this->_do_upload('file_transkrip', $config);
+            $file_step5 = $this->_do_upload('file_pernyataan', $config);
+            $file_step6 = $this->_do_upload('file_bebas_lab', $config);
+
+            $data_ta = array(
+                'nim'                  => $nim,
+                'jenis_ta'             => $this->input->post('jenis_ta'),
+                'judul_1'              => $this->input->post('judul_1'),
+                'judul_2'              => $this->input->post('judul_2'),
+                'judul_3'              => $this->input->post('judul_3'),
+                'judul_en'             => $this->input->post('judul_en'),
+                'konsentrasi_dkv'      => $this->input->post('konsentrasi_dkv'),
+                'file_ksm'             => $file_step3 ? $file_step3 : $this->input->post('file_ksm_old'),
+                'file_transkrip'       => $file_step4 ? $file_step4 : $this->input->post('file_transkrip_old'),
+                'file_pernyataan'      => $file_step5 ? $file_step5 : $this->input->post('file_pernyataan_old'),
+                'file_bebas_lab'       => $file_step6 ? $file_step6 : $this->input->post('file_bebas_lab_old'),
+                'status_approval_wali' => 'Pending',
+                'current_stage'        => 'Dosen Wali',
+                'created_at'           => date('Y-m-d H:i:s')
+            );
+
+            $this->Mahasiswa_model->save_pendaftaran_ta($data_ta);
+            $this->session->set_flashdata('success', 'Perubahan formulir Tugas Akhir berhasil disimpan!');
+            redirect('mahasiswa');
+            return;
+        }
+
+        $this->load->view('mahasiswa/edit_pendaftaran', $data);
+    }
+
     // Fitur Geodata Mahasiswa
     public function geodata() {
         $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';

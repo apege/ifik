@@ -55,7 +55,11 @@ $route['logout'] = 'login/logout';
 $route['forgot_password'] = 'login/forgot_password';
 $route['ajukan-booking'] = 'dashboard/ajukan';
 $route['kalender'] = 'dashboard/kalender';
-$route['dashboard/ajukan'] = 'dashboard/ajukan';
+// Mahasiswa Routes
+$route['mahasiswa/detail'] = 'Mahasiswa/detail_pendaftaran';
+$route['mahasiswa/detail_pendaftaran'] = 'Mahasiswa/detail_pendaftaran';
+$route['mahasiswa/edit'] = 'Mahasiswa/edit_pendaftaran';
+$route['mahasiswa/edit_pendaftaran'] = 'Mahasiswa/edit_pendaftaran';
 
 // Dosen Wali Routes
 $route['dosenwali'] = 'DosenWali';
