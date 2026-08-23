@@ -85,4 +85,11 @@ class Mahasiswa_model extends CI_Model {
         $this->db->where('nim', $nim);
         return $this->db->update('users', array('password' => $hashed_password));
     }
+
+    // Reset atau Hapus Pendaftaran TA
+    public function reset_pendaftaran_ta($nim) {
+        if (!$this->db->table_exists('pendaftaran_ta')) return true;
+        $this->db->where('nim', $nim);
+        return $this->db->delete('pendaftaran_ta');
+    }
 }

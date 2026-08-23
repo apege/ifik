@@ -121,13 +121,105 @@ document.addEventListener('DOMContentLoaded', function () {
             progressLine.style.width = percent + '%';
         }
 
+        // Check actual submission/file completion status of each step:
+        function checkStepCompletionStatus(stepIndex) {
+            if (stepIndex === 1) {
+                const inputJenis = document.getElementById('inputJenisTA');
+                return inputJenis && inputJenis.value.trim() !== '';
+            } else if (stepIndex === 2) {
+                const inputJ1 = document.querySelector('input[name="judul_1"]');
+                const inputJEn = document.querySelector('input[name="judul_en"]');
+                return inputJ1 && inputJ1.value.trim() !== '' && inputJEn && inputJEn.value.trim() !== '';
+            } else if (stepIndex === 3) {
+                const inputKsm = document.querySelector('input[name="file_ksm"]');
+                return inputKsm && inputKsm.files && inputKsm.files.length > 0;
+            } else if (stepIndex === 4) {
+                const inputTranskrip = document.querySelector('input[name="file_transkrip"]');
+                return inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0;
+            } else if (stepIndex === 5) {
+                const inputPernyataan = document.querySelector('input[name="file_pernyataan"]');
+                return inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0;
+            } else if (stepIndex === 6) {
+                const inputBebasLab = document.querySelector('input[name="file_bebas_lab"]');
+                return inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0;
+            }
+            return false;
+        }
+
+        // Update Right Sidebar (Progres Pendaftaran)
+        let filledCount = 0;
+        for (let i = 1; i <= totalSteps; i++) {
+            const sideItem = document.getElementById(`side-step-${i}`);
+            if (!sideItem) continue;
+
+            const counter = sideItem.querySelector('.side-step-counter');
+            const title = sideItem.querySelector('.side-step-title');
+            const badge = sideItem.querySelector('.side-step-badge');
+
+            const isFilled = checkStepCompletionStatus(i);
+            if (isFilled) filledCount++;
+
+            if (i === currentStep) {
+                sideItem.classList.remove('opacity-50');
+                sideItem.classList.add('opacity-100');
+                if (counter) {
+                    if (isFilled) {
+                        counter.className = 'side-step-counter w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0';
+                        counter.innerHTML = '<i class="bi bi-check-lg text-xs"></i>';
+                    } else {
+                        counter.className = 'side-step-counter w-7 h-7 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-bold text-xs flex items-center justify-center box-3d shrink-0';
+                        counter.textContent = i;
+                    }
+                }
+                if (title) title.className = 'side-step-title text-xs font-bold text-slate-900';
+                if (badge) {
+                    badge.textContent = isFilled ? 'Terisi' : 'Aktif';
+                    badge.className = isFilled 
+                        ? 'side-step-badge text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200 block'
+                        : 'side-step-badge text-[10px] font-bold text-orange-700 bg-orange-100/90 px-2.5 py-0.5 rounded-full border border-orange-200 block';
+                }
+            } else if (isFilled) {
+                sideItem.classList.remove('opacity-50');
+                sideItem.classList.add('opacity-100');
+                if (counter) {
+                    counter.className = 'side-step-counter w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0';
+                    counter.innerHTML = '<i class="bi bi-check-lg text-xs"></i>';
+                }
+                if (title) title.className = 'side-step-title text-xs font-semibold text-slate-800';
+                if (badge) {
+                    badge.textContent = 'Terisi';
+                    badge.className = 'side-step-badge text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200 block';
+                }
+            } else {
+                sideItem.classList.add('opacity-50');
+                sideItem.classList.remove('opacity-100');
+                if (counter) {
+                    counter.className = 'side-step-counter w-7 h-7 rounded-full bg-slate-100 text-slate-400 font-semibold text-xs border border-slate-300 flex items-center justify-center shrink-0';
+                    counter.textContent = i;
+                }
+                if (title) title.className = 'side-step-title text-xs font-medium text-slate-400';
+                if (badge) {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        // Calculate and update Kelengkapan Percentage Bar based on REAL file uploads
+        const completenessPercent = Math.round((filledCount / totalSteps) * 100);
+        const percentText = document.getElementById('sidebarCompletenessPercent');
+        const percentBar = document.getElementById('sidebarCompletenessBar');
+
+        if (percentText) percentText.textContent = `${completenessPercent}%`;
+        if (percentBar) percentBar.style.width = `${completenessPercent}%`;
+
         // Control Buttons
         if (btnPrev) {
             if (currentStep === 1) {
-                btnPrev.classList.add('hidden');
+                btnPrev.innerHTML = '<i class="bi bi-arrow-left text-base"></i> <span>Kembali ke Dashboard</span>';
             } else {
-                btnPrev.classList.remove('hidden');
+                btnPrev.innerHTML = '<i class="bi bi-arrow-left text-base font-bold"></i> <span>Kembali ke Langkah Sebelumnya</span>';
             }
+            btnPrev.classList.remove('hidden');
         }
 
         const isEditing = !!(document.querySelector('input[name="file_ksm_old"]')?.value || document.querySelector('input[name="judul_1"]')?.value);
@@ -227,6 +319,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 currentStep--;
                 updateStepUI();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                const dashboardLink = document.querySelector('a[href*="/mahasiswa"]')?.href;
+                window.location.href = dashboardLink || '/mahasiswa';
             }
         });
     }
@@ -452,6 +547,164 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // --- FITUR AUTO-TRANSLATE JUDUL ID -> EN ---
+    const btnAutoTranslate = document.getElementById('btnAutoTranslate');
+    const inputJudul1 = document.getElementById('inputJudul1');
+    const inputJudulEn = document.getElementById('inputJudulEn');
+    const translateSpinner = document.getElementById('translateSpinner');
+    const btnAutoTranslateText = document.getElementById('btnAutoTranslateText');
+
+    if (btnAutoTranslate && inputJudul1 && inputJudulEn) {
+        btnAutoTranslate.addEventListener('click', async function () {
+            const judulIndo = inputJudul1.value.trim();
+
+            if (!judulIndo) {
+                showInPageAlert('⚠️ Masukkan Judul Usulan 1 (Utama) terlebih dahulu sebelum klik Translate!', 'warning');
+                inputJudul1.focus();
+                inputJudul1.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+                return;
+            } else {
+                inputJudul1.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+            }
+
+            // Tampilkan status loading
+            btnAutoTranslate.disabled = true;
+            btnAutoTranslate.classList.add('opacity-75', 'cursor-not-allowed');
+            if (btnAutoTranslateText) btnAutoTranslateText.textContent = 'Menerjemahkan...';
+            if (translateSpinner) translateSpinner.classList.remove('hidden');
+
+            try {
+                let translatedText = '';
+
+                // 1. Coba panggil Endpoint Backend Mahasiswa/translate_judul
+                try {
+                    const postUrl = window.location.href.split('?')[0].replace(/\/pendaftaran_ta.*$/, '/translate_judul');
+                    const formData = new FormData();
+                    formData.append('text', judulIndo);
+
+                    const response = await fetch(postUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const resJson = await response.json();
+                        if (resJson.status === 'success' && resJson.translated) {
+                            translatedText = resJson.translated;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Backend translate failed, trying client APIs:', e);
+                }
+
+                // 2. Client-side Fallback: Google Translate API
+                if (!translatedText) {
+                    try {
+                        const gUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=id&tl=en&dt=t&q=${encodeURIComponent(judulIndo)}`;
+                        const gRes = await fetch(gUrl);
+                        if (gRes.ok) {
+                            const gJson = await gRes.json();
+                            if (gJson && gJson[0]) {
+                                translatedText = gJson[0].map(s => s[0]).join('').trim();
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Google client API error:', e);
+                    }
+                }
+
+                // 3. Client-side Fallback: MyMemory API
+                if (!translatedText) {
+                    try {
+                        const mUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(judulIndo)}&langpair=id|en`;
+                        const mRes = await fetch(mUrl);
+                        if (mRes.ok) {
+                            const mJson = await mRes.json();
+                            if (mJson && mJson.responseData && mJson.responseData.translatedText) {
+                                translatedText = mJson.responseData.translatedText.trim();
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('MyMemory API error:', e);
+                    }
+                }
+
+                if (translatedText) {
+                    inputJudulEn.value = translatedText;
+                    inputJudulEn.classList.add('bg-emerald-50', 'border-emerald-400');
+                    inputJudulEn.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+                    setTimeout(() => {
+                        inputJudulEn.classList.remove('bg-emerald-50', 'border-emerald-400');
+                    }, 2000);
+                    showInPageAlert('✅ Berhasil menerjemahkan judul ke Bahasa Inggris!', 'success');
+                } else {
+                    showInPageAlert('⚠️ Gagal menerjemahkan otomatis. Silakan ketik judul Bahasa Inggris secara manual.', 'warning');
+                }
+
+            } catch (err) {
+                console.error('Translation error:', err);
+                showInPageAlert('⚠️ Terjadi kendala saat menerjemahkan. Silakan ketik secara manual.', 'warning');
+            } finally {
+                btnAutoTranslate.disabled = false;
+                btnAutoTranslate.classList.remove('opacity-75', 'cursor-not-allowed');
+                if (btnAutoTranslateText) btnAutoTranslateText.textContent = 'Translate Otomatis';
+                if (translateSpinner) translateSpinner.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- FITUR TAMBAH / HAPUS JUDUL ALTERNATIF DINAMIS ---
+    const btnAddJudulAlt = document.getElementById('btnAddJudulAlt');
+    const containerJudul2 = document.getElementById('containerJudul2');
+    const containerJudul3 = document.getElementById('containerJudul3');
+    const inputJudul2 = document.getElementById('inputJudul2');
+    const inputJudul3 = document.getElementById('inputJudul3');
+
+    function updateAddButtonState() {
+        if (!btnAddJudulAlt) return;
+        const is2Visible = containerJudul2 && !containerJudul2.classList.contains('hidden');
+        const is3Visible = containerJudul3 && !containerJudul3.classList.contains('hidden');
+
+        if (is2Visible && is3Visible) {
+            btnAddJudulAlt.classList.add('hidden');
+        } else {
+            btnAddJudulAlt.classList.remove('hidden');
+        }
+    }
+
+    if (btnAddJudulAlt) {
+        btnAddJudulAlt.addEventListener('click', function () {
+            const is2Visible = containerJudul2 && !containerJudul2.classList.contains('hidden');
+            const is3Visible = containerJudul3 && !containerJudul3.classList.contains('hidden');
+
+            if (!is2Visible) {
+                containerJudul2.classList.remove('hidden');
+                if (inputJudul2) inputJudul2.focus();
+            } else if (!is3Visible) {
+                containerJudul3.classList.remove('hidden');
+                if (inputJudul3) inputJudul3.focus();
+            }
+            updateAddButtonState();
+        });
+    }
+
+    document.querySelectorAll('.btn-remove-alt').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const target = this.getAttribute('data-target');
+            if (target === '2' && containerJudul2 && inputJudul2) {
+                containerJudul2.classList.add('hidden');
+                inputJudul2.value = '';
+            } else if (target === '3' && containerJudul3 && inputJudul3) {
+                containerJudul3.classList.add('hidden');
+                inputJudul3.value = '';
+            }
+            updateAddButtonState();
+        });
+    });
+
+    // Initialize UI on load
+    updateStepUI();
+});
     // Initialize UI on load
     updateStepUI();
 });
