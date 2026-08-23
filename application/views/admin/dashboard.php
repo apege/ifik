@@ -280,6 +280,34 @@
                     </div>
                 </div>
 
+                <!-- Module 7: Portal Dosen Wali Akademik -->
+                <div class="clean-card rounded-2xl p-6 flex flex-col justify-between hover:border-orange-300 transition-all group">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                Dosen Wali
+                            </span>
+                            <div class="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center text-base">
+                                <i class="bi bi-person-check-fill"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 mb-1 group-hover:text-orange-600 transition-colors">
+                            Portal Dosen Wali Akademik
+                        </h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            Persetujuan awal Tahap 01 usulan Tugas Akhir mahasiswa bimbingan akademik dan pemberian catatan rekomendasi.
+                        </p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[11px] font-medium text-slate-400">
+                            Tahap 01 Approval
+                        </span>
+                        <a href="<?= site_url('dosenwali'); ?>" class="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all">
+                            Portal Dosen Wali <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </div>
 

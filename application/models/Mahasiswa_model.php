@@ -63,9 +63,13 @@ class Mahasiswa_model extends CI_Model {
                 'current_stage' => 'Dosen Wali'
             );
         }
-        $this->db->select('p.*, w.nama_dosen as nama_dosen_wali');
+        $has_dw = $this->db->table_exists('dosen_wali') && $this->db->field_exists('id_dosen_wali', 'pendaftaran_ta');
+
+        $this->db->select('p.*' . ($has_dw ? ', w.nama_dosen as nama_dosen_wali' : ''));
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('dosen_wali w', 'w.id = p.id_dosen_wali', 'left');
+        if ($has_dw) {
+            $this->db->join('dosen_wali w', 'w.id = p.id_dosen_wali', 'left');
+        }
         $this->db->where('p.nim', $nim);
         $query = $this->db->get();
         return $query->row_array() ?: array(
