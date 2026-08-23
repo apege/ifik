@@ -227,10 +227,21 @@
 
                                     <!-- Aksi -->
                                     <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                                        <a href="<?= site_url('ketuakk/detail/' . $row['nim']); ?>" 
-                                           class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all whitespace-nowrap">
-                                            <i class="bi bi-shield-check"></i> Review
-                                        </a>
+                                        <?php 
+                                            $is_prereq_ok = ($is_wali_app && $is_admin_app);
+                                        ?>
+                                        <?php if($is_prereq_ok): ?>
+                                            <a href="<?= site_url('ketuakk/detail/' . $row['nim']); ?>" 
+                                               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all whitespace-nowrap">
+                                                <i class="bi bi-shield-check"></i> Review KK
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="<?= site_url('ketuakk/detail/' . $row['nim']); ?>" 
+                                               title="Pengajuan masih menunggu approval Dosen Wali / Admin Layanan LAA"
+                                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl text-xs font-medium border border-slate-200 transition-all whitespace-nowrap">
+                                                <i class="bi bi-lock-fill text-slate-400"></i> Locked (Detail)
+                                            </a>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

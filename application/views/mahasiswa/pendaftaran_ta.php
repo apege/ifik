@@ -159,7 +159,11 @@
 
                                 <!-- Custom 3D Glass Dropdown for Jenis TA -->
                                 <div class="custom-dropdown relative w-full z-30" id="dropdownJenisTA">
-                                    <input type="hidden" name="jenis_ta" id="inputJenisTA" value="" required>
+                                    <input type="hidden" name="jenis_ta" id="inputJenisTA" value="<?= htmlspecialchars($pendaftaran['jenis_ta'] ?? ''); ?>" required>
+                                    <input type="hidden" name="file_ksm_old" value="<?= htmlspecialchars($pendaftaran['file_ksm'] ?? ''); ?>">
+                                    <input type="hidden" name="file_transkrip_old" value="<?= htmlspecialchars($pendaftaran['file_transkrip'] ?? ''); ?>">
+                                    <input type="hidden" name="file_pernyataan_old" value="<?= htmlspecialchars($pendaftaran['file_pernyataan'] ?? ''); ?>">
+                                    <input type="hidden" name="file_bebas_lab_old" value="<?= htmlspecialchars($pendaftaran['file_bebas_lab'] ?? ''); ?>">
 
                                     <button type="button" class="dropdown-trigger w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 hover:border-orange-400 focus:ring-4 focus:ring-orange-500/10 outline-none text-slate-800 font-semibold text-xs flex items-center justify-between transition shadow-xs">
                                         <span class="trigger-label text-slate-400 font-normal">-- Pilih Jenis TA --</span>
@@ -225,29 +229,29 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Judul Usulan 1 (Utama) <span class="text-orange-500">*</span></label>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_1" placeholder="Masukkan judul utama..." required>
+                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_1" value="<?= htmlspecialchars($pendaftaran['judul_1'] ?? ''); ?>" placeholder="Masukkan judul utama..." required>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Judul Usulan 2 (Alternatif 1) <span class="text-orange-500">*</span></label>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_2" placeholder="Masukkan alternatif judul ke-2..." required>
+                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_2" value="<?= htmlspecialchars($pendaftaran['judul_2'] ?? ''); ?>" placeholder="Masukkan alternatif judul ke-2..." required>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Judul Usulan 3 (Alternatif 2) <span class="text-orange-500">*</span></label>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_3" placeholder="Masukkan alternatif judul ke-3..." required>
+                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_3" value="<?= htmlspecialchars($pendaftaran['judul_3'] ?? ''); ?>" placeholder="Masukkan alternatif judul ke-3..." required>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Judul dalam Bahasa Inggris <span class="text-orange-500">*</span></label>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_en" placeholder="Title in English..." required>
+                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" name="judul_en" value="<?= htmlspecialchars($pendaftaran['judul_en'] ?? ''); ?>" placeholder="Title in English..." required>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Konsentrasi</label>
                                 <!-- Custom 3D Glass Dropdown for Konsentrasi -->
                                 <div class="custom-dropdown relative w-full z-30" id="dropdownKonsentrasi">
-                                    <input type="hidden" name="konsentrasi_dkv" id="inputKonsentrasi" value="">
+                                    <input type="hidden" name="konsentrasi_dkv" id="inputKonsentrasi" value="<?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? ''); ?>">
 
                                     <button type="button" class="dropdown-trigger w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 hover:border-orange-400 focus:ring-4 focus:ring-orange-500/10 outline-none text-slate-800 font-semibold text-xs flex items-center justify-between transition shadow-xs">
                                         <span class="trigger-label text-slate-400 font-normal">-- Pilih Konsentrasi --</span>
@@ -298,7 +302,7 @@
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
-                            <input type="file" name="file_ksm" class="hidden" accept=".pdf" required>
+                            <input type="file" name="file_ksm" class="hidden" accept=".pdf">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -360,7 +364,7 @@
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
-                            <input type="file" name="file_transkrip" class="hidden" accept=".pdf" required>
+                            <input type="file" name="file_transkrip" class="hidden" accept=".pdf">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -422,7 +426,7 @@
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
-                            <input type="file" name="file_pernyataan" class="hidden" accept=".pdf" required>
+                            <input type="file" name="file_pernyataan" class="hidden" accept=".pdf">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -484,7 +488,7 @@
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
-                            <input type="file" name="file_bebas_lab" class="hidden" accept=".pdf" required>
+                            <input type="file" name="file_bebas_lab" class="hidden" accept=".pdf">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">

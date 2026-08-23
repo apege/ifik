@@ -7,6 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentStep = 1;
     const totalSteps = 6;
 
+    // Direct navigation support from Dashboard redirect (e.g. ?step=3)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialStep = parseInt(urlParams.get('step'));
+    if (initialStep && initialStep >= 1 && initialStep <= totalSteps) {
+        currentStep = initialStep;
+    }
+
     const btnNext = document.getElementById('btnNext');
     const btnPrev = document.getElementById('btnPrev');
     const btnSubmit = document.getElementById('btnSubmit');
@@ -123,9 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        const isEditing = !!(document.querySelector('input[name="file_ksm_old"]')?.value || document.querySelector('input[name="judul_1"]')?.value);
+
         if (btnNext && btnSubmit) {
             if (currentStep === totalSteps) {
                 btnNext.classList.add('hidden');
+                btnSubmit.classList.remove('hidden');
+            } else if (isEditing) {
+                // When editing/revising, show BOTH "Lanjutkan" and "Kirim Pendaftaran" buttons
+                btnNext.classList.remove('hidden');
                 btnSubmit.classList.remove('hidden');
             } else {
                 btnNext.classList.remove('hidden');
@@ -147,11 +160,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         requiredInputs.forEach(input => {
             if (input.type === 'file') {
-                if (!input.files || input.files.length === 0) {
+                const oldFileInput = document.querySelector(`input[type="hidden"][name="${input.name}_old"]`);
+                const hasOldFile = oldFileInput && oldFileInput.value.trim() !== '';
+
+                if ((!input.files || input.files.length === 0) && !hasOldFile) {
                     isValid = false;
                     errorMessage = `⚠️ Mohon unggah berkas PDF pada Langkah ${step} sebelum melanjutkan!`;
                     input.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-                } else {
+                } else if (input.files && input.files.length > 0) {
                     const fileName = input.files[0].name;
                     if (!fileName.toLowerCase().endsWith('.pdf')) {
                         isValid = false;
@@ -160,6 +176,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         input.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
                     }
+                } else {
+                    input.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
                 }
             } else {
                 if (!input.value.trim()) {
@@ -214,7 +232,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Custom 3D Glass Dropdown Interaction Handler
-    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+    const dropdowns = document.querySelectorAll('.custom-dropdown');
+    dropdowns.forEach(dropdown => {
         const trigger = dropdown.querySelector('.dropdown-trigger');
         const menu = dropdown.querySelector('.dropdown-menu');
         const hiddenInput = dropdown.querySelector('input[type="hidden"]');
@@ -226,27 +245,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isHidden = menu.classList.contains('hidden');
+            dropdowns.forEach(d => {
+                if (d !== dropdown) {
+                    d.querySelector('.dropdown-menu')?.classList.add('hidden');
+                    d.querySelector('.chevron-icon')?.classList.remove('rotate-180');
+                }
+            });
 
-            // Close all open dropdowns first
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
-            document.querySelectorAll('.chevron-icon').forEach(i => i.classList.remove('rotate-180'));
-
-            if (isHidden) {
-                menu.classList.remove('hidden');
-                if (chevronIcon) chevronIcon.classList.add('rotate-180');
-            }
+            menu.classList.toggle('hidden');
+            if (chevronIcon) chevronIcon.classList.toggle('rotate-180');
         });
 
         options.forEach(opt => {
             opt.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const val = opt.getAttribute('data-value');
-                const labelText = opt.querySelector('span').textContent;
+                const labelText = opt.querySelector('span')?.textContent || val;
 
                 if (hiddenInput) {
                     hiddenInput.value = val;
-                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
                     trigger.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
                 }
 
@@ -283,6 +300,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+
+        // Prefill initialization for dropdowns
+        if (hiddenInput && hiddenInput.value.trim() !== '') {
+            const currentVal = hiddenInput.value.trim();
+            options.forEach(opt => {
+                if (opt.getAttribute('data-value') === currentVal) {
+                    opt.click();
+                }
+            });
+        }
     });
 
     document.addEventListener('click', () => {
@@ -305,11 +332,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!fileInput) return;
 
-        function renderFileCard(file) {
+        const oldFileInput = document.querySelector(`input[type="hidden"][name="${fileInput.name}_old"]`);
+
+        function renderFileCard(file, isSaved = false) {
             if (!file) return;
 
             if (fileNameEl) fileNameEl.textContent = file.name;
-            if (fileSizeEl) fileSizeEl.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB • PDF Terverifikasi`;
+            if (fileSizeEl) fileSizeEl.textContent = isSaved ? 'Berkas Tersimpan (Siap Diperbarui Jika Perlu)' : `${(file.size / 1024 / 1024).toFixed(2)} MB • PDF Terverifikasi`;
 
             if (promptContainer) {
                 promptContainer.classList.add('hidden');
@@ -326,6 +355,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
             zone.classList.remove('border-rose-500', 'bg-rose-50');
             zone.classList.add('border-emerald-400', 'bg-emerald-50/20');
+        }
+
+        // Initialize prefilled old file card on load
+        if (oldFileInput && oldFileInput.value.trim() !== '') {
+            renderFileCard({ name: oldFileInput.value.split('/').pop(), size: 0 }, true);
         }
 
         ['dragenter', 'dragover'].forEach(eventName => {
@@ -388,6 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btnReset.addEventListener('click', (e) => {
                 e.stopPropagation();
                 fileInput.value = ''; // Clear file input
+                if (oldFileInput) oldFileInput.value = ''; // Clear old file reference too
                 if (promptContainer) {
                     promptContainer.classList.remove('hidden');
                     promptContainer.style.display = 'block';
@@ -401,7 +436,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Form submission validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            for (let step = 1; step <= totalSteps; step++) {
+                if (!validateStep(step)) {
+                    e.preventDefault();
+                    currentStep = step;
+                    updateStepUI();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return false;
+                }
+            }
+        });
+    }
+
     // Initialize UI on load
     updateStepUI();
 });
-

@@ -204,6 +204,22 @@
             </div>
         </div>
 
+        <!-- Warning Prerequisite Alert Banner -->
+        <?php if (!$is_prerequisite_met): ?>
+            <div class="bg-amber-50 border border-amber-300 text-amber-900 p-4 rounded-2xl flex items-start gap-3 text-xs shadow-xs">
+                <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-amber-950 text-sm mb-0.5">Pemeriksaan Ketua KK Terkunci (Menunggu Tahap 01-02)</h4>
+                    <p class="text-amber-800 leading-relaxed">
+                        Pengajuan ini <strong>belum bisa diperiksa atau disetujui</strong> oleh Ketua Kelompok Keahlian karena masih menunggu persetujuan dari 
+                        <strong>Dosen Wali (Tahap 01)</strong> dan <strong>Admin Layanan / LAA (Tahap 02)</strong>.
+                    </p>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Approval Form Section -->
         <form method="POST" action="<?= site_url('ketuakk/submit_approval/' . $detail['nim']); ?>">
             <div class="clean-card rounded-2xl p-6 sm:p-7 space-y-5">
@@ -212,8 +228,9 @@
                         <i class="bi bi-chat-left-text text-orange-600"></i> Catatan Rekomendasi / Pengarahan Ketua KK
                     </label>
                     <textarea id="catatan_kk" name="catatan_kk" rows="3" 
-                              placeholder="Tuliskan catatan arahan keilmuan atau rekomendasi pembimbing untuk mahasiswa..."
-                              class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-white transition-all"><?= htmlspecialchars($detail['catatan_kk'] ?? ''); ?></textarea>
+                              <?= !$is_prerequisite_met ? 'disabled' : ''; ?>
+                              placeholder="<?= !$is_prerequisite_met ? 'Form dikunci hingga tahap Dosen Wali & Admin Layanan LAA disetujui...' : 'Tuliskan catatan arahan keilmuan atau rekomendasi pembimbing untuk mahasiswa...'; ?>"
+                              class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-white transition-all disabled:bg-slate-100 disabled:cursor-not-allowed"><?= htmlspecialchars($detail['catatan_kk'] ?? ''); ?></textarea>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -223,14 +240,16 @@
 
                     <div class="flex items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
                         <!-- Reject Button -->
-                        <button type="submit" name="status" value="Rejected" onclick="return confirm('Yakin ingin menolak pengajuan TA ini di tingkat Kelompok Keahlian?');" 
-                                class="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5">
+                        <button type="submit" name="status" value="Rejected" 
+                                <?= !$is_prerequisite_met ? 'disabled title="Prasyarat tahap sebelumnya belum disetujui"' : ''; ?>
+                                onclick="return confirm('Yakin ingin menolak pengajuan TA ini di tingkat Kelompok Keahlian?');" 
+                                class="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5">
                             <i class="bi bi-x-circle"></i> Tolak / Minta Perubahan
                         </button>
 
                         <!-- Approve & Unlock Bimbingan Button -->
                         <button type="submit" name="status" value="Approved" 
-                                <?= !$is_prerequisite_met ? 'disabled title="Prasyarat tahap sebelumnya belum lengkap"' : ''; ?>
+                                <?= !$is_prerequisite_met ? 'disabled title="Prasyarat tahap sebelumnya belum disetujui"' : ''; ?>
                                 onclick="return confirm('Yakin menyetujui topik TA mahasiswa ini? Akses modul Bimbingan TA akan otomatis dibuka (Unlocked).');" 
                                 class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5">
                             <i class="bi bi-unlock-fill"></i> Setujui &amp; Unlock Bimbingan TA

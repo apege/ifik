@@ -129,14 +129,35 @@
                             <?php endif; ?>
                         </div>
 
-                        <!-- Stage 3: Koordinator TA -->
+                        <!-- Stage 3: Ketua KK -->
+                        <?php 
+                            $stKk = $detail['status_approval_kk'] ?? 'Pending'; 
+                            $bgKk = ($stKk === 'Approved') ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (($stKk === 'Rejected') ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-amber-50 border-amber-200 text-amber-800');
+                        ?>
+                        <div class="p-4 rounded-xl border <?= $bgKk; ?> shadow-xs">
+                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">3. Ketua KK</span>
+                            <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
+                                <?php if($stKk === 'Approved'): ?>
+                                    <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
+                                <?php elseif($stKk === 'Rejected'): ?>
+                                    <i class="bi bi-x-circle-fill text-rose-600"></i> Ditolak
+                                <?php else: ?>
+                                    <i class="bi bi-clock-fill text-amber-600"></i> Pending
+                                <?php endif; ?>
+                            </div>
+                            <?php if(!empty($detail['catatan_kk'])): ?>
+                                <p class="text-[11px] opacity-80 mt-1 italic leading-tight">"<?= $detail['catatan_kk']; ?>"</p>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Stage 4: Koordinator TA -->
                         <?php 
                             $stKoor = $detail['status_approval_koor'] ?? 'Pending'; 
                             $bgKoor = ($stKoor === 'Approved') ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (($stKoor === 'Rejected') ? 'bg-rose-50 border-rose-300 text-rose-800' : 'bg-amber-50 border-amber-300 text-amber-800');
                         ?>
                         <div class="p-4 rounded-xl border-2 ring-2 ring-orange-500/20 <?= $bgKoor; ?> shadow-xs relative">
                             <span class="absolute -top-2.5 right-2 px-2 py-0.5 bg-orange-600 text-white text-[9px] font-bold rounded-full shadow-xs">SAAT INI</span>
-                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">3. Koordinator TA</span>
+                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">4. Koordinator TA</span>
                             <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
                                 <?php if($stKoor === 'Approved'): ?>
                                     <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
@@ -149,24 +170,6 @@
                             <?php if(!empty($detail['catatan_koor'])): ?>
                                 <p class="text-[11px] opacity-80 mt-1 italic leading-tight">"<?= $detail['catatan_koor']; ?>"</p>
                             <?php endif; ?>
-                        </div>
-
-                        <!-- Stage 4: Ketua KK -->
-                        <?php 
-                            $stKk = $detail['status_approval_kk'] ?? 'Pending'; 
-                            $bgKk = ($stKk === 'Approved') ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (($stKk === 'Rejected') ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-amber-50 border-amber-200 text-amber-800');
-                        ?>
-                        <div class="p-4 rounded-xl border <?= $bgKk; ?> shadow-xs">
-                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">4. Ketua KK</span>
-                            <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
-                                <?php if($stKk === 'Approved'): ?>
-                                    <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
-                                <?php elseif($stKk === 'Rejected'): ?>
-                                    <i class="bi bi-x-circle-fill text-rose-600"></i> Ditolak
-                                <?php else: ?>
-                                    <i class="bi bi-clock-fill text-amber-600"></i> Pending
-                                <?php endif; ?>
-                            </div>
                         </div>
                     </div>
                 </div>
