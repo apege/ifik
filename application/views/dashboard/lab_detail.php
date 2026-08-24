@@ -206,11 +206,14 @@ if (!$active_key && !empty($all_ruangan)) {
         elseif (strpos($n, 'green') !== false) $rkey = 'greenscreen';
         elseif (strpos($n, 'inkubator') !== false || strpos($n, 'incubator') !== false) $rkey = 'incubator';
         elseif (strpos($n, 'mac') !== false || strpos($n, '3d printing') !== false) $rkey = 'mac';
-        else $rkey = preg_replace('/[^a-z0-9]/', '', $c);
+        else {
+            $rkey = preg_replace('/[^a-z0-9]/', '', $c);
+            if (empty($rkey)) $rkey = 'room_' . $r->id;
+        }
 
-        if ($rkey === $lab_key && !empty($r->model_3d)) {
+        if ($rkey === $lab_key) {
             $active_key = $lab_key;
-            $img_url = !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : '';
+            $img_url = !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : base_url('assets/images/multimedia.jpg');
             $model_url = !empty($r->model_3d) ? (strpos($r->model_3d, 'http') === 0 ? $r->model_3d : base_url($r->model_3d)) : '';
 
             $labs_data[$lab_key] = [
@@ -752,7 +755,8 @@ $lab = $labs_data[$active_key];
                                  onerror="this.onerror=null; this.src='<?= $lab['photo_fallback'] ?>';" />
                         </div>
 
-                        <!-- Mode View 2: 3D Model (Tampil Kedua) -->
+                        <!-- Mode View 2: 3D Model (Tampil Kedua jika ada) -->
+                        <?php if (!empty($lab['model'])): ?>
                         <div class="showcase-content-view" id="view3D" style="display: none;">
                             <model-viewer 
                                 id="labDetailViewer"
@@ -771,13 +775,16 @@ $lab = $labs_data[$active_key];
                                 style="background-color: transparent;">
                             </model-viewer>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Indicator Line Bar Murni (Line 1: Foto Asli, Line 2: Model 3D) -->
+                    <?php if (!empty($lab['model'])): ?>
                     <div class="showcase-line-indicators">
                         <span class="detail-line active" id="detailLine0" onclick="switchShowcaseMode('photo')" title="Foto Dokumentasi Asli"></span>
                         <span class="detail-line" id="detailLine1" onclick="switchShowcaseMode('3d')" title="Model 3D Interaktif"></span>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Right Column: Lab Info & Actions -->

@@ -218,7 +218,7 @@
         color: #0f172a;
         font-weight: 800;
         font-size: 0.95rem;
-        padding: 12px 30px;
+        padding: 12px 28px;
         border-radius: 30px;
         text-decoration: none;
         display: inline-flex;
@@ -233,6 +233,33 @@
         color: #ffffff;
         transform: translateY(-3px);
         box-shadow: 0 12px 35px rgba(234, 88, 12, 0.5);
+    }
+
+    .btn-apple-secondary {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.92rem;
+        padding: 12px 22px;
+        border-radius: 30px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-apple-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: #ffffff;
+        color: #ffffff;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
     }
 
     /* Carousel Indicators Desain Fasilitas untuk Laboratorium Seekbar */
@@ -519,60 +546,70 @@
 
 <script>
     <?php
+        $featured_keys = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
         $dyn_lab_data = [];
-        $dyn_lab_keys = [];
+        $seen_keys = [];
 
         if (!empty($ruangan)) {
             foreach ($ruangan as $r) {
-                if (!empty($r->model_3d)) {
-                    $name = strtolower(trim(isset($r->nama_ruangan) ? $r->nama_ruangan : ''));
-                    $code = strtolower(trim(isset($r->kode_ruangan) ? $r->kode_ruangan : ''));
+                $name = strtolower(trim(isset($r->nama_ruangan) ? $r->nama_ruangan : ''));
+                $code = strtolower(trim(isset($r->kode_ruangan) ? $r->kode_ruangan : ''));
 
-                    if ($name === 'ss' || $code === 'ss' || strpos($name, 'test') !== false || strpos($name, 'qqq') !== false) continue;
+                if ($name === 'ss' || $code === 'ss' || strpos($name, 'test') !== false || strpos($name, 'qqq') !== false) continue;
 
-                    if (strpos($name, 'multimedia') !== false) $key = 'multimedia';
-                    elseif (strpos($name, 'aula') !== false) $key = 'aula';
-                    elseif (strpos($name, 'cintiq') !== false || strpos($name, 'tablet') !== false || strpos($name, 'sablon') !== false) $key = 'cintiq';
-                    elseif (strpos($name, 'green') !== false) $key = 'greenscreen';
-                    elseif (strpos($name, 'inkubator') !== false || strpos($name, 'incubator') !== false) $key = 'incubator';
-                    elseif (strpos($name, 'mac') !== false || strpos($name, '3d printing') !== false) $key = 'mac';
-                    else { $key = preg_replace('/[^a-z0-9]/', '', strtolower($r->kode_ruangan)); if (empty($key)) $key = 'room_' . $r->id; }
+                $key = '';
+                if (strpos($name, 'multimedia') !== false && !in_array('multimedia', $seen_keys)) $key = 'multimedia';
+                elseif (strpos($name, 'aula') !== false && !in_array('aula', $seen_keys)) $key = 'aula';
+                elseif ((strpos($name, 'cintiq') !== false || strpos($name, 'tablet') !== false || strpos($name, 'sablon') !== false) && !in_array('cintiq', $seen_keys)) $key = 'cintiq';
+                elseif (strpos($name, 'green') !== false && !in_array('greenscreen', $seen_keys)) $key = 'greenscreen';
+                elseif ((strpos($name, 'inkubator') !== false || strpos($name, 'incubator') !== false) && !in_array('incubator', $seen_keys)) $key = 'incubator';
+                elseif (strpos($name, 'mac') !== false && !in_array('mac', $seen_keys)) $key = 'mac';
+                else {
+                    $key = preg_replace('/[^a-z0-9]/', '', $code);
+                    if (empty($key)) $key = 'room_' . $r->id;
+                }
 
-                    if (!isset($dyn_lab_data[$key])) {
-                        $dyn_lab_data[$key] = [
-                            'key'     => $key,
-                            'title'   => $r->nama_ruangan,
-                            'desc'    => !empty($r->tagline) ? $r->tagline : (!empty($r->deskripsi) ? substr($r->deskripsi, 0, 95) . '...' : 'Fasilitas Laboratorium Fakultas Industri Kreatif'),
-                            'btnText' => 'Lihat Detail &rarr;',
-                            'url'     => site_url('dashboard/lab_detail/' . $key),
-                            'img'     => !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : base_url('assets/images/multimedia.jpg')
-                        ];
-                    }
+                if (!empty($key) && !isset($dyn_lab_data[$key])) {
+                    $seen_keys[] = $key;
+                    $default_img = base_url('assets/images/multimedia.jpg');
+                    if ($key === 'aula') $default_img = file_exists(FCPATH . 'assets/images/Aula1.jpg') ? base_url('assets/images/Aula1.jpg') : base_url('assets/images/aula.jpg');
+                    elseif ($key === 'cintiq') $default_img = file_exists(FCPATH . 'assets/images/sintiq.jpg') ? base_url('assets/images/sintiq.jpg') : base_url('assets/images/cintiq.jpg');
+                    elseif ($key === 'greenscreen') $default_img = base_url('assets/images/greenscreen.jpg');
+                    elseif ($key === 'incubator') $default_img = base_url('assets/images/incubator.jpg');
+                    elseif ($key === 'mac') $default_img = base_url('assets/images/mac.jpg');
+
+                    $detail_url = in_array($key, $featured_keys) 
+                        ? site_url('dashboard/lab_detail/' . $key) 
+                        : site_url('dashboard/kalender?ruangan=' . $r->id);
+
+                    $dyn_lab_data[$key] = [
+                        'key'     => $key,
+                        'id'      => $r->id,
+                        'title'   => $r->nama_ruangan,
+                        'desc'    => !empty($r->tagline) ? $r->tagline : (!empty($r->deskripsi) ? substr($r->deskripsi, 0, 95) . '...' : 'Fasilitas Laboratorium Fakultas Industri Kreatif'),
+                        'btnText' => 'Lihat Detail &rarr;',
+                        'url'     => $detail_url,
+                        'img'     => !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : $default_img
+                    ];
                 }
             }
         }
 
-        // URUTKAN PERSIS SAMA dengan urutan seekbar segmen: multimedia -> aula -> cintiq -> greenscreen -> incubator -> mac
-        $order_keys = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
-        $sorted_lab_data = [];
-        $sorted_lab_keys = [];
+        // Sort: 6 Lab Utama di depan, lalu diikuti seluruh ruangan lainnya
+        uksort($dyn_lab_data, function($k1, $k2) use ($dyn_lab_data, $featured_keys) {
+            $posA = array_search($k1, $featured_keys);
+            $posB = array_search($k2, $featured_keys);
+            if ($posA !== false && $posB !== false) return $posA - $posB;
+            if ($posA !== false) return -1;
+            if ($posB !== false) return 1;
+            $idA = $dyn_lab_data[$k1]['id'] ?? 0;
+            $idB = $dyn_lab_data[$k2]['id'] ?? 0;
+            return $idA - $idB;
+        });
 
-        // Pertama masukkan yang ada di order_keys (sesuai urutan)
-        foreach ($order_keys as $ok) {
-            if (isset($dyn_lab_data[$ok])) {
-                $sorted_lab_data[$ok] = $dyn_lab_data[$ok];
-                $sorted_lab_keys[] = $ok;
-            }
-        }
-        // Lalu masukkan sisa yang tidak ada di order_keys (di bagian belakang)
-        foreach ($dyn_lab_data as $k => $v) {
-            if (!in_array($k, $sorted_lab_keys)) {
-                $sorted_lab_data[$k] = $v;
-                $sorted_lab_keys[] = $k;
-            }
-        }
-        $dyn_lab_data = $sorted_lab_data;
-        $dyn_lab_keys = $sorted_lab_keys;
+        $dyn_lab_keys = array_keys($dyn_lab_data);
+        $total_labs_count = count($dyn_lab_keys);
+        $split_point_lab = !empty($dyn_lab_keys) ? (int)ceil($total_labs_count / 2) : 3;
     ?>
 
     <?php if (!empty($dyn_lab_data)): ?>
@@ -590,6 +627,8 @@
         const LAB_KEYS = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
     <?php endif; ?>
     const TOTAL_LABS = LAB_KEYS.length;
+    const SPLIT_POINT_LAB = <?= $split_point_lab ?>;
+    const DEKANAT_IMG_URL = "<?= base_url('assets/images/' . (!empty($header_settings->dekanat_image) ? $header_settings->dekanat_image : 'dekanat2.png')) ?>";
     let activeLabIndex = 0; // Mulai dari Multimedia (Indeks 0)
 
     let isMoving = false;
@@ -620,49 +659,136 @@
                     <a href="${data.url}" class="btn-apple-action">${data.btnText}</a>
                 </div>
             </div>
+            <img src="${DEKANAT_IMG_URL}" alt="Dekanat" class="dekanat-img-right">
         `;
     }
 
-    // UPDATE INDIKATOR SEGMEN RUANGAN & SEEK BAR SECARA SIMULTAN DARI KIRI KE KANAN
+    let labProgEndListener = null;
+
+    // UPDATE INDIKATOR CONTINUOUS TRACK & THUMB PROPORSIONAL
     function syncIndicators(targetIdx) {
-        const targetLabKey = LAB_KEYS[targetIdx];
-        const segs = Array.from(document.querySelectorAll('#labIndicators .seg'));
-        
-        let activeDomIdx = segs.findIndex(seg => seg.getAttribute('data-lab') === targetLabKey);
-        if (activeDomIdx === -1) activeDomIdx = targetIdx;
+        const totalCount = TOTAL_LABS;
+        const splitPoint = SPLIT_POINT_LAB;
 
-        segs.forEach((seg, domIdx) => {
-            const prog = seg.querySelector('.progress');
-            seg.classList.remove('active', 'completed');
-            
-            if (domIdx < activeDomIdx) {
-                seg.classList.add('completed');
-                if (prog) {
-                    prog.style.animation = 'none';
-                    prog.style.width = '100%';
+        const dotLeft = document.getElementById('dotFasilitasLeft');
+        const dotRight = document.getElementById('dotFasilitasRight');
+        const dotSingle = document.getElementById('dotFasilitas');
+
+        const thumbLeft = document.getElementById('thumbFasilitasLeft');
+        const thumbRight = document.getElementById('thumbFasilitasRight');
+        const thumbFull = document.getElementById('thumbFasilitasFull');
+
+        // Cleanup any active animation listener
+        if (labProgEndListener) {
+            const allProgs = document.querySelectorAll('.dot-track-continuous .thumb .progress');
+            allProgs.forEach(p => p.removeEventListener('animationend', labProgEndListener));
+            labProgEndListener = null;
+        }
+
+        let activeProgToAnimate = null;
+
+        const counterLeft = document.getElementById('fasilitasCounterLeft');
+        const counterRight = document.getElementById('fasilitasCounterRight');
+        const counterFull = document.getElementById('fasilitasCounterFull');
+
+        if (dotLeft && dotRight && thumbLeft && thumbRight) {
+            const countLeft = splitPoint;
+            const countRight = totalCount - splitPoint;
+
+            // Ukuran thumb proporsional terhadap total data dalam part masing-masing
+            const thumbWidthLeftPct = Math.max(8, (1 / countLeft) * 100);
+            const thumbWidthRightPct = Math.max(8, (1 / countRight) * 100);
+
+            thumbLeft.style.width = `${thumbWidthLeftPct}%`;
+            thumbRight.style.width = `${thumbWidthRightPct}%`;
+
+            const progLeft = thumbLeft.querySelector('.progress');
+            const progRight = thumbRight.querySelector('.progress');
+
+            if (targetIdx < splitPoint) {
+                // Sayap Kiri Aktif
+                dotLeft.classList.add('active');
+                dotRight.classList.remove('active');
+
+                if (counterLeft) {
+                    counterLeft.textContent = `${String(targetIdx + 1).padStart(2, '0')}/${String(countLeft).padStart(2, '0')}`;
                 }
-            } else if (domIdx > activeDomIdx) {
-                if (prog) {
-                    prog.style.animation = 'none';
-                    prog.style.width = '0%';
+                if (counterRight) {
+                    counterRight.textContent = `01/${String(countRight).padStart(2, '0')}`;
                 }
+
+                const leftPos = (countLeft > 1) 
+                    ? (targetIdx / (countLeft - 1)) * (100 - thumbWidthLeftPct) 
+                    : 0;
+                thumbLeft.style.left = `${leftPos}%`;
+                thumbLeft.style.opacity = '1';
+
+                // Sayap Kanan Belum Dilewati (0%)
+                thumbRight.style.left = '0%';
+                thumbRight.style.opacity = '0.35';
+                if (progRight) {
+                    progRight.style.animation = 'none';
+                    progRight.style.width = '0%';
+                }
+
+                activeProgToAnimate = progLeft;
             } else {
-                seg.classList.add('active');
-                if (prog) {
-                    prog.style.animation = 'none';
-                    prog.offsetHeight; // Force reflow
-                    prog.style.width = '0%';
-                }
-            }
-        });
+                // Sayap Kanan Aktif
+                dotLeft.classList.remove('active');
+                dotRight.classList.add('active');
 
-        const activeSeg = segs[activeDomIdx];
-        if (activeSeg) {
-            const activeProg = activeSeg.querySelector('.progress');
-            if (activeProg && isPlaying) {
-                void activeProg.offsetWidth; // Force reflow
-                const onAnimationEnd = () => {
-                    activeProg.removeEventListener('animationend', onAnimationEnd);
+                if (counterLeft) {
+                    counterLeft.textContent = `${String(countLeft).padStart(2, '0')}/${String(countLeft).padStart(2, '0')}`;
+                }
+                if (counterRight) {
+                    counterRight.textContent = `${String(targetIdx - splitPoint + 1).padStart(2, '0')}/${String(countRight).padStart(2, '0')}`;
+                }
+
+                // Sayap Kiri Sudah Selesai (100%)
+                thumbLeft.style.left = `${100 - thumbWidthLeftPct}%`;
+                thumbLeft.style.opacity = '0.35';
+                if (progLeft) {
+                    progLeft.style.animation = 'none';
+                    progLeft.style.width = '100%';
+                }
+
+                const rightIdx = targetIdx - splitPoint;
+                const rightPos = (countRight > 1) 
+                    ? (rightIdx / (countRight - 1)) * (100 - thumbWidthRightPct) 
+                    : 0;
+                thumbRight.style.left = `${rightPos}%`;
+                thumbRight.style.opacity = '1';
+
+                activeProgToAnimate = progRight;
+            }
+        } else if (thumbFull) {
+            if (dotSingle) dotSingle.classList.add('active');
+
+            if (counterFull) {
+                counterFull.textContent = `${String(targetIdx + 1).padStart(2, '0')}/${String(totalCount).padStart(2, '0')}`;
+            }
+
+            // Ukuran thumb proporsional terhadap total seluruh data
+            const thumbWidthPct = Math.max(6, (1 / totalCount) * 100);
+            thumbFull.style.width = `${thumbWidthPct}%`;
+
+            const pos = (totalCount > 1) 
+                ? (targetIdx / (totalCount - 1)) * (100 - thumbWidthPct) 
+                : 0;
+            thumbFull.style.left = `${pos}%`;
+            thumbFull.style.opacity = '1';
+
+            activeProgToAnimate = thumbFull.querySelector('.progress');
+        }
+
+        if (activeProgToAnimate) {
+            activeProgToAnimate.style.animation = 'none';
+            void activeProgToAnimate.offsetWidth; // Force reflow
+
+            if (isPlaying) {
+                labProgEndListener = () => {
+                    activeProgToAnimate.removeEventListener('animationend', labProgEndListener);
+                    labProgEndListener = null;
                     if (isPlaying && !isMoving && !isDragging) {
                         if (targetIdx === TOTAL_LABS - 1) {
                             if (typeof window.goToSlide === 'function') {
@@ -673,9 +799,11 @@
                         }
                     }
                 };
-                activeProg.addEventListener('animationend', onAnimationEnd);
-                activeProg.style.animation = 'slideProgress 6.5s linear forwards';
-                activeProg.style.animationPlayState = 'running';
+                activeProgToAnimate.addEventListener('animationend', labProgEndListener);
+                activeProgToAnimate.style.animation = 'slideProgress 6.5s linear forwards';
+                activeProgToAnimate.style.animationPlayState = 'running';
+            } else {
+                activeProgToAnimate.style.width = '100%';
             }
         }
     }
@@ -787,17 +915,10 @@
             playPauseIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`; // Icon Pause
         }
 
-        // HANYA resume progress bar di dalam #labIndicators yang sedang di-pause
-        const labProgs = document.querySelectorAll('#labIndicators .progress');
-        let resumed = false;
-        labProgs.forEach(prog => {
-            if (prog.style.animationPlayState === 'paused') {
-                prog.style.animationPlayState = 'running';
-                resumed = true;
-            }
-        });
-
-        if (!resumed) {
+        const activeThumbProg = document.querySelector('.dot.dot-fasilitas.active .dot-track-continuous .thumb .progress');
+        if (activeThumbProg && activeThumbProg.style.animationPlayState === 'paused') {
+            activeThumbProg.style.animationPlayState = 'running';
+        } else {
             syncIndicators(activeLabIndex);
         }
     }
@@ -810,17 +931,24 @@
             playPauseIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`; // Icon Play
         }
 
-        // HANYA bekukan progress bar di dalam #labIndicators
-        const labProgs = document.querySelectorAll('#labIndicators .progress');
-        labProgs.forEach(prog => {
-            if (prog.style.animation && prog.style.animation !== 'none') {
-                prog.style.animationPlayState = 'paused';
-            }
-        });
+        const activeThumbProg = document.querySelector('.dot.dot-fasilitas.active .dot-track-continuous .thumb .progress');
+        if (activeThumbProg && activeThumbProg.style.animation && activeThumbProg.style.animation !== 'none') {
+            activeThumbProg.style.animationPlayState = 'paused';
+        }
     }
     window.pauseAutoPlay = pauseAutoPlay;
 
     function toggleAutoPlay() {
+        if (typeof window.goToSlide === 'function') {
+            const currentActiveDot = document.querySelector('#carouselDots .dot.active');
+            const currentIdx = currentActiveDot ? parseInt(currentActiveDot.getAttribute('data-index') || '0') : 0;
+            if (currentIdx !== 1) {
+                window.goToSlide(1);
+                startAutoPlay();
+                return;
+            }
+        }
+
         if (isPlaying) {
             pauseAutoPlay();
         } else {
@@ -928,7 +1056,6 @@
         if (track && viewport) {
             updateAllSlots(activeLabIndex);
             renderTrackPosition(CENTER_SLOT_INDEX, false);
-            startAutoPlay();
 
             window.addEventListener('resize', () => renderTrackPosition(CENTER_SLOT_INDEX, false));
             window.addEventListener('load', () => renderTrackPosition(CENTER_SLOT_INDEX, false));
@@ -967,24 +1094,104 @@
                 }
             }, { passive: false });
 
-            // Klik Indikator Segmen Ruangan pada Fasilitas Seekbar
-            document.querySelectorAll('#labIndicators .seg').forEach((seg, sIdx) => {
-                seg.addEventListener('click', (e) => {
+            // DRAG-TO-SCRUB & LIVE FLOATING TOOLTIP PADA CONTINUOUS PROGRESS TRACK
+            document.querySelectorAll('.dot-track-continuous').forEach((track) => {
+                const tooltip = track.querySelector('.fasilitas-scrub-tooltip');
+                let isScrubbing = false;
+
+                function updateScrub(clientX, commit = false) {
+                    const rect = track.getBoundingClientRect();
+                    const ratio = Math.max(0, Math.min(0.999, (clientX - rect.left) / rect.width));
+                    const part = track.getAttribute('data-part');
+
+                    let targetIdx = 0;
+                    if (part === '1') {
+                        const countLeft = SPLIT_POINT_LAB;
+                        targetIdx = Math.min(countLeft - 1, Math.floor(ratio * countLeft));
+                    } else if (part === '2') {
+                        const countRight = TOTAL_LABS - SPLIT_POINT_LAB;
+                        targetIdx = SPLIT_POINT_LAB + Math.min(countRight - 1, Math.floor(ratio * countRight));
+                    } else {
+                        targetIdx = Math.min(TOTAL_LABS - 1, Math.floor(ratio * TOTAL_LABS));
+                    }
+
+                    if (tooltip) {
+                        tooltip.style.left = `${ratio * 100}%`;
+                        const labKey = LAB_KEYS[targetIdx];
+                        if (labKey && LAB_DATA[labKey]) {
+                            tooltip.innerHTML = `<span>🏛️ ${LAB_DATA[labKey].title}</span>`;
+                        }
+                        tooltip.classList.add('visible');
+                    }
+
+                    if (commit) {
+                        if (typeof window.goToSlide === 'function') {
+                            window.goToSlide(1);
+                        }
+                        navigateToIndex(targetIdx);
+                    }
+                }
+
+                track.addEventListener('pointerdown', (e) => {
                     e.stopPropagation();
                     e.preventDefault();
-
-                    // Pastikan layar tetap di Slide 1 (FASILITAS) dan tidak bergeser/scroll ke mana-mana
-                    if (typeof window.goToSlide === 'function') {
-                        window.goToSlide(1);
-                    }
-
-                    const targetLab = seg.getAttribute('data-lab');
-                    let targetIdx = LAB_KEYS.indexOf(targetLab);
-                    if (targetIdx === -1) {
-                        targetIdx = sIdx % TOTAL_LABS;
-                    }
-                    navigateToIndex(targetIdx);
+                    isScrubbing = true;
+                    track.classList.add('is-dragging');
+                    track.setPointerCapture(e.pointerId);
+                    updateScrub(e.clientX, true);
                 });
+
+                track.addEventListener('pointermove', (e) => {
+                    if (isScrubbing) {
+                        updateScrub(e.clientX, true);
+                    } else {
+                        updateScrub(e.clientX, false);
+                    }
+                });
+
+                track.addEventListener('pointerup', (e) => {
+                    if (isScrubbing) {
+                        isScrubbing = false;
+                        track.classList.remove('is-dragging');
+                        try { track.releasePointerCapture(e.pointerId); } catch(err) {}
+                        if (tooltip) tooltip.classList.remove('visible');
+                    }
+                });
+
+                track.addEventListener('pointercancel', (e) => {
+                    if (isScrubbing) {
+                        isScrubbing = false;
+                        track.classList.remove('is-dragging');
+                        if (tooltip) tooltip.classList.remove('visible');
+                    }
+                });
+
+                track.addEventListener('pointerleave', () => {
+                    if (!isScrubbing && tooltip) {
+                        tooltip.classList.remove('visible');
+                    }
+                });
+            });
+
+            // Keyboard Arrow Navigation (Khusus saat di Slide Fasilitas)
+            window.addEventListener('keydown', (e) => {
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+
+                const activeDot = document.querySelector('#carouselDots .dot.active');
+                const activeSlideIdx = activeDot ? parseInt(activeDot.getAttribute('data-index') || '0') : 0;
+
+                if (activeSlideIdx === 1) { // Fasilitas slide
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        shiftNext();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        shiftPrev();
+                    } else if (e.key === ' ' || e.code === 'Space') {
+                        e.preventDefault();
+                        toggleAutoPlay();
+                    }
+                }
             });
 
             // Klik langsung pada kartu di samping untuk berpindah dengan animasi smooth

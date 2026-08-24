@@ -288,49 +288,6 @@
                                     <i class="bi bi-info-circle text-orange-500"></i> Klik <strong>Translate Otomatis</strong> untuk menerjemahkan Judul Utama (ID &rarr; EN), atau ketik langsung secara manual.
                                 </p>
                             </div>
-                                    </button>
-                                </div>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" id="inputJudul2" name="judul_2" placeholder="Masukkan alternatif judul ke-2...">
-                            </div>
-
-                            <!-- Judul Alternatif 2 (Dinamis) -->
-                            <div id="containerJudul3" class="hidden p-4 rounded-xl bg-orange-50/70 border border-orange-200/90 transition-all duration-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Judul Usulan 3 (Alternatif 2)</label>
-                                    <button type="button" class="btn-remove-alt text-xs font-semibold text-rose-500 hover:text-rose-700 flex items-center gap-1 hover:underline cursor-pointer" data-target="3">
-                                        <i class="bi bi-trash3"></i> Hapus Alternatif 2
-                                    </button>
-                                </div>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" id="inputJudul3" name="judul_3" placeholder="Masukkan alternatif judul ke-3...">
-                            </div>
-
-                            <!-- Tombol Tambah Judul Alternatif -->
-                            <div class="pt-0.5">
-                                <button type="button" id="btnAddJudulAlt" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-orange-600 hover:text-orange-700 bg-orange-100/70 hover:bg-orange-200/80 border border-dashed border-orange-300 transition-all active:scale-95 shadow-2xs cursor-pointer">
-                                    <i class="bi bi-plus-circle-fill text-sm"></i>
-                                    <span>Tambah Judul Alternatif</span>
-                                </button>
-                            </div>
-
-                            <!-- Judul dalam Bahasa Inggris -->
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Judul dalam Bahasa Inggris <span class="text-orange-500">*</span></label>
-                                    <button type="button" id="btnAutoTranslate" class="text-[11px] font-semibold text-orange-600 hover:text-orange-700 bg-orange-100/90 hover:bg-orange-200 px-3 py-1 rounded-lg border border-orange-300/80 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95" title="Terjemahkan otomatis dari Judul Utama">
-                                        <i class="bi bi-translate text-xs"></i>
-                                        <span id="btnAutoTranslateText">Translate Otomatis</span>
-                                    </button>
-                                </div>
-                                <div class="relative">
-                                    <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium pr-10" id="inputJudulEn" name="judul_en" placeholder="Title in English..." required>
-                                    <span id="translateSpinner" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-orange-500 pointer-events-none">
-                                        <i class="bi bi-arrow-repeat animate-spin text-base"></i>
-                                    </span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1.5 font-normal flex items-center gap-1">
-                                    <i class="bi bi-info-circle text-orange-500"></i> Klik <strong>Translate Otomatis</strong> untuk menerjemahkan Judul Utama (ID &rarr; EN), atau ketik langsung secara manual.
-                                </p>
-                            </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Konsentrasi (Otomatis dari Biodata)</label>

@@ -66,26 +66,46 @@
     /* Carousel Indicators (Dots) - Modern Glassmorphism Hybrid */
     .carousel-indicators {
         position: absolute;
-        bottom: 45px;
+        bottom: 38px;
         left: 50%;
         transform: translateX(-50%);
-        width: 60vw;
+        width: 86vw;
+        max-width: 1350px;
         display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 16px;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
         z-index: 30;
     }
     
     .dots-half {
-        flex: 1;
+        flex: 1 1 0;
+        width: calc(50% - 42.5px);
         display: flex;
-        gap: 15px;
+        gap: 12px;
         align-items: center;
     }
 
+    .dots-half.dots-left {
+        justify-content: flex-end;
+    }
+
+    .dots-half.dots-right {
+        justify-content: flex-start;
+    }
+
+    .dots-center-gap {
+        width: 85px;
+        min-width: 85px;
+        max-width: 85px;
+        flex: 0 0 85px;
+        pointer-events: none;
+    }
+
     .carousel-indicators .dot {
-        flex: 1;
+        flex: 1 1 0;
+        max-width: 250px;
+        min-width: 100px;
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -93,7 +113,7 @@
         opacity: 0.7;
         transition: all 0.3s ease;
         background: rgba(0, 0, 0, 0.45);
-        padding: 10px 14px;
+        padding: 9px 12px;
         border-radius: 12px;
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
@@ -161,70 +181,152 @@
     .lab-add-room-btn {
         display: inline-flex;
         align-items: center;
-        gap: 3px;
+        justify-content: center;
+        width: 18px;
         height: 18px;
-        padding: 0 7px;
-        border-radius: 12px;
+        border-radius: 50%;
         background: #ea580c;
         border: none;
         color: #ffffff;
-        font-size: 0.65rem;
-        font-weight: 800;
-        letter-spacing: 0.5px;
         cursor: pointer;
         transition: all 0.2s ease;
         box-shadow: 0 2px 6px rgba(234, 88, 12, 0.5);
+        flex-shrink: 0;
+        text-decoration: none;
+        padding: 0;
     }
 
     .lab-add-room-btn:hover {
         background: #ffffff;
         color: #ea580c;
-        transform: scale(1.1);
+        transform: scale(1.15);
         box-shadow: 0 4px 10px rgba(255, 255, 255, 0.6);
     }
 
     .lab-add-room-btn svg {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         fill: currentColor;
     }
 
-    .dot-track-segmented {
+    /* Badge Counter Nomor Ruangan Aktif */
+    .fasilitas-counter {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 1px 6px;
+        border-radius: 10px;
+        letter-spacing: 0.5px;
+        font-variant-numeric: tabular-nums;
+        transition: all 0.3s ease;
+        line-height: 1.2;
+    }
+
+    .dot.active .fasilitas-counter {
+        color: #ffffff;
+        border-color: rgba(234, 88, 12, 0.6);
+        background: rgba(234, 88, 12, 0.25);
+        box-shadow: 0 0 8px rgba(234, 88, 12, 0.3);
+    }
+
+    .dot-track-continuous {
         height: 4px;
         width: 100%;
-        display: flex;
-        gap: 4px;
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 4px;
+        position: relative;
+        cursor: pointer;
+        transition: height 0.2s cubic-bezier(0.25, 1, 0.5, 1), background 0.2s ease, box-shadow 0.2s ease;
+        touch-action: none;
+    }
+
+    .dot-track-continuous::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        bottom: -8px;
+        left: 0;
+        right: 0;
+    }
+
+    .dot-track-continuous:hover,
+    .dot-track-continuous.is-dragging {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.38);
+    }
+
+    .dot-track-continuous .thumb {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 25%;
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 4px;
         overflow: hidden;
+        transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s ease, opacity 0.3s ease;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 12px rgba(234, 88, 12, 0.35);
     }
 
-    .dot-track-segmented .seg {
-        flex: 1;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 2px;
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-        transition: background 0.3s ease;
+    .dot-track-continuous.is-dragging .thumb {
+        transition: width 0.3s ease, opacity 0.3s ease; /* No lag during drag */
     }
 
-    .dot-track-segmented .seg:hover {
-        background: rgba(255, 255, 255, 0.6);
-    }
-
-    .dot-track-segmented .seg .progress {
+    .dot-track-continuous .thumb .progress {
         position: absolute;
-        top: 0; left: 0; height: 100%;
-        background: #ffffff;
+        top: 0;
+        left: 0;
+        height: 100%;
         width: 0%;
-        border-radius: 2px;
-        box-shadow: 0 0 8px #ffffff;
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0 0 8px #ffffff, 0 0 14px rgba(255, 255, 255, 0.9);
     }
 
-    .dot-track-segmented .seg.completed .progress {
-        width: 100% !important;
-        animation: none !important;
+    /* Floating Scrub Tooltip Glassmorphism */
+    .fasilitas-scrub-tooltip {
+        position: absolute;
+        bottom: calc(100% + 9px);
+        left: 0;
+        transform: translateX(-50%) translateY(4px);
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+        z-index: 100;
+        white-space: nowrap;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: rgba(15, 23, 42, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        padding: 3px 9px;
+        border-radius: 7px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(234, 88, 12, 0.35);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .fasilitas-scrub-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 4px;
+        border-style: solid;
+        border-color: rgba(15, 23, 42, 0.92) transparent transparent transparent;
+    }
+
+    .fasilitas-scrub-tooltip.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
     }
 
     /* Tombol Play/Pause Kecil di Pinggir Label Fasilitas */
@@ -311,7 +413,7 @@
         bottom: 0;
         right: 20px;
         max-height: 380px;
-        z-index: 5;
+        z-index: 20;
         pointer-events: none;
     }
     
@@ -369,7 +471,7 @@
 <div class="section-wrapper" id="section-carousel">
 
     <!-- Carousel Horizontal (Scroll Hijacking) -->
-    <div class="carousel-container">
+    <div class="carousel-container" id="headerCarousel">
         <!-- Slide 1 (Overview - Fakultas Industri Kreatif) -->
         <div class="carousel-slide slide-1">
             <div class="slide1-layout">
@@ -409,144 +511,254 @@
                     </div>
                 </div>
             </div>
-            <img src="<?= base_url('assets/images/dekanat2.png') ?>" alt="Dekanat" class="dekanat-img-right">
+            <img src="<?= base_url('assets/images/' . $dekanat_img) ?>" alt="Dekanat" class="dekanat-img-right">
         </div>
+        
+        <!-- Custom Slides dari Database (Slide 4, 5, 6, dst) -->
+        <?php if (!empty($header_slides) && count($header_slides) > 3): ?>
+            <?php for ($i = 3; $i < count($header_slides); $i++): ?>
+                <?php $s = $header_slides[$i]; ?>
+                <div class="carousel-slide slide-custom slide-<?= $i + 1 ?>" style="position: relative; width: 100vw; height: 100%; <?= $s->media_type === 'image' && !empty($s->media_path) ? 'background-image: url(' . base_url('assets/images/' . $s->media_path) . '); background-size: cover; background-position: center;' : '' ?>">
+                    <?php if ($s->media_type === 'video' && !empty($s->media_path)): ?>
+                        <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                            <source src="<?= base_url('assets/videos/' . $s->media_path) ?>" type="video/mp4">
+                        </video>
+                    <?php endif; ?>
+                    <div class="slide1-layout" style="position: relative; z-index: 2;">
+                        <div class="slide1-text-container">
+                            <div class="slide1-title-box">
+                                <h1><?= htmlspecialchars($s->label ?? ('Slide ' . ($i + 1))) ?></h1>
+                            </div>
+                        </div>
+                    </div>
+                    <img src="<?= base_url('assets/images/' . $dekanat_img) ?>" alt="Dekanat" class="dekanat-img-right">
+                </div>
+            <?php endfor; ?>
+        <?php endif; ?>
     </div>
     
-    <!-- Indikator Dots Gabungan -->
-    <div class="carousel-indicators" id="carouselDots">
-        <!-- Dot 0: Overview -->
-        <div class="dot active" data-index="0">
-            <span class="dot-label">Overview</span>
-            <div class="dot-track"><div class="progress"></div></div>
-        </div>
+    <!-- Indikator Dots Terbagi Kiri & Kanan (Simetris Mengelilingi Tombol Tengah) -->
+    <?php 
+        $all_rooms = [];
+        $seen_keys = [];
+        $featured_keys = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
 
-        <!-- Dot 1: Fasilitas (6 Segmen Ruangan) -->
-        <div class="dot dot-fasilitas" data-index="1">
-            <div class="dot-label-row">
-                <span class="dot-label">Fasilitas</span>
-                <div class="fasilitas-controls-group">
-                    <?php if ($this->session->userdata('role_id') == 1): ?>
-                        <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
-                            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                            <span>Ruangan</span>
-                        </a>
-                    <?php endif; ?>
-
-                    <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
-                        <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="dot-track-segmented" id="labIndicators">
-                <?php 
-                    $ruangan_with_3d = [];
-                    $seen_keys = [];
-                    if (!empty($ruangan)) {
-                        foreach ($ruangan as $r) {
-                            $n = strtolower(trim(isset($r->nama_ruangan) ? $r->nama_ruangan : ''));
-                            $c = strtolower(trim(isset($r->kode_ruangan) ? $r->kode_ruangan : ''));
-                            if (!empty($r->model_3d) && $n !== 'ss' && $c !== 'ss' && strpos($n, 'test') === false && strpos($n, 'qqq') === false) {
-                                if (strpos($n, 'multimedia') !== false) $lab_code = 'multimedia';
-                                elseif (strpos($n, 'aula') !== false) $lab_code = 'aula';
-                                elseif (strpos($n, 'cintiq') !== false || strpos($n, 'tablet') !== false || strpos($n, 'sablon') !== false) $lab_code = 'cintiq';
-                                elseif (strpos($n, 'green') !== false) $lab_code = 'greenscreen';
-                                elseif (strpos($n, 'inkubator') !== false || strpos($n, 'incubator') !== false) $lab_code = 'incubator';
-                                elseif (strpos($n, 'mac') !== false || strpos($n, '3d printing') !== false) $lab_code = 'mac';
-                                else $lab_code = preg_replace('/[^a-z0-9]/', '', $c);
-
-                                if (!empty($lab_code) && !in_array($lab_code, $seen_keys)) {
-                                    $seen_keys[] = $lab_code;
-                                    $r->mapped_key = $lab_code;
-                                    $ruangan_with_3d[] = $r;
-                                }
-                            }
-                        }
+        if (!empty($ruangan)) {
+            foreach ($ruangan as $r) {
+                $n = strtolower(trim(isset($r->nama_ruangan) ? $r->nama_ruangan : ''));
+                $c_code = strtolower(trim(isset($r->kode_ruangan) ? $r->kode_ruangan : ''));
+                if ($n !== 'ss' && $c_code !== 'ss' && strpos($n, 'test') === false && strpos($n, 'qqq') === false) {
+                    $lab_code = '';
+                    if (strpos($n, 'multimedia') !== false && !in_array('multimedia', $seen_keys)) $lab_code = 'multimedia';
+                    elseif (strpos($n, 'aula') !== false && !in_array('aula', $seen_keys)) $lab_code = 'aula';
+                    elseif ((strpos($n, 'cintiq') !== false || strpos($n, 'tablet') !== false || strpos($n, 'sablon') !== false) && !in_array('cintiq', $seen_keys)) $lab_code = 'cintiq';
+                    elseif (strpos($n, 'green') !== false && !in_array('greenscreen', $seen_keys)) $lab_code = 'greenscreen';
+                    elseif ((strpos($n, 'inkubator') !== false || strpos($n, 'incubator') !== false) && !in_array('incubator', $seen_keys)) $lab_code = 'incubator';
+                    elseif (strpos($n, 'mac') !== false && !in_array('mac', $seen_keys)) $lab_code = 'mac';
+                    else {
+                        $lab_code = preg_replace('/[^a-z0-9]/', '', $c_code);
+                        if (empty($lab_code)) $lab_code = 'room_' . $r->id;
                     }
 
-                    $order_keys = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
-                    usort($ruangan_with_3d, function($a, $b) use ($order_keys) {
-                        $posA = array_search($a->mapped_key, $order_keys);
-                        $posB = array_search($b->mapped_key, $order_keys);
-                        if ($posA === false) $posA = 999;
-                        if ($posB === false) $posB = 999;
-                        return $posA - $posB;
-                    });
-                ?>
-                <?php if (!empty($ruangan_with_3d)): ?>
-                    <?php foreach ($ruangan_with_3d as $idx => $r): ?>
-                        <div class="seg <?= $idx === 0 ? 'active' : '' ?>" 
-                             data-lab="<?= htmlspecialchars($r->mapped_key) ?>" 
-                             data-id="<?= $r->id ?>"
-                             title="<?= htmlspecialchars($r->nama_ruangan) ?>">
-                            <div class="progress"></div>
+                    if (!empty($lab_code) && !in_array($lab_code, $seen_keys)) {
+                        $seen_keys[] = $lab_code;
+                        $r->mapped_key = $lab_code;
+                        $all_rooms[] = $r;
+                    }
+                }
+            }
+        }
+
+        // Sort: 6 Lab Utama di depan, lalu diikuti seluruh ruangan lainnya
+        usort($all_rooms, function($a, $b) use ($featured_keys) {
+            $posA = array_search($a->mapped_key, $featured_keys);
+            $posB = array_search($b->mapped_key, $featured_keys);
+            if ($posA !== false && $posB !== false) return $posA - $posB;
+            if ($posA !== false) return -1;
+            if ($posB !== false) return 1;
+            return $a->id - $b->id;
+        });
+
+        $total_rooms_count = count($all_rooms);
+        $split_point = !empty($all_rooms) ? (int)ceil($total_rooms_count / 2) : 3;
+        $rooms_part1 = !empty($all_rooms) ? array_slice($all_rooms, 0, $split_point) : [];
+        $rooms_part2 = !empty($all_rooms) ? array_slice($all_rooms, $split_point) : [];
+
+        // HIERARKI DISTRIBUSI SECTION / TAB
+        $total_slides_count = !empty($header_slides) && count($header_slides) >= 3 ? count($header_slides) : 3;
+        $tab_items = [];
+
+        if ($total_slides_count === 3) {
+            // Default 3 Slide: Fasilitas dipecah 2 (2 di kiri : 2 di kanan)
+            $tab_items[] = ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'];
+            $tab_items[] = ['type' => 'fasilitas_part', 'index' => 1, 'part' => '1', 'id' => 'dotFasilitasLeft', 'label' => 'Fasilitas', 'rooms' => $rooms_part1, 'has_play' => true];
+            $tab_items[] = ['type' => 'fasilitas_part', 'index' => 1, 'part' => '2', 'id' => 'dotFasilitasRight', 'label' => 'Fasilitas', 'rooms' => $rooms_part2, 'has_add' => true];
+            $tab_items[] = ['type' => 'prestasi', 'index' => 2, 'id' => 'dotPrestasi', 'label' => 'Prestasi'];
+        } else {
+            // Banyak Slide (4, 5, 6, dst): Setiap section menjadi 1 kartu
+            $tab_items[] = ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'];
+            $tab_items[] = ['type' => 'fasilitas_full', 'index' => 1, 'id' => 'dotFasilitas', 'label' => 'Fasilitas', 'rooms' => $all_rooms, 'has_play' => true, 'has_add' => true];
+            $tab_items[] = ['type' => 'prestasi', 'index' => 2, 'id' => 'dotPrestasi', 'label' => 'Prestasi'];
+
+            for ($i = 3; $i < $total_slides_count; $i++) {
+                $slide_label = $header_slides[$i]->label ?? ('Slide ' . ($i + 1));
+                $tab_items[] = ['type' => 'custom_slide', 'index' => $i, 'id' => 'dotSlide' . $i, 'label' => $slide_label];
+            }
+        }
+
+        // Bagi rata kartu ke Sayap Kiri dan Sayap Kanan
+        $total_tabs = count($tab_items);
+        $half_tabs_count = (int)ceil($total_tabs / 2);
+        $tabs_left = array_slice($tab_items, 0, $half_tabs_count);
+        $tabs_right = array_slice($tab_items, $half_tabs_count);
+    ?>
+    <div class="carousel-indicators" id="carouselDots">
+        <!-- SISI KIRI (Sayap Kiri) -->
+        <div class="dots-half dots-left">
+            <?php foreach ($tabs_left as $idx => $tab): ?>
+                <?php if ($tab['type'] === 'fasilitas_part'): ?>
+                    <div class="dot dot-fasilitas <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" data-fasilitas-part="<?= $tab['part'] ?>" id="<?= $tab['id'] ?>">
+                        <div class="dot-label-row">
+                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                            <div class="fasilitas-controls-group">
+                                <span class="fasilitas-counter" id="fasilitasCounterLeft">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
+                                <?php if (!empty($tab['has_play'])): ?>
+                                    <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
+                                        <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    <?php endforeach; ?>
+                        <div class="dot-track-continuous" id="labIndicatorsLeft" data-part="1">
+                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasLeft"><span>Lab Multimedia</span></div>
+                            <div class="thumb" id="thumbFasilitasLeft">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                <?php elseif ($tab['type'] === 'fasilitas_full'): ?>
+                    <div class="dot dot-fasilitas <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                        <div class="dot-label-row">
+                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                            <div class="fasilitas-controls-group">
+                                <span class="fasilitas-counter" id="fasilitasCounterFull">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
+                                <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
+                                    <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </button>
+                                <?php if ($this->session->userdata('role_id') == 1): ?>
+                                    <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
+                                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="dot-track-continuous" id="labIndicatorsFull">
+                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasFull"><span>Lab Multimedia</span></div>
+                            <div class="thumb" id="thumbFasilitasFull">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                    </div>
                 <?php else: ?>
-                    <div class="seg active" data-lab="multimedia" title="Lab Multimedia &amp; Game"><div class="progress"></div></div>
-                    <div class="seg" data-lab="aula" title="Aula Utama"><div class="progress"></div></div>
-                    <div class="seg" data-lab="cintiq" title="Lab Cintiq"><div class="progress"></div></div>
-                    <div class="seg" data-lab="greenscreen" title="Lab Green Screen"><div class="progress"></div></div>
-                    <div class="seg" data-lab="incubator" title="Lab Inkubator"><div class="progress"></div></div>
-                    <div class="seg" data-lab="mac" title="Lab Mac Workstation"><div class="progress"></div></div>
+                    <div class="dot <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                        <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                        <div class="dot-track"><div class="progress"></div></div>
+                    </div>
                 <?php endif; ?>
-            </div>
+            <?php endforeach; ?>
         </div>
 
-        <!-- Dot 2: Prestasi -->
-        <div class="dot" data-index="2">
-            <span class="dot-label">Prestasi</span>
-            <div class="dot-track"><div class="progress"></div></div>
+        <!-- CELAH TENGAH: Tempat Tombol Bulat Oranye Scroll Down Bebas Terbuka -->
+        <div class="dots-center-gap"></div>
+
+        <!-- SISI KANAN (Sayap Kanan) -->
+        <div class="dots-half dots-right">
+            <?php foreach ($tabs_right as $idx => $tab): ?>
+                <?php if ($tab['type'] === 'fasilitas_part'): ?>
+                    <div class="dot dot-fasilitas" data-index="<?= $tab['index'] ?>" data-fasilitas-part="<?= $tab['part'] ?>" id="<?= $tab['id'] ?>">
+                        <div class="dot-label-row">
+                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                            <div class="fasilitas-controls-group">
+                                <span class="fasilitas-counter" id="fasilitasCounterRight">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
+                                <?php if ($this->session->userdata('role_id') == 1): ?>
+                                    <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
+                                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="dot-track-continuous" id="labIndicatorsRight" data-part="2">
+                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasRight"><span>Lab Multimedia</span></div>
+                            <div class="thumb" id="thumbFasilitasRight">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                <?php elseif ($tab['type'] === 'fasilitas_full'): ?>
+                    <div class="dot dot-fasilitas" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                        <div class="dot-label-row">
+                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                            <div class="fasilitas-controls-group">
+                                <span class="fasilitas-counter" id="fasilitasCounterFull">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
+                                <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
+                                    <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </button>
+                                <?php if ($this->session->userdata('role_id') == 1): ?>
+                                    <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
+                                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="dot-track-continuous" id="labIndicatorsFull">
+                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasFull"><span>Lab Multimedia</span></div>
+                            <div class="thumb" id="thumbFasilitasFull">
+                                <div class="progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="dot" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                        <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                        <div class="dot-track"><div class="progress"></div></div>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
 
 <script>
+    // Script Logika Carousel dan Sinkronisasi Indikator Header
     document.addEventListener('DOMContentLoaded', () => {
-        const carousel = document.querySelector('.carousel-container');
+        const carousel = document.getElementById('headerCarousel');
         const slides = document.querySelectorAll('.carousel-slide');
         const dots = document.querySelectorAll('#carouselDots .dot');
-        
         let currentIndex = 0;
         let activeProgEndListener = null;
 
-        const goToSlide = (index) => {
-            if (!carousel || !slides[index]) return;
-            const slideLeftPos = slides[index].offsetLeft;
-            carousel.scrollTo({
-                left: slideLeftPos,
-                behavior: 'smooth'
-            });
-            updateDots(index);
-        };
-
-        window.goToSlide = goToSlide;
-
-        // Video support handler
-        document.querySelectorAll('video').forEach((vid) => {
-            vid.addEventListener('loadedmetadata', () => {
-                const slideIndex = Array.from(slides).indexOf(vid.closest('.carousel-slide'));
-                if (currentIndex === slideIndex && dots[slideIndex]) {
-                    const activeProg = dots[slideIndex].querySelector('.progress');
-                    if (activeProg) {
-                        activeProg.style.animation = 'none';
-                        activeProg.offsetHeight;
-                        activeProg.style.animation = `slideProgress ${vid.duration}s linear forwards`;
-                    }
-                }
-            });
-        });
-
         const updateDots = (index) => {
-            currentIndex = index;
+            dots.forEach((dot) => {
+                const dotIdx = parseInt(dot.getAttribute('data-index') || '0');
+                const fasPart = dot.getAttribute('data-fasilitas-part');
+                
+                // Active state
+                if (dotIdx === index) {
+                    if (dotIdx === 1) {
+                        // Diatur oleh syncIndicators pada Lab sequence
+                    } else {
+                        dot.classList.add('active');
+                    }
+                } else {
+                    dot.classList.remove('active');
+                }
 
-            dots.forEach((dot, i) => {
-                dot.classList.remove('active');
+                // Normal Dot Progress Bar (Overview & Prestasi / Custom)
                 const prog = dot.querySelector('.dot-track > .progress');
                 if (prog) {
                     prog.style.animation = 'none';
                     prog.offsetHeight;
-                    if (i < index) {
+                    if (dotIdx < index) {
                         prog.style.width = '100%';
                     } else {
                         prog.style.width = '0%';
@@ -554,33 +766,33 @@
                 }
             });
 
-            if (dots[index]) {
-                dots[index].classList.add('active');
-            }
-
-            // 3D Logo logic: tampil di Slide 0 dan Slide 2
+            // 3D Logo logic: tampil di Slide 0 dan Slide Terakhir
             const modelContainer = document.getElementById('global-model-container');
             const dashboardContainer = document.querySelector('.dashboard-container');
             if (modelContainer) {
                 const currentScrollTop = dashboardContainer ? dashboardContainer.scrollTop : 0;
                 const vh = window.innerHeight || 800;
                 if (currentScrollTop < vh * 0.45) {
-                    modelContainer.style.opacity = (index === 0 || index === 2) ? '1' : '0';
+                    modelContainer.style.opacity = (index === 0 || index === (slides.length - 1)) ? '1' : '0';
                 }
                 modelContainer.style.pointerEvents = 'none';
             }
 
-            if (index === 0) {
-                const segs = document.querySelectorAll('#labIndicators .seg');
-                segs.forEach(seg => {
-                    seg.classList.remove('completed', 'active');
-                    const p = seg.querySelector('.progress');
+            if (index === 0) { // --- SLIDE 0: OVERVIEW ---
+                const dotOverview = document.getElementById('dotOverview');
+                if (dotOverview) dotOverview.classList.add('active');
+
+                // Reset Fasilitas continuous thumbs
+                document.querySelectorAll('.dot-track-continuous .thumb').forEach(thumb => {
+                    thumb.style.left = '0%';
+                    thumb.style.opacity = '0.35';
+                    const p = thumb.querySelector('.progress');
                     if (p) { p.style.animation = 'none'; p.style.width = '0%'; }
                 });
 
                 if (typeof pauseAutoPlay === 'function') pauseAutoPlay();
 
-                const overviewProg = dots[0].querySelector('.dot-track > .progress');
+                const overviewProg = dotOverview ? dotOverview.querySelector('.dot-track > .progress') : null;
                 if (overviewProg) {
                     if (activeProgEndListener) {
                         overviewProg.removeEventListener('animationend', activeProgEndListener);
@@ -599,17 +811,12 @@
                     overviewProg.addEventListener('animationend', activeProgEndListener);
                 }
 
-            } else if (index === 1) {
-                const overviewProg = dots[0].querySelector('.dot-track > .progress');
+            } else if (index === 1) { // --- SLIDE 1: FASILITAS (LABS) ---
+                const dotOverview = document.getElementById('dotOverview');
+                const overviewProg = dotOverview ? dotOverview.querySelector('.dot-track > .progress') : null;
                 if (overviewProg) {
                     overviewProg.style.animation = 'none';
                     overviewProg.style.width = '100%';
-                }
-
-                const prestasiProg = dots[2].querySelector('.dot-track > .progress');
-                if (prestasiProg) {
-                    prestasiProg.style.animation = 'none';
-                    prestasiProg.style.width = '0%';
                 }
 
                 if (typeof window.startLabSequence === 'function') {
@@ -618,49 +825,78 @@
                     startAutoPlay();
                 }
 
-            } else if (index === 2) {
-                const overviewProg = dots[0].querySelector('.dot-track > .progress');
+            } else { // --- SLIDE LAINNYA (PRESTASI / CUSTOM) ---
+                const dotOverview = document.getElementById('dotOverview');
+                const overviewProg = dotOverview ? dotOverview.querySelector('.dot-track > .progress') : null;
                 if (overviewProg) {
                     overviewProg.style.animation = 'none';
                     overviewProg.style.width = '100%';
                 }
 
-                const segs = document.querySelectorAll('#labIndicators .seg');
-                segs.forEach(seg => {
-                    seg.classList.add('completed');
-                    const p = seg.querySelector('.progress');
+                // Completed state for Fasilitas continuous thumbs
+                document.querySelectorAll('.dot-track-continuous .thumb').forEach(thumb => {
+                    thumb.style.opacity = '0.35';
+                    const p = thumb.querySelector('.progress');
                     if (p) { p.style.animation = 'none'; p.style.width = '100%'; }
                 });
 
                 if (typeof pauseAutoPlay === 'function') pauseAutoPlay();
 
-                const prestasiProg = dots[2].querySelector('.dot-track > .progress');
-                if (prestasiProg) {
+                const curDot = document.querySelector(`#carouselDots .dot[data-index="${index}"]`);
+                if (curDot) curDot.classList.add('active');
+                const curProg = curDot ? curDot.querySelector('.dot-track > .progress') : null;
+                if (curProg) {
                     if (activeProgEndListener) {
-                        prestasiProg.removeEventListener('animationend', activeProgEndListener);
+                        curProg.removeEventListener('animationend', activeProgEndListener);
                     }
-                    void prestasiProg.offsetWidth;
-                    prestasiProg.style.animation = 'slideProgress 6.5s linear forwards';
-                    prestasiProg.style.animationPlayState = 'running';
+                    void curProg.offsetWidth;
+                    curProg.style.animation = 'slideProgress 6.5s linear forwards';
+                    curProg.style.animationPlayState = 'running';
                     
                     activeProgEndListener = () => {
-                        prestasiProg.removeEventListener('animationend', activeProgEndListener);
+                        curProg.removeEventListener('animationend', activeProgEndListener);
                         activeProgEndListener = null;
-                        if (currentIndex === 2) {
-                            goToSlide(0);
+                        if (currentIndex === index) {
+                            const nextIndex = (currentIndex + 1) % slides.length;
+                            goToSlide(nextIndex);
                         }
                     };
-                    prestasiProg.addEventListener('animationend', activeProgEndListener);
+                    curProg.addEventListener('animationend', activeProgEndListener);
                 }
             }
         };
 
+        const goToSlide = (index) => {
+            if (index < 0 || index >= slides.length) return;
+            currentIndex = index;
+            carousel.scrollTo({
+                left: index * carousel.clientWidth,
+                behavior: 'smooth'
+            });
+            updateDots(currentIndex);
+        };
+
+        window.goToSlide = goToSlide;
+
         goToSlide(0);
 
         // Click on dots
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                goToSlide(index);
+        dots.forEach((dot) => {
+            dot.addEventListener('click', (e) => {
+                if (e.target.closest('#labAutoPlayBtn') || e.target.closest('.lab-add-room-btn') || e.target.closest('.dot-track-continuous')) return;
+
+                const slideIndex = parseInt(dot.getAttribute('data-index') || '0');
+                const fasPart = dot.getAttribute('data-fasilitas-part');
+                
+                goToSlide(slideIndex);
+
+                if (slideIndex === 1 && typeof navigateToIndex === 'function') {
+                    if (fasPart === '2') {
+                        navigateToIndex(<?= $split_point ?>);
+                    } else {
+                        navigateToIndex(0);
+                    }
+                }
             });
         });
 
@@ -668,7 +904,7 @@
         carousel.addEventListener('scroll', () => {
             const slideWidth = carousel.clientWidth;
             const newIndex = Math.round(carousel.scrollLeft / slideWidth);
-            if (newIndex !== currentIndex && newIndex >= 0 && newIndex < dots.length) {
+            if (newIndex !== currentIndex && newIndex >= 0 && newIndex < slides.length) {
                 currentIndex = newIndex;
                 updateDots(currentIndex);
             }

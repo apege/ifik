@@ -105,6 +105,7 @@ class Mahasiswa extends CI_Controller {
     public function pendaftaran_ta() {
         $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
         $data['title'] = 'Pendaftaran Tugas Akhir (6 Step)';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
 
         if ($this->input->post()) {
