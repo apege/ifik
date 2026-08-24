@@ -93,6 +93,128 @@ class User_model extends CI_Model {
     }
 
     /**
+     * Bulk Insert or Update user records in high-performance transactions
+     * @param array $accounts
+     * @return array ['imported' => int, 'updated' => int]
+     */
+    public function upsert_users_bulk($accounts)
+    {
+        if (empty($accounts)) {
+            return ['imported' => 0, 'updated' => 0];
+        }
+
+        @set_time_limit(300);
+        @ini_set('memory_limit', '256M');
+
+        // Cache role IDs
+        $roleQuery = $this->db->get('roles')->result_array();
+        $roleMap = [];
+        foreach ($roleQuery as $r) {
+            $roleMap[strtolower(trim($r['name']))] = (int)$r['id'];
+        }
+
+        // Collect unique valid emails
+        $emails = [];
+        foreach ($accounts as $acc) {
+            $email = isset($acc['email']) ? strtolower(trim($acc['email'])) : '';
+            if (!empty($email) && preg_match('/@(student\.)?telkomuniversity\.ac\.id$/i', $email)) {
+                $emails[] = $email;
+            }
+        }
+        $emails = array_unique($emails);
+
+        if (empty($emails)) {
+            return ['imported' => 0, 'updated' => 0];
+        }
+
+        // Single query to find existing users
+        $existingMap = [];
+        $emailChunks = array_chunk($emails, 200);
+        foreach ($emailChunks as $chunk) {
+            $this->db->where_in('email', $chunk);
+            $found = $this->db->get('users')->result_array();
+            foreach ($found as $u) {
+                $existingMap[strtolower(trim($u['email']))] = $u;
+            }
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $toInsert = [];
+        $importedCount = 0;
+        $updatedCount = 0;
+
+        $this->db->trans_start();
+
+        foreach ($accounts as $acc) {
+            $email = isset($acc['email']) ? strtolower(trim($acc['email'])) : '';
+            if (empty($email) || !preg_match('/@(student\.)?telkomuniversity\.ac\.id$/i', $email)) {
+                continue;
+            }
+
+            $roleName = isset($acc['role']) ? strtolower(trim($acc['role'])) : 'mahasiswa';
+            $roleId = isset($roleMap[$roleName]) ? $roleMap[$roleName] : 5;
+
+            $token = isset($acc['token']) && !empty($acc['token']) ? trim($acc['token']) : null;
+            $name = isset($acc['name']) && !empty($acc['name']) ? trim($acc['name']) : 'User';
+            $nimNip = isset($acc['nim_nip']) ? trim($acc['nim_nip']) : '';
+            $emailStatus = isset($acc['email_status']) ? $acc['email_status'] : 'belum';
+
+            if (isset($existingMap[$email])) {
+                // Update existing user
+                $existing = $existingMap[$email];
+                $updateData = [
+                    'name' => $name,
+                    'role_id' => $roleId,
+                    'nidn_nim' => $nimNip,
+                    'updated_at' => $now
+                ];
+                if ($token && empty($existing['password_changed'])) {
+                    $updateData['token'] = $token;
+                    $updateData['password'] = password_hash($token, PASSWORD_DEFAULT, ['cost' => 8]);
+                }
+                $this->db->where('id', $existing['id']);
+                $this->db->update('users', $updateData);
+                $updatedCount++;
+            } else {
+                // Queue for bulk insert
+                $rawPwd = $token ? $token : 'Telkom#123';
+                $toInsert[] = [
+                    'role_id' => $roleId,
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => password_hash($rawPwd, PASSWORD_DEFAULT, ['cost' => 8]),
+                    'nidn_nim' => $nimNip,
+                    'token' => $token,
+                    'password_changed' => 0,
+                    'email_status' => $emailStatus,
+                    'status' => 'active',
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ];
+                $importedCount++;
+
+                // If batch reaches 100, insert chunk
+                if (count($toInsert) >= 100) {
+                    $this->db->insert_batch('users', $toInsert);
+                    $toInsert = [];
+                }
+            }
+        }
+
+        if (!empty($toInsert)) {
+            $this->db->insert_batch('users', $toInsert);
+            $toInsert = [];
+        }
+
+        $this->db->trans_complete();
+
+        return [
+            'imported' => $importedCount,
+            'updated' => $updatedCount
+        ];
+    }
+
+    /**
      * Insert or update user record by email
      * @param array $data
      * @return int User ID
@@ -111,6 +233,7 @@ class User_model extends CI_Model {
             ];
             if (isset($data['token']) && !$existing->password_changed) {
                 $updateData['token'] = $data['token'];
+                $updateData['password'] = password_hash($data['token'], PASSWORD_DEFAULT, ['cost' => 8]);
             }
             $this->db->where('id', $existing->id);
             $this->db->update('users', $updateData);
@@ -120,17 +243,46 @@ class User_model extends CI_Model {
                 'role_id' => isset($data['role_id']) ? $data['role_id'] : 5,
                 'name' => $data['name'],
                 'email' => $email,
-                'password' => password_hash(isset($data['token']) ? $data['token'] : 'Telkom#123', PASSWORD_DEFAULT),
+                'password' => password_hash(isset($data['token']) ? $data['token'] : 'Telkom#123', PASSWORD_DEFAULT, ['cost' => 8]),
                 'nidn_nim' => isset($data['nidn_nim']) ? $data['nidn_nim'] : '',
                 'token' => isset($data['token']) ? $data['token'] : null,
                 'password_changed' => 0,
                 'email_status' => isset($data['email_status']) ? $data['email_status'] : 'belum',
                 'status' => 'active',
-                'created_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
             ];
             $this->db->insert('users', $insertData);
             return $this->db->insert_id();
         }
+    }
+
+    /**
+     * Bulk update tokens for multiple users in a single transaction
+     * @param array $updates [['id' => 1, 'token' => '...'], ...]
+     * @return int
+     */
+    public function update_user_tokens_bulk($updates)
+    {
+        if (empty($updates)) return 0;
+        @set_time_limit(300);
+        $this->db->trans_start();
+        $count = 0;
+        $now = date('Y-m-d H:i:s');
+        foreach ($updates as $item) {
+            $id = $item['id'];
+            $token = $item['token'];
+            $this->db->where('id', $id);
+            $this->db->where('password_changed', 0);
+            $this->db->update('users', [
+                'token' => $token,
+                'password' => password_hash($token, PASSWORD_DEFAULT, ['cost' => 8]),
+                'updated_at' => $now
+            ]);
+            if ($this->db->affected_rows() > 0) $count++;
+        }
+        $this->db->trans_complete();
+        return $count;
     }
 
     /**
@@ -148,7 +300,7 @@ class User_model extends CI_Model {
 
         $updateData = [
             'token' => $token,
-            'password' => password_hash($token, PASSWORD_DEFAULT),
+            'password' => password_hash($token, PASSWORD_DEFAULT, ['cost' => 8]),
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
