@@ -20,6 +20,65 @@ class Mahasiswa extends CI_Controller {
         $this->load->view('mahasiswa/dashboard', $data);
     }
 
+    // Detail Lengkap Pendaftaran Tugas Akhir (Single Page View)
+    public function detail_pendaftaran() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $data['title'] = 'Detail Pengajuan Tugas Akhir';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        $this->load->view('mahasiswa/detail_pendaftaran', $data);
+    }
+
+    // Formulir Edit Pendaftaran TA (Single Page Non-Wizard Form)
+    public function edit_pendaftaran() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $data['title'] = 'Edit Formulir Tugas Akhir';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        if ($this->input->post()) {
+            $config['upload_path']   = './uploads/persyaratan_ta/';
+            $config['allowed_types'] = 'pdf';
+            $config['max_size']      = 5120; // 5MB
+
+            if (!is_dir($config['upload_path'])) {
+                mkdir($config['upload_path'], 0777, true);
+            }
+
+            $this->load->library('upload', $config);
+
+            $file_step3 = $this->_do_upload('file_ksm', $config);
+            $file_step4 = $this->_do_upload('file_transkrip', $config);
+            $file_step5 = $this->_do_upload('file_pernyataan', $config);
+            $file_step6 = $this->_do_upload('file_bebas_lab', $config);
+
+            $data_ta = array(
+                'nim'                  => $nim,
+                'jenis_ta'             => $this->input->post('jenis_ta'),
+                'judul_1'              => $this->input->post('judul_1'),
+                'judul_2'              => $this->input->post('judul_2'),
+                'judul_3'              => $this->input->post('judul_3'),
+                'judul_en'             => $this->input->post('judul_en'),
+                'konsentrasi_dkv'      => $this->input->post('konsentrasi_dkv'),
+                'file_ksm'             => $file_step3 ? $file_step3 : $this->input->post('file_ksm_old'),
+                'file_transkrip'       => $file_step4 ? $file_step4 : $this->input->post('file_transkrip_old'),
+                'file_pernyataan'      => $file_step5 ? $file_step5 : $this->input->post('file_pernyataan_old'),
+                'file_bebas_lab'       => $file_step6 ? $file_step6 : $this->input->post('file_bebas_lab_old'),
+                'status_approval_wali' => 'Pending',
+                'current_stage'        => 'Dosen Wali',
+                'created_at'           => date('Y-m-d H:i:s')
+            );
+
+            $this->Mahasiswa_model->save_pendaftaran_ta($data_ta);
+            $this->session->set_flashdata('success', 'Perubahan formulir Tugas Akhir berhasil disimpan!');
+            redirect('mahasiswa');
+            return;
+        }
+
+        $this->load->view('mahasiswa/edit_pendaftaran', $data);
+    }
+
     // Fitur Geodata Mahasiswa
     public function geodata() {
         $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
@@ -221,5 +280,91 @@ class Mahasiswa extends CI_Controller {
         $this->Mahasiswa_model->reset_pendaftaran_ta($nim);
         $this->session->set_flashdata('success', 'Pengajuan Tugas Akhir berhasil di-reset!');
         redirect('mahasiswa');
+    }
+
+    // Modul Bimbingan TA & Upload Berkas Preview (Multi-Stage Hub)
+    public function bimbingan() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $data['title'] = 'Bimbingan & Evaluasi Preview TA';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        
+        // Riwayat tiap tahapan preview
+        $data['riwayat_preview1'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
+        $data['riwayat_preview2'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 2');
+        $data['riwayat_preview3'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 3');
+
+        // Total upload count
+        $data['upload_count_p1'] = count($data['riwayat_preview1']);
+        $data['upload_count_p2'] = count($data['riwayat_preview2']);
+        $data['upload_count_p3'] = count($data['riwayat_preview3']);
+
+        // Status terbaru
+        $data['latest_p1'] = $data['riwayat_preview1'][0] ?? null;
+        $data['latest_p2'] = $data['riwayat_preview2'][0] ?? null;
+        $data['latest_p3'] = $data['riwayat_preview3'][0] ?? null;
+
+        // Default Mock Pembimbing & Penguji jika belum di-set di database
+        $data['pembimbing_1'] = !empty($data['pendaftaran']['nama_pembimbing_1']) 
+            ? $data['pendaftaran']['nama_pembimbing_1'] 
+            : 'Dr. Rina Fitriana, S.Ds., M.Ds.';
+        $data['pembimbing_2'] = !empty($data['pendaftaran']['nama_pembimbing_2']) 
+            ? $data['pendaftaran']['nama_pembimbing_2'] 
+            : 'Agung Pratama, S.T., M.Kom.';
+        $data['penguji_ta'] = 'Bambang Sudarsono, S.T., M.T.';
+
+        $this->load->view('mahasiswa/bimbingan_preview1', $data);
+    }
+
+    // Alias route preview1
+    public function preview1() {
+        $this->bimbingan();
+    }
+
+    // Endpoint Upload Draft Berkas Preview (Preview 1 / 2 / 3)
+    public function upload_preview() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $tahap = $this->input->post('tahap_preview') ?: 'Preview 1';
+
+        $upload_dir = './uploads/preview_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config['upload_path']   = $upload_dir;
+        $config['allowed_types'] = 'pdf|docx|zip';
+        $config['max_size']      = 10240; // 10MB
+        $clean_tahap = str_replace(' ', '', strtoupper($tahap));
+        $config['file_name']     = $clean_tahap . '_' . $nim . '_' . time();
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload('file_draft')) {
+            $error_msg = $this->upload->display_errors('', '');
+            $this->session->set_flashdata('error', 'Gagal mengunggah berkas: ' . $error_msg);
+        } else {
+            $upload_data = $this->upload->data();
+            $file_name = $upload_data['file_name'];
+            $catatan = trim($this->input->post('catatan_mahasiswa') ?? '');
+
+            $data_insert = array(
+                'nim'                => $nim,
+                'tahap_preview'      => $tahap,
+                'file_draft'         => $file_name,
+                'catatan_mahasiswa'  => $catatan,
+                'status_pembimbing'  => 'Pending',
+                'created_at'         => date('Y-m-d H:i:s')
+            );
+
+            $this->Mahasiswa_model->save_upload_preview($data_insert);
+            $this->session->set_flashdata('success', "Draft Berkas {$tahap} berhasil diunggah! Menunggu peninjauan dari Dosen Penilai.");
+        }
+
+        redirect('mahasiswa/bimbingan');
+    }
+
+    // Fallback handler upload_preview1
+    public function upload_preview1() {
+        $this->upload_preview();
     }
 }

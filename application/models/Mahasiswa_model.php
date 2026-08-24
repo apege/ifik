@@ -92,4 +92,39 @@ class Mahasiswa_model extends CI_Model {
         $this->db->where('nim', $nim);
         return $this->db->delete('pendaftaran_ta');
     }
+
+    // Ambil riwayat upload berkas preview TA
+    public function get_riwayat_preview($nim, $tahap = 'Preview 1') {
+        if (!$this->db->table_exists('bimbingan_preview')) return [];
+        $this->db->where('nim', $nim);
+        if ($tahap) {
+            $this->db->where('tahap_preview', $tahap);
+        }
+        $this->db->order_by('created_at', 'DESC');
+        return $this->db->get('bimbingan_preview')->result_array();
+    }
+
+    // Simpan upload draft berkas preview baru
+    public function save_upload_preview($data) {
+        if (!$this->db->table_exists('bimbingan_preview')) return false;
+        return $this->db->insert('bimbingan_preview', $data);
+    }
+
+    // Hitung total upload pada tahap tertentu (untuk validasi minimal 1x upload)
+    public function count_upload_preview($nim, $tahap = 'Preview 1') {
+        if (!$this->db->table_exists('bimbingan_preview')) return 0;
+        $this->db->where('nim', $nim);
+        $this->db->where('tahap_preview', $tahap);
+        return $this->db->count_all_results('bimbingan_preview');
+    }
+
+    // Cek status terbaru kelayakan Preview 1
+    public function get_latest_preview_status($nim, $tahap = 'Preview 1') {
+        if (!$this->db->table_exists('bimbingan_preview')) return null;
+        $this->db->where('nim', $nim);
+        $this->db->where('tahap_preview', $tahap);
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        return $this->db->get('bimbingan_preview')->row_array();
+    }
 }

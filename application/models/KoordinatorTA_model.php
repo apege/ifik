@@ -5,126 +5,233 @@ class KoordinatorTA_model extends CI_Model {
 
     public function __construct() {
         parent::__construct();
+        $this->_ensure_columns_exist();
     }
 
-    // Get List All Mahasiswa Mendaftar TA untuk Koordinator TA
-    public function get_all_mahasiswa_ta() {
-        if (!$this->db->table_exists('mahasiswa') || !$this->db->table_exists('pendaftaran_ta')) {
-            return $this->get_mock_mahasiswa_list();
+    private function _ensure_columns_exist() {
+        if (!$this->db->table_exists('pendaftaran_ta')) return;
+        $fields = $this->db->list_fields('pendaftaran_ta');
+        $new_cols = array(
+            'pembimbing_1'         => "VARCHAR(50) DEFAULT NULL",
+            'pembimbing_2'         => "VARCHAR(50) DEFAULT NULL",
+            'penguji_1'            => "VARCHAR(50) DEFAULT NULL",
+            'penguji_2'            => "VARCHAR(50) DEFAULT NULL",
+            'tgl_sidang'           => "DATE DEFAULT NULL",
+            'jam_mulai_sidang'     => "TIME DEFAULT NULL",
+            'jam_selesai_sidang'   => "TIME DEFAULT NULL",
+            'ruangan_sidang'       => "VARCHAR(100) DEFAULT NULL",
+            'status_approval_koor' => "VARCHAR(50) DEFAULT 'Pending'",
+            'catatan_koor'         => "TEXT DEFAULT NULL",
+            'current_stage'        => "VARCHAR(100) DEFAULT 'Koordinator TA'",
+        );
+        foreach ($new_cols as $col => $type) {
+            if (!in_array($col, $fields)) {
+                $this->db->query("ALTER TABLE `pendaftaran_ta` ADD COLUMN `{$col}` {$type}");
+            }
+        }
+    }
+
+    // Ambil list semua dosen pembimbing dari database (role: dosen)
+    public function get_dosen_list() {
+        $list = array();
+
+        // 1. Ambil dari tabel users yang memiliki role 'dosen'
+        if ($this->db->table_exists('users') && $this->db->table_exists('roles')) {
+            $this->db->select('u.id, u.name as nama_dosen, u.nidn_nim as nip, u.email, u.no_hp');
+            $this->db->from('users u');
+            $this->db->join('roles r', 'r.id = u.role_id');
+            $this->db->where('r.name', 'dosen');
+            $this->db->where('u.status', 'active');
+            $this->db->order_by('u.name', 'ASC');
+            $usersDosen = $this->db->get()->result_array();
+            
+            foreach ($usersDosen as $ud) {
+                if (!empty($ud['nip'])) {
+                    $list[$ud['nip']] = array(
+                        'nip' => (string)$ud['nip'],
+                        'nama_dosen' => $ud['nama_dosen'],
+                        'email' => $ud['email'] ?? '',
+                        'prodi' => 'Informatika'
+                    );
+                }
+            }
         }
 
-        $this->db->select('m.*, p.status_approval_wali, p.status_approval_admin, p.status_approval_koor, p.status_approval_kk, p.current_stage, p.judul_1, p.created_at as tgl_daftar');
-        $this->db->from('mahasiswa m');
-        $this->db->join('pendaftaran_ta p', 'p.nim = m.nim', 'inner');
+        // 2. Lengkapi juga dari tabel dosen_wali
+        if ($this->db->table_exists('dosen_wali')) {
+            $dwList = $this->db->get('dosen_wali')->result_array();
+            foreach ($dwList as $dw) {
+                if (!empty($dw['nip']) && !isset($list[$dw['nip']])) {
+                    $list[$dw['nip']] = array(
+                        'nip' => (string)$dw['nip'],
+                        'nama_dosen' => $dw['nama_dosen'],
+                        'email' => $dw['email'] ?? '',
+                        'prodi' => $dw['jurusan'] ?? 'Informatika'
+                    );
+                }
+            }
+        }
+
+        return array_values($list);
+    }
+
+    // Get List All Mahasiswa Mendaftar TA untuk Koordinator TA (Real Database Records)
+    public function get_all_mahasiswa_ta() {
+        if (!$this->db->table_exists('pendaftaran_ta')) {
+            return array();
+        }
+
+        $this->db->select('m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.alamat, m.kota, m.provinsi, m.email, m.no_hp, p.*, dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2');
+        $this->db->from('pendaftaran_ta p');
+        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
         $this->db->order_by('p.created_at', 'DESC');
         $query = $this->db->get();
 
         $result = $query->result_array();
 
-        if (empty($result)) {
-            return $this->get_mock_mahasiswa_list();
+        // Normalisasi data
+        foreach ($result as &$row) {
+            if (empty($row['nama_depan']) && empty($row['nama_belakang'])) {
+                $row['nama_depan'] = 'Mahasiswa';
+                $row['nama_belakang'] = $row['nim'];
+            }
+            if (empty($row['konsentrasi_dkv']) && !empty($row['prodi_mhs'])) {
+                $row['konsentrasi_dkv'] = $row['prodi_mhs'];
+            }
+            if (empty($row['konsentrasi_dkv'])) {
+                $row['konsentrasi_dkv'] = 'Informatika';
+            }
+            if (empty($row['status_approval_koor'])) {
+                $row['status_approval_koor'] = 'Pending';
+            }
+            if (empty($row['current_stage'])) {
+                $row['current_stage'] = 'Koordinator TA';
+            }
         }
 
         return $result;
     }
 
-    private function get_mock_mahasiswa_list() {
-        return array(
-            array('nim' => '1301210001', 'nama_depan' => 'Alif', 'nama_belakang' => 'Muzakky', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Pengembangan Sistem Informasi IFIK Berbasis Web', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210002', 'nama_depan' => 'Nazril', 'nama_belakang' => 'Fadillah', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Rancang Bangun Interface Portal Akademik DKV Telkom University', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210003', 'nama_depan' => 'Moses', 'nama_belakang' => 'Aulia', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Sistem Monitoring Bimbingan Tugas Akhir Real-time', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Rejected', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210004', 'nama_depan' => 'Rivan', 'nama_belakang' => 'Arshavin', 'konsentrasi_dkv' => 'Multimedia', 'judul_1' => 'Analisis Sentimen Feedback Perkuliahan Menggunakan NLP', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210005', 'nama_depan' => 'Budi', 'nama_belakang' => 'Pratama', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Deteksi Dini Penyakit Tanaman Menggunakan Deep Learning', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210006', 'nama_depan' => 'Siti', 'nama_belakang' => 'Nurhaliza', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Perancangan Visual Identity Produk UMKM Lokal', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210007', 'nama_depan' => 'Dewi', 'nama_belakang' => 'Lestari', 'konsentrasi_dkv' => 'Multimedia', 'judul_1' => 'Pengembangan Game 3D Edukasi Kebudayaan Nusantara', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Rejected', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210008', 'nama_depan' => 'Fajar', 'nama_belakang' => 'Nugraha', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Sistem Rekomendasi Tempat Wisata dengan Collaborative Filtering', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Approved', 'current_stage' => 'Selesai Approval'),
-            array('nim' => '1301210009', 'nama_depan' => 'Gita', 'nama_belakang' => 'Gutawa', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Ilustrasi Buku Cerita Rakyat Berbasis Augmented Reality', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210010', 'nama_depan' => 'Hendra', 'nama_belakang' => 'Setiawan', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Aplikasi Manajemen Stok Barang Berbasis Cloud Native', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210011', 'nama_depan' => 'Indah', 'nama_belakang' => 'Permata', 'konsentrasi_dkv' => 'Multimedia', 'judul_1' => 'Animasi 2D Edukasi Pencegahan Cyberbullying pada Remaja', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210012', 'nama_depan' => 'Joko', 'nama_belakang' => 'Anwar', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Sistem Informasi Absensi Wajah Real-time Menggunakan OpenCV', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Rejected', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210013', 'nama_depan' => 'Kiki', 'nama_belakang' => 'Fatmala', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Redesain Kemasan Ramah Lingkungan untuk Produk Organik', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210014', 'nama_depan' => 'Lukman', 'nama_belakang' => 'Sardi', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Optimasi Routing Kurir Menggunakan Algoritma Genetika', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210015', 'nama_depan' => 'Maya', 'nama_belakang' => 'Septha', 'konsentrasi_dkv' => 'Multimedia', 'judul_1' => 'Virtual Tour Kampus Telkom University 360 Derajat', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Approved', 'current_stage' => 'Selesai Approval'),
-            array('nim' => '1301210016', 'nama_depan' => 'Naufal', 'nama_belakang' => 'Zaky', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Predictive Maintenance Peralatan Pabrik dengan Machine Learning', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210017', 'nama_depan' => 'Olga', 'nama_belakang' => 'Lidya', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Studi Semiotika Visual Pada Kampanye Sosial Lingkungan', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210018', 'nama_depan' => 'Putri', 'nama_belakang' => 'Marino', 'konsentrasi_dkv' => 'Multimedia', 'judul_1' => 'Interactive Storytelling App Untuk Anak Usia Dini', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210019', 'nama_depan' => 'Qory', 'nama_belakang' => 'Gore', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Platform E-Commerce Produk Digital Berbasis Microservices', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Rejected', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210020', 'nama_depan' => 'Rizky', 'nama_belakang' => 'Febian', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Branding Festival Seni Kreatif Jawa Barat 2026', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210021', 'nama_depan' => 'Syafiq', 'nama_belakang' => 'Razaq', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Chatbot Pelayanan Akademik Kampus Menggunakan LLM', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210022', 'nama_depan' => 'Titi', 'nama_belakang' => 'Kamal', 'konsentrasi_dkv' => 'Multimedia', 'judul_1' => 'Efek Visual (VFX) Pada Film Pendek Genre Fantasi', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210023', 'nama_depan' => 'Umar', 'nama_belakang' => 'Wirahadikusumah', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Sistem Deteksi Anomali Lalu Lintas Jaringan dengan Deep Learning', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA'),
-            array('nim' => '1301210024', 'nama_depan' => 'Vina', 'nama_belakang' => 'Panduwinata', 'konsentrasi_dkv' => 'Desain Grafis', 'judul_1' => 'Typographic Design System Untuk Platform Media Online', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Approved', 'status_approval_kk' => 'Pending', 'current_stage' => 'Ketua KK'),
-            array('nim' => '1301210025', 'nama_depan' => 'Wira', 'nama_belakang' => 'Nagara', 'konsentrasi_dkv' => 'Informatika', 'judul_1' => 'Aplikasi Pemantauan Kesehatan Mental Berbasis Mobile', 'status_approval_wali' => 'Approved', 'status_approval_admin' => 'Approved', 'status_approval_koor' => 'Pending', 'status_approval_kk' => 'Pending', 'current_stage' => 'Koordinator TA')
-        );
-    }
-
-
     // Get Detail Mahasiswa dan Pendaftaran TA untuk Koordinator TA
     public function get_detail_pendaftaran_mahasiswa($nim) {
-        if (!$this->db->table_exists('mahasiswa') || !$this->db->table_exists('pendaftaran_ta')) {
-            return $this->get_mock_detail($nim);
+        if (!$this->db->table_exists('pendaftaran_ta')) {
+            return null;
         }
 
-        $this->db->select('m.*, p.*');
-        $this->db->from('mahasiswa m');
-        $this->db->join('pendaftaran_ta p', 'p.nim = m.nim', 'left');
-        $this->db->where('m.nim', $nim);
+        $this->db->select('m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.alamat as mhs_alamat, m.kota, m.provinsi, m.email, m.no_hp, p.*, dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2');
+        $this->db->from('pendaftaran_ta p');
+        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->where('p.nim', $nim);
         $query = $this->db->get();
         $row = $query->row_array();
 
-        return $row ? $row : $this->get_mock_detail($nim);
+        if (!$row && $this->db->table_exists('mahasiswa')) {
+            $this->db->where('nim', $nim);
+            $row = $this->db->get('mahasiswa')->row_array();
+        }
+
+        if ($row) {
+            if (empty($row['alamat']) && !empty($row['mhs_alamat'])) {
+                $row['alamat'] = $row['mhs_alamat'];
+            }
+            if (empty($row['konsentrasi_dkv']) && !empty($row['prodi_mhs'])) {
+                $row['konsentrasi_dkv'] = $row['prodi_mhs'];
+            }
+            if (empty($row['status_approval_koor'])) {
+                $row['status_approval_koor'] = 'Pending';
+            }
+            if (empty($row['current_stage'])) {
+                $row['current_stage'] = 'Koordinator TA';
+            }
+        }
+
+        return $row;
     }
 
-    private function get_mock_detail($nim) {
-        $mock_names = array(
-            '1301210001' => array('Rivan', 'Arshavin', 'Informatika', 'Pengembangan Sistem Informasi IFIK Berbasis Web', 'Pending'),
-            '1301210002' => array('Sarah', 'Amalia', 'Desain Grafis', 'Rancang Bangun Interface Portal Akademik DKV Telkom University', 'Approved'),
-            '1301210003' => array('Budi', 'Santoso', 'Informatika', 'Sistem Monitoring Bimbingan Tugas Akhir Real-time', 'Rejected'),
-            '1301210004' => array('Anita', 'Wijaya', 'Multimedia', 'Analisis Sentimen Feedback Perkuliahan Menggunakan NLP', 'Pending')
-        );
+    // Approval / Reject Pendaftaran TA oleh Koordinator TA dengan AJAX & Validasi Pembimbing
+    public function update_approval_koor_ajax($nim, $status, $catatan = '', $pembimbing_1 = null, $pembimbing_2 = null) {
+        if (!$this->db->table_exists('pendaftaran_ta')) {
+            return array('status' => false, 'message' => 'Tabel pendaftaran_ta tidak ditemukan.');
+        }
 
-        $info = isset($mock_names[$nim]) ? $mock_names[$nim] : array('Mahasiswa', 'IFIK', 'Informatika', 'Pengembangan Sistem Informasi IFIK Berbasis Web', 'Pending');
+        // Cek data pendaftaran mahasiswa
+        $this->db->where('nim', $nim);
+        $curr = $this->db->get('pendaftaran_ta')->row_array();
+        if (!$curr) {
+            return array('status' => false, 'message' => 'Data pendaftaran mahasiswa dengan NIM ' . $nim . ' tidak ditemukan.');
+        }
 
-        return array(
-            'nim' => $nim,
-            'nama_depan' => $info[0],
-            'nama_belakang' => $info[1],
-            'konsentrasi_dkv' => $info[2],
-            'alamat' => 'Jl. Telekomunikasi No. 1, Terusan Buah Batu, Bandung, Jawa Barat',
-            'judul_1' => $info[3],
-            'judul_2' => 'Rancang Bangun Modul Mahasiswa dan Dosen Wali IFIK',
-            'judul_3' => 'Implementasi Workflow Approval Pendaftaran Tugas Akhir',
-            'judul_en' => 'Development of Web-Based IFIK Information System',
-            'status_approval_wali' => 'Approved',
-            'catatan_wali' => 'Berkas persyaratan lengkap, judul disetujui untuk diproses ke tahap berikutnya.',
-            'status_approval_admin' => 'Approved',
-            'catatan_admin' => 'Verifikasi administrasi & SKS memenuhi syarat.',
-            'status_approval_koor' => $info[4],
-            'catatan_koor' => ($info[4] === 'Rejected') ? 'Judul 1 perlu diperjelas batasan masalah dan metodologi pengujian.' : '',
-            'status_approval_kk' => 'Pending',
-            'catatan_kk' => '',
-            'current_stage' => ($info[4] === 'Approved') ? 'Ketua KK' : 'Koordinator TA'
-        );
-    }
+        // Validasi: Harus sudah disetujui Dosen Wali & Admin LAA sebelum Koordinator TA bisa approve
+        if ($status === 'Approved') {
+            $statusWali = $curr['status_approval_wali'] ?? 'Pending';
+            if ($statusWali !== 'Approved') {
+                return array(
+                    'status' => false, 
+                    'message' => 'Persetujuan ditolak! Berkas mahasiswa harus terlebih dahulu disetujui oleh Dosen Wali.'
+                );
+            }
 
-    // Approval / Reject Pendaftaran TA oleh Koordinator TA
-    public function update_approval_koor($nim, $status, $catatan = '') {
-        if (!$this->db->table_exists('pendaftaran_ta')) return true;
+            $statusAdmin = $curr['status_approval_admin'] ?? 'Pending';
+            if ($statusAdmin !== 'Approved') {
+                return array(
+                    'status' => false, 
+                    'message' => 'Persetujuan ditolak! Berkas mahasiswa harus terlebih dahulu disetujui oleh Admin Layanan Akademik (LAA).'
+                );
+            }
+
+            // Validasi Dosen Pembimbing 1 & 2 wajib dipilih
+            if (empty($pembimbing_1) || empty($pembimbing_2)) {
+                return array(
+                    'status' => false, 
+                    'message' => 'Dosen Pembimbing 1 dan Dosen Pembimbing 2 wajib dipilih sebelum menyetujui pendaftaran TA!'
+                );
+            }
+
+            // Validasi: Pembimbing 1 dan Pembimbing 2 TIDAK BOLEH SAMA
+            if ($pembimbing_1 === $pembimbing_2) {
+                return array(
+                    'status' => false, 
+                    'message' => 'Dosen Pembimbing 1 dan Dosen Pembimbing 2 tidak boleh sama! Silakan pilih dua dosen yang berbeda.'
+                );
+            }
+        }
+
+        // Validasi Catatan saat Reject
+        if ($status === 'Rejected' && empty(trim($catatan))) {
+            return array(
+                'status' => false, 
+                'message' => 'Catatan revisi / alasan penolakan wajib diisi jika memilih status Reject!'
+            );
+        }
 
         $data = array(
             'status_approval_koor' => $status, // 'Approved' / 'Rejected'
-            'catatan_koor'         => $catatan,
+            'catatan_koor'         => trim($catatan),
             'updated_at'           => date('Y-m-d H:i:s')
         );
 
-        // Jika disetujui, lanjut ke status berikutnya (Ketua KK)
         if ($status === 'Approved') {
+            $data['pembimbing_1']  = $pembimbing_1;
+            $data['pembimbing_2']  = $pembimbing_2;
             $data['current_stage'] = 'Ketua KK';
         } else {
             $data['current_stage'] = 'Koordinator TA';
         }
 
         $this->db->where('nim', $nim);
-        return $this->db->update('pendaftaran_ta', $data);
+        $update = $this->db->update('pendaftaran_ta', $data);
+
+        if ($update) {
+            return array(
+                'status'  => true, 
+                'message' => ($status === 'Approved') ? 'Pendaftaran TA berhasil disetujui dan Dosen Pembimbing telah ditetapkan!' : 'Pendaftaran TA berhasil ditolak dengan catatan revisi.'
+            );
+        } else {
+            return array('status' => false, 'message' => 'Gagal memperbarui database.');
+        }
     }
 }

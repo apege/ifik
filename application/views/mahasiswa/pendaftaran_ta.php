@@ -50,6 +50,10 @@
                         <i class="bi bi-file-earmark-text"></i>
                         <span>Pendaftaran TA</span>
                     </a>
+                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-person-video3"></i>
+                        <span>Bimbingan TA</span>
+                    </a>
                 </nav>
 
                 <!-- User Quick Info -->

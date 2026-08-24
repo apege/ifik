@@ -130,4 +130,24 @@ class DosenWali extends CI_Controller {
             echo json_encode(array('success' => false, 'message' => 'Gagal memperbarui status ke database.'));
         }
     }
+
+    // AJAX Endpoint: Update Keputusan Judul TA (Status Judul & Saran/Catatan Revisi)
+    public function update_judul_approval_ajax() {
+        $nim = $this->input->post('nim');
+        $status_judul = $this->input->post('status_judul') ?? 'Pending';
+        $catatan_judul = trim($this->input->post('catatan_judul') ?? '');
+
+        if (!$nim) {
+            echo json_encode(array('success' => false, 'message' => 'NIM wajib diisi.'));
+            return;
+        }
+
+        $res = $this->DosenWali_model->update_judul_approval($nim, $status_judul, $catatan_judul);
+        echo json_encode(array(
+            'success' => $res,
+            'status_judul' => $status_judul,
+            'catatan_judul' => $catatan_judul,
+            'message' => 'Status usulan judul Tugas Akhir berhasil diperbarui ke ' . $status_judul . '.'
+        ));
+    }
 }
