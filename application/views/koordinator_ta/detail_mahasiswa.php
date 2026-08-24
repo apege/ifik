@@ -169,6 +169,7 @@
                             <i class="fa-solid fa-clock text-amber-600 text-xs"></i> Pending
                         <?php endif; ?>
                     </div>
+                    </div>
                     <?php if(!empty($detail['catatan_wali'])): ?>
                         <p class="text-[10px] opacity-80 mt-1 italic line-clamp-2" title="<?= htmlspecialchars($detail['catatan_wali']); ?>">"<?= $detail['catatan_wali']; ?>"</p>
                     <?php endif; ?>

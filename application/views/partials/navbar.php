@@ -12,6 +12,7 @@
         top: 0;
         left: 0;
         width: 100vw;
+        max-width: 100%;
         height: 70px;
         z-index: 100;
         display: flex;
@@ -23,35 +24,41 @@
         border-bottom: 2px solid #ea580c; /* Highlight oranye jelas tapi simple */
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Soft shadow */
         transition: all 0.3s ease;
+        padding: 0 16px;
+        box-sizing: border-box;
     }
 
     .nav-list {
         display: flex;
         flex-direction: row; /* Menu menyamping (horizontal) */
-        gap: 15px;
+        gap: 10px;
+        align-items: center;
         list-style: none;
         margin: 0;
         padding: 0;
+        max-width: 100%;
     }
 
     .nav-item {
         position: relative;
+        flex-shrink: 0;
     }
 
     .nav-link {
         color: #1e293b;
         background: transparent;
         font-weight: 700;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.4px;
         text-decoration: none;
-        padding: 7px 5px;
+        padding: 6px 5px;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         position: relative;
         transition: color 0.3s ease;
+        white-space: nowrap;
     }
 
     /* Orange line from left to right on hover */
@@ -234,18 +241,24 @@
     }
 
     /* Responsiveness */
+    @media (max-width: 1400px) {
+        .nav-list { gap: 7px; }
+        .nav-link { font-size: 0.74rem; letter-spacing: 0.2px; padding: 6px 3px; gap: 4px; }
+        .nav-link-login { font-size: 0.75rem; padding: 6px 12px 6px 8px; }
+    }
+
     @media (max-width: 1200px) {
-        .nav-list { gap: 10px; }
-        .nav-link { font-size: 0.75rem; padding: 7px 2px; }
-        .nav-link-login { font-size: 0.75rem; }
-        .nav-dropdown { padding: 15px; gap: 10px; }
-        .nav-dropdown a { padding: 10px 15px; min-width: 110px; }
+        .nav-list { gap: 5px; }
+        .nav-link { font-size: 0.70rem; letter-spacing: 0px; padding: 5px 2px; gap: 3px; }
+        .nav-link .btn-box { display: none; } /* Hide small icons to guarantee zero clipping */
+        .nav-link-login { font-size: 0.72rem; padding: 6px 10px 6px 6px; }
+        .nav-dropdown { padding: 12px; gap: 8px; }
+        .nav-dropdown a { padding: 8px 12px; min-width: 100px; }
     }
 
     @media (max-width: 992px) {
-        .nav-list { gap: 5px; }
-        .nav-link .btn-box { display: none; } /* Hide icons to save space */
-        .nav-link { font-size: 0.7rem; gap: 4px; }
+        .nav-list { gap: 4px; }
+        .nav-link { font-size: 0.68rem; gap: 2px; }
         
         .nav-link-login span:last-child { display: none; } /* Hide "Login" text */
         .nav-link-login { padding: 6px; }
@@ -472,55 +485,102 @@
             </a>
         </li>
 
-        <!-- 6. Admin Panel -->
-        <li class="nav-item">
-            <a href="<?= site_url('admin') ?>" class="nav-link">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </span>
-                <span>Admin Panel</span>
-            </a>
-            <div class="nav-dropdown nav-dropdown--right">
-                <a href="<?= site_url('admin') ?>">
+        <!-- 6. Admin Panel / Portal Mahasiswa -->
+        <?php 
+            $role_id = $this->session->userdata('role_id'); 
+            $is_mahasiswa = ($role_id == 6 || strpos($this->session->userdata('email') ?? '', '@student.') !== false);
+        ?>
+        <?php if ($is_mahasiswa): ?>
+            <li class="nav-item">
+                <a href="<?= site_url('mahasiswa') ?>" class="nav-link">
                     <span class="btn-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                        </svg>
                     </span>
-                    <span>Pusat Kendali Admin</span>
+                    <span>Portal Mahasiswa</span>
                 </a>
-                <a href="<?= site_url('news/newsroom') ?>">
+            </li>
+        <?php else: ?>
+            <li class="nav-item">
+                <a href="<?= site_url('admin') ?>" class="nav-link">
                     <span class="btn-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6z"></path></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
                     </span>
-                    <span>Kelola Berita</span>
+                    <span>Admin Panel</span>
                 </a>
-                <a href="<?= site_url('adminlayanan') ?>">
-                    <span class="btn-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    </span>
-                    <span>Admin Layanan (LAA)</span>
-                </a>
-                <a href="<?= site_url('ketuakk') ?>">
-                    <span class="btn-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"></path></svg>
-                    </span>
-                    <span>Portal Ketua KK</span>
-                </a>
-                <a href="<?= site_url('import-email') ?>">
-                    <span class="btn-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    </span>
-                    <span>Import Email & Token</span>
-                </a>
-                <a href="<?= site_url('adminheader') ?>">
-                    <span class="btn-box">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </span>
-                    <span>Pengaturan Header</span>
-                </a>
-            </div>
-        </li>
+                <div class="nav-dropdown nav-dropdown--right">
+                    <?php if ($role_id == 1): ?>
+                    <a href="<?= site_url('admin') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        </span>
+                        <span>Pusat Kendali Admin</span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if (in_array($role_id, [1, 2])): ?>
+                    <a href="<?= site_url('dosenwali') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+                        </span>
+                        <span>Portal Dosen Wali</span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if (in_array($role_id, [1, 3])): ?>
+                    <a href="<?= site_url('news/newsroom') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6z"></path></svg>
+                        </span>
+                        <span>Kelola Berita</span>
+                    </a>
+                    <a href="<?= site_url('adminlayanan') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        </span>
+                        <span>Admin Layanan (LAA)</span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if (in_array($role_id, [1, 5])): ?>
+                    <a href="<?= site_url('ketuakk') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"></path></svg>
+                        </span>
+                        <span>Portal Ketua KK</span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if (in_array($role_id, [1, 4])): ?>
+                    <a href="<?= site_url('koordinatorta') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                        </span>
+                        <span>Portal Koor TA</span>
+                    </a>
+                    <?php endif; ?>
+
+                    <?php if ($role_id == 1): ?>
+                    <a href="<?= site_url('import-email') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        </span>
+                        <span>Import Email & Token</span>
+                    </a>
+                    <a href="<?= site_url('adminheader') ?>">
+                        <span class="btn-box">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        </span>
+                        <span>Pengaturan Header</span>
+                    </a>
+                    <?php endif; ?>
+                </div>
+            </li>
+        <?php endif; ?>
 
         <!-- 7. Login / Logout -->
         <li class="nav-item">

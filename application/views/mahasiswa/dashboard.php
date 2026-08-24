@@ -20,6 +20,18 @@
         $k_status = $has_ta ? ($pendaftaran['status_approval_koor'] ?? 'Pending') : 'Belum Diajukan';
         $kk_status = $has_ta ? ($pendaftaran['status_approval_kk'] ?? 'Pending') : 'Belum Diajukan';
 
+        $w_is_app = ($w_status === 'Approved');
+        $w_is_rej = ($w_status === 'Rejected');
+
+        $a_is_app = ($a_status === 'Approved');
+        $a_is_rej = ($a_status === 'Rejected');
+
+        $k_is_app = ($k_status === 'Approved');
+        $k_is_rej = ($k_status === 'Rejected');
+
+        $kk_is_app = ($kk_status === 'Approved');
+        $kk_is_rej = ($kk_status === 'Rejected');
+
         $approved_count = 0;
         if ($has_ta) {
             if ($w_status === 'Approved') $approved_count++;
@@ -209,6 +221,141 @@
             </div>
         </div>
 
+        <!-- Rejection / Revision Notes Alert Card (Only when a stage is actually Rejected or berkas_kurang is filled) -->
+        <?php 
+            $has_rejection = ($w_is_rej || $a_is_rej || $k_is_rej || $kk_is_rej || !empty($pendaftaran['berkas_kurang']));
+
+            // Hitung langkah (step) target untuk langsung di-redirect
+            $rev_step = 1;
+            if ($a_is_rej || !empty($pendaftaran['berkas_kurang'])) {
+                $raw_k = array_filter(explode(',', $pendaftaran['berkas_kurang'] ?? ''));
+                if (in_array('ksm', $raw_k)) $rev_step = 3;
+                else if (in_array('transkrip', $raw_k)) $rev_step = 4;
+                else if (in_array('pernyataan', $raw_k)) $rev_step = 5;
+                else if (in_array('bebas_lab', $raw_k)) $rev_step = 6;
+                else $rev_step = 3;
+            } else if ($w_is_rej || $k_is_rej || $kk_is_rej) {
+                $rev_step = 2; // Step 2 (Judul Usulan)
+            }
+        ?>
+        <?php if($has_rejection): ?>
+            <div class="bg-gradient-to-r from-rose-600 via-rose-700 to-red-800 text-white rounded-2xl p-6 shadow-md border border-rose-400 relative overflow-hidden">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold text-lg flex-shrink-0 box-3d border border-white/30">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                                Pengajuan TA Anda Perlu Revisi / Ditolak
+                            </h3>
+                            <a href="<?= site_url('mahasiswa/pendaftaran_ta?step=' . $rev_step); ?>" class="px-3.5 py-1.5 bg-white hover:bg-rose-50 text-rose-800 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
+                                <i class="bi bi-pencil-square"></i> Edit &amp; Perbarui Berkas (Form 6-Step)
+                            </a>
+                        </div>
+                        <p class="text-xs text-rose-100 mb-4 font-normal">
+                            Mohon perhatikan catatan revisi dari pihak berwenang di bawah ini untuk memperbarui pendaftaran Anda:
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            <?php if($w_is_rej): ?>
+                                <div class="bg-black/20 backdrop-blur-md rounded-xl p-3.5 border border-white/20">
+                                    <span class="text-[10px] uppercase font-bold text-amber-200 block mb-1">
+                                        <i class="bi bi-person-check-fill"></i> Catatan Revisi Dosen Wali
+                                    </span>
+                                    <p class="text-white leading-relaxed font-medium">
+                                        "<?= htmlspecialchars(!empty($pendaftaran['catatan_wali']) ? $pendaftaran['catatan_wali'] : 'Dosen wali meminta revisi usulan.'); ?>"
+                                    </p>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if($a_is_rej || !empty($pendaftaran['berkas_kurang'])): ?>
+                                <?php 
+                                    $berkas_map = array(
+                                        'ksm'        => array('label' => 'KSM (Kartu Studi Mahasiswa)', 'name' => 'KSM'),
+                                        'transkrip'  => array('label' => 'Transkrip Nilai Akademik', 'name' => 'Transkrip'),
+                                        'pernyataan' => array('label' => 'Surat Pernyataan Mahasiswa', 'name' => 'Surat Pernyataan'),
+                                        'bebas_lab'  => array('label' => 'Surat Bebas Lab & Perpus', 'name' => 'Bebas Lab')
+                                    );
+                                    $raw_kurang = array_filter(explode(',', $pendaftaran['berkas_kurang'] ?? ''));
+                                    $catatan_admin = $pendaftaran['catatan_admin'] ?? '';
+                                ?>
+                                <div class="bg-black/20 backdrop-blur-md rounded-xl p-3.5 border border-white/20 col-span-1 md:col-span-2">
+                                    <span class="text-[10px] uppercase font-bold text-amber-200 block mb-1">
+                                        <i class="bi bi-file-earmark-pdf-fill"></i> Catatan Verifikasi Berkas LAA
+                                    </span>
+                                    
+                                    <?php if(!empty($raw_kurang)): ?>
+                                        <div class="mb-1">
+                                            <span class="text-[11px] font-bold text-rose-200 block mb-1.5">📄 Dokumen PDF yang Harus Diunggah Ulang:</span>
+                                            <ul class="list-disc list-inside space-y-1.5 text-xs text-white font-medium pl-1">
+                                                <?php 
+                                                    $matched_notes = array();
+                                                    foreach($raw_kurang as $bk): 
+                                                        $bk = trim($bk);
+                                                        $info = $berkas_map[$bk] ?? array('label' => $bk, 'name' => $bk);
+                                                        $lbl = $info['label'];
+                                                        $sname = $info['name'];
+
+                                                        $item_note = '';
+                                                        if (!empty($catatan_admin)) {
+                                                            if (preg_match('/' . preg_quote($sname, '/') . '\s*:\s*([^-\n]+)/i', $catatan_admin, $m)) {
+                                                                $item_note = trim($m[1]);
+                                                                $matched_notes[] = $m[0];
+                                                            } else if (preg_match('/' . preg_quote($bk, '/') . '\s*:\s*([^-\n]+)/i', $catatan_admin, $m)) {
+                                                                $item_note = trim($m[1]);
+                                                                $matched_notes[] = $m[0];
+                                                            }
+                                                        }
+                                                ?>
+                                                    <li>
+                                                        <span class="bg-rose-900/80 border border-rose-400 px-2 py-0.5 rounded font-bold text-white text-[11px] inline-block my-0.5"><?= htmlspecialchars($lbl); ?></span>
+                                                        <?php if(!empty($item_note)): ?>
+                                                            <span class="text-amber-200 font-bold ml-1"> — "<?= htmlspecialchars($item_note); ?>"</span>
+                                                        <?php else: ?>
+                                                            <span class="text-rose-100 italic ml-1"> — File Kurang / Perlu Revisi</span>
+                                                        <?php endif; ?>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if(!empty($catatan_admin) && empty($matched_notes)): ?>
+                                        <p class="text-white leading-relaxed font-medium italic mt-2">
+                                            "<?= htmlspecialchars($catatan_admin); ?>"
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if($k_is_rej): ?>
+                                <div class="bg-black/20 backdrop-blur-md rounded-xl p-3.5 border border-white/20">
+                                    <span class="text-[10px] uppercase font-bold text-amber-200 block mb-1">
+                                        <i class="bi bi-award-fill"></i> Catatan Revisi Koordinator TA
+                                    </span>
+                                    <p class="text-white leading-relaxed font-medium">
+                                        "<?= htmlspecialchars(!empty($pendaftaran['catatan_koor']) ? $pendaftaran['catatan_koor'] : 'Koordinator TA meminta revisi rencana topik.'); ?>"
+                                    </p>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if($kk_is_rej): ?>
+                                <div class="bg-black/20 backdrop-blur-md rounded-xl p-3.5 border border-white/20">
+                                    <span class="text-[10px] uppercase font-bold text-amber-200 block mb-1">
+                                        <i class="bi bi-mortarboard-fill"></i> Catatan Revisi Ketua KK
+                                    </span>
+                                    <p class="text-white leading-relaxed font-medium">
+                                        "<?= htmlspecialchars(!empty($pendaftaran['catatan_kk']) ? $pendaftaran['catatan_kk'] : 'Ketua KK meminta penyesuaian rumpun keilmuan.'); ?>"
+                                    </p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Workflow Approval Chain Tracker (3D Stepper Line) -->
         <div class="card-3d-warm card-no-hover rounded-2xl p-6 sm:p-7 relative">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -241,8 +388,6 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
                     <!-- Stage 1: Dosen Wali -->
                     <?php 
-                        $w_is_app = ($w_status === 'Approved');
-                        $w_is_rej = ($w_status === 'Rejected');
                         $w_card_bg = $w_is_app ? 'border-2 border-emerald-400 bg-emerald-50/50 shadow-md shadow-emerald-500/10' : ($w_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-orange-300 bg-orange-100/50');
                         $w_icon_bg = $w_is_app ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-400/25' : ($w_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-gradient-to-tr from-orange-500 to-amber-500 text-white');
                         $w_badge_cls = $w_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($w_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-orange-200 text-orange-900 border-orange-300');
@@ -261,16 +406,22 @@
                                 <span class="w-2 h-2 rounded-full <?= $w_is_app ? 'bg-emerald-500' : ($w_is_rej ? 'bg-rose-500' : 'bg-orange-600'); ?>"></span>
                                 <?= $w_status; ?>
                             </span>
+
+                            <?php if(!empty($pendaftaran['catatan_wali'])): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $w_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                                    <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan:</span>
+                                    <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_wali']); ?>"</p>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
                     <!-- Stage 2: Admin Layanan -->
                     <?php 
-                        $a_is_app = ($a_status === 'Approved');
-                        $a_is_rej = ($a_status === 'Rejected');
                         $a_card_bg = $a_is_app ? 'border-2 border-emerald-400 bg-emerald-50/50 shadow-md shadow-emerald-500/10' : ($a_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
                         $a_icon_bg = $a_is_app ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-400/25' : ($a_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
                         $a_badge_cls = $a_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($a_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200');
+                        $laa_note = $pendaftaran['catatan_admin'] ?? '';
                     ?>
                     <div class="bg-white/95 p-5 rounded-2xl border <?= $a_card_bg; ?> shadow-xs hover-card-elevate flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-3.5">
@@ -286,15 +437,54 @@
                                 <span class="w-2 h-2 rounded-full <?= $a_is_app ? 'bg-emerald-500' : ($a_is_rej ? 'bg-rose-500' : 'bg-slate-400'); ?>"></span>
                                 <?= $a_status; ?>
                             </span>
+
+                            <?php if(!empty($raw_kurang) || !empty($laa_note)): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $a_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                                    <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan LAA:</span>
+                                    <?php if(!empty($laa_note)): ?>
+                                        <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($laa_note); ?>"</p>
+                                    <?php else: ?>
+                                        <p class="line-clamp-3 leading-snug">File kurang: <?= implode(', ', array_map('strtoupper', $raw_kurang)); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
-                    <!-- Stage 3: Ketua KK -->
+                    <!-- Stage 3: Koordinator TA -->
                     <?php 
-                        $kk_is_app = ($kk_status === 'Approved');
-                        $kk_is_rej = ($kk_status === 'Rejected');
-                        $kk_card_bg = $kk_is_app ? 'border-2 border-emerald-400 bg-emerald-50/50 shadow-md shadow-emerald-500/10' : ($kk_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
-                        $kk_icon_bg = $kk_is_app ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-400/25' : ($kk_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
+                        $k_card_bg = $k_is_app ? 'border-emerald-300 bg-emerald-50/60' : ($k_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
+                        $k_icon_bg = $k_is_app ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 text-white' : ($k_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
+                        $k_badge_cls = $k_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($k_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200');
+                    ?>
+                    <div class="bg-white/95 p-5 rounded-2xl border <?= $k_card_bg; ?> shadow-xs hover-card-elevate flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-xs font-extrabold tracking-wider uppercase text-slate-400">Tahap 03</span>
+                            <div class="w-9 h-9 rounded-xl <?= $k_icon_bg; ?> flex items-center justify-center text-base font-bold box-3d">
+                                <i class="bi <?= $k_is_app ? 'bi-check-lg' : ($k_is_rej ? 'bi-x-lg' : 'bi-award'); ?>"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm sm:text-base text-slate-900 mb-1">Koordinator TA</h3>
+                            <p class="text-xs text-slate-500 mb-3 font-medium">Validasi topik & kuota</p>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg border <?= $k_badge_cls; ?> badge-3d">
+                                <span class="w-2 h-2 rounded-full <?= $k_is_app ? 'bg-emerald-500' : ($k_is_rej ? 'bg-rose-500' : 'bg-slate-400'); ?>"></span>
+                                <?= $k_status; ?>
+                            </span>
+
+                            <?php if(!empty($pendaftaran['catatan_koor'])): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $k_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                                    <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan Koor:</span>
+                                    <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_koor']); ?>"</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Stage 4: Ketua KK -->
+                    <?php 
+                        $kk_card_bg = $kk_is_app ? 'border-emerald-300 bg-emerald-50/60' : ($kk_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
+                        $kk_icon_bg = $kk_is_app ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 text-white' : ($kk_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
                         $kk_badge_cls = $kk_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($kk_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200');
                     ?>
                     <div class="bg-white/95 p-5 rounded-2xl border <?= $kk_card_bg; ?> shadow-xs hover-card-elevate flex flex-col justify-between">
@@ -311,6 +501,13 @@
                                 <span class="w-2 h-2 rounded-full <?= $kk_is_app ? 'bg-emerald-500' : ($kk_is_rej ? 'bg-rose-500' : 'bg-slate-400'); ?>"></span>
                                 <?= $kk_status; ?>
                             </span>
+
+                            <?php if(!empty($pendaftaran['catatan_kk'])): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $kk_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                                    <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan KK:</span>
+                                    <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_kk']); ?>"</p>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
