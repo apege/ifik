@@ -1,0 +1,160 @@
+/* =========================================================
+   KOORDINATOR TA - DETAIL & DASHBOARD STYLESHEET
+   ========================================================= */
+
+body {
+    background-color: #fbf7f1;
+    color: #1e293b;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(234, 88, 12, 0.15);
+}
+
+.card-custom {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
+    border-radius: 1.25rem;
+}
+
+/* VERTICAL MACOS FLOATING DOCK STYLING */
+.vertical-floating-dock {
+    position: sticky;
+    top: 6.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 10px;
+    width: 72px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1.5px solid rgba(234, 88, 12, 0.22);
+    border-radius: 9999px;
+    box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    z-index: 30;
+    overflow: visible;
+}
+
+.dock-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    outline: none;
+    flex-shrink: 0;
+    transform-origin: center center;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    will-change: transform;
+}
+
+.dock-item i {
+    font-size: 17px;
+    pointer-events: none;
+}
+
+.dock-item:hover {
+    color: #ea580c;
+    background: #fff7ed;
+    border-color: #fdba74;
+    box-shadow: 0 10px 24px -4px rgba(234, 88, 12, 0.35);
+}
+
+.dock-item.active {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: #ffffff !important;
+    border-color: #f97316;
+    box-shadow: 0 10px 24px -3px rgba(234, 88, 12, 0.45);
+}
+
+/* Tooltip beside dock */
+.dock-tooltip {
+    position: absolute;
+    left: calc(100% + 18px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-8px);
+    background: #0f172a;
+    color: #ffffff;
+    padding: 7px 13px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.35);
+    z-index: 50;
+}
+
+.dock-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: #0f172a;
+}
+
+.dock-item:hover .dock-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* Tab Transition Animation */
+.tab-panel {
+    display: none;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tab-panel.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    animation: tabFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.99);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Custom Scrollbar for Dropdowns */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
