@@ -88,135 +88,128 @@
             <!-- Main Content Area -->
             <div class="lg:col-span-2 space-y-8">
                 
-                <!-- Status Alur Approval Workflow Card -->
-                <div class="card-3d-warm rounded-2xl p-6 sm:p-8">
-                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-orange-200/60">
-                        <div class="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center text-base font-bold shrink-0 box-3d">
-                            <i class="bi bi-diagram-3-fill"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-bold text-slate-900 tracking-tight">Status Persetujuan Berjenjang</h2>
-                            <p class="text-xs text-slate-500 font-normal">Tahap persetujuan pendaftaran Tugas Akhir mahasiswa.</p>
+                <!-- Judul TA Review & Keputusan Card -->
+                <?php
+                    $st_judul = $detail['status_judul'] ?? 'Pending';
+                    $note_judul = $detail['catatan_judul'] ?? '';
+                    $isJudulDecided = in_array($st_judul, array('Approved', 'Rejected'));
+                ?>
+                <div id="card-judul-global" class="card-3d-warm rounded-2xl p-6 sm:p-8 space-y-5 transition-all">
+                    <!-- Header Judul -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-orange-200/60 gap-3">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center text-xl shrink-0 box-3d">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="font-bold text-base sm:text-lg text-slate-900 tracking-tight">Usulan Judul Tugas Akhir</h2>
+                                    <span id="badge-status-judul-global" class="px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap <?= ($st_judul === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (($st_judul === 'Rejected') ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200'); ?>">
+                                        <?= ($st_judul === 'Approved') ? '✅ Disetujui' : (($st_judul === 'Rejected') ? '❌ Ditolak' : '⏳ Menunggu'); ?>
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500 font-normal mt-0.5">Tinjau usulan judul tugas akhir mahasiswa dan berikan keputusan serta saran perbaikan.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-                        <!-- Stage 1: Dosen Wali (Current) -->
-                        <?php 
-                            $stWali = $detail['status_approval_wali'] ?? 'Pending'; 
-                            $bgWali = ($stWali === 'Approved') ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (($stWali === 'Rejected') ? 'bg-rose-50 border-rose-300 text-rose-800' : 'bg-amber-50 border-amber-300 text-amber-800');
-                        ?>
-                        <div class="p-4 rounded-xl border-2 ring-2 ring-orange-500/20 <?= $bgWali; ?> shadow-xs relative">
-                            <span class="absolute -top-2.5 right-2 px-2 py-0.5 bg-orange-600 text-white text-[9px] font-bold rounded-full shadow-xs">SAAT INI</span>
-                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">1. Dosen Wali</span>
-                            <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
-                                <?php if($stWali === 'Approved'): ?>
-                                    <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
-                                <?php elseif($stWali === 'Rejected'): ?>
-                                    <i class="bi bi-x-circle-fill text-rose-600"></i> Ditolak
-                                <?php else: ?>
-                                    <i class="bi bi-clock-fill text-amber-600"></i> Pending
-                                <?php endif; ?>
+                    <!-- Daftar Usulan Judul Mahasiswa -->
+                    <div class="space-y-3.5 text-xs">
+                        <!-- Judul 1 -->
+                        <div class="p-4 rounded-xl bg-white/90 border border-orange-200/80 shadow-2xs space-y-1">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-600 block">Usulan Judul 1 (Utama)</span>
+                            <p class="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
+                                <?= htmlspecialchars($detail['judul_1'] ?? '-'); ?>
+                            </p>
+                        </div>
+
+                        <!-- Judul 2 -->
+                        <?php if(!empty($detail['judul_2'])): ?>
+                            <div class="p-4 rounded-xl bg-white/90 border border-orange-200/80 shadow-2xs space-y-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">Usulan Judul 2 (Alternatif 1)</span>
+                                <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">
+                                    <?= htmlspecialchars($detail['judul_2']); ?>
+                                </p>
                             </div>
-                            <?php if(!empty($detail['catatan_wali'])): ?>
-                                <p class="text-[11px] opacity-80 mt-1 italic leading-tight truncate" title="<?= htmlspecialchars($detail['catatan_wali']); ?>">"<?= $detail['catatan_wali']; ?>"</p>
+                        <?php endif; ?>
+
+                        <!-- Judul 3 -->
+                        <?php if(!empty($detail['judul_3'])): ?>
+                            <div class="p-4 rounded-xl bg-white/90 border border-orange-200/80 shadow-2xs space-y-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">Usulan Judul 3 (Alternatif 2)</span>
+                                <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">
+                                    <?= htmlspecialchars($detail['judul_3']); ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Judul EN -->
+                        <?php if(!empty($detail['judul_en'])): ?>
+                            <div class="p-3.5 rounded-xl bg-white/90 border border-orange-200/80 text-slate-600 flex items-center gap-2">
+                                <i class="bi bi-translate text-orange-500 text-sm shrink-0"></i>
+                                <span class="font-bold text-[11px] text-slate-500 shrink-0">Translasi EN:</span>
+                                <span class="italic font-medium text-xs text-slate-800">"<?= htmlspecialchars($detail['judul_en']); ?>"</span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Area Saran / Catatan & Tombol Keputusan (Approve, Reject, Reset) -->
+                    <div class="pt-4 border-t border-orange-200/60 space-y-3.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Saran / Catatan untuk Judul TA:</span>
+                                <span id="comment-status-judul" class="text-[10px] <?= $isJudulDecided ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
+                                    <?= $isJudulDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'; ?>
+                                </span>
+                            </label>
+                            <textarea id="catatan_judul" rows="2" placeholder="Tuliskan saran atau catatan revisi untuk judul tugas akhir..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isJudulDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isJudulDecided ? 'readonly' : ''; ?>><?= htmlspecialchars($note_judul); ?></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2.5" id="action-buttons-judul">
+                            <!-- Reset Button -->
+                            <button type="button" id="btn-reset-judul" onclick="resetJudulDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                                <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                            </button>
+
+                            <?php if($st_judul === 'Approved'): ?>
+                                <button type="button" id="btn-approve-judul" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                </button>
+                                <button type="button" id="btn-reject-judul" onclick="handleResetFirstWarningJudul('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                                    <i class="bi bi-x-circle text-sm"></i> Denied
+                                </button>
+                            <?php elseif($st_judul === 'Rejected'): ?>
+                                <button type="button" id="btn-approve-judul" onclick="handleResetFirstWarningJudul('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                                    <i class="bi bi-check-circle text-sm"></i> Approve
+                                </button>
+                                <button type="button" id="btn-reject-judul" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                </button>
+                            <?php else: ?>
+                                <button type="button" id="btn-approve-judul" onclick="decideJudul('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                </button>
+                                <button type="button" id="btn-reject-judul" onclick="decideJudul('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                </button>
                             <?php endif; ?>
-                        </div>
-
-                        <!-- Stage 2: Admin Layanan -->
-                        <?php 
-                            $stAdmin = $detail['status_approval_admin'] ?? 'Pending'; 
-                            $bgAdmin = ($stAdmin === 'Approved') ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (($stAdmin === 'Rejected') ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-600');
-                        ?>
-                        <div class="p-4 rounded-xl border <?= $bgAdmin; ?> shadow-xs">
-                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">2. Admin Layanan</span>
-                            <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
-                                <?php if($stAdmin === 'Approved'): ?>
-                                    <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
-                                <?php elseif($stAdmin === 'Rejected'): ?>
-                                    <i class="bi bi-x-circle-fill text-rose-600"></i> Ditolak
-                                <?php else: ?>
-                                    <i class="bi bi-clock text-slate-400"></i> Menunggu
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <!-- Stage 3: Koordinator TA -->
-                        <?php 
-                            $stKoor = $detail['status_approval_koor'] ?? 'Pending'; 
-                            $bgKoor = ($stKoor === 'Approved') ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (($stKoor === 'Rejected') ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-600');
-                        ?>
-                        <div class="p-4 rounded-xl border <?= $bgKoor; ?> shadow-xs">
-                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">3. Koordinator TA</span>
-                            <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
-                                <?php if($stKoor === 'Approved'): ?>
-                                    <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
-                                <?php elseif($stKoor === 'Rejected'): ?>
-                                    <i class="bi bi-x-circle-fill text-rose-600"></i> Ditolak
-                                <?php else: ?>
-                                    <i class="bi bi-clock text-slate-400"></i> Menunggu
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <!-- Stage 4: Ketua KK -->
-                        <?php 
-                            $stKk = $detail['status_approval_kk'] ?? 'Pending'; 
-                            $bgKk = ($stKk === 'Approved') ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : (($stKk === 'Rejected') ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-600');
-                        ?>
-                        <div class="p-4 rounded-xl border <?= $bgKk; ?> shadow-xs">
-                            <span class="text-[9px] font-bold uppercase tracking-wider block opacity-70 mb-1">4. Ketua KK</span>
-                            <div class="font-bold flex items-center gap-1.5 text-sm mb-1">
-                                <?php if($stKk === 'Approved'): ?>
-                                    <i class="bi bi-check-circle-fill text-emerald-600"></i> Disetujui
-                                <?php elseif($stKk === 'Rejected'): ?>
-                                    <i class="bi bi-x-circle-fill text-rose-600"></i> Ditolak
-                                <?php else: ?>
-                                    <i class="bi bi-clock text-slate-400"></i> Menunggu
-                                <?php endif; ?>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Judul & File PDF Card -->
-                <div class="card-3d-warm rounded-2xl p-6 sm:p-8">
-                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-orange-200/60">
+                <!-- Berkas Persyaratan PDF Card -->
+                <div class="card-3d-warm rounded-2xl p-6 sm:p-8 space-y-6">
+                    <div class="flex items-center gap-3 pb-4 border-b border-orange-200/60">
                         <div class="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center text-base font-bold shrink-0 box-3d">
-                            <i class="bi bi-journal-text"></i>
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
                         </div>
-                        <h2 class="text-lg font-bold text-slate-900 tracking-tight">Berkas Usulan Judul & Persyaratan</h2>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900 tracking-tight">Berkas Persyaratan PDF (Verifikasi Dokumen)</h2>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Klik tombol <strong class="text-amber-600">Buka &amp; Review PDF</strong> untuk meninjau dokumen dan membuka kunci tombol <strong>Approve</strong> &amp; <strong>Denied</strong>.</p>
+                        </div>
                     </div>
 
                     <div class="space-y-5 text-xs">
-                        <div>
-                            <span class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Usulan Judul 1 (Utama):</span>
-                            <div class="p-4 bg-white/80 rounded-xl border border-orange-200/80 font-semibold text-slate-900 text-xs leading-relaxed shadow-xs"><?= $detail['judul_1'] ?? 'Pengembangan Sistem Informasi IFIK Berbasis Web'; ?></div>
-                        </div>
-
-                        <div>
-                            <span class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Usulan Judul 2 (Alternatif 1):</span>
-                            <div class="p-4 bg-white/80 rounded-xl border border-orange-200/80 font-medium text-slate-800 text-xs shadow-xs"><?= $detail['judul_2'] ?? 'Rancang Bangun Modul Mahasiswa dan Dosen Wali IFIK'; ?></div>
-                        </div>
-
-                        <div>
-                            <span class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Usulan Judul 3 (Alternatif 2):</span>
-                            <div class="p-4 bg-white/80 rounded-xl border border-orange-200/80 font-medium text-slate-800 text-xs shadow-xs"><?= $detail['judul_3'] ?? 'Implementasi Workflow Approval Pendaftaran Tugas Akhir'; ?></div>
-                        </div>
-
-                        <div>
-                            <span class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Judul (Bahasa Inggris):</span>
-                            <div class="p-4 bg-white/80 rounded-xl border border-orange-200/80 font-medium italic text-slate-700 text-xs shadow-xs"><?= $detail['judul_en'] ?? 'Development of Web-Based IFIK Information System'; ?></div>
-                        </div>
-
-                        <!-- Berkas Persyaratan PDF (Per-File Approval & Reset) -->
-                        <div class="pt-4 border-t border-orange-200/60">
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <span class="block text-xs font-bold text-slate-800 uppercase tracking-wider">Berkas Persyaratan PDF:</span>
-                                    <p class="text-[11px] text-slate-500 mt-0.5">Klik tombol <strong class="text-amber-600">Buka & Review PDF</strong> untuk meninjau dokumen dan secara instan membuka kunci tombol <strong>Approve</strong> & <strong>Denied</strong>.</p>
-                                </div>
-                            </div>
 
                             <?php
                             $files_list = array(
@@ -274,18 +267,23 @@
                                             <?php endif; ?>
                                         </div>
 
-                                        <!-- BOTTOM: Area komentar + tombol Reset, Approve, Denied -->
-                                        <div id="bottom-area-<?= $key; ?>" class="px-5 py-4">
-
+                                        <!-- BOTTOM: Form Komentar & Tombol Aksi -->
+                                        <div class="px-5 py-4 bg-white space-y-3.5">
                                             <!-- Form Komentar Per File -->
-                                            <div class="mb-4">
+                                            <?php
+                                                $comment_val = $detail['catatan_file_' . $key] ?? '';
+                                                if (empty($comment_val) && !empty($detail['catatan_wali']) && preg_match('/\[' . preg_quote(strtoupper($key), '/') . '[^\]]*\]\s*:\s*([^\n\r]+)/i', $detail['catatan_wali'], $cm)) {
+                                                    $comment_val = trim($cm[1]);
+                                                }
+                                            ?>
+                                            <div>
                                                 <label class="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                                     <span>Komentar / Catatan untuk Berkas Ini:</span>
                                                     <span id="comment-status-<?= $key; ?>" class="text-[10px] <?= $isDecided ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
                                                         <?= $isDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'; ?>
                                                     </span>
                                                 </label>
-                                                <textarea id="comment-<?= $key; ?>" rows="2" placeholder="Tambahkan catatan atau revisi untuk berkas <?= $item['short']; ?>..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isDecided ? 'readonly' : ''; ?>></textarea>
+                                                <textarea id="comment-<?= $key; ?>" rows="2" placeholder="Tambahkan catatan atau revisi untuk berkas <?= $item['short']; ?>..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isDecided ? 'readonly' : ''; ?>><?= htmlspecialchars($comment_val); ?></textarea>
                                             </div>
 
                                             <!-- Tombol Reset, Approve & Denied di kanan bawah -->
@@ -331,7 +329,6 @@
                                                 <?php endif; ?>
                                             </div>
                                         </div>
-
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -1020,6 +1017,136 @@
             method: 'POST',
             body: formData
         }).catch(err => console.error(err));
+    }
+
+    // --- FITUR KEPUTUSAN JUDUL TA (APPROVE / REJECT / RESET) ---
+    function handleResetFirstWarningJudul(targetAction) {
+        showSideToast(`Status judul saat ini sudah ditetapkan. Silakan klik tombol "Reset" terlebih dahulu jika ingin mengganti menjadi ${targetAction}.`, 'Perhatian');
+    }
+
+    function resetJudulDecision() {
+        const statusBadge = document.getElementById('badge-status-judul-global');
+        if (statusBadge) {
+            statusBadge.className = 'px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap bg-slate-100 text-slate-600 border-slate-200';
+            statusBadge.textContent = '⏳ Menunggu';
+        }
+
+        const actionContainer = document.getElementById('action-buttons-judul');
+        if (actionContainer) {
+            actionContainer.innerHTML = `
+                <button type="button" id="btn-reset-judul" onclick="resetJudulDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                    <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                </button>
+                <button type="button" id="btn-approve-judul" onclick="decideJudul('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                </button>
+                <button type="button" id="btn-reject-judul" onclick="decideJudul('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                </button>
+            `;
+        }
+
+        const commentArea = document.getElementById('catatan_judul');
+        if (commentArea) {
+            commentArea.removeAttribute('readonly');
+            commentArea.className = 'w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition bg-white';
+            commentArea.focus();
+        }
+
+        const commentStatus = document.getElementById('comment-status-judul');
+        if (commentStatus) {
+            commentStatus.className = 'text-[10px] text-slate-400 font-normal';
+            commentStatus.textContent = '(Dapat diedit)';
+        }
+
+        showSideToast('Status Judul di-reset ke Menunggu. Form saran & tombol keputusan terbuka kembali.', 'Pemberitahuan');
+
+        const formData = new FormData();
+        formData.append('nim', currentNim);
+        formData.append('status_judul', 'Pending');
+        formData.append('catatan_judul', commentArea ? commentArea.value.trim() : '');
+
+        fetch('<?= site_url('dosenwali/update_judul_approval_ajax'); ?>', {
+            method: 'POST',
+            body: formData
+        }).catch(err => console.error(err));
+    }
+
+    function decideJudul(status) {
+        const commentArea = document.getElementById('catatan_judul');
+        const commentVal = commentArea ? commentArea.value.trim() : '';
+
+        if (commentArea) {
+            commentArea.setAttribute('readonly', 'true');
+            commentArea.className = 'w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition bg-slate-50 opacity-80 cursor-not-allowed';
+        }
+
+        const commentStatus = document.getElementById('comment-status-judul');
+        if (commentStatus) {
+            commentStatus.className = 'text-[10px] text-amber-600 font-semibold';
+            commentStatus.textContent = '(Terkunci, klik Reset untuk mengedit kembali)';
+        }
+
+        const statusBadge = document.getElementById('badge-status-judul-global');
+        if (statusBadge) {
+            if (status === 'Approved') {
+                statusBadge.className = 'px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap bg-emerald-100 text-emerald-800 border-emerald-300';
+                statusBadge.textContent = '✅ Disetujui';
+            } else {
+                statusBadge.className = 'px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap bg-rose-100 text-rose-700 border-rose-300';
+                statusBadge.textContent = '❌ Ditolak';
+            }
+        }
+
+        const actionContainer = document.getElementById('action-buttons-judul');
+        if (actionContainer) {
+            if (status === 'Approved') {
+                actionContainer.innerHTML = `
+                    <button type="button" id="btn-reset-judul" onclick="resetJudulDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                        <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                    </button>
+                    <button type="button" id="btn-approve-judul" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                    </button>
+                    <button type="button" id="btn-reject-judul" onclick="handleResetFirstWarningJudul('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                        <i class="bi bi-x-circle text-sm"></i> Denied
+                    </button>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <button type="button" id="btn-reset-judul" onclick="resetJudulDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                        <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                    </button>
+                    <button type="button" id="btn-approve-judul" onclick="handleResetFirstWarningJudul('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                        <i class="bi bi-check-circle text-sm"></i> Approve
+                    </button>
+                    <button type="button" id="btn-reject-judul" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                    </button>
+                `;
+            }
+        }
+
+        showSideToast(`Status Judul berhasil di-${status === 'Approved' ? 'Approve' : 'Denied'}. Form saran dikunci.`, 'Pemberitahuan');
+
+        const formData = new FormData();
+        formData.append('nim', currentNim);
+        formData.append('status_judul', status);
+        formData.append('catatan_judul', commentVal);
+
+        fetch('<?= site_url('dosenwali/update_judul_approval_ajax'); ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                showSideToast(data.message || 'Gagal memperbarui status judul.', 'Peringatan', true);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
     }
 
     </script>

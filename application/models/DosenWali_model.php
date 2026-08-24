@@ -20,12 +20,33 @@ class DosenWali_model extends CI_Model {
             'review_file_transkrip'  => "TINYINT(1) DEFAULT 0",
             'review_file_pernyataan' => "TINYINT(1) DEFAULT 0",
             'review_file_bebas_lab'   => "TINYINT(1) DEFAULT 0",
+            'catatan_file_ksm'        => "TEXT NULL",
+            'catatan_file_transkrip'  => "TEXT NULL",
+            'catatan_file_pernyataan' => "TEXT NULL",
+            'catatan_file_bebas_lab'  => "TEXT NULL",
+            'judul_disetujui'        => "INT DEFAULT 1",
+            'status_judul'           => "VARCHAR(20) DEFAULT 'Pending'",
+            'catatan_judul'          => "TEXT NULL",
         );
         foreach ($new_cols as $col => $type) {
             if (!in_array($col, $fields)) {
                 $this->db->query("ALTER TABLE `pendaftaran_ta` ADD COLUMN `{$col}` {$type}");
             }
         }
+    }
+
+    // Update Keputusan Usulan Judul TA (Status & Saran/Catatan Revisi)
+    public function update_judul_approval($nim, $status_judul, $catatan_judul = '') {
+        if (!$this->db->table_exists('pendaftaran_ta')) return false;
+
+        $data = array(
+            'status_judul'    => $status_judul,
+            'catatan_judul'   => $catatan_judul,
+            'updated_at'      => date('Y-m-d H:i:s')
+        );
+
+        $this->db->where('nim', $nim);
+        return $this->db->update('pendaftaran_ta', $data);
     }
 
     // Get List Mahasiswa Bimbingan Wali (Fetch REAL Submitted Pendaftaran TA Data ONLY)
@@ -119,6 +140,9 @@ class DosenWali_model extends CI_Model {
             $data['review_file_' . $file_type] = 1;
         }
 
+        // Selalu perbarui catatan berkas sesuai input dosen wali
+        $data['catatan_file_' . $file_type] = $comment;
+
         if (!empty($comment)) {
             $current = $this->db->get_where('pendaftaran_ta', array('nim' => $nim))->row_array();
             $existing_notes = $current['catatan_wali'] ?? '';
@@ -138,15 +162,13 @@ class DosenWali_model extends CI_Model {
             $s_prn = $row['status_file_pernyataan'] ?? 'Pending';
             $s_lab = $row['status_file_bebas_lab'] ?? 'Pending';
 
-            $all_files = array($s_ksm, $s_trn, $s_prn, $s_lab);
-
             $overall_data = array('updated_at' => date('Y-m-d H:i:s'));
             if ($s_ksm === 'Approved' && $s_trn === 'Approved' && $s_prn === 'Approved' && $s_lab === 'Approved') {
                 $overall_data['status_approval_wali'] = 'Approved';
                 $overall_data['current_stage'] = 'Admin Layanan';
-            } else if (in_array('Rejected', $all_files)) {
+            } else if ($s_ksm === 'Rejected' && $s_trn === 'Rejected' && $s_prn === 'Rejected' && $s_lab === 'Rejected') {
                 $overall_data['status_approval_wali'] = 'Rejected';
-                $overall_data['current_stage'] = 'Dosen Wali (Revisi)';
+                $overall_data['current_stage'] = 'Dosen Wali (Ditolak)';
             } else {
                 $overall_data['status_approval_wali'] = 'Pending';
                 $overall_data['current_stage'] = 'Dosen Wali';
