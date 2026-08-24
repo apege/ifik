@@ -60,6 +60,10 @@
                         <i class="bi bi-file-earmark-text"></i>
                         <span>Pendaftaran TA</span>
                     </a>
+                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-person-video3"></i>
+                        <span>Bimbingan TA</span>
+                    </a>
                 </nav>
 
                 <!-- User Quick Info -->
@@ -340,24 +344,31 @@
             <!-- Bimbingan Status Bottom Bar -->
             <div class="mt-6 pt-4 border-t border-orange-100 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center text-lg font-bold shrink-0 box-3d">
-                        <i class="bi bi-lock-fill"></i>
+                    <div class="w-10 h-10 rounded-xl <?= $k_is_app ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'; ?> flex items-center justify-center text-lg font-bold shrink-0 box-3d">
+                        <i class="bi <?= $k_is_app ? 'bi-unlock-fill' : 'bi-lock-fill'; ?>"></i>
                     </div>
                     <div>
                         <h4 class="font-bold text-sm text-slate-900">Status Akses Bimbingan Akademik</h4>
-                        <p class="text-xs text-slate-500 font-medium">Memerlukan persetujuan hingga Tahap 04 Koordinator TA (Penetapan Pembimbing)</p>
+                        <p class="text-xs text-slate-500 font-medium">
+                            <?= $k_is_app ? 'Persetujuan 4 tahap selesai. Dosen Pembimbing resmi ditetapkan.' : 'Memerlukan persetujuan hingga Tahap 04 Koordinator TA (Penetapan Pembimbing)'; ?>
+                        </p>
                     </div>
                 </div>
 
-                <?php if($k_is_app): ?>
-                    <span class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold rounded-xl flex items-center gap-2 box-3d">
-                        <i class="bi bi-patch-check-fill text-base"></i> UNLOCKED — Terbuka
-                    </span>
-                <?php else: ?>
-                    <span class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-bold rounded-xl flex items-center gap-2 box-3d">
-                        <i class="bi bi-clock-fill text-base"></i> LOCKED — Menunggu
-                    </span>
-                <?php endif; ?>
+                <div class="flex items-center gap-2.5">
+                    <?php if($k_is_app): ?>
+                        <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 box-3d shadow-md hover:scale-105 active:scale-95 transition-all">
+                            <i class="bi bi-patch-check-fill text-base"></i> UNLOCKED — Masuk Bimbingan &amp; Upload Preview 1 <i class="bi bi-arrow-right text-xs"></i>
+                        </a>
+                    <?php else: ?>
+                        <span class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white text-xs font-bold rounded-xl flex items-center gap-2 box-3d">
+                            <i class="bi bi-clock-fill text-base"></i> LOCKED — Menunggu
+                        </span>
+                        <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="px-3.5 py-2 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-800 text-[11px] font-bold transition flex items-center gap-1.5" title="Uji Coba Langsung Modul Bimbingan & Preview 1">
+                            <i class="bi bi-box-arrow-up-right"></i> Buka Bimbingan (Testing)
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 

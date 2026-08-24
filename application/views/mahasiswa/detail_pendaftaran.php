@@ -27,6 +27,51 @@
 </head>
 <body class="bg-gradient-to-br from-amber-100/80 via-orange-50 to-amber-100/90 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-orange-600 selection:text-white">
 
+    <!-- Header Glass Navbar (Clean White Glass - Consistent) -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-orange-100/80 shadow-xs no-print">
+        <div class="w-full px-4 sm:px-6 lg:px-10">
+            <div class="flex items-center justify-between h-16 sm:h-18">
+                <!-- Brand -->
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-xl font-bold text-lg flex items-center justify-center box-3d">
+                        I
+                    </div>
+                    <div>
+                        <span class="font-bold text-base text-slate-900 tracking-tight block leading-none">IFIK Portal</span>
+                        <span class="text-[9px] uppercase font-bold tracking-wider text-orange-500 mt-0.5 block">Akademik Mahasiswa</span>
+                    </div>
+                </div>
+
+                <!-- Nav Menu -->
+                <nav class="hidden md:flex items-center gap-7 relative" id="mainNav">
+                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link active-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Pendaftaran TA</span>
+                    </a>
+                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-person-video3"></i>
+                        <span>Bimbingan TA</span>
+                    </a>
+                </nav>
+
+                <!-- User Quick Info -->
+                <div class="flex items-center gap-2.5">
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span class="text-xs font-semibold text-slate-800 leading-tight"><?= $mahasiswa['nama_depan'] ?? 'Mahasiswa'; ?></span>
+                        <span class="text-[9px] text-slate-400 font-medium"><?= $mahasiswa['nim'] ?? 'NIM Mahasiswa'; ?></span>
+                    </div>
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center font-bold text-xs box-3d">
+                        <?= strtoupper(substr($mahasiswa['nama_depan'] ?? 'M', 0, 1)); ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <!-- Main Content Container (Continuous Vertical Long-Page Layout) -->
     <main class="w-full px-4 sm:px-6 lg:px-10 py-8 flex-grow space-y-8 max-w-7xl mx-auto">
 

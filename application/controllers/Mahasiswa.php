@@ -238,4 +238,90 @@ class Mahasiswa extends CI_Controller {
         $this->session->set_flashdata('success', 'Pengajuan Tugas Akhir berhasil di-reset!');
         redirect('mahasiswa');
     }
+
+    // Modul Bimbingan TA & Upload Berkas Preview (Multi-Stage Hub)
+    public function bimbingan() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $data['title'] = 'Bimbingan & Evaluasi Preview TA';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        
+        // Riwayat tiap tahapan preview
+        $data['riwayat_preview1'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
+        $data['riwayat_preview2'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 2');
+        $data['riwayat_preview3'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 3');
+
+        // Total upload count
+        $data['upload_count_p1'] = count($data['riwayat_preview1']);
+        $data['upload_count_p2'] = count($data['riwayat_preview2']);
+        $data['upload_count_p3'] = count($data['riwayat_preview3']);
+
+        // Status terbaru
+        $data['latest_p1'] = $data['riwayat_preview1'][0] ?? null;
+        $data['latest_p2'] = $data['riwayat_preview2'][0] ?? null;
+        $data['latest_p3'] = $data['riwayat_preview3'][0] ?? null;
+
+        // Default Mock Pembimbing & Penguji jika belum di-set di database
+        $data['pembimbing_1'] = !empty($data['pendaftaran']['nama_pembimbing_1']) 
+            ? $data['pendaftaran']['nama_pembimbing_1'] 
+            : 'Dr. Rina Fitriana, S.Ds., M.Ds.';
+        $data['pembimbing_2'] = !empty($data['pendaftaran']['nama_pembimbing_2']) 
+            ? $data['pendaftaran']['nama_pembimbing_2'] 
+            : 'Agung Pratama, S.T., M.Kom.';
+        $data['penguji_ta'] = 'Bambang Sudarsono, S.T., M.T.';
+
+        $this->load->view('mahasiswa/bimbingan_preview1', $data);
+    }
+
+    // Alias route preview1
+    public function preview1() {
+        $this->bimbingan();
+    }
+
+    // Endpoint Upload Draft Berkas Preview (Preview 1 / 2 / 3)
+    public function upload_preview() {
+        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $tahap = $this->input->post('tahap_preview') ?: 'Preview 1';
+
+        $upload_dir = './uploads/preview_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config['upload_path']   = $upload_dir;
+        $config['allowed_types'] = 'pdf|docx|zip';
+        $config['max_size']      = 10240; // 10MB
+        $clean_tahap = str_replace(' ', '', strtoupper($tahap));
+        $config['file_name']     = $clean_tahap . '_' . $nim . '_' . time();
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload('file_draft')) {
+            $error_msg = $this->upload->display_errors('', '');
+            $this->session->set_flashdata('error', 'Gagal mengunggah berkas: ' . $error_msg);
+        } else {
+            $upload_data = $this->upload->data();
+            $file_name = $upload_data['file_name'];
+            $catatan = trim($this->input->post('catatan_mahasiswa') ?? '');
+
+            $data_insert = array(
+                'nim'                => $nim,
+                'tahap_preview'      => $tahap,
+                'file_draft'         => $file_name,
+                'catatan_mahasiswa'  => $catatan,
+                'status_pembimbing'  => 'Pending',
+                'created_at'         => date('Y-m-d H:i:s')
+            );
+
+            $this->Mahasiswa_model->save_upload_preview($data_insert);
+            $this->session->set_flashdata('success', "Draft Berkas {$tahap} berhasil diunggah! Menunggu peninjauan dari Dosen Penilai.");
+        }
+
+        redirect('mahasiswa/bimbingan');
+    }
+
+    // Fallback handler upload_preview1
+    public function upload_preview1() {
+        $this->upload_preview();
+    }
 }
