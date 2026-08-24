@@ -83,6 +83,68 @@
         z-index: calc(10 + var(--index));
     }
 
+    /* ===== VARIAN BINGKAI KARTU (PILIHAN ADMIN) ===== */
+    /* 1. Polos / Standar */
+    .news-card.frame-none {
+        border: 1.5px solid rgba(234, 88, 12, 0.16);
+    }
+    .news-card.frame-none:hover {
+        border-color: rgba(234, 88, 12, 0.45);
+    }
+
+    /* 2. Doodle Spiral (Artistik Swirl) */
+    .news-card.frame-swirl::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 12px solid #18181b;
+        border-image: url('<?= base_url("assets/images/frame-border-swirl.svg") ?>') 20 round;
+        pointer-events: none;
+        z-index: 15;
+        border-radius: 24px;
+        box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.3);
+        transition: box-shadow 0.4s ease;
+    }
+    .news-card.frame-swirl:hover::before {
+        box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.8), 0 0 15px rgba(234, 88, 12, 0.35);
+    }
+
+    /* 3. Batik Geometrik */
+    .news-card.frame-geometric::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 12px solid #18181b;
+        border-image: url('<?= base_url("assets/images/frame-border-geometric.svg") ?>') 20 round;
+        pointer-events: none;
+        z-index: 15;
+        border-radius: 24px;
+        box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.3);
+        transition: box-shadow 0.4s ease;
+    }
+    .news-card.frame-geometric:hover::before {
+        box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.8), 0 0 15px rgba(234, 88, 12, 0.35);
+    }
+
+    /* 4. Polaroid Vintage */
+    .news-card.frame-polaroid {
+        padding: 8px 8px 12px;
+        border: 1.5px solid #e2e8f0;
+    }
+    .news-card.frame-polaroid .news-image {
+        border-radius: 16px;
+    }
+
+    /* 5. Glow Neon */
+    .news-card.frame-neon {
+        border: 2px solid #ea580c;
+        box-shadow: 0 0 15px rgba(234, 88, 12, 0.35), 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+    .news-card.frame-neon:hover {
+        border-color: #f97316;
+        box-shadow: 0 0 25px rgba(234, 88, 12, 0.6), 0 20px 45px rgba(234, 88, 12, 0.3);
+    }
+
     /* Saat kartu di-hover: tegak, naik, geser menjauhi tumpukan */
     .news-card:hover {
         --hover-shift-x: calc(var(--offset) * 40px);
@@ -200,21 +262,42 @@
         flex-direction: column;
         gap: 8px;
         align-items: center;
+        margin: 4px 0;
+        transition: opacity 0.3s ease;
     }
 
     .news-dot {
         width: 8px;
         height: 8px;
-        border-radius: 50%;
+        border-radius: 99px;
         background: #cbd5e1;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .news-dot:hover:not(.active) {
+        background: #94a3b8;
     }
 
     .news-dot.active {
-        background: #ea580c;
-        height: 24px; /* Memanjang ke bawah (vertikal) */
-        border-radius: 4px;
+        background: rgba(234, 88, 12, 0.25);
+        height: 32px; /* Memanjang ke bawah (vertikal pill) */
+        border-radius: 99px;
+        box-shadow: 0 2px 10px rgba(234, 88, 12, 0.2);
+    }
+
+    .news-dot-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0%;
+        background: linear-gradient(180deg, #ea580c, #f97316);
+        border-radius: 99px;
+        pointer-events: none;
+        box-shadow: 0 0 6px rgba(234, 88, 12, 0.6);
     }
 
     .news-page-info {
@@ -240,6 +323,54 @@
         position: absolute;
         bottom: 0; left: 0; width: 100%; height: 30px;
         background: linear-gradient(to top, #ffffff, transparent);
+    }
+
+    /* ===== PLACEHOLDER FOTO BERITA (Bila Foto Kosong / Belum Ada) ===== */
+    .news-image--placeholder {
+        background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .news-image-placeholder-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        color: #ea580c;
+        opacity: 0.85;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        pointer-events: none;
+    }
+    .news-card:hover .news-image-placeholder-badge {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    .news-image-placeholder-badge span {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+
+    /* Modal placeholder foto */
+    .news-modal-card-img-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #ea580c;
+    }
+    .news-modal-card-img-placeholder span {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
     }
     
     .news-content {
@@ -325,13 +456,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background: rgba(251, 247, 241, 0.97); /* Light theme off-white */
+        background: rgba(251, 247, 241, 0.98); /* Light theme off-white */
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.35s ease;
         overflow-y: auto;
+        overscroll-behavior: contain;
+        max-height: 100vh;
         padding: 48px 40px 60px;
     }
     #newsModal.open {
@@ -789,7 +922,7 @@
 </div>
 
 <!-- ===== MODAL VIEW ALL ===== -->
-<div id="newsModal">
+<div id="newsModal" data-lenis-prevent>
     <div class="news-modal-header">
         <div>
             <h2>Semua Berita &amp; Informasi</h2>
@@ -810,122 +943,102 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ===== DATA SEMUA BERITA =====
-    const allNews = [
-        {
-            date: '12 Agustus 2026',
-            title: 'Pameran Karya Mahasiswa FIK 2026 Sukses Digelar',
-            excerpt: 'Ratusan karya inovatif dari mahasiswa dipamerkan dalam ajang tahunan yang dihadiri oleh praktisi industri kreatif terkemuka. Acara ini berlangsung meriah selama tiga hari berturut-turut.',
-            image: '<?= base_url('assets/images/background.png') ?>',
-            url: '<?= base_url('index.php/news/detail') ?>'
-        },
-        {
-            date: '05 Agustus 2026',
-            title: 'Workshop Desain Interaktif Bersama Pakar UI/UX',
-            excerpt: 'Mahasiswa diajak untuk mendalami tren UI/UX dan interaksi 3D web modern dalam workshop intensif selama dua hari bersama narasumber berpengalaman dari startup ternama.',
-            image: '<?= base_url('assets/images/ifik_portal_3d_render.jpg') ?>'
-        },
-        {
-            date: '28 Juli 2026',
-            title: 'Peluncuran Sistem Layanan Terpadu IFIK Versi Baru',
-            excerpt: 'Sistem IFIK kini hadir dengan wajah baru yang lebih premium, responsif, dan interaktif menggunakan teknologi WebGL untuk memudahkan seluruh civitas akademika.',
-            image: '<?= base_url('assets/images/ik_3d_illustration.jpg') ?>'
-        },
-        {
-            date: '15 Juli 2026',
-            title: 'Prestasi Gemilang Tim Riset FIK di Tingkat Nasional',
-            excerpt: 'Penelitian kolaboratif dosen dan mahasiswa tentang pemanfaatan AI dalam desain komunikasi visual berhasil memenangkan hibah penelitian bergengsi tahun ini.',
-            image: '<?= base_url('assets/images/BackgroundTrain.jpg') ?>'
-        },
-        {
-            date: '02 Juli 2026',
-            title: 'Kunjungan Studi Industri Kreatif ke Studio Animasi',
-            excerpt: 'Mahasiswa semester akhir berkesempatan melihat langsung alur kerja produksi animasi 3D kelas dunia dan berdiskusi dengan para profesional di bidang tersebut.',
-            image: '<?= base_url('assets/images/background.png') ?>'
-        },
-        {
-            date: '25 Juni 2026',
-            title: 'Seminar Nasional Industri Kreatif dan Ekonomi Digital',
-            excerpt: 'Para pakar dari berbagai universitas berkumpul membahas peluang dan tantangan industri kreatif di era transformasi digital yang terus berkembang pesat.',
-            image: '<?= base_url('assets/images/ik_3d_illustration.jpg') ?>'
-        },
-        {
-            date: '18 Juni 2026',
-            title: 'Mahasiswa FIK Raih Juara 1 Kompetisi Desain Asia',
-            excerpt: 'Tim mahasiswa Desain Komunikasi Visual FIK berhasil mengharumkan nama universitas di ajang kompetisi desain internasional bertaraf Asia Tenggara.',
-            image: '<?= base_url('assets/images/ifik_portal_3d_render.jpg') ?>'
-        },
-        {
-            date: '10 Juni 2026',
-            title: 'Kerja Sama FIK dengan Perusahaan Game Terkemuka',
-            excerpt: 'Perjanjian kerja sama ditandatangani antara FIK dan studio game ternama untuk program magang, penelitian bersama, dan pengembangan kurikulum berbasis industri.',
-            image: '<?= base_url('assets/images/background.png') ?>'
-        },
-        {
-            date: '03 Juni 2026',
-            title: 'Dosen FIK Terima Penghargaan Riset Inovatif 2026',
-            excerpt: 'Dua dosen dari Program Studi Animasi berhasil meraih penghargaan riset inovatif dari Kementerian Pendidikan atas penelitian mereka di bidang motion capture dan AI generatif.',
-            image: '<?= base_url('assets/images/ik_3d_illustration.jpg') ?>'
-        },
-        {
-            date: '27 Mei 2026',
-            title: 'Pembukaan Laboratorium Realitas Virtual FIK',
-            excerpt: 'Fasilitas lab VR terbaru resmi dibuka, dilengkapi dengan 20 unit headset generasi terbaru dan ruang motion capture khusus untuk keperluan penelitian dan pembelajaran.',
-            image: '<?= base_url('assets/images/logo-dummy.webp') ?>',
-            imageFit: 'contain',
-            imageBg: '#fff7ed'
-        },
-        {
-            date: '20 Mei 2026',
-            title: 'Film Pendek Mahasiswa FIK Tayang di Festival Internasional',
-            excerpt: 'Karya film pendek berjudul "Ruang Imaji" yang diproduksi oleh mahasiswa Sinematografi FIK berhasil masuk seleksi dan ditayangkan di festival film internasional bergengsi.',
-            image: '<?= base_url('assets/images/ifik_portal_3d_render.jpg') ?>'
-        },
-        {
-            date: '13 Mei 2026',
-            title: 'FIK Buka Program Sertifikasi Desain untuk Umum',
-            excerpt: 'Masyarakat umum kini bisa mengikuti program sertifikasi desain grafis dan UI/UX yang diselenggarakan oleh FIK bekerjasama dengan lembaga internasional terpercaya.',
-            image: '<?= base_url('assets/images/background.png') ?>'
-        },
-        {
-            date: '05 Mei 2026',
-            title: 'Kolaborasi Lintas Prodi Hasilkan Karya Multimedia Epik',
-            excerpt: 'Proyek kolaborasi lintas program studi antara Animasi, DKV, dan Musik menghasilkan karya multimedia interaktif yang memukau di pameran akhir semester genap.',
-            image: '<?= base_url('assets/images/ik_3d_illustration.jpg') ?>'
-        },
-        {
-            date: '28 April 2026',
-            title: 'Beasiswa Penuh untuk Mahasiswa Berprestasi FIK',
-            excerpt: 'Sebanyak 30 mahasiswa berprestasi FIK menerima beasiswa penuh dari mitra industri untuk melanjutkan studi dan mengikuti program pertukaran pelajar internasional.',
-            image: '<?= base_url('assets/images/ifik_portal_3d_render.jpg') ?>'
-        },
-        {
-            date: '20 April 2026',
-            title: 'Hackathon Desain 48 Jam di Kampus FIK',
-            excerpt: 'Lebih dari 200 peserta mengikuti ajang Hackathon Desain selama 48 jam nonstop, menghasilkan puluhan prototipe produk digital inovatif yang siap dikembangkan.',
-            image: '<?= base_url('assets/images/background.png') ?>'
-        },
-        {
-            date: '12 April 2026',
-            title: 'Talkshow Karir Kreatif Bersama Alumni Sukses FIK',
-            excerpt: 'Puluhan alumni FIK yang kini berkarir di perusahaan multinasional berbagi pengalaman dan motivasi kepada mahasiswa aktif dalam sesi talkshow yang sangat inspiratif.',
-            image: '<?= base_url('assets/images/ik_3d_illustration.jpg') ?>'
-        },
-        {
-            date: '04 April 2026',
-            title: 'FIK Resmikan Pusat Inovasi dan Inkubasi Startup Kreatif',
-            excerpt: 'Pusat inkubasi baru resmi dibuka untuk mendukung ekosistem startup mahasiswa, dilengkapi dengan fasilitas co-working, mentoring dari investor, dan akses pendanaan awal.',
-            image: '<?= base_url('assets/images/logo-dummy.webp') ?>',
-            imageFit: 'contain',
-            imageBg: '#f0fdf4'
-        },
-        {
-            date: '28 Maret 2026',
-            title: 'Pelatihan AI Generatif untuk Dosen dan Mahasiswa FIK',
-            excerpt: 'Program pelatihan intensif penggunaan AI generatif dalam proses desain dan produksi konten kreatif diikuti oleh seluruh civitas akademika FIK dengan antusias.',
-            image: '<?= base_url('assets/images/ifik_portal_3d_render.jpg') ?>'
-        },
-    ];
+    // ===== DATA SEMUA BERITA (dinamis dari database & model) =====
+    <?php
+        $CI =& get_instance();
+        if (!isset($CI->News_model)) {
+            $CI->load->model('News_model');
+        }
+        $db_berita = isset($berita) && !empty($berita) ? $berita : ($CI->News_model ? $CI->News_model->get_published() : array());
+
+        $bulan_map = array('01'=>'Januari','02'=>'Februari','03'=>'Maret','04'=>'April','05'=>'Mei','06'=>'Juni','07'=>'Juli','08'=>'Agustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'Desember');
+        $news_json = array();
+
+        if (!empty($db_berita)) {
+            foreach ($db_berita as $b) {
+                $tgl_p = explode('-', $b->tanggal);
+                $tgl_id = (count($tgl_p) === 3) ? ((int)$tgl_p[2].' '.($bulan_map[$tgl_p[1]]??'').' '.$tgl_p[0]) : $b->tanggal;
+                
+                $img_path = $b->gambar ? trim($b->gambar) : '';
+                $has_image = !empty($img_path) && file_exists(FCPATH . ltrim($img_path, '/\\')) && strpos($img_path, 'background.png') === false;
+                $gambar_url = $has_image ? base_url($img_path) : '';
+
+                $news_json[] = array(
+                    'id'            => $b->id,
+                    'date'          => $tgl_id,
+                    'title'         => $b->judul,
+                    'excerpt'       => $b->excerpt ?? '',
+                    'image'         => $gambar_url,
+                    'isPlaceholder' => !$has_image,
+                    'url'           => site_url('news/detail/' . $b->id),
+                    'border_style'  => $b->border_style ?? 'none',
+                );
+            }
+        } else {
+            // Sample fallback news items if DB is empty, with real photos + placeholder examples
+            $sample_news = array(
+                array(
+                    'id' => 1,
+                    'date' => '12 Agustus 2026',
+                    'title' => 'Pameran Karya Mahasiswa FIK 2026 Sukses Digelar',
+                    'excerpt' => 'Ratusan karya inovatif dari mahasiswa dipamerkan dalam ajang tahunan yang dihadiri oleh praktisi industri kreatif terkemuka.',
+                    'image' => base_url('assets/images/Fakultas.jpg'),
+                    'isPlaceholder' => false,
+                    'border_style' => 'swirl'
+                ),
+                array(
+                    'id' => 2,
+                    'date' => '05 Agustus 2026',
+                    'title' => 'Workshop Desain Interaktif Bersama Pakar UI/UX',
+                    'excerpt' => 'Mahasiswa diajak untuk mendalami tren UI/UX dan interaksi 3D web modern dalam workshop intensif selama dua hari.',
+                    'image' => '',
+                    'isPlaceholder' => true,
+                    'border_style' => 'neon'
+                ),
+                array(
+                    'id' => 3,
+                    'date' => '28 Juli 2026',
+                    'title' => 'Peluncuran Sistem Layanan Terpadu IFIK Versi Baru',
+                    'excerpt' => 'Sistem IFIK kini hadir dengan wajah baru yang lebih premium, responsif, dan interaktif untuk memudahkan seluruh civitas akademika.',
+                    'image' => base_url('assets/images/multimedia.jpg'),
+                    'isPlaceholder' => false,
+                    'border_style' => 'geometric'
+                ),
+                array(
+                    'id' => 4,
+                    'date' => '15 Juli 2026',
+                    'title' => 'Prestasi Gemilang Tim Riset FIK di Tingkat Nasional',
+                    'excerpt' => 'Penelitian kolaboratif dosen dan mahasiswa tentang pemanfaatan AI dalam desain komunikasi visual berhasil memenangkan hibah.',
+                    'image' => '',
+                    'isPlaceholder' => true,
+                    'border_style' => 'polaroid'
+                ),
+                array(
+                    'id' => 5,
+                    'date' => '02 Juli 2026',
+                    'title' => 'Kunjungan Studi Industri Kreatif ke Studio Animasi',
+                    'excerpt' => 'Mahasiswa semester akhir berkesempatan melihat langsung alur kerja produksi animasi 3D kelas dunia dan berdiskusi.',
+                    'image' => base_url('assets/images/Aula1.jpg'),
+                    'isPlaceholder' => false,
+                    'border_style' => 'none'
+                )
+            );
+
+            foreach ($sample_news as $sn) {
+                $news_json[] = array(
+                    'id'           => $sn['id'],
+                    'date'         => $sn['date'],
+                    'title'        => $sn['title'],
+                    'excerpt'      => $sn['excerpt'],
+                    'image'        => $sn['image'],
+                    'isPlaceholder'=> $sn['isPlaceholder'],
+                    'url'          => site_url('news/detail/' . $sn['id']),
+                    'border_style' => $sn['border_style'],
+                );
+            }
+        }
+    ?>
+    const allNews = <?= json_encode($news_json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
     // ===== KONFIGURASI =====
     const CARDS_PER_PAGE = 5;
@@ -945,7 +1058,14 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < totalPages; i++) {
             const dot = document.createElement('div');
             dot.className = 'news-dot' + (i === currentPage ? ' active' : '');
-            dot.addEventListener('click', () => goToPage(i));
+            
+            const fill = document.createElement('div');
+            fill.className = 'news-dot-fill';
+            dot.appendChild(fill);
+
+            dot.addEventListener('click', () => {
+                goToPage(i);
+            });
             dotsEl.appendChild(dot);
         }
     }
@@ -957,7 +1077,12 @@ document.addEventListener('DOMContentLoaded', () => {
         pageInfoEl.textContent = `${currentPage + 1} / ${totalPages}`;
         // Update dots
         dotsEl.querySelectorAll('.news-dot').forEach((d, i) => {
-            d.classList.toggle('active', i === currentPage);
+            const isActive = i === currentPage;
+            d.classList.toggle('active', isActive);
+            const fill = d.querySelector('.news-dot-fill');
+            if (fill) {
+                fill.style.height = '0%';
+            }
         });
     }
 
@@ -977,16 +1102,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== BUAT ELEMEN KARTU =====
     function createCard(news, index, total) {
         const card = document.createElement('div');
-        card.className = 'news-card';
+        card.className = 'news-card frame-' + (news.border_style || 'none');
         card.style.setProperty('--index', index);
         card.style.setProperty('--total', total);
 
-        const imgStyle = news.imageFit
-            ? `background-image:url('${news.image}'); background-size:contain; background-repeat:no-repeat; background-color:${news.imageBg || '#f1f5f9'};`
-            : `background-image:url('${news.image}');`;
+        const isPlaceholder = !news.image || news.isPlaceholder;
+        const imgStyle = isPlaceholder 
+            ? '' 
+            : (news.imageFit
+                ? `background-image:url('${news.image}'); background-size:contain; background-repeat:no-repeat; background-color:${news.imageBg || '#f1f5f9'};`
+                : `background-image:url('${news.image}');`);
+
+        const placeholderHtml = isPlaceholder ? `
+            <div class="news-image-placeholder-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                  <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                </svg>
+                <span>IFIK Portal</span>
+            </div>
+        ` : '';
 
         card.innerHTML = `
-            <div class="news-image" style="${imgStyle}"></div>
+            <div class="news-image ${isPlaceholder ? 'news-image--placeholder' : ''}" style="${imgStyle}">
+                ${placeholderHtml}
+            </div>
             <div class="news-content">
                 <span class="news-date">${news.date}</span>
                 <h3 class="news-title">${news.title}</h3>
@@ -1005,6 +1145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetPage < 0 || targetPage >= totalPages) return;
 
         isAnimating = true;
+        resetAutoScroll();
 
         // Tentukan arah animasi
         const goingForward = direction !== null ? direction === 'next' : targetPage > currentPage;
@@ -1045,6 +1186,102 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 480);
     }
 
+    // ===== AUTO SCROLL (OTOMATIS PINDAH HALAMAN DENGAN PROGRESS DOT) =====
+    const AUTO_SCROLL_DELAY = 10000; // 10000ms (10 detik per slide)
+    let autoScrollRaf = null;
+    let lastTimestamp = null;
+    let elapsedMs = 0;
+    let isHovered = false;
+    let isSectionVisible = true;
+
+    function updateProgressBar(pct) {
+        const activeDotFill = dotsEl.querySelector('.news-dot.active .news-dot-fill');
+        if (activeDotFill) {
+            activeDotFill.style.height = `${Math.min(100, Math.max(0, pct))}%`;
+        }
+    }
+
+    function autoScrollLoop(timestamp) {
+        if (lastTimestamp === null) lastTimestamp = timestamp;
+        const delta = timestamp - lastTimestamp;
+        lastTimestamp = timestamp;
+
+        if (totalPages > 1 && !isHovered && isSectionVisible && !document.hidden && !newsModal.classList.contains('open')) {
+            elapsedMs += delta;
+            const pct = (elapsedMs / AUTO_SCROLL_DELAY) * 100;
+            updateProgressBar(pct);
+
+            if (elapsedMs >= AUTO_SCROLL_DELAY) {
+                elapsedMs = 0;
+                updateProgressBar(0);
+                nextAutoPage();
+            }
+        }
+
+        autoScrollRaf = requestAnimationFrame(autoScrollLoop);
+    }
+
+    function nextAutoPage() {
+        if (totalPages <= 1 || isAnimating) return;
+        const nextPage = (currentPage + 1) % totalPages;
+        goToPage(nextPage, 'next');
+    }
+
+    function startAutoScroll() {
+        stopAutoScroll();
+        if (totalPages <= 1) return;
+        lastTimestamp = null;
+        autoScrollRaf = requestAnimationFrame(autoScrollLoop);
+    }
+
+    function stopAutoScroll() {
+        if (autoScrollRaf) {
+            cancelAnimationFrame(autoScrollRaf);
+            autoScrollRaf = null;
+        }
+        lastTimestamp = null;
+    }
+
+    function resetAutoScroll() {
+        elapsedMs = 0;
+        updateProgressBar(0);
+        lastTimestamp = null;
+    }
+
+    // Pause auto-scroll HANYA saat kursor berada langsung di atas kartu (.news-card)
+    container.addEventListener('mouseover', (e) => { 
+        if (e.target.closest('.news-card')) {
+            isHovered = true; 
+            dotsEl.style.opacity = '0.7';
+        }
+    });
+    container.addEventListener('mouseout', (e) => { 
+        if (!e.relatedTarget || !e.relatedTarget.closest('.news-card')) {
+            isHovered = false; 
+            dotsEl.style.opacity = '1';
+        }
+    });
+
+    // IntersectionObserver agar auto-scroll hanya aktif saat section berita terlihat
+    const sectionContact = document.getElementById('section-contact');
+    if (sectionContact && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                isSectionVisible = entry.isIntersecting;
+            });
+        }, { threshold: 0.2 });
+        observer.observe(sectionContact);
+    }
+
+    // Pause saat tab browser tidak aktif (pindah tab)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopAutoScroll();
+        } else {
+            startAutoScroll();
+        }
+    });
+
     // ===== EVENT LISTENER TOMBOL =====
     prevBtn.addEventListener('click', () => goToPage(currentPage - 1, 'prev'));
     nextBtn.addEventListener('click', () => goToPage(currentPage + 1, 'next'));
@@ -1077,15 +1314,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.classList.add('visible');
             }
             
+            const isPlaceholder = !news.image || news.isPlaceholder;
             const isContain = news.imageFit === 'contain';
             const imgStyle = isContain
                 ? `object-fit: contain; padding: 12px; background: ${news.imageBg || '#1e293b'};`
                 : `object-fit: cover;`;
 
+            const imgHtml = isPlaceholder ? `
+                <div class="news-modal-card-img-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                      <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                    </svg>
+                    <span>IFIK News</span>
+                </div>
+            ` : `<img class="news-modal-card-img" src="${news.image}" alt="${news.title}" loading="lazy" style="${imgStyle}" />`;
+
             card.innerHTML = `
                 <div class="news-modal-card-body">
                     <div class="news-modal-card-bg" style="${isContain ? 'background:' + (news.imageBg || '#1e293b') : ''}">
-                        <img class="news-modal-card-img" src="${news.image}" alt="${news.title}" loading="lazy" style="${imgStyle}" />
+                        ${imgHtml}
                     </div>
                     <div class="news-modal-card-overlay"></div>
                     <div class="news-modal-card-badge">${news.date}</div>
@@ -1121,11 +1369,15 @@ document.addEventListener('DOMContentLoaded', () => {
     newsViewAllBtn.addEventListener('click', () => {
         populateModal(allNews, true);
         newsModal.classList.add('open');
+        if (window.lenis) window.lenis.stop();
+        document.body.style.overflow = 'hidden';
     });
 
     // Close Modal
     function closeModal() {
         newsModal.classList.remove('open');
+        if (window.lenis) window.lenis.start();
+        document.body.style.overflow = '';
         const modalCards = newsModalGrid.querySelectorAll('.news-modal-card');
         modalCards.forEach(card => card.classList.remove('visible'));
         
@@ -1228,5 +1480,6 @@ document.addEventListener('DOMContentLoaded', () => {
     buildDots();
     renderPage(0);
     updateControls();
+    startAutoScroll();
 });
 </script>

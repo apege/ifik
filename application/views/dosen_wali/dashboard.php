@@ -6,6 +6,26 @@
     <title><?= $title; ?> - IFIK</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="<?= base_url('assets/css/style.css'); ?>" rel="stylesheet">
 </head>
@@ -84,52 +104,181 @@
             }
         ?>
 
+        <!-- Stats Overview Cards (Exact Interactive Design from Import Akun) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <!-- Total Bimbingan -->
-            <div class="card-3d-warm rounded-2xl p-5 border border-orange-200/60 flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Total Mahasiswa</span>
-                    <span class="text-2xl font-bold text-slate-900 tracking-tight block"><?= $totalMhs; ?></span>
-                    <span class="text-[11px] text-slate-500 font-medium mt-1 block">Bimbingan Akademik</span>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center text-xl font-bold shrink-0 box-3d">
-                    <i class="bi bi-people-fill"></i>
+            <!-- 1. Total Mahasiswa Bimbingan Card -->
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
+                    <!-- Ambient Glow Effects -->
+                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-brand-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-brand-500/10 blur-lg"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 flex items-start justify-between gap-3">
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Mahasiswa</p>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalMhs; ?></h3>
+                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Bimbingan Akademik</p>
+                        </div>
+                        
+                        <!-- Glowing Halo Icon -->
+                        <div class="relative shrink-0">
+                            <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
+                            <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-users text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient Divider Line & Floating Pulse Dots -->
+                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-brand-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+
+                    <!-- Corner Accents -->
+                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-brand-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
 
-            <!-- Menunggu Approval -->
-            <div class="card-3d-warm rounded-2xl p-5 border border-orange-200/60 flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 block mb-1">Menunggu Approval</span>
-                    <span class="text-2xl font-bold text-amber-600 tracking-tight block"><?= $pendingCount; ?></span>
-                    <span class="text-[11px] text-slate-500 font-medium mt-1 block">Perlu Ditolak / Disetujui</span>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center text-xl font-bold shrink-0 box-3d">
-                    <i class="bi bi-clock-history"></i>
+            <!-- 2. Menunggu Approval Card (Cyan) -->
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                    <!-- Ambient Glow Effects -->
+                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 flex items-start justify-between gap-3">
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Menunggu Approval</p>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditolak / Disetujui</p>
+                        </div>
+                        
+                        <!-- Glowing Halo Icon -->
+                        <div class="relative shrink-0">
+                            <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
+                            <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-key text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient Divider Line & Floating Pulse Dots -->
+                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+
+                    <!-- Corner Accents -->
+                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-cyan-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
 
-            <!-- Disetujui (Approved) -->
-            <div class="card-3d-warm rounded-2xl p-5 border border-orange-200/60 flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block mb-1">Disetujui</span>
-                    <span class="text-2xl font-bold text-emerald-600 tracking-tight block"><?= $approvedCount; ?></span>
-                    <span class="text-[11px] text-slate-500 font-medium mt-1 block">Lanjut ke Admin</span>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center text-xl font-bold shrink-0 box-3d">
-                    <i class="bi bi-check-circle-fill"></i>
+            <!-- 3. Disetujui Card (Emerald) -->
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
+                    <!-- Ambient Glow Effects -->
+                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 flex items-start justify-between gap-3">
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui</p>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Admin</p>
+                        </div>
+                        
+                        <!-- Glowing Halo Icon -->
+                        <div class="relative shrink-0">
+                            <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                            <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-paper-plane text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient Divider Line & Floating Pulse Dots -->
+                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+
+                    <!-- Corner Accents -->
+                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-emerald-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
 
-            <!-- Ditolak / Revisi (Rejected) -->
-            <div class="card-3d-warm rounded-2xl p-5 border border-orange-200/60 flex items-center justify-between">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 block mb-1">Perlu Revisi</span>
-                    <span class="text-2xl font-bold text-rose-600 tracking-tight block"><?= $rejectedCount; ?></span>
-                    <span class="text-[11px] text-slate-500 font-medium mt-1 block">Telah Ditolak</span>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-500 text-white flex items-center justify-center text-xl font-bold shrink-0 box-3d">
-                    <i class="bi bi-x-circle-fill"></i>
+            <!-- 4. Perlu Revisi Card (Amber) -->
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                    <!-- Ambient Glow Effects -->
+                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative z-10 flex items-start justify-between gap-3">
+                        <div class="flex-1">
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Perlu Revisi</p>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $rejectedCount; ?></h3>
+                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Telah Ditolak / Perlu Revisi</p>
+                        </div>
+                        
+                        <!-- Glowing Halo Icon -->
+                        <div class="relative shrink-0">
+                            <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
+                            <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-clock text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient Divider Line & Floating Pulse Dots -->
+                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+
+                    <!-- Corner Accents -->
+                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-amber-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
         </div>
