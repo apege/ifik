@@ -119,6 +119,12 @@
         -webkit-backdrop-filter: blur(8px);
         border: 1px solid rgba(255, 255, 255, 0.15);
     }
+
+    /* Ketika sayap kanan hanya memiliki 1 item (Prestasi), buat lebarnya proporsional mengimbangi 2 item di sayap kiri */
+    .dots-half.dots-right .dot:only-child {
+        max-width: 512px;
+        width: 100%;
+    }
     
     .carousel-indicators .dot.active, 
     .carousel-indicators .dot:hover {
@@ -580,63 +586,31 @@
         });
 
         $total_rooms_count = count($all_rooms);
-        $split_point = !empty($all_rooms) ? (int)ceil($total_rooms_count / 2) : 3;
-        $rooms_part1 = !empty($all_rooms) ? array_slice($all_rooms, 0, $split_point) : [];
-        $rooms_part2 = !empty($all_rooms) ? array_slice($all_rooms, $split_point) : [];
 
         // HIERARKI DISTRIBUSI SECTION / TAB
+        // Sayap Kiri: Overview & Fasilitas (1 kesatuan utuh)
+        // Sayap Kanan: Prestasi & Custom Slide lainnya
         $total_slides_count = !empty($header_slides) && count($header_slides) >= 3 ? count($header_slides) : 3;
-        $tab_items = [];
 
-        if ($total_slides_count === 3) {
-            // Default 3 Slide: Fasilitas dipecah 2 (2 di kiri : 2 di kanan)
-            $tab_items[] = ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'];
-            $tab_items[] = ['type' => 'fasilitas_part', 'index' => 1, 'part' => '1', 'id' => 'dotFasilitasLeft', 'label' => 'Fasilitas', 'rooms' => $rooms_part1, 'has_play' => true];
-            $tab_items[] = ['type' => 'fasilitas_part', 'index' => 1, 'part' => '2', 'id' => 'dotFasilitasRight', 'label' => 'Fasilitas', 'rooms' => $rooms_part2, 'has_add' => true];
-            $tab_items[] = ['type' => 'prestasi', 'index' => 2, 'id' => 'dotPrestasi', 'label' => 'Prestasi'];
-        } else {
-            // Banyak Slide (4, 5, 6, dst): Setiap section menjadi 1 kartu
-            $tab_items[] = ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'];
-            $tab_items[] = ['type' => 'fasilitas_full', 'index' => 1, 'id' => 'dotFasilitas', 'label' => 'Fasilitas', 'rooms' => $all_rooms, 'has_play' => true, 'has_add' => true];
-            $tab_items[] = ['type' => 'prestasi', 'index' => 2, 'id' => 'dotPrestasi', 'label' => 'Prestasi'];
+        $tabs_left = [
+            ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'],
+            ['type' => 'fasilitas_full', 'index' => 1, 'id' => 'dotFasilitas', 'label' => 'Fasilitas', 'rooms' => $all_rooms, 'has_play' => true, 'has_add' => true]
+        ];
 
-            for ($i = 3; $i < $total_slides_count; $i++) {
-                $slide_label = $header_slides[$i]->label ?? ('Slide ' . ($i + 1));
-                $tab_items[] = ['type' => 'custom_slide', 'index' => $i, 'id' => 'dotSlide' . $i, 'label' => $slide_label];
-            }
+        $tabs_right = [
+            ['type' => 'prestasi', 'index' => 2, 'id' => 'dotPrestasi', 'label' => 'Prestasi']
+        ];
+
+        for ($i = 3; $i < $total_slides_count; $i++) {
+            $slide_label = $header_slides[$i]->label ?? ('Slide ' . ($i + 1));
+            $tabs_right[] = ['type' => 'custom_slide', 'index' => $i, 'id' => 'dotSlide' . $i, 'label' => $slide_label];
         }
-
-        // Bagi rata kartu ke Sayap Kiri dan Sayap Kanan
-        $total_tabs = count($tab_items);
-        $half_tabs_count = (int)ceil($total_tabs / 2);
-        $tabs_left = array_slice($tab_items, 0, $half_tabs_count);
-        $tabs_right = array_slice($tab_items, $half_tabs_count);
     ?>
     <div class="carousel-indicators" id="carouselDots">
         <!-- SISI KIRI (Sayap Kiri) -->
         <div class="dots-half dots-left">
             <?php foreach ($tabs_left as $idx => $tab): ?>
-                <?php if ($tab['type'] === 'fasilitas_part'): ?>
-                    <div class="dot dot-fasilitas <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" data-fasilitas-part="<?= $tab['part'] ?>" id="<?= $tab['id'] ?>">
-                        <div class="dot-label-row">
-                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
-                            <div class="fasilitas-controls-group">
-                                <span class="fasilitas-counter" id="fasilitasCounterLeft">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
-                                <?php if (!empty($tab['has_play'])): ?>
-                                    <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
-                                        <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="dot-track-continuous" id="labIndicatorsLeft" data-part="1">
-                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasLeft"><span>Lab Multimedia</span></div>
-                            <div class="thumb" id="thumbFasilitasLeft">
-                                <div class="progress"></div>
-                            </div>
-                        </div>
-                    </div>
-                <?php elseif ($tab['type'] === 'fasilitas_full'): ?>
+                <?php if ($tab['type'] === 'fasilitas_full'): ?>
                     <div class="dot dot-fasilitas <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
                         <div class="dot-label-row">
                             <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
@@ -674,55 +648,10 @@
         <!-- SISI KANAN (Sayap Kanan) -->
         <div class="dots-half dots-right">
             <?php foreach ($tabs_right as $idx => $tab): ?>
-                <?php if ($tab['type'] === 'fasilitas_part'): ?>
-                    <div class="dot dot-fasilitas" data-index="<?= $tab['index'] ?>" data-fasilitas-part="<?= $tab['part'] ?>" id="<?= $tab['id'] ?>">
-                        <div class="dot-label-row">
-                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
-                            <div class="fasilitas-controls-group">
-                                <span class="fasilitas-counter" id="fasilitasCounterRight">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
-                                <?php if ($this->session->userdata('role_id') == 1): ?>
-                                    <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
-                                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="dot-track-continuous" id="labIndicatorsRight" data-part="2">
-                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasRight"><span>Lab Multimedia</span></div>
-                            <div class="thumb" id="thumbFasilitasRight">
-                                <div class="progress"></div>
-                            </div>
-                        </div>
-                    </div>
-                <?php elseif ($tab['type'] === 'fasilitas_full'): ?>
-                    <div class="dot dot-fasilitas" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
-                        <div class="dot-label-row">
-                            <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
-                            <div class="fasilitas-controls-group">
-                                <span class="fasilitas-counter" id="fasilitasCounterFull">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
-                                <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
-                                    <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                </button>
-                                <?php if ($this->session->userdata('role_id') == 1): ?>
-                                    <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
-                                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="dot-track-continuous" id="labIndicatorsFull">
-                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasFull"><span>Lab Multimedia</span></div>
-                            <div class="thumb" id="thumbFasilitasFull">
-                                <div class="progress"></div>
-                            </div>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <div class="dot" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
-                        <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
-                        <div class="dot-track"><div class="progress"></div></div>
-                    </div>
-                <?php endif; ?>
+                <div class="dot" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                    <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                    <div class="dot-track"><div class="progress"></div></div>
+                </div>
             <?php endforeach; ?>
         </div>
     </div>
@@ -886,17 +815,7 @@
                 if (e.target.closest('#labAutoPlayBtn') || e.target.closest('.lab-add-room-btn') || e.target.closest('.dot-track-continuous')) return;
 
                 const slideIndex = parseInt(dot.getAttribute('data-index') || '0');
-                const fasPart = dot.getAttribute('data-fasilitas-part');
-                
                 goToSlide(slideIndex);
-
-                if (slideIndex === 1 && typeof navigateToIndex === 'function') {
-                    if (fasPart === '2') {
-                        navigateToIndex(<?= $split_point ?>);
-                    } else {
-                        navigateToIndex(0);
-                    }
-                }
             });
         });
 
