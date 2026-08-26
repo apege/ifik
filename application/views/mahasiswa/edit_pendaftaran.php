@@ -40,22 +40,6 @@
                     </div>
                 </div>
 
-                <!-- Nav Menu -->
-                <nav class="hidden md:flex items-center gap-7 relative" id="mainNav">
-                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link active-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Pendaftaran TA</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-person-video3"></i>
-                        <span>Bimbingan TA</span>
-                    </a>
-                </nav>
-
                 <!-- User Quick Info -->
                 <div class="flex items-center gap-2.5">
                     <div class="hidden sm:flex flex-col text-right">
@@ -81,24 +65,47 @@
                 </a>
                 <div>
                     <div class="flex items-center gap-2.5">
-                        <span class="text-xs font-bold uppercase tracking-wider text-orange-600">FORMULIR PERUBAHAN</span>
-                        <span class="text-[10px] bg-orange-100 text-orange-800 font-bold px-2.5 py-0.5 rounded-full border border-orange-200">Mode Edit</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-orange-600">FORMULIR PENGAJUAN</span>
+                        <?php if(!empty($is_locked)): ?>
+                            <span class="text-[10px] bg-slate-200 text-slate-700 font-bold px-2.5 py-0.5 rounded-full border border-slate-300 flex items-center gap-1">
+                                <i class="bi bi-lock-fill"></i> Terkunci (Sedang Ditinjau)
+                            </span>
+                        <?php else: ?>
+                            <span class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2.5 py-0.5 rounded-full border border-rose-300 flex items-center gap-1">
+                                <i class="bi bi-pencil-fill"></i> Mode Revisi
+                            </span>
+                        <?php endif; ?>
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-0.5">
-                        Edit Formulir Pengajuan Tugas Akhir
+                        <?= !empty($is_locked) ? 'Ringkasan Formulir Tugas Akhir' : 'Edit Formulir Pengajuan Tugas Akhir'; ?>
                     </h1>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
                 <a href="<?= site_url('mahasiswa/detail_pendaftaran'); ?>" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition">
-                    <i class="bi bi-eye-fill"></i> Lihat Detail
+                    <i class="bi bi-eye-fill"></i> Status Approval
                 </a>
                 <a href="<?= site_url('mahasiswa'); ?>" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition">
                     <i class="bi bi-grid-1x2-fill"></i> Dashboard
                 </a>
             </div>
         </div>
+
+        <?php if(!empty($is_locked)): ?>
+            <!-- Locked View-Only Notice Banner -->
+            <div class="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-400/80 text-amber-950 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl font-bold box-3d shrink-0">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 block">STATUS: FORMULIR TERKUNCI (SEDANG DITINJAU)</span>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed mt-1">
+                        Pengajuan Tugas Akhir Anda saat ini sedang dalam proses peninjauan berjenjang. Kolom formulir dibuat <strong>hanya lihat (tidak dapat diedit)</strong>. Seluruh kolom input akan otomatis dapat diedit kembali jika terdapat catatan revisi dari Dosen Wali atau Admin Layanan.
+                    </p>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <?php if(!empty($pendaftaran['catatan_wali'])): ?>
             <!-- Reminder Alert: Feedback Dosen Wali -->
@@ -120,6 +127,7 @@
 
         <!-- Form Edit Pendaftaran (All Form Fields on 1 Long Continuous Page) -->
         <form action="<?= site_url('mahasiswa/edit_pendaftaran'); ?>" method="POST" enctype="multipart/form-data" id="formEditPendaftaranTA" class="space-y-8">
+            <fieldset class="space-y-8 <?= !empty($is_locked) ? 'opacity-65 select-none' : ''; ?>" <?= !empty($is_locked) ? 'disabled' : ''; ?>>
 
             <!-- BAGIAN 1: Pilihan Jenis Tugas Akhir -->
             <div class="card-3d-warm card-no-hover rounded-2xl p-6 sm:p-8 space-y-5">
@@ -240,10 +248,10 @@
 
                 <!-- Konsentrasi -->
                 <div class="space-y-1.5 pt-2">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Konsentrasi Studi</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Konsentrasi Studi (Otomatis dari Biodata)</label>
                     <div class="relative">
-                        <input type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 font-semibold text-xs outline-none cursor-not-allowed" value="<?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? ($mahasiswa['konsentrasi_dkv'] ?? 'Desain Grafis')); ?>" readonly>
-                        <input type="hidden" name="konsentrasi_dkv" value="<?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? ($mahasiswa['konsentrasi_dkv'] ?? 'Desain Grafis')); ?>">
+                        <input type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-800 font-semibold text-xs outline-none cursor-not-allowed" value="<?= htmlspecialchars(!empty($mahasiswa['konsentrasi_dkv']) ? $mahasiswa['konsentrasi_dkv'] : ($pendaftaran['konsentrasi_dkv'] ?? 'Desain Komunikasi Visual')); ?>" readonly>
+                        <input type="hidden" name="konsentrasi_dkv" value="<?= htmlspecialchars(!empty($mahasiswa['konsentrasi_dkv']) ? $mahasiswa['konsentrasi_dkv'] : ($pendaftaran['konsentrasi_dkv'] ?? 'Desain Komunikasi Visual')); ?>">
                     </div>
                 </div>
             </div>
@@ -446,15 +454,23 @@
                 </div>
             </div>
 
+            </fieldset>
+
             <!-- Bottom Submit & Cancel Bar -->
             <div class="flex flex-wrap items-center justify-between gap-4 pt-4 pb-12 border-t border-orange-200/70">
                 <a href="<?= site_url('mahasiswa'); ?>" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition box-3d">
-                    <i class="bi bi-arrow-left text-base"></i> Batal &amp; Kembali ke Dashboard
+                    <i class="bi bi-arrow-left text-base"></i> Kembali ke Dashboard
                 </a>
 
-                <button type="submit" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-lg transition box-3d cursor-pointer hover:scale-105 active:scale-95">
-                    <i class="bi bi-check-circle-fill text-base"></i> Simpan Perubahan Pendaftaran
-                </button>
+                <?php if(!empty($is_locked)): ?>
+                    <button type="button" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-slate-200 text-slate-500 font-bold text-xs border border-slate-300 shadow-none cursor-not-allowed select-none" disabled>
+                        <i class="bi bi-lock-fill text-base"></i> Formulir Terkunci (Sedang Ditinjau)
+                    </button>
+                <?php else: ?>
+                    <button type="submit" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-lg transition box-3d cursor-pointer hover:scale-105 active:scale-95">
+                        <i class="bi bi-check-circle-fill text-base"></i> Simpan Perubahan Pendaftaran
+                    </button>
+                <?php endif; ?>
             </div>
 
         </form>

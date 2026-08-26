@@ -5,8 +5,15 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     const totalSteps = 6;
-    const STEP_KEY = 'ifik_ta_active_step';
-    const DRAFT_KEY = 'ifik_ta_form_draft';
+    const userNim = window.CURRENT_USER_NIM ? window.CURRENT_USER_NIM.trim() : 'guest';
+    const STEP_KEY = 'ifik_ta_active_step_' + userNim;
+    const DRAFT_KEY = 'ifik_ta_form_draft_' + userNim;
+
+    // Clean legacy un-scoped draft keys from browser
+    try {
+        localStorage.removeItem('ifik_ta_active_step');
+        localStorage.removeItem('ifik_ta_form_draft');
+    } catch(e) {}
 
     let currentStep = 1;
 
@@ -272,6 +279,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function validateStep(step) {
         const currentContainer = document.getElementById(`step-content-${step}`);
         if (!currentContainer) return true;
+
+        // If form is locked in view-only mode, allow smooth step navigation
+        if (currentContainer.closest('fieldset[disabled]')) {
+            return true;
+        }
 
         let isValid = true;
         let errorMessage = '';

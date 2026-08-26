@@ -335,6 +335,8 @@
 
                             <?php
                             $allReviewed = !empty($detail['review_file_ksm']) && !empty($detail['review_file_transkrip']) && !empty($detail['review_file_pernyataan']) && !empty($detail['review_file_bebas_lab']);
+                            $allApproved = ($detail['status_file_ksm'] ?? '') === 'Approved' && ($detail['status_file_transkrip'] ?? '') === 'Approved' && ($detail['status_file_pernyataan'] ?? '') === 'Approved' && ($detail['status_file_bebas_lab'] ?? '') === 'Approved';
+                            $allRejected = ($detail['status_file_ksm'] ?? '') === 'Rejected' && ($detail['status_file_transkrip'] ?? '') === 'Rejected' && ($detail['status_file_pernyataan'] ?? '') === 'Rejected' && ($detail['status_file_bebas_lab'] ?? '') === 'Rejected';
                             ?>
 
                             <!-- Bulk Actions Bar -->
@@ -350,19 +352,33 @@
                                     </button>
 
                                     <!-- Approve Semua & Denied Semua -->
-                                    <?php if($allReviewed): ?>
-                                        <button type="button" id="btn-bulk-approve" onclick="approveAllFiles('Approved')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                            <i class="bi bi-check-all text-base"></i> Approve Semua
-                                        </button>
-                                        <button type="button" id="btn-bulk-reject" onclick="approveAllFiles('Rejected')" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
-                                        </button>
-                                    <?php else: ?>
+                                    <?php if(!$allReviewed): ?>
                                         <button type="button" id="btn-bulk-approve" onclick="handleBulkLockedClick()" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60" title="Wajib buka dan review semua berkas terlebih dahulu">
                                             <i class="bi bi-lock-fill text-xs"></i> Approve Semua
                                         </button>
                                         <button type="button" id="btn-bulk-reject" onclick="handleBulkLockedClick()" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60" title="Wajib buka dan review semua berkas terlebih dahulu">
                                             <i class="bi bi-lock-fill text-xs"></i> Denied Semua
+                                        </button>
+                                    <?php elseif($allApproved): ?>
+                                        <button type="button" id="btn-bulk-approve" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs" title="Semua berkas telah disetujui">
+                                            <i class="bi bi-check-all text-base"></i> Approve Semua
+                                        </button>
+                                        <button type="button" id="btn-bulk-reject" onclick="handleResetFirstWarning('semua berkas', 'Denied Semua')" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Semua berkas sudah di-Approve. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Denied Semua">
+                                            <i class="bi bi-x-circle text-sm"></i> Denied Semua
+                                        </button>
+                                    <?php elseif($allRejected): ?>
+                                        <button type="button" id="btn-bulk-approve" onclick="handleResetFirstWarning('semua berkas', 'Approve Semua')" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Semua berkas sudah di-Denied. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Approve Semua">
+                                            <i class="bi bi-check-all text-base"></i> Approve Semua
+                                        </button>
+                                        <button type="button" id="btn-bulk-reject" class="px-4 py-2 bg-rose-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs" title="Semua berkas telah ditolak">
+                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" id="btn-bulk-approve" onclick="approveAllFiles('Approved')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs" title="Approve semua berkas sekaligus">
+                                            <i class="bi bi-check-all text-base"></i> Approve Semua
+                                        </button>
+                                        <button type="button" id="btn-bulk-reject" onclick="approveAllFiles('Rejected')" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs" title="Denied semua berkas sekaligus">
+                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -556,34 +572,60 @@
     }
 
     function checkAllReviewed() {
+        return updateBulkButtonsState();
+    }
+
+    function updateBulkButtonsState() {
         const keys = ['ksm', 'transkrip', 'pernyataan', 'bebas_lab'];
         const allRev = keys.every(k => fileReviewedState[k] === true);
+        const allApp = keys.every(k => fileCurrentStatus[k] === 'Approved');
+        const allRej = keys.every(k => fileCurrentStatus[k] === 'Rejected');
         
         const btnApprove = document.getElementById('btn-bulk-approve');
         const btnReject = document.getElementById('btn-bulk-reject');
 
-        if (btnApprove && btnReject) {
-            if (allRev) {
-                btnApprove.className = 'px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs';
-                btnApprove.onclick = () => approveAllFiles('Approved');
-                btnApprove.innerHTML = '<i class="bi bi-check-all text-base"></i> Approve Semua';
-                btnApprove.title = 'Approve semua berkas';
+        if (!btnApprove || !btnReject) return allRev;
 
-                btnReject.className = 'px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs';
-                btnReject.onclick = () => approveAllFiles('Rejected');
-                btnReject.innerHTML = '<i class="bi bi-x-circle-fill text-sm"></i> Denied Semua';
-                btnReject.title = 'Denied semua berkas';
-            } else {
-                btnApprove.className = 'px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60';
-                btnApprove.onclick = handleBulkLockedClick;
-                btnApprove.innerHTML = '<i class="bi bi-lock-fill text-xs"></i> Approve Semua';
-                btnApprove.title = 'Wajib buka dan review semua berkas terlebih dahulu';
+        if (!allRev) {
+            btnApprove.className = 'px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60';
+            btnApprove.onclick = handleBulkLockedClick;
+            btnApprove.innerHTML = '<i class="bi bi-lock-fill text-xs"></i> Approve Semua';
+            btnApprove.title = 'Wajib buka dan review semua berkas terlebih dahulu';
 
-                btnReject.className = 'px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60';
-                btnReject.onclick = handleBulkLockedClick;
-                btnReject.innerHTML = '<i class="bi bi-lock-fill text-xs"></i> Denied Semua';
-                btnReject.title = 'Wajib buka dan review semua berkas terlebih dahulu';
-            }
+            btnReject.className = 'px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60';
+            btnReject.onclick = handleBulkLockedClick;
+            btnReject.innerHTML = '<i class="bi bi-lock-fill text-xs"></i> Denied Semua';
+            btnReject.title = 'Wajib buka dan review semua berkas terlebih dahulu';
+        } else if (allApp) {
+            btnApprove.className = 'px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs';
+            btnApprove.onclick = null;
+            btnApprove.innerHTML = '<i class="bi bi-check-all text-base"></i> Approve Semua';
+            btnApprove.title = 'Semua berkas telah disetujui';
+
+            btnReject.className = 'px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2';
+            btnReject.onclick = () => handleResetFirstWarning('semua berkas', 'Denied Semua');
+            btnReject.innerHTML = '<i class="bi bi-x-circle text-sm"></i> Denied Semua';
+            btnReject.title = 'Semua berkas sudah di-Approve. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Denied Semua';
+        } else if (allRej) {
+            btnApprove.className = 'px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2';
+            btnApprove.onclick = () => handleResetFirstWarning('semua berkas', 'Approve Semua');
+            btnApprove.innerHTML = '<i class="bi bi-check-all text-base"></i> Approve Semua';
+            btnApprove.title = 'Semua berkas sudah di-Denied. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Approve Semua';
+
+            btnReject.className = 'px-4 py-2 bg-rose-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs';
+            btnReject.onclick = null;
+            btnReject.innerHTML = '<i class="bi bi-x-circle-fill text-sm"></i> Denied Semua';
+            btnReject.title = 'Semua berkas telah ditolak';
+        } else {
+            btnApprove.className = 'px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs';
+            btnApprove.onclick = () => approveAllFiles('Approved');
+            btnApprove.innerHTML = '<i class="bi bi-check-all text-base"></i> Approve Semua';
+            btnApprove.title = 'Approve semua berkas sekaligus';
+
+            btnReject.className = 'px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs';
+            btnReject.onclick = () => approveAllFiles('Rejected');
+            btnReject.innerHTML = '<i class="bi bi-x-circle-fill text-sm"></i> Denied Semua';
+            btnReject.title = 'Denied semua berkas sekaligus';
         }
         return allRev;
     }
@@ -743,6 +785,9 @@
 
         showSideToast(`Status berkas ${key.toUpperCase()} di-reset ke Menunggu. Form komentar & tombol keputusan terbuka kembali.`, 'Pemberitahuan');
 
+        // Update bulk buttons state immediately
+        updateBulkButtonsState();
+
         // 5. Send AJAX update
         const formData = new FormData();
         formData.append('nim', currentNim);
@@ -837,6 +882,9 @@
 
         showSideToast(`Berkas ${key.toUpperCase()} berhasil di-${status === 'Approved' ? 'Approve' : 'Denied'}. Form komentar dikunci.`, 'Pemberitahuan');
 
+        // Update bulk buttons state
+        updateBulkButtonsState();
+
         // Send AJAX request with comment
         const formData = new FormData();
         formData.append('nim', currentNim);
@@ -919,6 +967,9 @@
         });
 
         showSideToast(`Semua berkas berhasil di-reset ke Menunggu.`, 'Pemberitahuan');
+
+        // Update bulk buttons state immediately
+        updateBulkButtonsState();
 
         const formData = new FormData();
         formData.append('nim', currentNim);
@@ -1008,6 +1059,9 @@
         });
 
         showSideToast(`Semua berkas berhasil di-${status === 'Approved' ? 'Approve' : 'Denied'}. Form komentar dikunci.`, 'Pemberitahuan');
+
+        // Update bulk buttons visual state immediately
+        updateBulkButtonsState();
 
         const formData = new FormData();
         formData.append('nim', currentNim);

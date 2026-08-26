@@ -9,27 +9,52 @@ class Mahasiswa_model extends CI_Model {
 
     // Get Data Mahasiswa berdasarkan NIM atau User ID
     public function get_mahasiswa($nim) {
-        if (!$this->db->table_exists('mahasiswa')) {
-            return array(
-                'nim' => $nim,
-                'nama_depan' => 'Rivan',
-                'nama_belakang' => 'Arshavin',
-                'alamat' => 'Jl. Telekomunikasi No. 1, Terusan Buah Batu, Bandung',
-                'kota' => 'Bandung',
-                'provinsi' => 'Jawa Barat',
-                'latitude' => '-6.973000',
-                'longitude' => '107.630000',
-                'konsentrasi_dkv' => 'Desain Grafis'
-            );
+        $session_name = $this->session->userdata('name');
+        $session_nim  = $this->session->userdata('nim') ?: $this->session->userdata('nidn_nim');
+        
+        // Ambil data dari tabel users jika tersedia
+        $user_row = null;
+        if (!empty($nim)) {
+            $user_row = $this->db->get_where('users', array('nidn_nim' => $nim))->row_array();
         }
-        $query = $this->db->get_where('mahasiswa', array('nim' => $nim));
-        return $query->row_array() ?: array(
-            'nim' => $nim,
-            'nama_depan' => 'Rivan',
-            'nama_belakang' => 'Arshavin',
+        if (!$user_row && $this->session->userdata('user_id')) {
+            $user_row = $this->db->get_where('users', array('id' => $this->session->userdata('user_id')))->row_array();
+        }
+
+        $full_name = !empty($user_row['name']) ? $user_row['name'] : ($session_name ?: 'Mahasiswa');
+        $name_parts = explode(' ', trim($full_name), 2);
+        $nama_depan_default = $name_parts[0] ?? 'Mahasiswa';
+        $nama_belakang_default = $name_parts[1] ?? '';
+
+        $data_mhs = null;
+        if ($this->db->table_exists('mahasiswa') && !empty($nim)) {
+            $query = $this->db->get_where('mahasiswa', array('nim' => $nim));
+            $data_mhs = $query->row_array();
+        }
+
+        if ($data_mhs) {
+            // Jika nama_depan di tabel mahasiswa kosong atau ingin diselaraskan dengan akun login
+            if (empty($data_mhs['nama_depan']) || (!empty($user_row['name']) && $user_row['name'] !== 'Rivan Arshavin')) {
+                $data_mhs['nama_depan'] = $nama_depan_default;
+                $data_mhs['nama_belakang'] = $nama_belakang_default;
+            }
+            if (empty($data_mhs['nim'])) {
+                $data_mhs['nim'] = $nim ?: $session_nim;
+            }
+            return $data_mhs;
+        }
+
+        return array(
+            'nim' => $nim ?: ($session_nim ?: '1301210001'),
+            'nama_depan' => $nama_depan_default,
+            'nama_belakang' => $nama_belakang_default,
             'alamat' => 'Jl. Telekomunikasi No. 1, Terusan Buah Batu, Bandung',
             'kota' => 'Bandung',
-            'provinsi' => 'Jawa Barat'
+            'provinsi' => 'Jawa Barat',
+            'latitude' => '-6.973000',
+            'longitude' => '107.630000',
+            'konsentrasi_dkv' => 'Desain Komunikasi Visual',
+            'prodi' => 'Desain Komunikasi Visual'
         );
     }
 
