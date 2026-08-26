@@ -12,10 +12,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+  <!-- Leaflet Map for Interactive Address Pinning -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
   <!-- Orbital Custom Stylesheet -->
   <link rel="stylesheet" href="<?= base_url('assets/css/onboarding.css'); ?>?v=<?= time(); ?>">
 </head>
-<body class="bg-black text-white antialiased overflow-hidden select-none">
+<body class="bg-slate-50 text-slate-900 antialiased overflow-hidden">
 
   <!-- Full Viewport Cosmic Orbital Container -->
   <div class="orbital-viewport">
@@ -33,12 +37,28 @@
         <span class="brand-tag">v2.4 Core</span>
       </div>
 
-      <div class="orbit-controls">
-        <button type="button" id="toggleAutoRotate" class="control-pill-btn">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          Auto Rotate
+      <!-- Linear Step Progress Indicator -->
+      <nav class="orbital-stepper-bar" id="stepperNav">
+        <button type="button" class="step-nav-item active" data-step="1">
+          <span class="step-num">1</span>
+          <span class="step-text">Ganti Password</span>
         </button>
-      </div>
+        <div class="step-nav-line"></div>
+        <button type="button" class="step-nav-item" data-step="2">
+          <span class="step-num">2</span>
+          <span class="step-text"><?= !empty($is_dosen) ? 'Identitas Dosen' : 'Identitas Mahasiswa'; ?></span>
+        </button>
+        <div class="step-nav-line"></div>
+        <button type="button" class="step-nav-item" data-step="3">
+          <span class="step-num">3</span>
+          <span class="step-text">Kelahiran & Domisili</span>
+        </button>
+        <div class="step-nav-line"></div>
+        <button type="button" class="step-nav-item" data-step="4">
+          <span class="step-num">4</span>
+          <span class="step-text"><?= !empty($is_dosen) ? 'Program Studi' : 'Akademik & Dosen Wali'; ?></span>
+        </button>
+      </nav>
     </header>
 
     <!-- Main Radial Orbital Stage Wrapper -->
@@ -54,7 +74,6 @@
 
         <!-- Concentric Orbital Path Rings -->
         <div class="orbit-ring"></div>
-        <div class="orbit-ring-outer"></div>
 
         <!-- Orbital nodes are rendered dynamically via onboarding.js -->
 
@@ -62,9 +81,9 @@
     </main>
 
     <!-- Footer System Status -->
-    <footer class="absolute bottom-6 left-0 right-0 flex items-center justify-between px-8 text-xs text-white/40 pointer-events-none">
+    <footer class="absolute bottom-6 left-0 right-0 flex items-center justify-between px-8 text-xs text-slate-500 pointer-events-none">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
         <span>Aktivasi Akun Mahasiswa Terproteksi</span>
       </div>
       <div class="font-mono">Fakultas Industri Kreatif &bull; Telkom University</div>
@@ -91,7 +110,7 @@
   <!-- JavaScript Kinematics & Interaction -->
   <script src="<?= base_url('assets/js/onboarding.js'); ?>?v=<?= time(); ?>"></script>
 
-  <!-- 3D Tubes Cursor Initialization -->
+  <!-- 3D Tubes Cursor Initialization (Exact Commit 9447ba9) -->
   <script type="module">
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
@@ -101,11 +120,12 @@
             const canvas = document.getElementById('tubesCanvas');
             if (canvas) {
               const app = TubesCursor(canvas, {
+                bloom: false,
                 tubes: {
-                  colors: ["#5e72e4", "#8965e0", "#f5365c"],
+                  colors: ["#ff5500", "#ff7700", "#ffa000", "#ff3300"],
                   lights: {
-                    intensity: 200,
-                    colors: ["#21d4fd", "#b721ff", "#f4d03f", "#11cdef"]
+                    intensity: 150,
+                    colors: ["#ffffff", "#ffaa00", "#ffffff", "#ff6600"]
                   }
                 }
               });

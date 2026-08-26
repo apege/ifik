@@ -307,9 +307,17 @@
         if (rejectBox) rejectBox.style.display = 'none';
 
         const isAuthorized = [1, 2, 3].includes(roleId);
+        const statusLower = (booking.status || '').toLowerCase();
 
-        // Hanya tampilkan tombol Setujui/Tolak jika status masih 'Pending' dan pengguna berwenang
-        if (isAuthorized && booking.status === 'Pending') {
+        // Status yang bisa diapprove:
+        // 1. Pending (untuk Admin, Laboran, Ka. Ur)
+        // 2. Disetujui Laboran (bisa di-approve / difinalisasi oleh Ka. Ur dan Admin)
+        const canApprove = (
+            statusLower === 'pending' ||
+            ((roleId === 3 || roleId === 1) && statusLower.includes('laboran'))
+        );
+
+        if (isAuthorized && canApprove) {
             let roleName = 'Admin';
             if (roleId === 3) roleName = 'Ka. Ur';
             else if (roleId === 2) roleName = 'Laboran';
