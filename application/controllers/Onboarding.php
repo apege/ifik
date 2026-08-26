@@ -179,6 +179,31 @@ class Onboarding extends CI_Controller {
             return;
         }
 
+        // 3. Strict Validation for Demographics & Birth Info
+        if (empty($tempatLahir) || empty($tanggalLahir) || empty($alamat)) {
+            $msg = 'Tempat lahir, tanggal lahir, dan alamat domisili lengkap wajib diisi!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+            redirect('onboarding');
+            return;
+        }
+
+        // 4. Strict Validation for Academic Info
+        $isDosen = ((int)$user->role_id === 4);
+        if (!$isDosen && empty($dosenWali)) {
+            $msg = 'Dosen wali akademik pembimbing wajib dipilih!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+            redirect('onboarding');
+            return;
+        }
+
         $fullName = trim($cleanDepan . ' ' . $cleanBelakang);
 
         // 3. Hash New Password
@@ -243,5 +268,73 @@ class Onboarding extends CI_Controller {
 
         // 7. Redirect to dashboard
         redirect('dashboard');
+    }
+
+    /**
+     * Proxy endpoint for Wilayah.id API to eliminate browser CORS restrictions
+     */
+    public function wilayah_proxy()
+    {
+        $endpoint = $this->input->get('endpoint', TRUE);
+        $code = $this->input->get('code', TRUE);
+
+        $url = '';
+        if ($endpoint === 'provinces') {
+            $url = 'https://wilayah.id/api/provinces.json';
+        } elseif ($endpoint === 'regencies' && !empty($code)) {
+            $url = 'https://wilayah.id/api/regencies/' . urlencode($code) . '.json';
+        } elseif ($endpoint === 'districts' && !empty($code)) {
+            $url = 'https://wilayah.id/api/districts/' . urlencode($code) . '.json';
+        } elseif ($endpoint === 'villages' && !empty($code)) {
+            $url = 'https://wilayah.id/api/villages/' . urlencode($code) . '.json';
+        }
+
+        if (empty($url)) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['data' => []]));
+            return;
+        }
+
+        $opts = [
+            'http' => [
+                'timeout' => 8,
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ]
+        ];
+        $context = stream_context_create($opts);
+        $json = @file_get_contents($url, false, $context);
+
+        if (!$json) {
+            // Fallback to emsifa if needed
+            if ($endpoint === 'provinces') {
+                $url2 = 'https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json';
+            } elseif ($endpoint === 'regencies') {
+                $url2 = 'https://emsifa.github.io/api-wilayah-indonesia/api/regencies/' . str_replace('.', '', $code) . '.json';
+            } elseif ($endpoint === 'districts') {
+                $url2 = 'https://emsifa.github.io/api-wilayah-indonesia/api/districts/' . str_replace('.', '', $code) . '.json';
+            } elseif ($endpoint === 'villages') {
+                $url2 = 'https://emsifa.github.io/api-wilayah-indonesia/api/villages/' . str_replace('.', '', $code) . '.json';
+            }
+            if (!empty($url2)) {
+                $json = @file_get_contents($url2, false, $context);
+                if ($json) {
+                    $raw = json_decode($json, true);
+                    if (is_array($raw)) {
+                        $json = json_encode(['data' => array_map(function($item) {
+                            return ['code' => isset($item['id']) ? $item['id'] : '', 'name' => isset($item['name']) ? ucwords(strtolower($item['name'])) : ''];
+                        }, $raw)]);
+                    }
+                }
+            }
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output($json ? $json : json_encode(['data' => []]));
     }
 }

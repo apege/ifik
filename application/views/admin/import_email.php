@@ -2351,9 +2351,9 @@
                     `;
                 } else if (acc.token && acc.token.length > 0) {
                     tokenHtml = `
-                        <div class="inline-flex items-center justify-between w-[118px] px-2 py-1 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-mono font-medium text-slate-700 mx-auto">
-                            <span class="tracking-wide cursor-pointer font-bold truncate max-w-[75px]" onclick="copyToClipboard('${acc.token}')" title="Klik untuk Salin Token: ${acc.token}">${acc.token}</span>
-                            <button onclick="copyToClipboard('${acc.token}')" class="text-slate-400 hover:text-slate-700 transition-colors p-0.5 cursor-pointer" title="Salin Token">
+                        <div class="inline-flex items-center justify-between w-[118px] px-2 py-1 bg-slate-50 hover:bg-orange-50/50 border border-slate-200/80 hover:border-orange-300/80 rounded-lg text-xs font-mono font-medium text-slate-700 transition-all mx-auto group">
+                            <span class="tracking-wide cursor-pointer font-bold truncate max-w-[75px]" onclick="copyTokenByUserId('${acc.id}')" title="Klik untuk Salin Token: ${acc.token}">${acc.token}</span>
+                            <button id="copy-btn-${acc.id}" onclick="copyTokenByUserId('${acc.id}')" class="text-slate-400 group-hover:text-brand-600 hover:text-brand-700 transition-colors p-0.5 cursor-pointer" title="Salin Token">
                                 <i class="fa-regular fa-copy text-xs"></i>
                             </button>
                         </div>
@@ -3172,6 +3172,80 @@
                         }
                     });
                 }
+            });
+        }
+
+        // Clipboard Copy Handlers
+        function copyTokenByUserId(id) {
+            const acc = state.accounts.find(a => a.id == id);
+            if (!acc || !acc.token) return;
+            copyToClipboard(acc.token, id);
+        }
+
+        function copyToClipboard(text, id = null) {
+            if (!text) return;
+
+            // Visual feedback on copy button icon if id is provided
+            if (id) {
+                const btn = document.getElementById(`copy-btn-${id}`);
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600 text-xs animate-in zoom-in"></i>`;
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                    }, 1800);
+                }
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopySuccessToast(text);
+                }).catch(() => {
+                    fallbackCopyToClipboard(text);
+                });
+            } else {
+                fallbackCopyToClipboard(text);
+            }
+        }
+
+        function fallbackCopyToClipboard(text) {
+            try {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = text;
+                tempTextArea.style.position = 'fixed';
+                tempTextArea.style.left = '-999999px';
+                tempTextArea.style.top = '-999999px';
+                document.body.appendChild(tempTextArea);
+                tempTextArea.focus();
+                tempTextArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+                if (successful) {
+                    showCopySuccessToast(text);
+                } else {
+                    Swal.fire('Gagal Menyalin', 'Silakan salin token secara manual.', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Gagal Menyalin', 'Silakan salin token secara manual.', 'error');
+            }
+        }
+
+        function showCopySuccessToast(token) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2200,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: `Token <span style="font-family:monospace; font-weight:700; color:#ea580c; background:#fff7ed; padding:2px 6px; border-radius:6px; border:1px solid #fed7aa;">${token}</span> berhasil disalin!`
             });
         }
 
