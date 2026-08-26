@@ -336,47 +336,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let formHtml = '';
-
     // ─────────────────────────────────────────────
     // NODE 1: GANTI PASSWORD
     // ─────────────────────────────────────────────
     if (node.id === 1) {
       formHtml = `
         <div class="orbital-form-pane">
-          <div class="orb-input-group">
-            <label class="orb-label">Password Baru <span class="text-red-400">*</span></label>
-            <div class="orb-input-wrap">
-              <input type="password" id="orb_password_baru" class="orb-input" placeholder="Min. 6 karakter" value="${formDataState.password_baru || ''}" autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" ondrop="return false;" required>
-              <button type="button" id="orbEyeNew" class="orb-eye-toggle" title="Lihat password">
-                <svg class="eye-open-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                <svg class="eye-slash-icon hidden" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-              </button>
+          <div class="orb-form-body">
+            <div class="orb-input-group">
+              <label class="orb-label">Password Baru <span class="text-red-400">*</span></label>
+              <div class="orb-input-wrap">
+                <input type="password" id="orb_password_baru" class="orb-input" placeholder="Min. 6 karakter" value="${formDataState.password_baru || ''}" autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" ondrop="return false;" required>
+                <button type="button" id="orbEyeNew" class="orb-eye-toggle" title="Lihat password">
+                  <svg class="eye-open-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <svg class="eye-slash-icon hidden" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <!-- Neon Password Strength Bar -->
-          <div class="orb-strength-container" id="orbStrengthContainer">
-            <div class="orb-strength-track">
-              <div class="orb-strength-bar" id="orbStrengthBar"></div>
+            <!-- Neon Password Strength Bar -->
+            <div class="orb-strength-container" id="orbStrengthContainer">
+              <div class="orb-strength-track">
+                <div class="orb-strength-bar" id="orbStrengthBar"></div>
+              </div>
+              <div class="orb-strength-meta">
+                <span class="orb-strength-label">Kekuatan Password</span>
+                <span class="orb-strength-status" id="orbStrengthStatus">-</span>
+              </div>
             </div>
-            <div class="orb-strength-meta">
-              <span class="orb-strength-label">Kekuatan Password</span>
-              <span class="orb-strength-status" id="orbStrengthStatus">-</span>
-            </div>
-          </div>
 
-          <div class="orb-input-group mt-1">
-            <label class="orb-label">Konfirmasi Password Baru <span class="text-red-400">*</span></label>
-            <div class="orb-input-wrap">
-              <input type="password" id="orb_konfirmasi_password" class="orb-input" placeholder="Ulangi password baru" value="${formDataState.konfirmasi_password || ''}" autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" ondrop="return false;" required>
-              <button type="button" id="orbEyeConfirm" class="orb-eye-toggle" title="Lihat password">
-                <svg class="eye-open-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                <svg class="eye-slash-icon hidden" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-              </button>
+            <div class="orb-input-group mt-1">
+              <label class="orb-label">Konfirmasi Password Baru <span class="text-red-400">*</span></label>
+              <div class="orb-input-wrap">
+                <input type="password" id="orb_konfirmasi_password" class="orb-input" placeholder="Ulangi password baru" value="${formDataState.konfirmasi_password || ''}" autocomplete="new-password" oncopy="return false;" onpaste="return false;" oncut="return false;" ondrop="return false;" required>
+                <button type="button" id="orbEyeConfirm" class="orb-eye-toggle" title="Lihat password">
+                  <svg class="eye-open-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <svg class="eye-slash-icon hidden" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <p id="orbPassError" class="text-xs text-red-400 hidden"></p>
+            <p id="orbPassError" class="text-xs text-red-400 hidden"></p>
+          </div>
 
           <div class="orb-btn-group">
             <button type="button" id="btnNextStep1" class="orb-btn-action">
@@ -394,37 +395,39 @@ document.addEventListener('DOMContentLoaded', () => {
       const idLabel = isDosen ? 'NIP / NIDN Dosen' : 'NIM Mahasiswa';
       formHtml = `
         <div class="orbital-form-pane">
-          <div class="orb-input-group">
-            <label class="orb-label">
-              <span>${idLabel}</span>
-              <span class="orb-badge-locked">
-                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                Terkunci
-              </span>
-            </label>
-            <div class="orb-input-wrap">
-              <input type="text" id="orb_nim" class="orb-input orb-input-readonly" value="${formDataState.nim}" readonly title="${idLabel} telah terdaftar dari akun Anda">
-              <svg class="orb-lock-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          <div class="orb-form-body">
+            <div class="orb-input-group">
+              <label class="orb-label">
+                <span>${idLabel}</span>
+                <span class="orb-badge-locked">
+                  <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  Terkunci
+                </span>
+              </label>
+              <div class="orb-input-wrap">
+                <input type="text" id="orb_nim" class="orb-input orb-input-readonly" value="${formDataState.nim}" readonly title="${idLabel} telah terdaftar dari akun Anda">
+                <svg class="orb-lock-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              </div>
             </div>
-          </div>
 
-          <div class="orb-input-group">
-            <label class="orb-label">
-              <span>Nama Depan *</span>
-              <span class="orb-badge-warn" id="orbBadgeDepan">Tanpa Simbol</span>
-            </label>
-            <input type="text" id="orb_nama_depan" class="orb-input no-icon" placeholder="Nama depan" value="${formDataState.nama_depan}" required>
-          </div>
+            <div class="orb-input-group">
+              <label class="orb-label">
+                <span>Nama Depan *</span>
+                <span class="orb-badge-warn" id="orbBadgeDepan">Tanpa Simbol</span>
+              </label>
+              <input type="text" id="orb_nama_depan" class="orb-input no-icon" placeholder="Nama depan" value="${formDataState.nama_depan}" required>
+            </div>
 
-          <div class="orb-input-group">
-            <label class="orb-label">
-              <span>Nama Belakang *</span>
-              <span class="orb-badge-warn" id="orbBadgeBelakang">Tanpa Simbol</span>
-            </label>
-            <input type="text" id="orb_nama_belakang" class="orb-input no-icon" placeholder="Nama belakang" value="${formDataState.nama_belakang}" required>
-          </div>
+            <div class="orb-input-group">
+              <label class="orb-label">
+                <span>Nama Belakang *</span>
+                <span class="orb-badge-warn" id="orbBadgeBelakang">Tanpa Simbol</span>
+              </label>
+              <input type="text" id="orb_nama_belakang" class="orb-input no-icon" placeholder="Nama belakang" value="${formDataState.nama_belakang}" required>
+            </div>
 
-          <p id="orbStep2Error" class="text-xs text-red-400 hidden"></p>
+            <p id="orbStep2Error" class="text-xs text-red-400 hidden"></p>
+          </div>
 
           <div class="orb-btn-group">
             <button type="button" id="btnBackStep2" class="orb-btn-secondary">Kembali</button>
@@ -442,50 +445,50 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (node.id === 3) {
       formHtml = `
         <div class="orbital-form-pane">
-          <!-- Tempat & Tanggal Lahir -->
-          <div class="grid grid-cols-2 gap-2">
-            <div class="orb-input-group">
-              <label class="orb-label">Tempat Lahir *</label>
-              <div class="orb-autocomplete-wrapper">
-                <div class="orb-autocomplete-box">
-                  <input type="text" id="orb_tempat_lahir" class="orb-input no-icon text-xs" placeholder="Kota lahir" value="${formDataState.tempat_lahir}" autocomplete="off" required>
-                  <div class="orb-autocomplete-dropdown" id="tempatLahirDropdownList"></div>
+          <div class="orb-form-body">
+            <!-- Tempat & Tanggal Lahir -->
+            <div class="grid grid-cols-2 gap-2">
+              <div class="orb-input-group">
+                <label class="orb-label">Tempat Lahir *</label>
+                <div class="orb-autocomplete-wrapper">
+                  <div class="orb-autocomplete-box">
+                    <input type="text" id="orb_tempat_lahir" class="orb-input no-icon" placeholder="Kota lahir" value="${formDataState.tempat_lahir}" autocomplete="off" required>
+                    <div class="orb-autocomplete-dropdown" id="tempatLahirDropdownList"></div>
+                  </div>
                 </div>
+              </div>
+
+              <div class="orb-input-group">
+                <label class="orb-label">Tanggal Lahir *</label>
+                <input type="date" id="orb_tanggal_lahir" class="orb-input no-icon" value="${formDataState.tanggal_lahir}" required>
               </div>
             </div>
 
-            <div class="orb-input-group">
-              <label class="orb-label">Tanggal Lahir *</label>
-              <input type="date" id="orb_tanggal_lahir" class="orb-input no-icon text-xs" value="${formDataState.tanggal_lahir}" required>
-            </div>
-          </div>
+            <!-- Alamat Domisili Header & Mode Tabs -->
+            <div class="mt-1">
+              <label class="orb-label flex items-center justify-between">
+                <span>Alamat Domisili *</span>
+                <span class="text-[10px] text-orange-600 font-mono" id="geoStatusLabel">Autocomplete & Pin Map</span>
+              </label>
 
-          <!-- Alamat Domisili Header & Mode Tabs -->
-          <div class="mt-1">
-            <label class="orb-label flex items-center justify-between">
-              <span>Alamat Domisili *</span>
-              <span class="text-[10px] text-orange-600 font-mono" id="geoStatusLabel">Autocomplete & Pin Map</span>
-            </label>
+              <!-- Mode Tabs -->
+              <div class="orb-segmented-tabs">
+                <button type="button" id="tabModeManual" class="orb-tab-btn active">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  <span>Ketik Wilayah</span>
+                </button>
+                <button type="button" id="tabModeMap" class="orb-tab-btn">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span>Pin di Peta</span>
+                </button>
+              </div>
 
-            <!-- Mode Tabs -->
-            <div class="orb-segmented-tabs">
-              <button type="button" id="tabModeManual" class="orb-tab-btn active">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                <span>Ketik Wilayah</span>
-              </button>
-              <button type="button" id="tabModeMap" class="orb-tab-btn">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span>Pin di Peta</span>
-              </button>
-            </div>
-
-            <!-- PANE 1: Ketik Wilayah -->
-            <div id="paneManualWilayah" class="space-y-1.5">
-              <div class="grid grid-cols-2 gap-1.5">
+              <!-- PANE 1: Ketik Wilayah (Full Width Stacked Hierarchy) -->
+              <div id="paneManualWilayah" class="space-y-2">
                 <!-- 1. Provinsi Autocomplete -->
                 <div class="orb-autocomplete-wrapper">
                   <div class="orb-autocomplete-box">
-                    <input type="text" id="orb_provinsi" class="orb-input no-icon text-xs" placeholder="Provinsi..." autocomplete="off">
+                    <input type="text" id="orb_provinsi" class="orb-input no-icon" placeholder="1. Pilih Provinsi..." autocomplete="off">
                     <div class="orb-autocomplete-dropdown" id="provinsiDropdownList"></div>
                   </div>
                 </div>
@@ -493,17 +496,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- 2. Kota/Kabupaten Autocomplete -->
                 <div class="orb-autocomplete-wrapper">
                   <div class="orb-autocomplete-box">
-                    <input type="text" id="orb_kota" class="orb-input no-icon text-xs" placeholder="Kota / Kab..." autocomplete="off">
+                    <input type="text" id="orb_kota" class="orb-input no-icon" placeholder="2. Pilih Kota / Kabupaten..." autocomplete="off">
                     <div class="orb-autocomplete-dropdown" id="kotaDropdownList"></div>
                   </div>
                 </div>
-              </div>
 
-              <div class="grid grid-cols-2 gap-1.5">
                 <!-- 3. Kecamatan Autocomplete -->
                 <div class="orb-autocomplete-wrapper">
                   <div class="orb-autocomplete-box">
-                    <input type="text" id="orb_kecamatan" class="orb-input no-icon text-xs" placeholder="Kecamatan..." autocomplete="off">
+                    <input type="text" id="orb_kecamatan" class="orb-input no-icon" placeholder="3. Pilih Kecamatan..." autocomplete="off">
                     <div class="orb-autocomplete-dropdown" id="kecamatanDropdownList"></div>
                   </div>
                 </div>
@@ -511,36 +512,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- 4. Kelurahan / Desa Autocomplete -->
                 <div class="orb-autocomplete-wrapper">
                   <div class="orb-autocomplete-box">
-                    <input type="text" id="orb_kelurahan" class="orb-input no-icon text-xs" placeholder="Kelurahan / Desa..." autocomplete="off">
+                    <input type="text" id="orb_kelurahan" class="orb-input no-icon" placeholder="4. Pilih Kelurahan / Desa..." autocomplete="off">
                     <div class="orb-autocomplete-dropdown" id="kelurahanDropdownList"></div>
                   </div>
                 </div>
+
+                <!-- 5. Nama Jalan (Isi Sendiri) -->
+                <input type="text" id="orb_jalan" class="orb-input no-icon" placeholder="5. Nama Jalan / Detail Rumah (mis: Gang Mekar Surya 2)">
               </div>
 
-              <!-- 5. Nama Jalan (Isi Sendiri) -->
-              <input type="text" id="orb_jalan" class="orb-input no-icon text-xs" placeholder="Nama Jalan / Alamat Rumah">
+              <!-- PANE 2: Pin di Peta (Leaflet OpenStreetMap + GPS) -->
+              <div id="paneMapWilayah" class="hidden space-y-1.5">
+                <div class="orb-map-wrap">
+                  <div id="domisiliMap"></div>
+                  <button type="button" id="btnGpsCurrentLocation" class="orb-geo-btn" title="Gunakan Lokasi GPS Saat Ini">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+                    <span>Lokasi Saya</span>
+                  </button>
+                </div>
+                <div class="orb-location-badge" id="mapAddressBadge">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                  <span id="mapAddressText" class="truncate text-[11px]">Geser pin pada peta untuk memilih lokasi</span>
+                </div>
+              </div>
+
+              <!-- Hidden input synced for Alamat Domisili -->
+              <input type="hidden" id="orb_alamat" value="${formDataState.alamat || ''}">
             </div>
 
-            <!-- PANE 2: Pin di Peta (Leaflet OpenStreetMap + GPS) -->
-            <div id="paneMapWilayah" class="hidden space-y-1.5">
-              <div class="orb-map-wrap">
-                <div id="domisiliMap"></div>
-                <button type="button" id="btnGpsCurrentLocation" class="orb-geo-btn" title="Gunakan Lokasi GPS Saat Ini">
-                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
-                  <span>Lokasi Saya</span>
-                </button>
-              </div>
-              <div class="orb-location-badge" id="mapAddressBadge">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                <span id="mapAddressText" class="truncate text-[11px]">Geser pin pada peta untuk memilih lokasi</span>
-              </div>
-            </div>
-
-            <!-- Hidden input synced for Alamat Domisili -->
-            <input type="hidden" id="orb_alamat" value="${formDataState.alamat || ''}">
+            <p id="orbStep3Error" class="text-xs text-red-400 hidden"></p>
           </div>
-
-          <p id="orbStep3Error" class="text-xs text-red-400 hidden"></p>
 
           <div class="orb-btn-group">
             <button type="button" id="btnBackStep3" class="orb-btn-secondary">Kembali</button>
@@ -586,47 +587,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
       formHtml = `
         <div class="orbital-form-pane">
-          
-          <!-- Custom Select: Konsentrasi / Homebase -->
-          <div class="orb-custom-select-wrapper">
-            <label class="orb-label">${konsentrasiLabel}</label>
-            <div class="orb-custom-select" id="select_konsentrasi">
-              <button type="button" class="orb-select-trigger">
-                <span class="orb-select-value">${formDataState.konsentrasi}</span>
-                <svg class="orb-select-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-              </button>
-              <div class="orb-select-dropdown">
-                <div class="orb-select-option ${formDataState.konsentrasi === 'Desain Komunikasi Visual' ? 'selected' : ''}" data-val="Desain Komunikasi Visual">
-                  <span>Desain Komunikasi Visual</span>
-                  <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div class="orb-select-option ${formDataState.konsentrasi === 'Informatika' ? 'selected' : ''}" data-val="Informatika">
-                  <span>Informatika</span>
-                  <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div class="orb-select-option ${formDataState.konsentrasi === 'Rekayasa Perangkat Lunak' ? 'selected' : ''}" data-val="Rekayasa Perangkat Lunak">
-                  <span>Rekayasa Perangkat Lunak</span>
-                  <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div class="orb-select-option ${formDataState.konsentrasi === 'Desain Produk' ? 'selected' : ''}" data-val="Desain Produk">
-                  <span>Desain Produk</span>
-                  <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div class="orb-select-option ${formDataState.konsentrasi === 'Desain Interior' ? 'selected' : ''}" data-val="Desain Interior">
-                  <span>Desain Interior</span>
-                  <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div class="orb-select-option ${formDataState.konsentrasi === 'Kriya Tekstil & Fashion' ? 'selected' : ''}" data-val="Kriya Tekstil & Fashion">
-                  <span>Kriya Tekstil & Fashion</span>
-                  <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          <div class="orb-form-body">
+            <!-- Custom Select: Konsentrasi / Homebase -->
+            <div class="orb-custom-select-wrapper">
+              <label class="orb-label">${konsentrasiLabel}</label>
+              <div class="orb-custom-select" id="select_konsentrasi">
+                <button type="button" class="orb-select-trigger">
+                  <span class="orb-select-value">${formDataState.konsentrasi}</span>
+                  <svg class="orb-select-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="orb-select-dropdown">
+                  <div class="orb-select-option ${formDataState.konsentrasi === 'Desain Komunikasi Visual' ? 'selected' : ''}" data-val="Desain Komunikasi Visual">
+                    <span>Desain Komunikasi Visual</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <div class="orb-select-option ${formDataState.konsentrasi === 'Informatika' ? 'selected' : ''}" data-val="Informatika">
+                    <span>Informatika</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <div class="orb-select-option ${formDataState.konsentrasi === 'Rekayasa Perangkat Lunak' ? 'selected' : ''}" data-val="Rekayasa Perangkat Lunak">
+                    <span>Rekayasa Perangkat Lunak</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <div class="orb-select-option ${formDataState.konsentrasi === 'Desain Produk' ? 'selected' : ''}" data-val="Desain Produk">
+                    <span>Desain Produk</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <div class="orb-select-option ${formDataState.konsentrasi === 'Desain Interior' ? 'selected' : ''}" data-val="Desain Interior">
+                    <span>Desain Interior</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <div class="orb-select-option ${formDataState.konsentrasi === 'Kriya Tekstil & Fashion' ? 'selected' : ''}" data-val="Kriya Tekstil & Fashion">
+                    <span>Kriya Tekstil & Fashion</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
                 </div>
               </div>
             </div>
+
+            ${dosenWaliBlock}
+
+            <p id="orbStep4Error" class="text-xs text-red-400 hidden mt-1"></p>
           </div>
-
-          ${dosenWaliBlock}
-
-          <p id="orbStep4Error" class="text-xs text-red-400 hidden mt-1"></p>
 
           <div class="orb-btn-group">
             <button type="button" id="btnBackStep4" class="orb-btn-secondary">Kembali</button>
@@ -638,14 +640,14 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
-
     card.innerHTML = `
-      <div class="card-header-flex">
-        <span class="card-badge ${badgeClass}" id="badgeStatus_${node.id}">${statusLabel}</span>
-        <span class="card-date">${node.date}</span>
+      <div class="card-header-block">
+        <div class="card-header-flex">
+          <span class="card-badge ${badgeClass}" id="badgeStatus_${node.id}">${statusLabel}</span>
+          <span class="card-date">${node.date}</span>
+        </div>
+        <h3 class="card-title">${node.title}</h3>
       </div>
-      <h3 class="card-title">${node.title}</h3>
-      <p class="card-content-desc">${node.content}</p>
 
       ${formHtml}
     `;

@@ -411,23 +411,27 @@ body {
 /* ─── SHADCN POPUP CARD (CLEAN WHITE THEME) ─────────────────────────────── */
 .orbital-card {
   position: absolute;
-  top: 50px;
+  top: 48px;
   left: 50%;
   transform: translateX(-50%);
-  width: 330px;
+  width: 380px;
+  max-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(249, 115, 22, 0.28);
   border-radius: 18px;
-  padding: 16px 18px 14px;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.12), 0 10px 30px rgba(234, 88, 12, 0.08);
+  padding: 0;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.14), 0 10px 30px rgba(234, 88, 12, 0.08);
   z-index: 250;
   cursor: default;
   user-select: auto;
   pointer-events: auto;
   animation: cardPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   color: #0f172a;
+  overflow: hidden;
 }
 
 .orbital-card.wide-card {
@@ -436,8 +440,11 @@ body {
 
 @media (max-width: 640px) {
   .orbital-card, .orbital-card.wide-card {
-    width: 90vw;
-    max-width: 340px;
+    width: 92vw;
+    max-width: 380px;
+    top: 35px;
+    height: 400px;
+    max-height: calc(100vh - 80px);
   }
 }
 
@@ -448,19 +455,34 @@ body {
 
 .card-top-pointer {
   position: absolute;
-  top: -12px;
+  top: -14px;
   left: 50%;
   transform: translateX(-50%);
   width: 2px;
-  height: 12px;
+  height: 14px;
   background: #ff6b00;
+}
+
+/* Card Header (Sticky Top Block) */
+.card-header-block {
+  flex-shrink: 0;
+  padding: 16px 20px 10px;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .card-header-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0;
 }
 
 /* Badges */
@@ -636,10 +658,80 @@ body {
 .orbital-form-pane {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.orb-form-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 290px;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 12px;
-  padding-top: 12px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(249, 115, 22, 0.45) transparent;
+}
+
+.orb-form-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.orb-form-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.orb-form-body::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.35);
+  border-radius: 9999px;
+}
+
+.orb-form-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.65);
+}
+
+.orb-btn-group {
+  flex-shrink: 0;
+  padding: 12px 20px 14px;
+  background: #ffffff;
   border-top: 1px solid #f1f5f9;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.orb-btn-secondary {
+  height: 38px;
+  padding: 0 16px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.orb-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #94a3b8;
 }
 
 .orb-input-group {
@@ -649,7 +741,7 @@ body {
 }
 
 .orb-label {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #334155;
   display: flex;
@@ -659,9 +751,9 @@ body {
 }
 
 .orb-badge-locked {
-  font-size: 0.62rem;
-  padding: 1px 6px;
-  border-radius: 4px;
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 5px;
   background: #fff7ed;
   border: 1px solid #fed7aa;
   color: #ea580c;
@@ -675,9 +767,9 @@ body {
 }
 
 .orb-badge-warn {
-  font-size: 0.62rem;
-  padding: 1px 6px;
-  border-radius: 4px;
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 5px;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #dc2626;
@@ -699,12 +791,12 @@ body {
 
 .orb-input, .orb-select, .orb-textarea {
   width: 100%;
-  padding: 7px 10px 7px 30px;
+  padding: 9px 12px 9px 34px;
   background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-radius: 7px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
   color: #0f172a;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-family: inherit;
   outline: none;
   transition: all 0.2s ease;
@@ -718,7 +810,7 @@ body {
 }
 
 .orb-input.no-icon, .orb-select.no-icon, .orb-textarea.no-icon {
-  padding-left: 10px;
+  padding: 9px 12px;
 }
 
 .orb-textarea {
