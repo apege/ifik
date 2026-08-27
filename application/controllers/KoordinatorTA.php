@@ -9,12 +9,15 @@ class KoordinatorTA extends CI_Controller {
         $this->load->helper(array('form', 'url', 'text'));
     }
 
-    // Dashboard Koordinator TA: Daftar Mahasiswa Mendaftar Tugas Akhir
+    // Dashboard Koordinator TA: Daftar Mahasiswa Mendaftar Tugas Akhir & Plotting Preview 2
     public function index() {
         $nip_koor = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19800202002'; // Mock NIP Koordinator TA
         $data['title'] = 'Dashboard Koordinator TA';
         $data['nip_koor'] = $nip_koor;
         $data['list_mahasiswa'] = $this->KoordinatorTA_model->get_all_mahasiswa_ta();
+        $data['list_preview2'] = $this->KoordinatorTA_model->get_all_mahasiswa_preview2();
+        $data['dosen_list'] = $this->KoordinatorTA_model->get_dosen_list();
+        $data['ruangan_list'] = $this->KoordinatorTA_model->get_available_ruangan();
 
         $this->load->view('koordinator_ta/dashboard', $data);
     }
@@ -64,6 +67,32 @@ class KoordinatorTA extends CI_Controller {
         }
 
         $result = $this->KoordinatorTA_model->update_approval_koor_ajax($nim, $status, $catatan, $pembimbing_1, $pembimbing_2);
+        echo json_encode($result);
+    }
+
+    // AJAX Endpoint: Batch Approval / Reject Koordinator TA (Multi-Select)
+    public function ajax_batch_approval() {
+        header('Content-Type: application/json');
+
+        $nims_raw     = $this->input->post('nims'); // JSON string atau array
+        $status       = $this->input->post('status'); // 'Approved' / 'Rejected'
+        $catatan      = trim($this->input->post('catatan_koor') ?? '');
+        $pembimbing_1 = $this->input->post('pembimbing_1');
+        $pembimbing_2 = $this->input->post('pembimbing_2');
+        $penguji_1    = $this->input->post('penguji_1');
+        $penguji_2    = $this->input->post('penguji_2');
+
+        $nims = is_array($nims_raw) ? $nims_raw : json_decode($nims_raw, true);
+
+        if (empty($nims) || !is_array($nims) || empty($status)) {
+            echo json_encode(array(
+                'status' => false,
+                'message' => 'Pilih setidaknya satu mahasiswa untuk diproses.'
+            ));
+            return;
+        }
+
+        $result = $this->KoordinatorTA_model->batch_approval_koor_ajax($nims, $status, $catatan, $pembimbing_1, $pembimbing_2, $penguji_1, $penguji_2);
         echo json_encode($result);
     }
 
@@ -126,6 +155,116 @@ class KoordinatorTA extends CI_Controller {
             'isLAAApproved'         => ($stAdmin === 'Approved'),
             'isKoorApproved'        => ($stKoor === 'Approved'),
             'isKkApproved'          => ($stKk === 'Approved')
+        ));
+    }
+
+    // AJAX Endpoint: Realtime Dashboard Sync (Background Polling for Table & Stat Cards)
+    public function ajax_realtime_dashboard() {
+        header('Content-Type: application/json');
+
+        $list = $this->KoordinatorTA_model->get_all_mahasiswa_ta();
+
+        $totalMhs = count($list);
+        $pendingCount = 0;
+        $approvedCount = 0;
+        $rejectedCount = 0;
+
+        foreach ($list as $row) {
+            $st = $row['status_approval_koor'] ?? 'Pending';
+            if ($st === 'Approved') $approvedCount++;
+            else if ($st === 'Rejected') $rejectedCount++;
+            else $pendingCount++;
+        }
+
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $list,
+            'stats'  => array(
+                'total'    => $totalMhs,
+                'pending'  => $pendingCount,
+                'approved' => $approvedCount,
+                'rejected' => $rejectedCount
+            )
+        ));
+    }
+
+    // AJAX Endpoint: Update Dosen Penguji & Jadwal Sidang Preview 2 (Single Mahasiswa)
+    public function ajax_update_preview2_penguji() {
+        header('Content-Type: application/json');
+
+        $nim          = $this->input->post('nim');
+        $penguji_1    = $this->input->post('penguji_1');
+        $penguji_2    = $this->input->post('penguji_2');
+        $tgl_sidang   = $this->input->post('tgl_sidang');
+        $jam_mulai    = $this->input->post('jam_mulai_sidang');
+        $jam_selesai  = $this->input->post('jam_selesai_sidang');
+        $ruangan      = $this->input->post('ruangan_sidang');
+
+        if (empty($nim) || empty($penguji_1) || empty($penguji_2)) {
+            echo json_encode(array(
+                'status' => false,
+                'message' => 'NIM, Dosen Penguji 1, dan Dosen Penguji 2 wajib dipilih.'
+            ));
+            return;
+        }
+
+        $res = $this->KoordinatorTA_model->update_penguji_jadwal_preview2($nim, $penguji_1, $penguji_2, $tgl_sidang, $jam_mulai, $jam_selesai, $ruangan);
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Batch Update Dosen Penguji & Jadwal Preview 2 (Multi-Select)
+    public function ajax_batch_preview2_penguji() {
+        header('Content-Type: application/json');
+
+        $nims_raw     = $this->input->post('nims');
+        $penguji_1    = $this->input->post('penguji_1');
+        $penguji_2    = $this->input->post('penguji_2');
+        $tgl_sidang   = $this->input->post('tgl_sidang');
+        $jam_mulai    = $this->input->post('jam_mulai_sidang');
+        $jam_selesai  = $this->input->post('jam_selesai_sidang');
+        $ruangan      = $this->input->post('ruangan_sidang');
+
+        $nims = is_array($nims_raw) ? $nims_raw : json_decode($nims_raw, true);
+
+        if (empty($nims) || !is_array($nims) || empty($penguji_1) || empty($penguji_2)) {
+            echo json_encode(array(
+                'status' => false,
+                'message' => 'Pilih mahasiswa serta tentukan Dosen Penguji 1 & 2.'
+            ));
+            return;
+        }
+
+        $res = $this->KoordinatorTA_model->batch_penguji_preview2_ajax($nims, $penguji_1, $penguji_2, $tgl_sidang, $jam_mulai, $jam_selesai, $ruangan);
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Realtime Sync Data Preview 2
+    public function ajax_realtime_preview2() {
+        header('Content-Type: application/json');
+
+        $list = $this->KoordinatorTA_model->get_all_mahasiswa_preview2();
+
+        $totalP2 = count($list);
+        $terjadwalCount = 0;
+        $pengujiSetCount = 0;
+        $belumSetCount = 0;
+
+        foreach ($list as $row) {
+            $st = $row['status_preview2'] ?? 'Belum Diplot';
+            if ($st === 'Terjadwal') $terjadwalCount++;
+            else if ($st === 'Penguji Ditetapkan') $pengujiSetCount++;
+            else $belumSetCount++;
+        }
+
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $list,
+            'stats'  => array(
+                'total'       => $totalP2,
+                'terjadwal'   => $terjadwalCount,
+                'penguji_set' => $pengujiSetCount,
+                'belum_set'   => $belumSetCount
+            )
         ));
     }
 }
