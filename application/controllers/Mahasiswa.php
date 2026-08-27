@@ -10,9 +10,13 @@ class Mahasiswa extends CI_Controller {
         $this->load->helper(array('form', 'url'));
     }
 
+    private function _get_current_nim() {
+        return $this->session->userdata('nim') ?: ($this->session->userdata('nidn_nim') ?: '1301210001');
+    }
+
     // Dashboard Mahasiswa & Overview Status Approval Chain
     public function index() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001'; // Mock NIM
+        $nim = $this->_get_current_nim();
         $data['title'] = 'Dashboard Mahasiswa';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
@@ -22,7 +26,7 @@ class Mahasiswa extends CI_Controller {
 
     // Detail Lengkap Pendaftaran Tugas Akhir (Single Page View)
     public function detail_pendaftaran() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $nim = $this->_get_current_nim();
         $data['title'] = 'Detail Pengajuan Tugas Akhir';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
@@ -32,12 +36,35 @@ class Mahasiswa extends CI_Controller {
 
     // Formulir Edit Pendaftaran TA (Single Page Non-Wizard Form)
     public function edit_pendaftaran() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
-        $data['title'] = 'Edit Formulir Tugas Akhir';
+        $nim = $this->_get_current_nim();
+        $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        if (empty($pendaftaran)) {
+            redirect('mahasiswa/pendaftaran_ta');
+            return;
+        }
+
+        $w_status  = $pendaftaran['status_approval_wali'] ?? 'Pending';
+        $a_status  = $pendaftaran['status_approval_admin'] ?? 'Pending';
+        $k_status  = $pendaftaran['status_approval_koor'] ?? 'Pending';
+        $kk_status = $pendaftaran['status_approval_kk'] ?? 'Pending';
+        $st_judul  = $pendaftaran['status_judul'] ?? 'Pending';
+        $has_revisi = ($w_status === 'Rejected' || $a_status === 'Rejected' || $k_status === 'Rejected' || $kk_status === 'Rejected' || !empty($pendaftaran['berkas_kurang']) || $st_judul === 'Rejected');
+        $is_locked = !$has_revisi;
+
+        $data['title'] = $is_locked ? 'Detail / Ringkasan Formulir Tugas Akhir' : 'Edit Formulir Tugas Akhir (Revisi)';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
-        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        $data['pendaftaran'] = $pendaftaran;
+        $data['is_locked'] = $is_locked;
+        $data['has_revisi'] = $has_revisi;
 
         if ($this->input->post()) {
+            if ($is_locked) {
+                $this->session->set_flashdata('error', 'Formulir saat ini terkunci (hanya lihat) karena pengajuan sedang dalam proses peninjauan.');
+                redirect('mahasiswa/edit_pendaftaran');
+                return;
+            }
+
             $config['upload_path']   = './uploads/persyaratan_ta/';
             $config['allowed_types'] = 'pdf';
             $config['max_size']      = 5120; // 5MB
@@ -53,6 +80,12 @@ class Mahasiswa extends CI_Controller {
             $file_step5 = $this->_do_upload('file_pernyataan', $config);
             $file_step6 = $this->_do_upload('file_bebas_lab', $config);
 
+            // Reset status approval yang sebelumnya ditolak kembali ke Pending untuk re-review
+            $new_w_status  = ($w_status === 'Rejected') ? 'Pending' : $w_status;
+            $new_a_status  = ($a_status === 'Rejected') ? 'Pending' : $a_status;
+            $new_k_status  = ($k_status === 'Rejected') ? 'Pending' : $k_status;
+            $new_kk_status = ($kk_status === 'Rejected') ? 'Pending' : $kk_status;
+
             $data_ta = array(
                 'nim'                  => $nim,
                 'jenis_ta'             => $this->input->post('jenis_ta'),
@@ -65,13 +98,17 @@ class Mahasiswa extends CI_Controller {
                 'file_transkrip'       => $file_step4 ? $file_step4 : $this->input->post('file_transkrip_old'),
                 'file_pernyataan'      => $file_step5 ? $file_step5 : $this->input->post('file_pernyataan_old'),
                 'file_bebas_lab'       => $file_step6 ? $file_step6 : $this->input->post('file_bebas_lab_old'),
-                'status_approval_wali' => 'Pending',
-                'current_stage'        => 'Dosen Wali',
-                'created_at'           => date('Y-m-d H:i:s')
+                'status_approval_wali' => $new_w_status,
+                'status_approval_admin'=> $new_a_status,
+                'status_approval_koor' => $new_k_status,
+                'status_approval_kk'   => $new_kk_status,
+                'status_judul'         => ($st_judul === 'Rejected') ? 'Pending' : $st_judul,
+                'berkas_kurang'        => NULL,
+                'created_at'           => $pendaftaran['created_at'] ?? date('Y-m-d H:i:s')
             );
 
             $this->Mahasiswa_model->save_pendaftaran_ta($data_ta);
-            $this->session->set_flashdata('success', 'Perubahan formulir Tugas Akhir berhasil disimpan!');
+            $this->session->set_flashdata('success', 'Perbaikan berkas & formulir Tugas Akhir berhasil dikirim untuk ditinjau ulang!');
             redirect('mahasiswa');
             return;
         }
@@ -81,7 +118,7 @@ class Mahasiswa extends CI_Controller {
 
     // Fitur Geodata Mahasiswa
     public function geodata() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $nim = $this->_get_current_nim();
         $data['title'] = 'Geodata Mahasiswa';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
 
@@ -103,9 +140,27 @@ class Mahasiswa extends CI_Controller {
 
     // Fitur Pendaftaran TA 6-Step Wizard
     public function pendaftaran_ta() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
-        $data['title'] = 'Pendaftaran Tugas Akhir (6 Step)';
-        $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        $nim = $this->_get_current_nim();
+        $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        $has_revisi = false;
+        $is_locked = false;
+
+        if (!empty($pendaftaran)) {
+            $w_status  = $pendaftaran['status_approval_wali'] ?? 'Pending';
+            $a_status  = $pendaftaran['status_approval_admin'] ?? 'Pending';
+            $k_status  = $pendaftaran['status_approval_koor'] ?? 'Pending';
+            $kk_status = $pendaftaran['status_approval_kk'] ?? 'Pending';
+            $st_judul  = $pendaftaran['status_judul'] ?? 'Pending';
+            $has_revisi = ($w_status === 'Rejected' || $a_status === 'Rejected' || $k_status === 'Rejected' || $kk_status === 'Rejected' || !empty($pendaftaran['berkas_kurang']) || $st_judul === 'Rejected');
+            $is_locked = !$has_revisi;
+        }
+
+        $data['title'] = $is_locked ? 'Pendaftaran Tugas Akhir (Sedang Ditinjau)' : 'Pendaftaran Tugas Akhir (6 Step)';
+        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran'] = $pendaftaran;
+        $data['is_locked'] = $is_locked;
+        $data['has_revisi'] = $has_revisi;
 
         if ($this->input->post()) {
             // Konfigurasi Upload File PDF
@@ -204,7 +259,7 @@ class Mahasiswa extends CI_Controller {
 
     // Fitur Ganti Password
     public function ganti_password() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $nim = $this->_get_current_nim();
         $data['title'] = 'Ganti Password';
 
         if ($this->input->post()) {
@@ -276,7 +331,7 @@ class Mahasiswa extends CI_Controller {
 
     // Fitur Reset Pengajuan TA
     public function reset_pendaftaran() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $nim = $this->_get_current_nim();
         $this->Mahasiswa_model->reset_pendaftaran_ta($nim);
         $this->session->set_flashdata('success', 'Pengajuan Tugas Akhir berhasil di-reset!');
         redirect('mahasiswa');
@@ -284,7 +339,7 @@ class Mahasiswa extends CI_Controller {
 
     // Modul Bimbingan TA & Upload Berkas Preview (Multi-Stage Hub)
     public function bimbingan() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $nim = $this->_get_current_nim();
         $data['title'] = 'Bimbingan & Evaluasi Preview TA';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
@@ -323,7 +378,7 @@ class Mahasiswa extends CI_Controller {
 
     // Endpoint Upload Draft Berkas Preview (Preview 1 / 2 / 3)
     public function upload_preview() {
-        $nim = $this->session->userdata('nim') ? $this->session->userdata('nim') : '1301210001';
+        $nim = $this->_get_current_nim();
         $tahap = $this->input->post('tahap_preview') ?: 'Preview 1';
 
         $upload_dir = './uploads/preview_ta/';

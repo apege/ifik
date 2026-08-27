@@ -9,9 +9,13 @@ class DosenWali extends CI_Controller {
         $this->load->helper(array('form', 'url'));
     }
 
+    private function _get_current_nip() {
+        return $this->session->userdata('nidn_nim') ?: ($this->session->userdata('nip') ?: ($this->session->userdata('nim') ?: '19850101'));
+    }
+
     // Dashboard Dosen Wali: Daftar Mahasiswa Bimbingan Akademik
     public function index() {
-        $nip_dosen = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19850101'; // Mock NIP Dosen Wali
+        $nip_dosen = $this->_get_current_nip();
         $data['title'] = 'Dashboard Dosen Wali';
         $data['dosen_info'] = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
         $data['list_mahasiswa'] = $this->DosenWali_model->get_mahasiswa_bimbingan($nip_dosen);
@@ -21,7 +25,7 @@ class DosenWali extends CI_Controller {
 
     // Detail Mahasiswa Bimbingan & Approval
     public function detail_mahasiswa($nim) {
-        $nip_dosen = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19850101';
+        $nip_dosen = $this->_get_current_nip();
         $data['title'] = 'Detail Mahasiswa & Approval Pendaftaran TA';
         $data['dosen_info'] = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
         $data['detail'] = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);

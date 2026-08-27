@@ -40,22 +40,6 @@
                     </div>
                 </div>
 
-                <!-- Nav Menu -->
-                <nav class="hidden md:flex items-center gap-7 relative" id="mainNav">
-                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link active-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Pendaftaran TA</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-person-video3"></i>
-                        <span>Bimbingan TA</span>
-                    </a>
-                </nav>
-
                 <!-- User Quick Info -->
                 <div class="flex items-center gap-2.5">
                     <div class="hidden sm:flex flex-col text-right">
@@ -130,9 +114,25 @@
             </div>
         </div>
 
+        <?php if(!empty($is_locked)): ?>
+            <!-- Locked View-Only Notice Banner -->
+            <div class="p-5 mb-6 rounded-2xl bg-amber-500/10 border-2 border-amber-400/80 text-amber-950 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-xl font-bold box-3d shrink-0">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800 block">STATUS: FORMULIR TERKUNCI (SEDANG DITINJAU)</span>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed mt-1">
+                        Pengajuan Tugas Akhir Anda saat ini sedang dalam proses peninjauan berjenjang. Kolom formulir berstatus <strong>hanya lihat (tidak dapat diedit)</strong>. Anda dapat menelusuri tiap langkah untuk memeriksa berkas yang telah dikirim. Kolom formulir akan otomatis aktif kembali jika terdapat catatan revisi.
+                    </p>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Main Card Container 3D -->
         <div class="card-3d-warm rounded-2xl mb-8 relative">
             <form action="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" method="POST" enctype="multipart/form-data" id="formPendaftaranTA">
+                <fieldset class="<?= !empty($is_locked) ? 'opacity-70 select-none' : ''; ?>" <?= !empty($is_locked) ? 'disabled' : ''; ?>>
                 
                 <div class="p-6 sm:p-10">
                     <!-- STEP 1 -->
@@ -288,55 +288,12 @@
                                     <i class="bi bi-info-circle text-orange-500"></i> Klik <strong>Translate Otomatis</strong> untuk menerjemahkan Judul Utama (ID &rarr; EN), atau ketik langsung secara manual.
                                 </p>
                             </div>
-                                    </button>
-                                </div>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" id="inputJudul2" name="judul_2" placeholder="Masukkan alternatif judul ke-2...">
-                            </div>
-
-                            <!-- Judul Alternatif 2 (Dinamis) -->
-                            <div id="containerJudul3" class="hidden p-4 rounded-xl bg-orange-50/70 border border-orange-200/90 transition-all duration-200">
-                                <div class="flex items-center justify-between mb-2">
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Judul Usulan 3 (Alternatif 2)</label>
-                                    <button type="button" class="btn-remove-alt text-xs font-semibold text-rose-500 hover:text-rose-700 flex items-center gap-1 hover:underline cursor-pointer" data-target="3">
-                                        <i class="bi bi-trash3"></i> Hapus Alternatif 2
-                                    </button>
-                                </div>
-                                <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium" id="inputJudul3" name="judul_3" placeholder="Masukkan alternatif judul ke-3...">
-                            </div>
-
-                            <!-- Tombol Tambah Judul Alternatif -->
-                            <div class="pt-0.5">
-                                <button type="button" id="btnAddJudulAlt" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-orange-600 hover:text-orange-700 bg-orange-100/70 hover:bg-orange-200/80 border border-dashed border-orange-300 transition-all active:scale-95 shadow-2xs cursor-pointer">
-                                    <i class="bi bi-plus-circle-fill text-sm"></i>
-                                    <span>Tambah Judul Alternatif</span>
-                                </button>
-                            </div>
-
-                            <!-- Judul dalam Bahasa Inggris -->
-                            <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Judul dalam Bahasa Inggris <span class="text-orange-500">*</span></label>
-                                    <button type="button" id="btnAutoTranslate" class="text-[11px] font-semibold text-orange-600 hover:text-orange-700 bg-orange-100/90 hover:bg-orange-200 px-3 py-1 rounded-lg border border-orange-300/80 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95" title="Terjemahkan otomatis dari Judul Utama">
-                                        <i class="bi bi-translate text-xs"></i>
-                                        <span id="btnAutoTranslateText">Translate Otomatis</span>
-                                    </button>
-                                </div>
-                                <div class="relative">
-                                    <input type="text" class="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium pr-10" id="inputJudulEn" name="judul_en" placeholder="Title in English..." required>
-                                    <span id="translateSpinner" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-orange-500 pointer-events-none">
-                                        <i class="bi bi-arrow-repeat animate-spin text-base"></i>
-                                    </span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-1.5 font-normal flex items-center gap-1">
-                                    <i class="bi bi-info-circle text-orange-500"></i> Klik <strong>Translate Otomatis</strong> untuk menerjemahkan Judul Utama (ID &rarr; EN), atau ketik langsung secara manual.
-                                </p>
-                            </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Konsentrasi (Otomatis dari Biodata)</label>
                                 <div class="relative">
-                                    <input type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100/90 text-slate-800 font-semibold text-xs outline-none cursor-not-allowed pr-28" value="<?= htmlspecialchars($mahasiswa['konsentrasi_dkv'] ?? 'Desain Grafis'); ?>" readonly>
-                                    <input type="hidden" name="konsentrasi_dkv" value="<?= htmlspecialchars($mahasiswa['konsentrasi_dkv'] ?? 'Desain Grafis'); ?>">
+                                    <input type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-100/90 text-slate-800 font-semibold text-xs outline-none cursor-not-allowed pr-28" value="<?= htmlspecialchars(!empty($mahasiswa['konsentrasi_dkv']) ? $mahasiswa['konsentrasi_dkv'] : ($pendaftaran['konsentrasi_dkv'] ?? 'Desain Komunikasi Visual')); ?>" readonly>
+                                    <input type="hidden" name="konsentrasi_dkv" value="<?= htmlspecialchars(!empty($mahasiswa['konsentrasi_dkv']) ? $mahasiswa['konsentrasi_dkv'] : ($pendaftaran['konsentrasi_dkv'] ?? 'Desain Komunikasi Visual')); ?>">
                                     <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-lg flex items-center gap-1">
                                         <i class="bi bi-check-circle-fill"></i> Otomatis
                                     </span>
@@ -595,6 +552,8 @@
                     </div>
                 </div>
 
+                </fieldset>
+
                 <!-- Footer Navigation -->
                 <div class="px-6 sm:px-10 py-5 bg-orange-100/40 border-t border-orange-200/60 flex items-center justify-between">
                     <button type="button" class="bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-700 border border-slate-300 font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-2 text-xs shadow-xs box-3d cursor-pointer" id="btnPrev">
@@ -605,9 +564,15 @@
                         <button type="button" class="btn-3d-orange flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-bold text-xs" id="btnNext">
                             <span>Lanjutkan</span> <i class="bi bi-arrow-right text-sm"></i>
                         </button>
-                        <button type="submit" class="hidden flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-xs box-3d" id="btnSubmit">
-                            <i class="bi bi-send-fill text-sm"></i> Kirim Pendaftaran
-                        </button>
+                        <?php if(!empty($is_locked)): ?>
+                            <button type="button" class="hidden flex items-center gap-2 bg-slate-200 border border-slate-300 text-slate-500 font-bold px-6 py-2.5 rounded-xl shadow-none transition text-xs select-none cursor-not-allowed" id="btnSubmit" disabled>
+                                <i class="bi bi-lock-fill text-sm"></i> Formulir Terkunci (Sedang Ditinjau)
+                            </button>
+                        <?php else: ?>
+                            <button type="submit" class="hidden flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-xs box-3d" id="btnSubmit">
+                                <i class="bi bi-send-fill text-sm"></i> Kirim Pendaftaran
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -623,6 +588,9 @@
         &copy; <?= date('Y'); ?> IFIK Portal — Fakultas Industri Kreatif, Telkom University
     </footer>
 
+    <script>
+        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ''); ?>";
+    </script>
     <script src="<?= base_url('assets/js/navbar_animated.js'); ?>?v=<?= time(); ?>"></script>
     <script src="<?= base_url('assets/js/pendaftaran_ta_stepper.js'); ?>?v=<?= time(); ?>"></script>
     <?php $this->load->view('partials/custom_cursor'); ?>

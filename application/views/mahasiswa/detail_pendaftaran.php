@@ -42,22 +42,6 @@
                     </div>
                 </div>
 
-                <!-- Nav Menu -->
-                <nav class="hidden md:flex items-center gap-7 relative" id="mainNav">
-                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link active-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Pendaftaran TA</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
-                        <i class="bi bi-person-video3"></i>
-                        <span>Bimbingan TA</span>
-                    </a>
-                </nav>
-
                 <!-- User Quick Info -->
                 <div class="flex items-center gap-2.5">
                     <div class="hidden sm:flex flex-col text-right">
@@ -74,6 +58,31 @@
 
     <!-- Main Content Container (Continuous Vertical Long-Page Layout) -->
     <main class="w-full px-4 sm:px-6 lg:px-10 py-8 flex-grow space-y-8 max-w-7xl mx-auto">
+
+        <!-- Flashdata Alert Banner -->
+        <?php if($this->session->flashdata('info')): ?>
+            <div class="p-4 bg-sky-50 border border-sky-200 text-sky-900 rounded-2xl flex items-start gap-3 shadow-xs">
+                <div class="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center text-base shrink-0 box-3d">
+                    <i class="bi bi-info-circle-fill"></i>
+                </div>
+                <div class="flex-grow pt-0.5">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-sky-800">Informasi Pendaftaran</h4>
+                    <p class="text-xs font-semibold text-sky-950 mt-0.5"><?= $this->session->flashdata('info'); ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if($this->session->flashdata('success')): ?>
+            <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl flex items-start gap-3 shadow-xs">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base shrink-0 box-3d">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="flex-grow pt-0.5">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-800">Berhasil</h4>
+                    <p class="text-xs font-semibold text-emerald-950 mt-0.5"><?= $this->session->flashdata('success'); ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <!-- Top Header & Action Breadcrumbs -->
         <div class="flex flex-wrap items-center justify-between gap-4 border-b border-orange-200/70 pb-5">
@@ -93,124 +102,40 @@
             </div>
 
             <!-- Quick Action Buttons -->
+            <?php 
+                $w_status = $pendaftaran['status_approval_wali'] ?? 'Pending';
+                $a_status = $pendaftaran['status_approval_admin'] ?? 'Pending';
+                $k_status = $pendaftaran['status_approval_koor'] ?? 'Pending';
+                $kk_status = $pendaftaran['status_approval_kk'] ?? 'Pending';
+                $st_judul  = $pendaftaran['status_judul'] ?? 'Pending';
+
+                $approved_count = 0;
+                if ($w_status === 'Approved') $approved_count++;
+                if ($a_status === 'Approved') $approved_count++;
+                if ($k_status === 'Approved') $approved_count++;
+                if ($kk_status === 'Approved') $approved_count++;
+
+                $is_fully_approved = ($approved_count === 4);
+                $has_revisi = ($w_status === 'Rejected' || $a_status === 'Rejected' || $k_status === 'Rejected' || $kk_status === 'Rejected' || !empty($pendaftaran['berkas_kurang']) || $st_judul === 'Rejected');
+                $has_rejection = $has_revisi;
+            ?>
             <div class="flex items-center gap-3 no-print">
                 <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition cursor-pointer">
                     <i class="bi bi-printer-fill text-sm"></i> Cetak / Simpan PDF
                 </button>
-                <a href="<?= site_url('mahasiswa/edit_pendaftaran'); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs shadow-md hover:from-orange-700 hover:to-amber-700 transition box-3d">
-                    <i class="bi bi-pencil-square text-sm"></i> Ubah Formulir Data
-                </a>
+                <?php if($has_revisi): ?>
+                    <a href="<?= site_url('mahasiswa/edit_pendaftaran'); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-xs shadow-md transition box-3d animate-pulse">
+                        <i class="bi bi-pencil-square text-sm"></i> Perbaiki Berkas / Data (Ada Revisi)
+                    </a>
+                <?php else: ?>
+                    <a href="<?= site_url('mahasiswa/edit_pendaftaran'); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs shadow-md transition box-3d">
+                        <i class="bi bi-pencil-square text-sm"></i> Lihat &amp; Edit Formulir
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
 
-        <!-- Overall Status Banner & Approval Workflow -->
-        <?php 
-            $w_status = $pendaftaran['status_approval_wali'] ?? 'Pending';
-            $a_status = $pendaftaran['status_approval_admin'] ?? 'Pending';
-            $k_status = $pendaftaran['status_approval_koor'] ?? 'Pending';
-            $kk_status = $pendaftaran['status_approval_kk'] ?? 'Pending';
 
-            $approved_count = 0;
-            if ($w_status === 'Approved') $approved_count++;
-            if ($a_status === 'Approved') $approved_count++;
-            if ($k_status === 'Approved') $approved_count++;
-            if ($kk_status === 'Approved') $approved_count++;
-
-            $is_fully_approved = ($approved_count === 4);
-            $has_rejection = ($w_status === 'Rejected' || $a_status === 'Rejected' || $k_status === 'Rejected' || $kk_status === 'Rejected');
-        ?>
-
-        <div class="card-3d-warm card-no-hover rounded-2xl p-6 sm:p-8">
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-12 h-12 rounded-2xl <?= $is_fully_approved ? 'bg-emerald-500 text-white' : ($has_rejection ? 'bg-rose-500 text-white' : 'bg-gradient-to-tr from-orange-500 to-amber-400 text-white'); ?> flex items-center justify-center text-2xl font-bold box-3d shadow-md">
-                        <i class="bi <?= $is_fully_approved ? 'bi-patch-check-fill' : ($has_rejection ? 'bi-exclamation-octagon-fill' : 'bi-clock-history'); ?>"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-orange-600 block">STATUS KESELURUHAN</span>
-                        <h3 class="text-lg sm:text-xl font-bold text-slate-900">
-                            <?php if($is_fully_approved): ?>
-                                <span class="text-emerald-600">Pengajuan Tugas Akhir Disetujui Penuh (100%)</span>
-                            <?php elseif($has_rejection): ?>
-                                <span class="text-rose-600">Terdapat Tahapan yang Perlu Revisi / Ditolak</span>
-                            <?php else: ?>
-                                <span class="text-slate-800">Sedang Dalam Tahap Persetujuan Berjenjang (<?= $approved_count; ?>/4 Disetujui)</span>
-                            <?php endif; ?>
-                        </h3>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-4 py-2 rounded-full border <?= $is_fully_approved ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($has_rejection ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-amber-100 text-amber-900 border-amber-300'); ?> badge-3d">
-                        <i class="bi bi-circle-fill text-[8px] mr-1.5 <?= $is_fully_approved ? 'text-emerald-500' : ($has_rejection ? 'text-rose-500' : 'text-amber-500 animate-pulse'); ?>"></i>
-                        <?= $is_fully_approved ? 'Pendaftaran Selesai' : ($has_rejection ? 'Status: Revisi' : 'Tahap: ' . ($pendaftaran['current_stage'] ?? 'Dosen Wali')); ?>
-                    </span>
-                </div>
-            </div>
-
-            <!-- 4-Stage Horizontal Workflow Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-                <!-- Tahap 1: Dosen Wali -->
-                <div class="p-4 rounded-xl border <?= ($w_status === 'Approved') ? 'bg-emerald-50/70 border-emerald-300' : (($w_status === 'Rejected') ? 'bg-rose-50/70 border-rose-300' : 'bg-orange-50/70 border-orange-300'); ?>">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tahap 01</span>
-                        <i class="bi <?= ($w_status === 'Approved') ? 'bi-check-circle-fill text-emerald-600' : (($w_status === 'Rejected') ? 'bi-x-circle-fill text-rose-600' : 'bi-clock-fill text-orange-500'); ?> text-base"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-slate-900">Dosen Wali</h4>
-                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Persetujuan usulan judul</p>
-                    <div class="mt-2.5">
-                        <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-md border <?= ($w_status === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (($w_status === 'Rejected') ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-orange-200/80 text-orange-900 border-orange-300'); ?>">
-                            <?= $w_status; ?>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Tahap 2: Admin Layanan -->
-                <div class="p-4 rounded-xl border <?= ($a_status === 'Approved') ? 'bg-emerald-50/70 border-emerald-300' : (($a_status === 'Rejected') ? 'bg-rose-50/70 border-rose-300' : 'bg-slate-50 border-slate-200'); ?>">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tahap 02</span>
-                        <i class="bi <?= ($a_status === 'Approved') ? 'bi-check-circle-fill text-emerald-600' : (($a_status === 'Rejected') ? 'bi-x-circle-fill text-rose-600' : 'bi-clock-fill text-slate-400'); ?> text-base"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-slate-900">Admin Layanan</h4>
-                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Verifikasi kelengkapan PDF</p>
-                    <div class="mt-2.5">
-                        <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-md border <?= ($a_status === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (($a_status === 'Rejected') ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-slate-200 text-slate-700 border-slate-300'); ?>">
-                            <?= $a_status; ?>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Tahap 3: Koordinator TA -->
-                <div class="p-4 rounded-xl border <?= ($k_status === 'Approved') ? 'bg-emerald-50/70 border-emerald-300' : (($k_status === 'Rejected') ? 'bg-rose-50/70 border-rose-300' : 'bg-slate-50 border-slate-200'); ?>">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tahap 03</span>
-                        <i class="bi <?= ($k_status === 'Approved') ? 'bi-check-circle-fill text-emerald-600' : (($k_status === 'Rejected') ? 'bi-x-circle-fill text-rose-600' : 'bi-clock-fill text-slate-400'); ?> text-base"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-slate-900">Koordinator TA</h4>
-                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Validasi topik & kuota</p>
-                    <div class="mt-2.5">
-                        <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-md border <?= ($k_status === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (($k_status === 'Rejected') ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-slate-200 text-slate-700 border-slate-300'); ?>">
-                            <?= $k_status; ?>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Tahap 4: Ketua KK -->
-                <div class="p-4 rounded-xl border <?= ($kk_status === 'Approved') ? 'bg-emerald-50/70 border-emerald-300' : (($kk_status === 'Rejected') ? 'bg-rose-50/70 border-rose-300' : 'bg-slate-50 border-slate-200'); ?>">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tahap 04</span>
-                        <i class="bi <?= ($kk_status === 'Approved') ? 'bi-check-circle-fill text-emerald-600' : (($kk_status === 'Rejected') ? 'bi-x-circle-fill text-rose-600' : 'bi-clock-fill text-slate-400'); ?> text-base"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-slate-900">Ketua KK</h4>
-                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">Persetujuan akhir pembimbing</p>
-                    <div class="mt-2.5">
-                        <span class="inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-md border <?= ($kk_status === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : (($kk_status === 'Rejected') ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-slate-200 text-slate-700 border-slate-300'); ?>">
-                            <?= $kk_status; ?>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Section 1: Data Mahasiswa & Informasi Akademik -->
         <div class="card-3d-warm card-no-hover rounded-2xl p-6 sm:p-8 space-y-6">
