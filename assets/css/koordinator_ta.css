@@ -158,3 +158,35 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+/* FLOATING BATCH ACTION BAR */
+.floating-batch-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    z-index: 50;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.floating-batch-bar.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* STAT CARD ACTIVE HIGHLIGHT */
+.stat-card-active {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 2.5px #ea580c, 0 20px 30px -10px rgba(234, 88, 12, 0.25) !important;
+    transform: translateY(-4px) scale(1.02) !important;
+}
+
+/* MODAL BACKDROP TRANSITION */
+.modal-backdrop {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
