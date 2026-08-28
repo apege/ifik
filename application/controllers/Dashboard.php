@@ -241,6 +241,15 @@ class Dashboard extends CI_Controller {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menambahkan ruangan baru.']);
         }
     }
+
+    public function about()
+    {
+        $this->load->helper('url');
+        $this->load->model('Header_model');
+        $data['header_settings'] = $this->Header_model->get_settings();
+        $data['title'] = 'Tentang Fakultas Industri Kreatif';
+        $this->load->view('dashboard/about', $data);
+    }
 }
 
 

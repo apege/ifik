@@ -94,12 +94,20 @@ class AdminHeader extends CI_Controller {
         $duration = (int)$this->input->post('duration');
         if ($duration < 1 || $media_type == 'video') $duration = 4;
 
+        // Data teks overlay dari toggle ON/OFF
+        $show_text           = (int)$this->input->post('show_text');
+        $overlay_title       = $this->input->post('overlay_title', true);
+        $overlay_description = $this->input->post('overlay_description'); // HTML dari TinyMCE — jangan di-escape
+
         $insert_data = [
-            'label' => $label,
-            'media_type' => $media_type,
-            'order_num' => $order_num,
-            'duration' => $duration,
-            'created_at' => date('Y-m-d H:i:s')
+            'label'               => $label,
+            'media_type'          => $media_type,
+            'order_num'           => $order_num,
+            'duration'            => $duration,
+            'show_text'           => $show_text,
+            'overlay_title'       => $show_text ? $overlay_title       : null,
+            'overlay_description' => $show_text ? $overlay_description : null,
+            'created_at'          => date('Y-m-d H:i:s')
         ];
 
         $this->load->library('upload');

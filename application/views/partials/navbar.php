@@ -30,8 +30,8 @@
 
     .nav-list {
         display: flex;
-        flex-direction: row; /* Menu menyamping (horizontal) */
-        gap: 10px;
+        flex-direction: row; /* horizontal layout */
+        flex-wrap: wrap; /* allow wrapping after 3 items */
         align-items: center;
         list-style: none;
         margin: 0;
@@ -100,7 +100,8 @@
     /* Nav Link Login (Preserve Old Orange Pill Style) */
     .nav-link-login {
         color: #ffffff;
-        background: #ea580c;
+        background: linear-gradient(90deg, #ea580c 0%, #ff7f50 50%, #ea580c 100%);
+        background-size: 200% 100%;
         font-weight: 700;
         font-size: 0.85rem;
         text-transform: uppercase;
@@ -111,17 +112,18 @@
         align-items: center;
         gap: 8px;
         border-radius: 999px;
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                    box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                    background 0.3s ease;
         box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
         transform-origin: center;
+        animation: shine 3s linear infinite;
+    }
+
+    @keyframes shine {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
     }
     
     .nav-link-login:hover {
         background: #c2410c;
-        transform: scale(1.1) rotate(-4deg);
-        box-shadow: 0 8px 22px rgba(234, 88, 12, 0.5);
         color: #ffffff;
     }
 
@@ -160,10 +162,14 @@
         padding: 20px;
         z-index: 1000;
         pointer-events: none;
-        display: flex;
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: 15px;
         white-space: nowrap;
+    }
+
+    .user-dropdown a {
+        min-width: 130px;
     }
 
     .nav-dropdown::before {
@@ -210,7 +216,6 @@
         font-weight: 700;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         text-transform: capitalize;
-        min-width: 130px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     }
 
@@ -253,7 +258,7 @@
         .nav-link .btn-box { display: none; } /* Hide small icons to guarantee zero clipping */
         .nav-link-login { font-size: 0.72rem; padding: 6px 10px 6px 6px; }
         .nav-dropdown { padding: 12px; gap: 8px; }
-        .nav-dropdown a { padding: 8px 12px; min-width: 100px; }
+        .nav-dropdown a { padding: 8px 12px; }
     }
 
     @media (max-width: 992px) {
@@ -265,7 +270,7 @@
         .nav-link-login .btn-box { margin: 0; }
         
         .nav-dropdown {
-            flex-direction: column; /* Stack dropdown items vertically */
+            grid-template-columns: 1fr; /* 1 kolom penuh */
             left: 0;
             transform: translateX(-20px) translateY(15px);
         }
@@ -585,18 +590,38 @@
         <!-- 7. Login / Logout -->
         <li class="nav-item">
             <?php if ($this->session->userdata('logged_in')): ?>
-                <a href="<?= base_url('login/logout') ?>" class="nav-link-login">
+                <a href="#" class="nav-link-login user-link">
                     <span class="btn-box">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
                         </svg>
                     </span>
-                    <span>Logout</span>
+                    <span><?php echo $this->session->userdata('name'); ?></span>
                 </a>
+                <div class="nav-dropdown user-dropdown">
+                    <a href="<?php echo base_url('login/logout'); ?>">
+                        <span class="btn-box">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                        </span>
+                        <span>Logout</span>
+                    </a>
+                    <a href="<?php echo base_url('mahasiswa'); ?>">
+                        <span class="btn-box">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </span>
+                        <span>Mahasiswa</span>
+                    </a>
+                </div>
             <?php else: ?>
-                <a href="<?= base_url('login') ?>" class="nav-link-login">
+                <a href="<?php echo base_url('login'); ?>" class="nav-link-login">
                     <span class="btn-box">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>

@@ -345,10 +345,32 @@ class Mahasiswa extends CI_Controller {
 
     // Modul Bimbingan TA & Upload Berkas Preview (Multi-Stage Hub)
     public function bimbingan() {
+        $role_id = $this->session->userdata('role_id');
+
+        if ($role_id == 4) {
+            $dosen_id = $this->session->userdata('user_id');
+            $posisi = $this->input->get('posisi') ?: 1;
+            
+            $data['title'] = 'Dashboard Bimbingan Dosen';
+            $data['posisi'] = $posisi;
+            $data['students'] = $this->Mahasiswa_model->get_students_by_dosen($dosen_id, $posisi);
+            
+            foreach ($data['students'] as &$student) {
+                $student['preview1'] = $this->Mahasiswa_model->get_riwayat_preview($student['nim'], 'Preview 1');
+                $student['preview2'] = $this->Mahasiswa_model->get_riwayat_preview($student['nim'], 'Preview 2');
+                $student['preview3'] = $this->Mahasiswa_model->get_riwayat_preview($student['nim'], 'Preview 3');
+            }
+            
+            $this->load->view('mahasiswa/dosen_bimbingan', $data);
+            return;
+        }
+
         $nim = $this->_get_current_nim();
         $data['title'] = 'Bimbingan & Evaluasi Preview TA';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        
+        $pembimbing_penguji = $this->Mahasiswa_model->get_pembimbing_penguji($nim);
         
         // Riwayat tiap tahapan preview
         $data['riwayat_preview1'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
@@ -366,13 +388,15 @@ class Mahasiswa extends CI_Controller {
         $data['latest_p3'] = $data['riwayat_preview3'][0] ?? null;
 
         // Default Mock Pembimbing & Penguji jika belum di-set di database
-        $data['pembimbing_1'] = !empty($data['pendaftaran']['nama_pembimbing_1']) 
-            ? $data['pendaftaran']['nama_pembimbing_1'] 
-            : 'Dr. Rina Fitriana, S.Ds., M.Ds.';
-        $data['pembimbing_2'] = !empty($data['pendaftaran']['nama_pembimbing_2']) 
-            ? $data['pendaftaran']['nama_pembimbing_2'] 
-            : 'Agung Pratama, S.T., M.Kom.';
-        $data['penguji_ta'] = 'Bambang Sudarsono, S.T., M.T.';
+        $data['pembimbing_1'] = !empty($pembimbing_penguji['pembimbing_1']) 
+            ? $pembimbing_penguji['pembimbing_1'] 
+            : (!empty($data['pendaftaran']['nama_pembimbing_1']) ? $data['pendaftaran']['nama_pembimbing_1'] : 'Dr. Rina Fitriana, S.Ds., M.Ds.');
+        $data['pembimbing_2'] = !empty($pembimbing_penguji['pembimbing_2']) 
+            ? $pembimbing_penguji['pembimbing_2'] 
+            : (!empty($data['pendaftaran']['nama_pembimbing_2']) ? $data['pendaftaran']['nama_pembimbing_2'] : 'Agung Pratama, S.T., M.Kom.');
+        $data['penguji_ta'] = !empty($pembimbing_penguji['penguji_1']) 
+            ? $pembimbing_penguji['penguji_1'] 
+            : 'Bambang Sudarsono, S.T., M.T.';
 
         $this->load->view('mahasiswa/bimbingan_preview1', $data);
     }
@@ -427,5 +451,36 @@ class Mahasiswa extends CI_Controller {
     // Fallback handler upload_preview1
     public function upload_preview1() {
         $this->upload_preview();
+    }
+
+    // Endpoint for Dosen to submit review
+    public function review_preview() {
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id != 4) {
+            redirect('mahasiswa/bimbingan');
+            return;
+        }
+
+        $id = $this->input->post('id_preview');
+        $posisi = $this->input->post('posisi');
+        $catatan = $this->input->post('catatan_pembimbing');
+        $status = $this->input->post('status_pembimbing');
+
+        if ($posisi == 1) {
+            $data = array(
+                'status_pembimbing' => $status,
+                'catatan_pembimbing' => $catatan
+            );
+            $this->Mahasiswa_model->update_review_preview($id, $data);
+            $this->session->set_flashdata('success', 'Review Pembimbing 1 berhasil disimpan.');
+        } else if ($posisi == 2) {
+            $data = array(
+                'catatan_pembimbing_2' => $catatan
+            );
+            $this->Mahasiswa_model->update_review_preview($id, $data);
+            $this->session->set_flashdata('success', 'Komentar Pembimbing 2 berhasil disimpan.');
+        }
+
+        redirect('mahasiswa/bimbingan?posisi=' . $posisi);
     }
 }

@@ -118,6 +118,9 @@ $route['news/delete/(:num)'] = 'News/delete/$1';
 $route['news/toggle/(:num)'] = 'News/toggle/$1';
 $route['news/get_all_json'] = 'News/get_all_json';
 
+// About / Baca Selengkapnya Route
+$route['dashboard/about'] = 'Dashboard/about';
+
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
