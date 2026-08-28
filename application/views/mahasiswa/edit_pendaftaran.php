@@ -40,6 +40,22 @@
                     </div>
                 </div>
 
+                <!-- Nav Menu -->
+                <nav class="hidden md:flex items-center gap-7 relative" id="mainNav">
+                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link active-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Pendaftaran TA</span>
+                    </a>
+                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-person-video3"></i>
+                        <span>Bimbingan TA</span>
+                    </a>
+                </nav>
+
                 <!-- User Quick Info -->
                 <div class="flex items-center gap-2.5">
                     <div class="hidden sm:flex flex-col text-right">
