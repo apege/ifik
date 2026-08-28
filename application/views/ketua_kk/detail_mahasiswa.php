@@ -35,8 +35,20 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-6">
 
         <!-- Flash Messages -->
+        <?php if($this->session->flashdata('success')): ?>
+            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl shadow-xs flex items-center justify-between text-xs mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <p class="font-semibold"><?= $this->session->flashdata('success'); ?></p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 font-bold"><i class="bi bi-x-lg"></i></button>
+            </div>
+        <?php endif; ?>
+
         <?php if($this->session->flashdata('error')): ?>
-            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl shadow-xs flex items-center justify-between text-xs">
+            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl shadow-xs flex items-center justify-between text-xs mb-4">
                 <div class="flex items-center gap-2.5">
                     <div class="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-xs">
                         <i class="bi bi-exclamation-triangle"></i>
@@ -221,16 +233,17 @@
         <?php endif; ?>
 
         <!-- Approval Form Section -->
-        <form method="POST" action="<?= site_url('ketuakk/submit_approval/' . $detail['nim']); ?>">
+        <form id="formApprovalKK" method="POST" action="<?= site_url('ketuakk/submit_approval/' . $detail['nim']); ?>">
+            <input type="hidden" name="status" id="inputActionStatus" value="Approved">
+
             <div class="clean-card rounded-2xl p-6 sm:p-7 space-y-5">
                 <div>
                     <label for="catatan_kk" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1 flex items-center gap-2">
                         <i class="bi bi-chat-left-text text-orange-600"></i> Catatan Rekomendasi / Pengarahan Ketua KK
                     </label>
                     <textarea id="catatan_kk" name="catatan_kk" rows="3" 
-                              <?= !$is_prerequisite_met ? 'disabled' : ''; ?>
-                              placeholder="<?= !$is_prerequisite_met ? 'Form dikunci hingga tahap Dosen Wali & Admin Layanan LAA disetujui...' : 'Tuliskan catatan arahan keilmuan atau rekomendasi pembimbing untuk mahasiswa...'; ?>"
-                              class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-white transition-all disabled:bg-slate-100 disabled:cursor-not-allowed"><?= htmlspecialchars($detail['catatan_kk'] ?? ''); ?></textarea>
+                              placeholder="Tuliskan catatan arahan keilmuan atau rekomendasi pembimbing untuk mahasiswa..."
+                              class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-white transition-all"><?= htmlspecialchars($detail['catatan_kk'] ?? ''); ?></textarea>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -240,24 +253,55 @@
 
                     <div class="flex items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
                         <!-- Reject Button -->
-                        <button type="submit" name="status" value="Rejected" 
-                                <?= !$is_prerequisite_met ? 'disabled title="Prasyarat tahap sebelumnya belum disetujui"' : ''; ?>
-                                onclick="return confirm('Yakin ingin menolak pengajuan TA ini di tingkat Kelompok Keahlian?');" 
-                                class="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5">
+                        <button type="button" id="btnRejectKK" 
+                                class="w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="bi bi-x-circle"></i> Tolak / Minta Perubahan
                         </button>
 
                         <!-- Approve & Unlock Bimbingan Button -->
-                        <button type="submit" name="status" value="Approved" 
-                                <?= !$is_prerequisite_met ? 'disabled title="Prasyarat tahap sebelumnya belum disetujui"' : ''; ?>
-                                onclick="return confirm('Yakin menyetujui topik TA mahasiswa ini? Akses modul Bimbingan TA akan otomatis dibuka (Unlocked).');" 
-                                class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5">
+                        <button type="button" id="btnApproveKK" 
+                                class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="bi bi-unlock-fill"></i> Setujui &amp; Unlock Bimbingan TA
                         </button>
                     </div>
                 </div>
             </div>
         </form>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const btnApprove = document.getElementById('btnApproveKK');
+                const btnReject = document.getElementById('btnRejectKK');
+                const inputStatus = document.getElementById('inputActionStatus');
+                const formApproval = document.getElementById('formApprovalKK');
+                const catatanInput = document.getElementById('catatan_kk');
+
+                if (btnApprove && formApproval) {
+                    btnApprove.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (confirm('Yakin menyetujui topik TA mahasiswa ini? Akses modul Bimbingan TA akan otomatis dibuka (Unlocked).')) {
+                            if (inputStatus) inputStatus.value = 'Approved';
+                            formApproval.submit();
+                        }
+                    });
+                }
+
+                if (btnReject && formApproval) {
+                    btnReject.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (catatanInput && !catatanInput.value.trim()) {
+                            alert('Silakan tuliskan catatan / alasan penolakan terlebih dahulu!');
+                            catatanInput.focus();
+                            return;
+                        }
+                        if (confirm('Yakin ingin menolak pengajuan TA ini di tingkat Kelompok Keahlian?')) {
+                            if (inputStatus) inputStatus.value = 'Rejected';
+                            formApproval.submit();
+                        }
+                    });
+                }
+            });
+        </script>
 
     </main>
 

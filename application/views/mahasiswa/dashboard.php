@@ -228,7 +228,21 @@
             // Hitung langkah (step) target untuk langsung di-redirect
             $rev_step = 1;
             if ($a_is_rej || !empty($pendaftaran['berkas_kurang'])) {
-                $raw_k = array_filter(explode(',', $pendaftaran['berkas_kurang'] ?? ''));
+                $raw_str = $pendaftaran['berkas_kurang'] ?? '';
+                $raw_k = array();
+                if (!empty($raw_str)) {
+                    if (is_string($raw_str) && (strpos(trim($raw_str), '[') === 0 || strpos(trim($raw_str), '{') === 0)) {
+                        $decoded = json_decode($raw_str, true);
+                        if (is_array($decoded)) $raw_k = array_map('trim', $decoded);
+                    }
+                    if (empty($raw_k)) {
+                        $parts = explode(',', $raw_str);
+                        foreach ($parts as $p) {
+                            $p = trim($p, "[]\"' \t\n\r\0\x0B");
+                            if ($p !== '') $raw_k[] = $p;
+                        }
+                    }
+                }
                 if (in_array('ksm', $raw_k)) $rev_step = 3;
                 else if (in_array('transkrip', $raw_k)) $rev_step = 4;
                 else if (in_array('pernyataan', $raw_k)) $rev_step = 5;
@@ -277,8 +291,46 @@
                                         'pernyataan' => array('label' => 'Surat Pernyataan Mahasiswa', 'name' => 'Surat Pernyataan'),
                                         'bebas_lab'  => array('label' => 'Surat Bebas Lab & Perpus', 'name' => 'Bebas Lab')
                                     );
-                                    $raw_kurang = array_filter(explode(',', $pendaftaran['berkas_kurang'] ?? ''));
+                                    $raw_kurang = $raw_k;
                                     $catatan_admin = $pendaftaran['catatan_admin'] ?? '';
+
+                                    $doc_notes = array();
+                                    $general_notes = array();
+
+                                    if (!empty($catatan_admin)) {
+                                        $berkas_keywords = array(
+                                            'ksm'        => array('KSM', 'Kartu Studi'),
+                                            'transkrip'  => array('Transkrip Nilai Akademik', 'Transkrip Nilai', 'Transkrip'),
+                                            'pernyataan' => array('Surat Pernyataan Mahasiswa', 'Surat Pernyataan', 'Pernyataan'),
+                                            'bebas_lab'  => array('Surat Bebas Laboratorium & Perpustakaan', 'Surat Bebas Lab & Perpustakaan', 'Surat Bebas Lab & Perpus', 'Surat Bebas Lab', 'Bebas Lab')
+                                        );
+
+                                        $segments = preg_split('/(?:^|\n|\s+-\s+)/', $catatan_admin);
+                                        foreach ($segments as $seg) {
+                                            $seg = trim($seg, "- \t\n\r\0\x0B");
+                                            if (empty($seg)) continue;
+
+                                            $matched_key = null;
+                                            $extracted_text = '';
+
+                                            foreach ($berkas_keywords as $key => $kw_list) {
+                                                foreach ($kw_list as $kw) {
+                                                    if (stripos($seg, $kw . ':') !== false) {
+                                                        $parts = explode(':', $seg, 2);
+                                                        $extracted_text = trim($parts[1] ?? '');
+                                                        $matched_key = $key;
+                                                        break 2;
+                                                    }
+                                                }
+                                            }
+
+                                            if ($matched_key && !empty($extracted_text)) {
+                                                $doc_notes[$matched_key] = $extracted_text;
+                                            } else {
+                                                $general_notes[] = $seg;
+                                            }
+                                        }
+                                    }
                                 ?>
                                 <div class="bg-black/20 backdrop-blur-md rounded-xl p-3.5 border border-white/20 col-span-1 md:col-span-2">
                                     <span class="text-[10px] uppercase font-bold text-amber-200 block mb-1">
@@ -290,26 +342,14 @@
                                             <span class="text-[11px] font-bold text-rose-200 block mb-1.5">📄 Dokumen PDF yang Harus Diunggah Ulang:</span>
                                             <ul class="list-disc list-inside space-y-1.5 text-xs text-white font-medium pl-1">
                                                 <?php 
-                                                    $matched_notes = array();
                                                     foreach($raw_kurang as $bk): 
                                                         $bk = trim($bk);
                                                         $info = $berkas_map[$bk] ?? array('label' => $bk, 'name' => $bk);
                                                         $lbl = $info['label'];
-                                                        $sname = $info['name'];
-
-                                                        $item_note = '';
-                                                        if (!empty($catatan_admin)) {
-                                                            if (preg_match('/' . preg_quote($sname, '/') . '\s*:\s*([^-\n]+)/i', $catatan_admin, $m)) {
-                                                                $item_note = trim($m[1]);
-                                                                $matched_notes[] = $m[0];
-                                                            } else if (preg_match('/' . preg_quote($bk, '/') . '\s*:\s*([^-\n]+)/i', $catatan_admin, $m)) {
-                                                                $item_note = trim($m[1]);
-                                                                $matched_notes[] = $m[0];
-                                                            }
-                                                        }
+                                                        $item_note = $doc_notes[$bk] ?? '';
                                                 ?>
-                                                    <li>
-                                                        <span class="bg-rose-900/80 border border-rose-400 px-2 py-0.5 rounded font-bold text-white text-[11px] inline-block my-0.5"><?= htmlspecialchars($lbl); ?></span>
+                                                    <li class="my-1">
+                                                        <span class="bg-rose-900/80 border border-rose-400 px-2 py-0.5 rounded font-bold text-white text-[11px] inline-block"><?= htmlspecialchars($lbl); ?></span>
                                                         <?php if(!empty($item_note)): ?>
                                                             <span class="text-amber-200 font-bold ml-1"> — "<?= htmlspecialchars($item_note); ?>"</span>
                                                         <?php else: ?>
@@ -321,9 +361,9 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if(!empty($catatan_admin) && empty($matched_notes)): ?>
-                                        <p class="text-white leading-relaxed font-medium italic mt-2">
-                                            "<?= htmlspecialchars($catatan_admin); ?>"
+                                    <?php if(!empty($general_notes)): ?>
+                                        <p class="text-white leading-relaxed font-medium italic mt-2.5 pt-2 border-t border-white/20">
+                                            "<?= htmlspecialchars(implode(' | ', $general_notes)); ?>"
                                         </p>
                                     <?php endif; ?>
                                 </div>
