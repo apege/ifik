@@ -493,7 +493,7 @@
         <!-- 6. Admin Panel / Portal Mahasiswa -->
         <?php 
             $role_id = $this->session->userdata('role_id'); 
-            $is_mahasiswa = ($role_id == 6 || strpos($this->session->userdata('email') ?? '', '@student.') !== false);
+            $is_mahasiswa = ($role_id == 5 || strpos($this->session->userdata('email') ?? '', '@student.') !== false);
         ?>
         <?php if ($is_mahasiswa): ?>
             <li class="nav-item">
@@ -560,7 +560,7 @@
                     </a>
                     <?php endif; ?>
 
-                    <?php if (in_array($role_id, [1, 4])): ?>
+                    <?php if (in_array($role_id, [1, 4, 6])): ?>
                     <a href="<?= site_url('koordinatorta') ?>">
                         <span class="btn-box">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
