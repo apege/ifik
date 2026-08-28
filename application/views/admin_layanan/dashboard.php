@@ -303,44 +303,39 @@
         <!-- Filter Tab Group for LAA -->
         <div class="card-custom p-4 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-                    <a href="<?= site_url('adminlayanan?status=all&per_page=' . $per_page); ?>" 
-                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap <?= $filter_status === 'all' ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="filterTabsContainerLAA">
+                    <button type="button" onclick="switchLAATab('all')" id="tabLAA_all" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer <?= $filter_status === 'all' ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Semua Status (<?= $stats['total']; ?>)
-                    </a>
-                    <a href="<?= site_url('adminlayanan?status=Pending&per_page=' . $per_page); ?>" 
-                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap <?= $filter_status === 'Pending' ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    </button>
+                    <button type="button" onclick="switchLAATab('Pending')" id="tabLAA_Pending" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer <?= $filter_status === 'Pending' ? 'bg-amber-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Menunggu Cek (<?= $stats['pending']; ?>)
-                    </a>
-                    <a href="<?= site_url('adminlayanan?status=Approved&per_page=' . $per_page); ?>" 
-                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap <?= $filter_status === 'Approved' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    </button>
+                    <button type="button" onclick="switchLAATab('Approved')" id="tabLAA_Approved" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer <?= $filter_status === 'Approved' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Disetujui (<?= $stats['approved']; ?>)
-                    </a>
-                    <a href="<?= site_url('adminlayanan?status=Rejected&per_page=' . $per_page); ?>" 
-                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap <?= $filter_status === 'Rejected' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    </button>
+                    <button type="button" onclick="switchLAATab('Rejected')" id="tabLAA_Rejected" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer <?= $filter_status === 'Rejected' ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Dikembalikan (<?= $stats['rejected']; ?>)
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Unified Search Pill Bar with AUTOCOMPLETE -->
+        <!-- Unified Search Pill Bar with AUTOCOMPLETE & INSTANT SEARCH -->
         <div class="card-custom p-4 mb-6 relative">
-            <form method="GET" action="<?= site_url('adminlayanan'); ?>" id="formSearchLAA" class="relative">
-                <input type="hidden" name="status" value="<?= htmlspecialchars($filter_status); ?>">
-                <input type="hidden" name="per_page" value="<?= $per_page; ?>">
-
+            <form onsubmit="return false;" id="formSearchLAA" class="relative">
                 <div class="unified-search-pill">
                     <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm ml-1"></i>
                     <input type="text" name="q" id="inputSearchLAA" autocomplete="off" value="<?= htmlspecialchars($search ?? ''); ?>" 
                            placeholder="Ketik nama mahasiswa, NIM, atau judul berkas TA..." 
                            class="w-full bg-transparent px-3 text-xs text-slate-800 font-semibold focus:outline-none">
                     
-                    <?php if(!empty($search)): ?>
-                        <a href="<?= site_url('adminlayanan?status=' . $filter_status . '&per_page=' . $per_page); ?>" class="text-slate-400 hover:text-rose-600 text-xs font-bold px-2">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                        </a>
-                    <?php endif; ?>
+                    <button type="button" id="btnClearSearchLAA" onclick="clearLAASearch()" class="<?= empty($search) ? 'hidden' : ''; ?> text-slate-400 hover:text-rose-600 text-xs font-bold px-2 cursor-pointer">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
                 </div>
 
                 <!-- Autocomplete Dropdown -->
@@ -504,166 +499,347 @@
             <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
                 <div class="flex items-center gap-3 text-slate-600">
                     <span class="font-medium text-slate-500">Tampilkan:</span>
-                    <select id="selectPerPageLAA" class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-600 shadow-xs">
+                    <select id="selectPerPageLAA" onchange="changeLAAPerPage(this.value)" class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-600 shadow-xs cursor-pointer">
                         <option value="5" <?= $per_page == 5 ? 'selected' : ''; ?>>5 per halaman</option>
                         <option value="10" <?= $per_page == 10 ? 'selected' : ''; ?>>10 per halaman</option>
                         <option value="20" <?= $per_page == 20 ? 'selected' : ''; ?>>20 per halaman</option>
                     </select>
                     <span class="text-slate-300">|</span>
-                    <span>
+                    <span id="txtShowingCountLAA">
                         Menampilkan <strong><?= $total_rows > 0 ? (($page - 1) * $per_page + 1) : 0; ?></strong> - <strong><?= min($page * $per_page, $total_rows); ?></strong> dari <strong><?= $total_rows; ?></strong> mahasiswa
                     </span>
                 </div>
 
-                <?php if($total_pages > 1): ?>
-                    <div class="flex items-center gap-1">
-                        <?php if($page > 1): ?>
-                            <a href="<?= site_url('adminlayanan?status=' . $filter_status . '&q=' . urlencode($search) . '&per_page=' . $per_page . '&page=' . ($page - 1)); ?>" 
-                               class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
-                            </a>
-                        <?php else: ?>
-                            <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
-                                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
-                            </span>
-                        <?php endif; ?>
+                <div id="laaPaginationControls">
+                    <?php if($total_pages > 1): ?>
+                        <div class="flex items-center gap-1">
+                            <?php if($page > 1): ?>
+                                <button type="button" onclick="changeLAAPage(<?= $page - 1; ?>)" 
+                                   class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">
+                                    <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+                                </button>
+                            <?php else: ?>
+                                <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
+                                    <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+                                </span>
+                            <?php endif; ?>
 
-                        <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                            <a href="<?= site_url('adminlayanan?status=' . $filter_status . '&q=' . urlencode($search) . '&per_page=' . $per_page . '&page=' . $i); ?>" 
-                               class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all <?= $i == $page ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'; ?>">
-                                <?= $i; ?>
-                            </a>
-                        <?php endfor; ?>
+                            <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                                <button type="button" onclick="changeLAAPage(<?= $i; ?>)" 
+                                   class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer <?= $i == $page ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'; ?>">
+                                    <?= $i; ?>
+                                </button>
+                            <?php endfor; ?>
 
-                        <?php if($page < $total_pages): ?>
-                            <a href="<?= site_url('adminlayanan?status=' . $filter_status . '&q=' . urlencode($search) . '&per_page=' . $per_page . '&page=' . ($page + 1)); ?>" 
-                               class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs">
-                                Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </a>
-                        <?php else: ?>
-                            <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
-                                Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+                            <?php if($page < $total_pages): ?>
+                                <button type="button" onclick="changeLAAPage(<?= $page + 1; ?>)" 
+                                   class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">
+                                    Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </button>
+                            <?php else: ?>
+                                <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
+                                    Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
     </main>
 
-    <!-- AUTOCOMPLETE & LIVE SEARCH JAVASCRIPT -->
+    <!-- REAL-TIME AJAX JAVASCRIPT SYSTEM FOR ADMIN LAA -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 1. Limit Selector Event
-            const selectPerPageLAA = document.getElementById('selectPerPageLAA');
-            if (selectPerPageLAA) {
-                selectPerPageLAA.addEventListener('change', function() {
-                    const perPageVal = this.value;
-                    const urlParams = new URLSearchParams(window.location.search);
-                    urlParams.set('per_page', perPageVal);
-                    urlParams.set('page', '1');
-                    window.location.search = urlParams.toString();
-                });
+        let currentLAAState = {
+            status: '<?= $filter_status; ?>',
+            search: '<?= addslashes($search ?? ""); ?>',
+            perPage: <?= $per_page; ?>,
+            page: <?= $page; ?>
+        };
+        let laaSearchTimer = null;
+
+        function refreshLAATable(isSilent = false) {
+            const url = `<?= site_url("adminlayanan/ajax_get_table"); ?>?status=${encodeURIComponent(currentLAAState.status)}&q=${encodeURIComponent(currentLAAState.search)}&per_page=${currentLAAState.perPage}&page=${currentLAAState.page}`;
+
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+
+            if (!isSilent) {
+                tbody.style.opacity = '0.4';
             }
 
-            // 2. INSTANT LIVE SEARCH ACROSS ALL PAGES & AUTOCOMPLETE
+            fetch(url)
+                .then(res => res.json())
+                .then(res => {
+                    tbody.style.opacity = '1';
+
+                    if (!res.success) return;
+
+                    // 1. Update Stats Badges & Tab Buttons
+                    if (res.stats) {
+                        const tabAll = document.getElementById('tabLAA_all');
+                        const tabPending = document.getElementById('tabLAA_Pending');
+                        const tabApproved = document.getElementById('tabLAA_Approved');
+                        const tabRejected = document.getElementById('tabLAA_Rejected');
+
+                        if (tabAll) tabAll.textContent = `Semua Status (${res.stats.total || 0})`;
+                        if (tabPending) tabPending.textContent = `Menunggu Cek (${res.stats.pending || 0})`;
+                        if (tabApproved) tabApproved.textContent = `Disetujui (${res.stats.approved || 0})`;
+                        if (tabRejected) tabRejected.textContent = `Dikembalikan (${res.stats.rejected || 0})`;
+                    }
+
+                    // 2. Render Rows
+                    if (!res.list || res.list.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8" class="py-14 text-center text-slate-400">
+                                    <i class="fa-solid fa-inbox text-4xl text-slate-300 mb-3 block"></i>
+                                    Tidak ada data pengajuan berkas ditemukan.
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        let html = '';
+                        res.list.forEach(row => {
+                            let ksmClass = row.status_ksm === 'Valid' ? 'text-emerald-600 font-extrabold' : (row.status_ksm === 'Invalid' ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+                            let trsClass = row.status_transkrip === 'Valid' ? 'text-emerald-600 font-extrabold' : (row.status_transkrip === 'Invalid' ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+                            let prnClass = row.status_pernyataan === 'Valid' ? 'text-emerald-600 font-extrabold' : (row.status_pernyataan === 'Invalid' ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+                            let labClass = row.status_bebas_lab === 'Valid' ? 'text-emerald-600 font-extrabold' : (row.status_bebas_lab === 'Invalid' ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+
+                            let waliBadge = row.is_wali_app ? `
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <i class="fa-solid fa-circle-check text-emerald-500"></i> Disetujui
+                                </span>` : `
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <i class="fa-solid fa-hourglass text-slate-400"></i> Belum Wali
+                                </span>`;
+
+                            let adminBadge = '';
+                            if (row.status_approval_admin === 'Approved') {
+                                adminBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check-double text-emerald-600"></i> Approved</span>`;
+                            } else if (row.status_approval_admin === 'Rejected') {
+                                adminBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-arrow-rotate-left text-rose-600"></i> Dikembalikan</span>`;
+                            } else {
+                                adminBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock text-amber-600"></i> Menunggu Cek</span>`;
+                            }
+
+                            let actionBtn = row.is_wali_app ? `
+                                <a href="${row.detail_url}" class="btn-3d-kinetic">
+                                    <span class="bg"></span>
+                                    <span class="wrap">
+                                        <span class="content">
+                                            <i class="fa-solid fa-magnifying-glass icon-action"></i>
+                                            <span class="char state-1"><span>P</span><span>e</span><span>r</span><span>i</span><span>k</span><span>s</span><span>a</span></span>
+                                        </span>
+                                    </span>
+                                </a>` : `
+                                <span title="Pengajuan belum disetujui oleh Dosen Wali" class="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-[11px] font-semibold cursor-not-allowed opacity-75">
+                                    <i class="fa-solid fa-lock text-slate-400"></i> Locked
+                                </span>`;
+
+                            html += `
+                                <tr class="hover:bg-orange-50/40 transition-colors">
+                                    <td class="py-3.5 px-3 text-center whitespace-nowrap">
+                                        <input type="checkbox" name="batch_select[]" value="${row.nim}" 
+                                               data-name="${row.full_name}" 
+                                               data-prereq="${row.is_wali_app ? '1' : '0'}"
+                                               ${!row.is_wali_app ? 'disabled title="Belum disetujui Dosen Wali"' : ''} 
+                                               class="student-cb w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
+                                    </td>
+                                    <td class="py-3.5 px-3 whitespace-nowrap">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-brand-600 font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                                ${row.first_char}
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-900 text-xs">${row.full_name}</div>
+                                                <div class="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                                                    <span>${row.nim}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-3 whitespace-nowrap">
+                                        <div class="font-bold text-slate-700 text-xs">${row.prodi}</div>
+                                        <span class="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.2 bg-orange-50 text-brand-700 rounded text-[9px] font-bold border border-orange-200">
+                                            <i class="fa-solid fa-diagram-project text-[8px]"></i>
+                                            <span>${row.kode_kk}</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-3.5 px-3 max-w-[200px] lg:max-w-[240px]">
+                                        <div class="font-semibold text-slate-800 line-clamp-2 text-xs leading-relaxed" title="${row.judul_1}">
+                                            ${row.judul_1}
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-2 text-center whitespace-nowrap">
+                                        <div class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[9px] font-mono shadow-2xs">
+                                            <span class="${ksmClass}">KSM</span><span class="text-slate-300">·</span>
+                                            <span class="${trsClass}">TRS</span><span class="text-slate-300">·</span>
+                                            <span class="${prnClass}">SRT</span><span class="text-slate-300">·</span>
+                                            <span class="${labClass}">LAB</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3.5 px-2 text-center whitespace-nowrap">${waliBadge}</td>
+                                    <td class="py-3.5 px-2 text-center whitespace-nowrap">${adminBadge}</td>
+                                    <td class="py-3.5 px-3 text-center whitespace-nowrap">${actionBtn}</td>
+                                </tr>
+                            `;
+                        });
+                        tbody.innerHTML = html;
+                        rebindStudentCheckboxes();
+                    }
+
+                    // 3. Update Pagination Text & Controls
+                    currentLAAState.page = res.page;
+                    currentLAAState.total_pages = res.total_pages;
+
+                    const txtCount = document.getElementById('txtShowingCountLAA');
+                    if (txtCount) {
+                        const start = res.total_rows > 0 ? ((res.page - 1) * res.per_page + 1) : 0;
+                        const end = Math.min(res.page * res.per_page, res.total_rows);
+                        txtCount.innerHTML = `Menampilkan <strong>${start}</strong> - <strong>${end}</strong> dari <strong>${res.total_rows}</strong> mahasiswa`;
+                    }
+
+                    renderLAAPaginationControls(res.page, res.total_pages);
+                })
+                .catch(err => {
+                    if (tbody) tbody.style.opacity = '1';
+                    console.error('AJAX Error:', err);
+                });
+        }
+
+        function renderLAAPaginationControls(page, totalPages) {
+            const container = document.getElementById('laaPaginationControls');
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="flex items-center gap-1">';
+            
+            if (page > 1) {
+                html += `<button type="button" onclick="changeLAAPage(${page - 1})" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer"><i class="fa-solid fa-chevron-left text-[10px]"></i> Prev</button>`;
+            } else {
+                html += `<span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60"><i class="fa-solid fa-chevron-left text-[10px]"></i> Prev</span>`;
+            }
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === page) {
+                    html += `<button type="button" onclick="changeLAAPage(${i})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-brand-600 text-white shadow-md cursor-pointer">${i}</button>`;
+                } else {
+                    html += `<button type="button" onclick="changeLAAPage(${i})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 cursor-pointer">${i}</button>`;
+                }
+            }
+
+            if (page < totalPages) {
+                html += `<button type="button" onclick="changeLAAPage(${page + 1})" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">Next <i class="fa-solid fa-chevron-right text-[10px]"></i></button>`;
+            } else {
+                html += `<span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">Next <i class="fa-solid fa-chevron-right text-[10px]"></i></span>`;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function switchLAATab(status) {
+            currentLAAState.status = status;
+            currentLAAState.page = 1;
+
+            const tabs = ['all', 'Pending', 'Approved', 'Rejected'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tabLAA_' + t);
+                if (btn) {
+                    if (t === status) {
+                        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ' + 
+                                       (t === 'Pending' ? 'bg-amber-600 text-white shadow-md' : (t === 'Approved' ? 'bg-emerald-600 text-white shadow-md' : (t === 'Rejected' ? 'bg-rose-600 text-white shadow-md' : 'bg-brand-600 text-white shadow-md')));
+                    } else {
+                        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200';
+                    }
+                }
+            });
+
+            refreshLAATable();
+        }
+
+        function changeLAAPerPage(perPageVal) {
+            currentLAAState.perPage = parseInt(perPageVal) || 5;
+            currentLAAState.page = 1;
+            refreshLAATable();
+        }
+
+        function changeLAAPage(pageNum) {
+            currentLAAState.page = parseInt(pageNum) || 1;
+            refreshLAATable();
+        }
+
+        function clearLAASearch() {
+            const input = document.getElementById('inputSearchLAA');
+            const btnClear = document.getElementById('btnClearSearchLAA');
+            if (input) input.value = '';
+            if (btnClear) btnClear.classList.add('hidden');
+
+            currentLAAState.search = '';
+            currentLAAState.page = 1;
+            refreshLAATable();
+        }
+
+        function rebindStudentCheckboxes() {
+            const checkAll = document.getElementById('checkAllStudents');
+            const studentCbs = document.querySelectorAll('.student-cb');
+
+            if (checkAll) {
+                checkAll.checked = false;
+                checkAll.onchange = function() {
+                    studentCbs.forEach(cb => {
+                        if (!cb.disabled) cb.checked = this.checked;
+                    });
+                    updateBatchBar();
+                };
+            }
+
+            studentCbs.forEach(cb => {
+                cb.onchange = () => {
+                    updateBatchBar();
+                    if (checkAll) {
+                        const enabledCbs = Array.from(studentCbs).filter(c => !c.disabled);
+                        const checkedCount = enabledCbs.filter(c => c.checked).length;
+                        checkAll.checked = (enabledCbs.length > 0 && checkedCount === enabledCbs.length);
+                    }
+                };
+            });
+
+            updateBatchBar();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
             const inputSearch = document.getElementById('inputSearchLAA');
-            const dropdown = document.getElementById('autocompleteDropdownLAA');
-            const resultsBox = document.getElementById('autocompleteResultsLAA');
-            const tableBody = document.getElementById('tableBody');
-            let debounceTimer = null;
+            const btnClear = document.getElementById('btnClearSearchLAA');
 
             if (inputSearch) {
                 inputSearch.addEventListener('input', function() {
                     const q = this.value.trim();
 
-                    if (tableBody) {
-                        const rows = tableBody.querySelectorAll('tr');
-                        const qLower = q.toLowerCase();
-                        rows.forEach(row => {
-                            const text = row.innerText.toLowerCase();
-                            if (!qLower || text.includes(qLower)) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        });
+                    if (btnClear) {
+                        if (q.length > 0) btnClear.classList.remove('hidden');
+                        else btnClear.classList.add('hidden');
                     }
 
-                    clearTimeout(debounceTimer);
-
-                    if (q.length < 2) {
-                        if (dropdown) dropdown.classList.add('hidden');
-                        if (q.length === 0) {
-                            debounceTimer = setTimeout(() => {
-                                const urlParams = new URLSearchParams(window.location.search);
-                                if (urlParams.has('q')) {
-                                    urlParams.delete('q');
-                                    urlParams.set('page', '1');
-                                    window.location.search = urlParams.toString();
-                                }
-                            }, 350);
-                        }
-                        return;
-                    }
-
-                    debounceTimer = setTimeout(() => {
-                        fetch(`<?= site_url('adminlayanan/autocomplete'); ?>?q=${encodeURIComponent(q)}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data && data.length > 0 && dropdown && resultsBox) {
-                                    let html = '';
-                                    data.forEach(item => {
-                                        if (item.is_prereq_ok) {
-                                            html += `
-                                                <a href="<?= site_url('adminlayanan/detail_berkas/'); ?>${item.nim}" class="p-3 hover:bg-orange-50 transition-colors flex items-center justify-between gap-3 block group">
-                                                    <div>
-                                                        <div class="font-bold text-slate-900 group-hover:text-brand-600 text-xs">${item.nama} <span class="text-slate-400 font-mono text-[11px]">(${item.nim})</span></div>
-                                                        <div class="text-[11px] text-slate-500 line-clamp-1 italic">"${item.judul}"</div>
-                                                    </div>
-                                                    <span class="px-2.5 py-1 bg-orange-100 text-brand-700 text-[10px] font-bold rounded-lg shrink-0">Periksa &rarr;</span>
-                                                </a>
-                                            `;
-                                        } else {
-                                            html += `
-                                                <div class="p-3 bg-slate-50 text-slate-400 flex items-center justify-between gap-3 opacity-75 cursor-not-allowed">
-                                                    <div>
-                                                        <div class="font-bold text-slate-700 text-xs">${item.nama} <span class="text-slate-400 font-mono text-[11px]">(${item.nim})</span></div>
-                                                        <div class="text-[11px] text-slate-400 line-clamp-1 italic">"${item.judul}"</div>
-                                                    </div>
-                                                    <span class="px-2.5 py-1 bg-slate-200 text-slate-500 text-[10px] font-bold rounded-lg shrink-0 flex items-center gap-1"><i class="fa-solid fa-lock"></i> Locked</span>
-                                                </div>
-                                            `;
-                                        }
-                                    });
-                                    resultsBox.innerHTML = html;
-                                    dropdown.classList.remove('hidden');
-                                } else if (dropdown && resultsBox) {
-                                    resultsBox.innerHTML = `<div class="p-3.5 text-center text-slate-400 text-xs">Tidak ditemukan data berkas cocok untuk "${q}"</div>`;
-                                    dropdown.classList.remove('hidden');
-                                }
-                            })
-                            .catch(err => {
-                                console.error('Autocomplete error:', err);
-                            });
-
-                        const currentUrlParams = new URLSearchParams(window.location.search);
-                        const currentQ = currentUrlParams.get('q') || '';
-                        if (currentQ !== q) {
-                            currentUrlParams.set('q', q);
-                            currentUrlParams.set('page', '1');
-                            window.location.search = currentUrlParams.toString();
-                        }
-                    }, 650);
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (dropdown && !inputSearch.contains(e.target) && !dropdown.contains(e.target)) {
-                        dropdown.classList.add('hidden');
-                    }
+                    clearTimeout(laaSearchTimer);
+                    laaSearchTimer = setTimeout(() => {
+                        currentLAAState.search = q;
+                        currentLAAState.page = 1;
+                        refreshLAATable();
+                    }, 250);
                 });
             }
+
+            // Silent Auto-polling every 8 seconds for real-time live data
+            setInterval(() => {
+                refreshLAATable(true);
+            }, 8000);
         });
     </script>
 
@@ -855,7 +1031,22 @@
                 container.appendChild(input);
             });
 
-            form.submit();
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                unselectAllStudents();
+                refreshLAATable();
+                showLAAToast(res.message || 'Verifikasi berhasil disetujui!');
+            })
+            .catch(err => {
+                console.error('Submit approve error:', err);
+                form.submit();
+            });
         }
 
         function openBatchModal() {
@@ -1278,7 +1469,38 @@
                 container.appendChild(input);
             });
 
-            form.submit();
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                closeBatchModal();
+                unselectAllStudents();
+                refreshLAATable();
+                showLAAToast(res.message || 'Verifikasi massal berhasil disimpan!');
+            })
+            .catch(err => {
+                console.error('Submit batch error:', err);
+                form.submit();
+            });
+        }
+
+        function showLAAToast(msg) {
+            let toast = document.getElementById('laaToastNotification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'laaToastNotification';
+                toast.className = 'fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 transition-all duration-500 transform translate-y-0 opacity-100';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i> <span class="text-xs font-bold">${msg}</span>`;
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
         }
     </script>
 
