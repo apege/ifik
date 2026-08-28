@@ -127,7 +127,9 @@
                         </div>
                         <div class="min-w-0">
                             <span class="text-xs font-bold text-amber-200 uppercase tracking-wider block">Pembimbing Utama (Penilai P1 &amp; P3)</span>
-                            <h4 class="font-bold text-sm sm:text-base text-white truncate mt-0.5"><?= htmlspecialchars($pembimbing_1); ?></h4>
+                            <h4 class="font-bold text-sm sm:text-base text-white truncate mt-0.5">
+                                <?= !empty($pembimbing_1) ? htmlspecialchars($pembimbing_1) : '<span class="italic text-white/60 text-xs">Belum Di-assign</span>'; ?>
+                            </h4>
                         </div>
                     </div>
 
@@ -138,7 +140,9 @@
                         </div>
                         <div class="min-w-0">
                             <span class="text-xs font-bold text-orange-200/80 uppercase tracking-wider block">Pembimbing Pendamping (Bimbingan Teknis)</span>
-                            <h4 class="font-bold text-sm sm:text-base text-white/95 truncate mt-0.5"><?= htmlspecialchars($pembimbing_2); ?></h4>
+                            <h4 class="font-bold text-sm sm:text-base text-white/95 truncate mt-0.5">
+                                <?= !empty($pembimbing_2) ? htmlspecialchars($pembimbing_2) : '<span class="italic text-white/50 text-xs">Belum Di-assign</span>'; ?>
+                            </h4>
                         </div>
                     </div>
 
@@ -149,7 +153,9 @@
                         </div>
                         <div class="min-w-0">
                             <span class="text-xs font-bold text-purple-200 uppercase tracking-wider block">Dosen Penguji (Penilai Preview 2)</span>
-                            <h4 class="font-bold text-sm sm:text-base text-white/95 truncate mt-0.5"><?= htmlspecialchars($penguji_ta); ?></h4>
+                            <h4 class="font-bold text-sm sm:text-base text-white/95 truncate mt-0.5">
+                                <?= !empty($penguji_ta) ? htmlspecialchars($penguji_ta) : '<span class="italic text-white/50 text-xs">Belum Di-assign</span>'; ?>
+                            </h4>
                         </div>
                     </div>
                 </div>
@@ -368,6 +374,7 @@
                             </p>
                         </div>
 
+                        <?php if($is_pembimbing_assigned): ?>
                         <!-- Form Upload -->
                         <?= form_open_multipart('mahasiswa/upload_preview', ['id' => 'formUploadPreview1', 'class' => 'space-y-6']); ?>
                             <input type="hidden" name="tahap_preview" value="Preview 1">
@@ -422,8 +429,14 @@
                                     <span>Kirim Berkas Draft Preview 1</span>
                                 </button>
                             </div>
-
                         <?= form_close(); ?>
+                        <?php else: ?>
+                        <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl">
+                            <i class="bi bi-person-fill-lock text-4xl text-slate-400 mb-3 block"></i>
+                            <h4 class="font-bold text-lg text-slate-700">Tahap Bimbingan Belum Tersedia</h4>
+                            <p class="text-slate-500 text-sm mt-2">Dosen Pembimbing 1 dan Pembimbing 2 Anda belum di-assign oleh Koordinator TA. Harap menunggu hingga pembimbing ditetapkan sebelum Anda dapat mulai mengunggah berkas.</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
