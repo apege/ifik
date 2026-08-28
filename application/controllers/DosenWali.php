@@ -154,4 +154,52 @@ class DosenWali extends CI_Controller {
             'message' => 'Status usulan judul Tugas Akhir berhasil diperbarui ke ' . $status_judul . '.'
         ));
     }
+
+    // AJAX Endpoint: Realtime fetch daftar mahasiswa bimbingan & statistik status
+    public function get_mahasiswa_ajax() {
+        $nip_dosen = $this->_get_current_nip();
+        $list = $this->DosenWali_model->get_mahasiswa_bimbingan($nip_dosen);
+
+        $totalMhs = count($list);
+        $pendingCount = 0;
+        $approvedCount = 0;
+        $rejectedCount = 0;
+
+        $formattedList = [];
+        foreach ($list as $m) {
+            $st = $m['status_approval_wali'] ?? 'Pending';
+            if ($st === 'Approved') {
+                $approvedCount++;
+            } elseif ($st === 'Rejected') {
+                $rejectedCount++;
+            } else {
+                $pendingCount++;
+            }
+
+            $nama = trim(($m['nama_depan'] ?? '') . ' ' . ($m['nama_belakang'] ?? ''));
+            $formattedList[] = [
+                'nim'                  => $m['nim'],
+                'nama'                 => $nama,
+                'judul'                => $m['judul_1'] ?? '',
+                'status_approval_wali' => $st,
+                'current_stage'        => $m['current_stage'] ?? 'Dosen Wali',
+                'detail_url'           => site_url('dosenwali/detail_mahasiswa/' . $m['nim'])
+            ];
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success' => true,
+                'stats'   => [
+                    'total'    => $totalMhs,
+                    'pending'  => $pendingCount,
+                    'approved' => $approvedCount,
+                    'rejected' => $rejectedCount,
+                    'approved_pct' => $totalMhs > 0 ? round(($approvedCount / $totalMhs) * 100) : 0
+                ],
+                'data'    => $formattedList
+            ]));
+    }
 }
+

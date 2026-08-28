@@ -957,6 +957,35 @@
     function closeFileBreakdownModal() {
         document.getElementById('modalFileBreakdown').classList.add('hidden');
     }
+
+    // AJAX Polling: Cek perubahan status approval pengajuan TA mahasiswa secara real-time
+    (() => {
+        let lastStatusKey = '<?= ($w_status ?? '') . "_" . ($a_status ?? '') . "_" . ($k_status ?? '') . "_" . ($kk_status ?? ''); ?>';
+
+        async function checkStudentTAStatus() {
+            try {
+                const res = await fetch('<?= site_url("mahasiswa/get_status_pendaftaran_ajax"); ?>', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) return;
+                const json = await res.json();
+                if (!json || !json.success || !json.has_ta) return;
+
+                const newStatusKey = `${json.status_wali}_${json.status_admin}_${json.status_koor}_${json.status_kk}`;
+                if (lastStatusKey && newStatusKey !== lastStatusKey) {
+                    console.log('Status TA berubah, memperbarui tampilan...');
+                    // Reload halus untuk me-render status baru, badge tahapan & bimbingan
+                    window.location.reload();
+                }
+                lastStatusKey = newStatusKey;
+            } catch (e) {
+                // Silent fail
+            }
+        }
+
+        // Jalankan polling setiap 6 detik
+        setInterval(checkStudentTAStatus, 6000);
+    })();
     </script>
     <?php $this->load->view('partials/custom_cursor'); ?>
 </body>
