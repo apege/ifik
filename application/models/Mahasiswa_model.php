@@ -152,4 +152,63 @@ class Mahasiswa_model extends CI_Model {
         $this->db->limit(1);
         return $this->db->get('bimbingan_preview')->row_array();
     }
+
+    // Mendapatkan nama dosen pembimbing dan penguji asli
+    public function get_pembimbing_penguji($nim) {
+        $result = array(
+            'pembimbing_1' => '',
+            'pembimbing_2' => '',
+            'penguji_1' => '',
+            'penguji_2' => ''
+        );
+
+        if ($this->db->table_exists('ta_pembimbing')) {
+            $this->db->select('u1.name as p1, u2.name as p2');
+            $this->db->from('ta_pembimbing tp');
+            $this->db->join('users u1', 'u1.id = tp.id_pembimbing_1', 'left');
+            $this->db->join('users u2', 'u2.id = tp.id_pembimbing_2', 'left');
+            $this->db->where('tp.nim', $nim);
+            $p = $this->db->get()->row_array();
+            if ($p) {
+                $result['pembimbing_1'] = $p['p1'];
+                $result['pembimbing_2'] = $p['p2'];
+            }
+        }
+
+        if ($this->db->table_exists('ta_penguji')) {
+            $this->db->select('u1.name as p1, u2.name as p2');
+            $this->db->from('ta_penguji tp');
+            $this->db->join('users u1', 'u1.id = tp.id_penguji_1', 'left');
+            $this->db->join('users u2', 'u2.id = tp.id_penguji_2', 'left');
+            $this->db->where('tp.nim', $nim);
+            $p = $this->db->get()->row_array();
+            if ($p) {
+                $result['penguji_1'] = $p['p1'];
+                $result['penguji_2'] = $p['p2'];
+            }
+        }
+        return $result;
+    }
+
+    // Mengambil daftar mahasiswa bimbingan bagi seorang Dosen
+    public function get_students_by_dosen($dosen_id, $posisi = 1) {
+        if (!$this->db->table_exists('ta_pembimbing') || !$this->db->table_exists('pendaftaran_ta')) return [];
+        $this->db->select('pt.nim, pt.judul_1 as judul, u.name as nama_mahasiswa');
+        $this->db->from('ta_pembimbing tp');
+        $this->db->join('pendaftaran_ta pt', 'pt.nim = tp.nim', 'inner');
+        $this->db->join('users u', 'u.nidn_nim = tp.nim', 'left');
+        if ($posisi == 1) {
+            $this->db->where('tp.id_pembimbing_1', $dosen_id);
+        } else {
+            $this->db->where('tp.id_pembimbing_2', $dosen_id);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    // Update status preview dan catatan dosen
+    public function update_review_preview($id, $data) {
+        if (!$this->db->table_exists('bimbingan_preview')) return false;
+        $this->db->where('id', $id);
+        return $this->db->update('bimbingan_preview', $data);
+    }
 }

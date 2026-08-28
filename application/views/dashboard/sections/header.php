@@ -423,36 +423,78 @@
         pointer-events: none;
     }
     
-    /* Pagination Button Teks Deskripsi */
-    .header-pagination {
-        display: none;
-        pointer-events: auto;
-        margin-top: 5px;
+    /* ===== BACA SELENGKAPNYA BUTTON ===== */
+    .read-more-btn {
+        display: flex;
         align-items: center;
         gap: 8px;
-    }
-    .header-pagination button {
-        background: #ffffff;
-        border: none;
-        padding: 5px 12px;
-        border-radius: 8px;
-        font-weight: 700;
-        color: #ea580c;
-        cursor: pointer;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        font-size: 0.75rem;
-        transition: all 0.2s;
-    }
-    .header-pagination button:hover {
+        pointer-events: auto;
+        margin-top: 8px;
+        padding: 9px 20px;
         background: #ea580c;
-        color: #ffffff;
-    }
-    .header-pagination span {
-        color: #ffffff;
-        font-size: 0.8rem;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
         font-weight: 800;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        font-size: 0.82rem;
+        cursor: pointer;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 14px rgba(234,88,12,0.35);
+        transition: all 0.25s ease;
+        width: 100%;
+        justify-content: center;
+        white-space: normal;
+        word-break: break-word;
+        text-align: center;
     }
+    .read-more-btn:hover {
+        background: #c2410c;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(234,88,12,0.45);
+        color: #fff;
+    }
+    .read-more-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ===== DOTS RIGHT: SCROLLABLE OVERFLOW ===== */
+    .dots-half.dots-right {
+        position: relative;
+        overflow: hidden;
+    }
+    .dots-right-inner {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        transition: transform 0.35s cubic-bezier(0.25,1,0.5,1);
+        will-change: transform;
+    }
+    /* Arrow nav buttons for dots-right */
+    .dots-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(234,88,12,0.85);
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        flex-shrink: 0;
+    }
+    .dots-nav-btn.visible { opacity: 1; pointer-events: auto; }
+    .dots-nav-btn svg { width: 11px; height: 11px; }
+    .dots-nav-btn.btn-prev { left: 0; }
+    .dots-nav-btn.btn-next { right: 0; }
+    .dots-nav-btn:hover { background: #ea580c; transform: translateY(-50%) scale(1.1); }
     
     @media (max-width: 900px) {
         .slide1-layout { padding: 0 20px; }
@@ -486,13 +528,25 @@
                         <h1><?= htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif') ?></h1>
                     </div>
                     <div class="slide1-content-box" id="headerDescBox">
-                        <?= htmlspecialchars($header_settings->description ?? 'Seiring dengan berkembangnya kebutuhan pelayanan untuk mahasiswa, dosen dan pegawai FIK maka diperlukan peningkatan layanan yang mengusung efisiensi dan efektifitas. Ifik lahir dari keresahan dan kesulitan mahasiswa maupun dosen dalam beberapa layanan, antara lain pendaftaran TA, bimbingan online, dokumen online, peminjaman ruangan dan lain sebagainya. Sejak dibuat tahun 2021 oleh tim unit lab FIK, aplikasi berbasis web ini telah digunakan hingga saat ini untuk mempermudah layanan untuk kalangan internal FIK, baik untuk mahasiswa, dosen maupun pegawai FIK.') ?>
+                        <?php
+                            $full_desc = $header_settings->description ?? 'Seiring dengan berkembangnya kebutuhan pelayanan untuk mahasiswa, dosen dan pegawai FIK maka diperlukan peningkatan layanan yang mengusung efisiensi dan efektifitas. Ifik lahir dari keresahan dan kesulitan mahasiswa maupun dosen dalam beberapa layanan, antara lain pendaftaran TA, bimbingan online, dokumen online, peminjaman ruangan dan lain sebagainya. Sejak dibuat tahun 2021 oleh tim unit lab FIK, aplikasi berbasis web ini telah digunakan hingga saat ini untuk mempermudah layanan untuk kalangan internal FIK, baik untuk mahasiswa, dosen maupun pegawai FIK.';
+                            $plain_desc = strip_tags($full_desc);
+                            $char_limit = 280;
+                            if (mb_strlen($plain_desc) > $char_limit) {
+                                $truncated = mb_substr($plain_desc, 0, $char_limit);
+                                $last_space = mb_strrpos($truncated, ' ');
+                                echo htmlspecialchars($last_space ? mb_substr($truncated, 0, $last_space) : $truncated) . '...';
+                            } else {
+                                echo htmlspecialchars($plain_desc);
+                            }
+                        ?>
                     </div>
-                    <div class="header-pagination" id="headerPagination">
-                        <button onclick="prevDescPage()">&larr; Prev</button>
-                        <span id="headerPageInfo">1/1</span>
-                        <button onclick="nextDescPage()">Next &rarr;</button>
-                    </div>
+                    <?php if (mb_strlen(strip_tags($header_settings->description ?? '')) > 280): ?>
+                    <a href="<?= base_url('dashboard/about') ?>" class="read-more-btn">
+                        Baca Selengkapnya
+                        <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                    <?php endif; ?>
                 </div>
             </div>
             
@@ -530,11 +584,46 @@
                             <source src="<?= base_url('assets/videos/' . $s->media_path) ?>" type="video/mp4">
                         </video>
                     <?php endif; ?>
-                    <div class="slide1-layout" style="position: relative; z-index: 2;">
+                    <div class="slide1-layout">
                         <div class="slide1-text-container">
-                            <div class="slide1-title-box">
-                                <h1><?= htmlspecialchars($s->label ?? ('Slide ' . ($i + 1))) ?></h1>
-                            </div>
+                            <?php if (!empty($s->show_text) && $s->show_text == 1): ?>
+                                <!-- Toggle ON: Tampilkan judul & deskripsi kustom dari TinyMCE -->
+                                <?php if (!empty($s->overlay_title)): ?>
+                                <div class="slide1-title-box">
+                                    <h1><?= htmlspecialchars($s->overlay_title) ?></h1>
+                                </div>
+                                <?php endif; ?>
+                                <?php if (!empty($s->overlay_description)): ?>
+                                <div class="slide1-content-box">
+                                    <?= $s->overlay_description /* HTML dari TinyMCE */ ?>
+                                </div>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <!-- Toggle OFF: Gunakan judul & deskripsi default dari header_settings -->
+                                <div class="slide1-title-box">
+                                    <h1><?= htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif') ?></h1>
+                                </div>
+                                <div class="slide1-content-box">
+                                    <?php
+                                        $def_desc  = $header_settings->description ?? '';
+                                        $def_plain = strip_tags($def_desc);
+                                        $def_limit = 280;
+                                        if (mb_strlen($def_plain) > $def_limit) {
+                                            $def_cut   = mb_substr($def_plain, 0, $def_limit);
+                                            $def_space = mb_strrpos($def_cut, ' ');
+                                            echo htmlspecialchars($def_space ? mb_substr($def_cut, 0, $def_space) : $def_cut) . '...';
+                                        } else {
+                                            echo htmlspecialchars($def_plain);
+                                        }
+                                    ?>
+                                </div>
+                                <?php if (mb_strlen(strip_tags($header_settings->description ?? '')) > 280): ?>
+                                <a href="<?= base_url('dashboard/about') ?>" class="read-more-btn">
+                                    Baca Selengkapnya
+                                    <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <img src="<?= base_url('assets/images/' . $dekanat_img) ?>" alt="Dekanat" class="dekanat-img-right">
@@ -645,14 +734,26 @@
         <!-- CELAH TENGAH: Tempat Tombol Bulat Oranye Scroll Down Bebas Terbuka -->
         <div class="dots-center-gap"></div>
 
-        <!-- SISI KANAN (Sayap Kanan) -->
-        <div class="dots-half dots-right">
-            <?php foreach ($tabs_right as $idx => $tab): ?>
-                <div class="dot" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
-                    <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
-                    <div class="dot-track"><div class="progress"></div></div>
-                </div>
-            <?php endforeach; ?>
+        <!-- SISI KANAN (Sayap Kanan) — Scrollable jika > 2 tabs -->
+        <div class="dots-half dots-right" id="dotsRightPanel">
+            <!-- Tombol Prev (muncul jika overflow) -->
+            <button class="dots-nav-btn btn-prev" id="dotsNavPrev" onclick="scrollDotsRight(-1)" title="Sebelumnya">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+
+            <div class="dots-right-inner" id="dotsRightInner">
+                <?php foreach ($tabs_right as $idx => $tab): ?>
+                    <div class="dot" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                        <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
+                        <div class="dot-track"><div class="progress"></div></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Tombol Next (muncul jika overflow) -->
+            <button class="dots-nav-btn btn-next" id="dotsNavNext" onclick="scrollDotsRight(1)" title="Berikutnya">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
     </div>
 </div>
@@ -832,61 +933,77 @@
 </script>
 
 <script>
-    // Script Logika Pagination Teks Deskripsi (Fitur Teman)
-    document.addEventListener('DOMContentLoaded', () => {
-        const fullText = <?= json_encode($header_settings->description ?? 'Seiring dengan berkembangnya kebutuhan pelayanan untuk mahasiswa, dosen dan pegawai FIK maka diperlukan peningkatan layanan yang mengusung efisiensi dan efektifitas. Ifik lahir dari keresahan dan kesulitan mahasiswa maupun dosen dalam beberapa layanan, antara lain pendaftaran TA, bimbingan online, dokumen online, peminjaman ruangan dan lain sebagainya. Sejak dibuat tahun 2021 oleh tim unit lab FIK, aplikasi berbasis web ini telah digunakan hingga saat ini untuk mempermudah layanan untuk kalangan internal FIK, baik untuk mahasiswa, dosen maupun pegawai FIK.') ?>;
-        const charLimit = 420;
-        
-        let pages = [];
-        if (fullText.length > charLimit) {
-            let currentIdx = 0;
-            while(currentIdx < fullText.length) {
-                let slice = fullText.slice(currentIdx, currentIdx + charLimit);
-                if (currentIdx + charLimit < fullText.length) {
-                    let lastSpace = slice.lastIndexOf(' ');
-                    if (lastSpace > -1) {
-                        slice = slice.slice(0, lastSpace);
-                        currentIdx += lastSpace + 1;
-                    } else {
-                        currentIdx += charLimit;
-                    }
-                } else {
-                    currentIdx += charLimit;
+    // ===== DOTS RIGHT: SCROLL OVERFLOW NAVIGATION =====
+    (function() {
+        document.addEventListener('DOMContentLoaded', () => {
+            const panel     = document.getElementById('dotsRightPanel');
+            const inner     = document.getElementById('dotsRightInner');
+            const btnPrev   = document.getElementById('dotsNavPrev');
+            const btnNext   = document.getElementById('dotsNavNext');
+
+            if (!panel || !inner) return;
+
+            let currentOffset = 0;
+
+            function getDotWidth() {
+                const firstDot = inner.querySelector('.dot');
+                if (!firstDot) return 0;
+                // width of dot + gap (12px)
+                return firstDot.offsetWidth + 12;
+            }
+
+            function getVisibleCount() {
+                const dw = getDotWidth();
+                if (dw <= 0) return 99;
+                return Math.floor(panel.offsetWidth / dw);
+            }
+
+            function getTotalDots() {
+                return inner.querySelectorAll('.dot').length;
+            }
+
+            function updateNav() {
+                const total   = getTotalDots();
+                const visible = getVisibleCount();
+                const needsScroll = total > visible;
+
+                // Clamp offset
+                const maxOffset = Math.max(0, total - visible);
+                if (currentOffset > maxOffset) currentOffset = maxOffset;
+
+                // Translate inner
+                inner.style.transform = `translateX(-${currentOffset * getDotWidth()}px)`;
+
+                // Show/hide buttons
+                btnPrev.classList.toggle('visible', needsScroll && currentOffset > 0);
+                btnNext.classList.toggle('visible', needsScroll && currentOffset < maxOffset);
+            }
+
+            window.scrollDotsRight = function(dir) {
+                const visible  = getVisibleCount();
+                const total    = getTotalDots();
+                const maxOffset = Math.max(0, total - visible);
+                currentOffset = Math.max(0, Math.min(currentOffset + dir, maxOffset));
+                updateNav();
+            };
+
+            // Also expose so goToSlide can scroll to active dot
+            window._syncDotsRightOffset = function(activeTabIndex) {
+                // Find the position of this dot in the inner list
+                const dots = Array.from(inner.querySelectorAll('.dot'));
+                const pos = dots.findIndex(d => parseInt(d.dataset.index) === activeTabIndex);
+                if (pos === -1) return;
+                const visible = getVisibleCount();
+                if (pos >= currentOffset + visible) {
+                    currentOffset = pos - visible + 1;
+                } else if (pos < currentOffset) {
+                    currentOffset = pos;
                 }
-                pages.push(slice);
-            }
-        } else {
-            pages.push(fullText);
-        }
+                updateNav();
+            };
 
-        let currentDescPage = 0;
-        const descBox = document.getElementById('headerDescBox');
-        const paginationBox = document.getElementById('headerPagination');
-        const pageInfo = document.getElementById('headerPageInfo');
-
-        function renderDescPage() {
-            if(!descBox) return;
-            descBox.innerHTML = pages[currentDescPage];
-            if (pages.length > 1 && paginationBox) {
-                paginationBox.style.display = 'flex';
-                if (pageInfo) pageInfo.innerText = (currentDescPage + 1) + '/' + pages.length;
-            }
-        }
-
-        window.prevDescPage = function() {
-            if(currentDescPage > 0) {
-                currentDescPage--;
-                renderDescPage();
-            }
-        };
-        
-        window.nextDescPage = function() {
-            if(currentDescPage < pages.length - 1) {
-                currentDescPage++;
-                renderDescPage();
-            }
-        };
-
-        renderDescPage();
-    });
+            updateNav();
+            window.addEventListener('resize', updateNav);
+        });
+    })();
 </script>
