@@ -537,5 +537,68 @@ class Mahasiswa extends CI_Controller {
                 'judul_1'        => $pendaftaran['judul_1'] ?? ''
             ]));
     }
-}
+    // AJAX Endpoint: Get list of students and their previews for Dosen Bimbingan
+    public function ajax_get_dosen_bimbingan() {
+        header('Content-Type: application/json');
+        
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id != 4) {
+            echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+            return;
+        }
 
+        try {
+            $dosen_id = $this->session->userdata('user_id');
+            $posisi = $this->input->get('posisi') ?: 1;
+            $tahap = $this->input->get('tahap') ?: 'Preview 1';
+            
+            $students = $this->Mahasiswa_model->get_students_by_dosen($dosen_id, $posisi);
+            
+            $data = [];
+            $total = count($students);
+            
+            foreach ($students as $student) {
+                $previews = $this->Mahasiswa_model->get_riwayat_preview($student['nim'], $tahap);
+                $latest = !empty($previews) ? $previews[0] : null;
+                
+                $data[] = [
+                    'nim' => $student['nim'],
+                    'nama_mahasiswa' => $student['nama_mahasiswa'] ?? $student['nim'],
+                    'judul' => $student['judul'] ?? '-',
+                    'konsentrasi_dkv' => $student['konsentrasi_dkv'] ?? '',
+                    'latest_preview' => $latest
+                ];
+            }
+
+            echo json_encode([
+                'status' => true,
+                'data' => $data,
+                'stats' => [
+                    'total' => $total
+                ]
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['status' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+        }
+    }
+
+    // AJAX Endpoint: Get preview log for logged in Mahasiswa
+    public function ajax_get_preview_log() {
+        header('Content-Type: application/json');
+        
+        $nim = $this->_get_current_nim();
+        $tahap = $this->input->get('tahap');
+        
+        if (empty($tahap)) {
+            echo json_encode(['status' => false, 'message' => 'Tahap tidak valid']);
+            return;
+        }
+        
+        $riwayat = $this->Mahasiswa_model->get_riwayat_preview($nim, $tahap);
+        
+        echo json_encode([
+            'status' => true,
+            'data' => $riwayat
+        ]);
+    }
+}

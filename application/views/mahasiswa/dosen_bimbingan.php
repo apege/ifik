@@ -17,6 +17,38 @@
         body, button, input, textarea, select {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         }
+
+        /* Unified Multi-Search Pill Component */
+        .search-pill-container { position: relative; display: flex; align-items: center; gap: 8px; width: 100%; }
+        .unified-search-pill {
+            display: flex; align-items: center; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px;
+            padding: 2px 12px; flex: 1; height: 46px; transition: all 0.2s ease;
+        }
+        .unified-search-pill:focus-within {
+            border-color: #ea580c !important; background: #ffffff !important; box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12) !important;
+        }
+
+        /* Rotating Border Table */
+        @keyframes spinRotatingBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .table-rotating-border-wrap {
+            position: relative; border-radius: 16px; padding: 2px; overflow: hidden;
+            box-shadow: 0 12px 36px -8px rgba(234, 88, 12, 0.15), 0 4px 16px rgba(71, 85, 105, 0.06); background: #ffffff;
+        }
+        .table-rotating-border-spin {
+            position: absolute; inset: -350%; pointer-events: none; opacity: 0.95;
+            background: conic-gradient(from 90deg at 50% 50%, #ea580c 0%, #f97316 12%, #ffffff 22%, #cbd5e1 35%, #475569 48%, #1e293b 58%, #ea580c 68%, #ffffff 80%, #94a3b8 90%, #ea580c 100%);
+            animation: spinRotatingBorder 7s linear infinite;
+        }
+        .table-rotating-border-inner { position: relative; z-index: 10; width: 100%; background: #ffffff; border-radius: 14px; overflow: hidden; }
+        .table-custom-rounded { border-collapse: separate !important; border-spacing: 0 !important; width: 100%; }
+        .table-custom-rounded thead tr th:first-child { border-top-left-radius: 14px; }
+        .table-custom-rounded thead tr th:last-child { border-top-right-radius: 14px; }
+        
+        .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; gap: 0.375rem; border: 1px solid transparent; }
+        .badge-success { background-color: #d1fae5; color: #065f46; border-color: #34d399; }
+        .badge-warning { background-color: #fef3c7; color: #92400e; border-color: #fbbf24; }
+        .badge-danger { background-color: #ffe4e6; color: #9f1239; border-color: #fb7185; }
+        .badge-secondary { background-color: #f1f5f9; color: #475569; border-color: #cbd5e1; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-amber-50/40 via-orange-50/25 to-slate-100 min-h-screen text-slate-800 antialiased flex flex-col justify-between selection:bg-orange-500 selection:text-white">
@@ -76,212 +108,98 @@
                 <button onclick="switchDosenTab('preview3')" id="dosenTab3" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200">Preview 3</button>
             </div>
 
-            <!-- Content Preview 1 -->
-            <div id="dosenContent1" class="space-y-6">
-                <?php foreach($students as $mhs): ?>
-                <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 class="font-bold text-lg text-slate-800"><?= htmlspecialchars($mhs['nama_mahasiswa']) ?> (<?= $mhs['nim'] ?>)</h4>
-                            <p class="text-xs text-slate-500 font-bold uppercase mt-1">Judul: <?= htmlspecialchars($mhs['judul']) ?></p>
+            <!-- Unified Table Container -->
+            <div id="dosenTableContainer" class="space-y-4">
+                <!-- Search Pill -->
+                <div class="relative search-pill-container" id="multiSearchWrapper">
+                    <div class="unified-search-pill">
+                        <div class="flex-1 flex items-center pl-2">
+                            <i class="bi bi-search text-slate-400 text-sm mr-3"></i>
+                            <input type="text" id="searchInput" oninput="fetchBimbinganData()" placeholder="Cari Nama, NIM, Judul TA..." class="w-full text-sm font-medium bg-transparent border-none focus:outline-none text-slate-800">
                         </div>
                     </div>
-                    <?php if(!empty($mhs['preview1'])): ?>
-                        <?php $latest = $mhs['preview1'][0]; ?>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-slate-700">Berkas Terbaru: <a href="<?= base_url('uploads/preview_ta/' . $latest['file_draft']) ?>" target="_blank" class="text-orange-600 hover:underline"><?= htmlspecialchars($latest['file_draft']) ?></a></span>
-                                <span class="text-xs font-bold px-3 py-1 bg-slate-100 rounded-lg"><?= date('d M Y, H:i', strtotime($latest['created_at'])) ?></span>
-                            </div>
-                            <p class="text-sm text-slate-600 italic">"<?= htmlspecialchars($latest['catatan_mahasiswa']) ?>"</p>
-                            
-                            <hr class="border-slate-100">
-                            
-                            <!-- Form Review -->
-                            <form action="<?= site_url('mahasiswa/review_preview') ?>" method="POST" class="space-y-4">
-                                <input type="hidden" name="id_preview" value="<?= $latest['id'] ?>">
-                                <input type="hidden" name="posisi" value="<?= $posisi ?>">
-                                
-                                <?php if($posisi == 1): ?>
-                                    <!-- Menampilkan Catatan Sebelumnya & Status "Apakah Revisi Sudah Dikerjakan?" -->
-                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                                        <p class="text-sm font-bold text-blue-900 mb-1"><i class="bi bi-info-circle-fill"></i> Riwayat & Pengecekan Revisi</p>
-                                        <p class="text-xs text-blue-800 mb-2">Pastikan mahasiswa telah mengerjakan revisi berdasarkan catatan yang Anda berikan sebelumnya.</p>
-                                        <?php if(!empty($latest['catatan_pembimbing'])): ?>
-                                            <div class="text-xs italic text-slate-600 p-2 bg-white rounded border border-blue-100 mt-2">
-                                                <strong>Catatan Anda Sebelumnya:</strong><br>
-                                                <?= htmlspecialchars($latest['catatan_pembimbing']) ?>
-                                            </div>
-                                        <?php endif; ?>
-                                        <div class="mt-3">
-                                            <label class="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                                <input type="checkbox" required class="w-4 h-4 text-orange-500 rounded focus:ring-orange-500 border-slate-300">
-                                                Apakah revisi ini sudah dikerjakan dengan baik?
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Status Penilaian (P1)</label>
-                                        <select name="status_pembimbing" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm">
-                                            <option value="Pending" <?= $latest['status_pembimbing'] == 'Pending' ? 'selected' : '' ?>>Menunggu Review</option>
-                                            <option value="Approved" <?= $latest['status_pembimbing'] == 'Approved' ? 'selected' : '' ?>>Disetujui (ACC)</option>
-                                            <option value="Revision" <?= $latest['status_pembimbing'] == 'Revision' ? 'selected' : '' ?>>Perlu Revisi</option>
-                                        </select>
-                                    </div>
-                                <?php endif; ?>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Catatan / Feedback Anda</label>
-                                    <textarea name="catatan_pembimbing" rows="3" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm"><?= htmlspecialchars($posisi == 1 ? ($latest['catatan_pembimbing'] ?? '') : ($latest['catatan_pembimbing_2'] ?? '')) ?></textarea>
-                                </div>
-                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-md">Simpan Review</button>
-                            </form>
-                        </div>
-                    <?php else: ?>
-                        <p class="text-sm text-slate-500 italic">Belum ada file draft yang diunggah mahasiswa ini untuk Preview 1.</p>
-                    <?php endif; ?>
                 </div>
-                <?php endforeach; ?>
+
+                <!-- Table with Rotating Conic-Gradient Border -->
+                <div class="table-rotating-border-wrap mt-4">
+                    <span class="table-rotating-border-spin"></span>
+                    <div class="table-rotating-border-inner overflow-x-auto">
+                        <table class="table-custom-rounded text-left text-sm w-full">
+                            <thead class="bg-slate-50 text-slate-700 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-4 px-4 font-bold">Mahasiswa & Judul TA</th>
+                                    <th class="py-4 px-4">Berkas Terbaru</th>
+                                    <th class="py-4 px-4 text-center">Waktu Upload</th>
+                                    <th class="py-4 px-4 text-center">Status</th>
+                                    <th class="py-4 px-4 pr-6 text-right">Aksi (Review)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 font-medium bg-white" id="bimbinganTableBody">
+                                <tr><td colspan="5" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2"></i> Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <!-- Content Preview 2 -->
-            <div id="dosenContent2" class="space-y-6 hidden">
-                <?php foreach($students as $mhs): ?>
-                <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 class="font-bold text-lg text-slate-800"><?= htmlspecialchars($mhs['nama_mahasiswa']) ?> (<?= $mhs['nim'] ?>)</h4>
-                        </div>
+            <!-- Modal Review -->
+            <div id="reviewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeReviewModal()"></div>
+                <div class="relative bg-white rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl transform transition-all">
+                    <button onclick="closeReviewModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+                    <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2 border-b pb-4"><i class="bi bi-pencil-square text-orange-500"></i> <span id="modalTahapTitle">Review Berkas</span></h3>
+                    
+                    <div class="mb-5 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <p class="text-sm font-bold text-slate-800 mb-1" id="modalStudentName">Nama Mahasiswa (NIM)</p>
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Judul: <span id="modalJudul" class="text-slate-700 font-bold normal-case"></span></p>
+                        <p class="text-sm text-slate-600 italic mb-3 border-l-2 border-orange-300 pl-3">Catatan Mahasiswa: "<span id="modalStudentNotes"></span>"</p>
+                        <a href="#" id="modalFileLink" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold hover:bg-orange-200 transition"><i class="bi bi-file-earmark-pdf-fill"></i> Buka File Draft Terbaru</a>
                     </div>
-                    <?php if(!empty($mhs['preview2'])): ?>
-                        <?php $latest = $mhs['preview2'][0]; ?>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-slate-700">Berkas Terbaru: <a href="<?= base_url('uploads/preview_ta/' . $latest['file_draft']) ?>" target="_blank" class="text-orange-600 hover:underline"><?= htmlspecialchars($latest['file_draft']) ?></a></span>
-                                <span class="text-xs font-bold px-3 py-1 bg-slate-100 rounded-lg"><?= date('d M Y, H:i', strtotime($latest['created_at'])) ?></span>
-                            </div>
-                            <p class="text-sm text-slate-600 italic">"<?= htmlspecialchars($latest['catatan_mahasiswa']) ?>"</p>
-                            <hr class="border-slate-100">
-                            <!-- Form Review -->
-                            <form action="<?= site_url('mahasiswa/review_preview') ?>" method="POST" class="space-y-4">
-                                <input type="hidden" name="id_preview" value="<?= $latest['id'] ?>">
-                                <input type="hidden" name="posisi" value="<?= $posisi ?>">
-                                
-                                <?php if($posisi == 1): ?>
-                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                                        <p class="text-sm font-bold text-blue-900 mb-1"><i class="bi bi-info-circle-fill"></i> Riwayat & Pengecekan Revisi</p>
-                                        <p class="text-xs text-blue-800 mb-2">Pastikan mahasiswa telah mengerjakan revisi berdasarkan catatan yang Anda berikan sebelumnya.</p>
-                                        <?php if(!empty($latest['catatan_pembimbing'])): ?>
-                                            <div class="text-xs italic text-slate-600 p-2 bg-white rounded border border-blue-100 mt-2">
-                                                <strong>Catatan Anda Sebelumnya:</strong><br>
-                                                <?= htmlspecialchars($latest['catatan_pembimbing']) ?>
-                                            </div>
-                                        <?php endif; ?>
-                                        <div class="mt-3">
-                                            <label class="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                                <input type="checkbox" required class="w-4 h-4 text-orange-500 rounded focus:ring-orange-500 border-slate-300">
-                                                Apakah revisi ini sudah dikerjakan dengan baik?
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Status Penilaian (P1)</label>
-                                        <select name="status_pembimbing" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm">
-                                            <option value="Pending" <?= $latest['status_pembimbing'] == 'Pending' ? 'selected' : '' ?>>Menunggu Review</option>
-                                            <option value="Approved" <?= $latest['status_pembimbing'] == 'Approved' ? 'selected' : '' ?>>Disetujui (ACC)</option>
-                                            <option value="Revision" <?= $latest['status_pembimbing'] == 'Revision' ? 'selected' : '' ?>>Perlu Revisi</option>
-                                        </select>
-                                    </div>
-                                <?php endif; ?>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Catatan / Feedback Anda</label>
-                                    <textarea name="catatan_pembimbing" rows="3" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm"><?= htmlspecialchars($posisi == 1 ? ($latest['catatan_pembimbing'] ?? '') : ($latest['catatan_pembimbing_2'] ?? '')) ?></textarea>
-                                </div>
-                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-md">Simpan Review</button>
-                            </form>
+                    
+                    <form id="formReview" action="<?= site_url('mahasiswa/review_preview') ?>" method="POST" class="space-y-4">
+                        <input type="hidden" name="id_preview" id="modalIdPreview" value="">
+                        <input type="hidden" name="posisi" value="<?= $posisi ?>">
+                        
+                        <?php if($posisi == 1): ?>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4 hidden" id="modalRiwayatContainer">
+                            <p class="text-sm font-bold text-blue-900 mb-1"><i class="bi bi-clock-history"></i> Catatan Sebelumnya:</p>
+                            <p class="text-xs text-blue-800 italic" id="modalCatatanSebelumnya"></p>
                         </div>
-                    <?php else: ?>
-                        <p class="text-sm text-slate-500 italic">Belum ada file draft yang diunggah mahasiswa ini untuk Preview 2.</p>
-                    <?php endif; ?>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Content Preview 3 -->
-            <div id="dosenContent3" class="space-y-6 hidden">
-                <?php foreach($students as $mhs): ?>
-                <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50">
-                    <div class="flex justify-between items-start mb-4">
+                        
                         <div>
-                            <h4 class="font-bold text-lg text-slate-800"><?= htmlspecialchars($mhs['nama_mahasiswa']) ?> (<?= $mhs['nim'] ?>)</h4>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Status Penilaian (P1)</label>
+                            <select name="status_pembimbing" id="modalStatus" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm font-semibold">
+                                <option value="Pending">Menunggu Review</option>
+                                <option value="Approved">Disetujui (ACC)</option>
+                                <option value="Revision">Perlu Revisi</option>
+                            </select>
                         </div>
-                    </div>
-                    <?php if(!empty($mhs['preview3'])): ?>
-                        <?php $latest = $mhs['preview3'][0]; ?>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm font-bold text-slate-700">Berkas Terbaru: <a href="<?= base_url('uploads/preview_ta/' . $latest['file_draft']) ?>" target="_blank" class="text-orange-600 hover:underline"><?= htmlspecialchars($latest['file_draft']) ?></a></span>
-                                <span class="text-xs font-bold px-3 py-1 bg-slate-100 rounded-lg"><?= date('d M Y, H:i', strtotime($latest['created_at'])) ?></span>
-                            </div>
-                            <p class="text-sm text-slate-600 italic">"<?= htmlspecialchars($latest['catatan_mahasiswa']) ?>"</p>
-                            <hr class="border-slate-100">
-                            <!-- Form Review -->
-                            <form action="<?= site_url('mahasiswa/review_preview') ?>" method="POST" class="space-y-4">
-                                <input type="hidden" name="id_preview" value="<?= $latest['id'] ?>">
-                                <input type="hidden" name="posisi" value="<?= $posisi ?>">
-                                
-                                <?php if($posisi == 1): ?>
-                                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                                        <p class="text-sm font-bold text-blue-900 mb-1"><i class="bi bi-info-circle-fill"></i> Riwayat & Pengecekan Revisi</p>
-                                        <p class="text-xs text-blue-800 mb-2">Pastikan mahasiswa telah mengerjakan revisi berdasarkan catatan yang Anda berikan sebelumnya.</p>
-                                        <?php if(!empty($latest['catatan_pembimbing'])): ?>
-                                            <div class="text-xs italic text-slate-600 p-2 bg-white rounded border border-blue-100 mt-2">
-                                                <strong>Catatan Anda Sebelumnya:</strong><br>
-                                                <?= htmlspecialchars($latest['catatan_pembimbing']) ?>
-                                            </div>
-                                        <?php endif; ?>
-                                        <div class="mt-3">
-                                            <label class="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                                <input type="checkbox" required class="w-4 h-4 text-orange-500 rounded focus:ring-orange-500 border-slate-300">
-                                                Apakah revisi ini sudah dikerjakan dengan baik?
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Status Penilaian (P1)</label>
-                                        <select name="status_pembimbing" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm">
-                                            <option value="Pending" <?= $latest['status_pembimbing'] == 'Pending' ? 'selected' : '' ?>>Menunggu Review</option>
-                                            <option value="Approved" <?= $latest['status_pembimbing'] == 'Approved' ? 'selected' : '' ?>>Disetujui (ACC)</option>
-                                            <option value="Revision" <?= $latest['status_pembimbing'] == 'Revision' ? 'selected' : '' ?>>Perlu Revisi</option>
-                                        </select>
-                                    </div>
-                                <?php endif; ?>
+                        <?php endif; ?>
 
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Catatan / Feedback Anda</label>
-                                    <textarea name="catatan_pembimbing" rows="3" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm"><?= htmlspecialchars($posisi == 1 ? ($latest['catatan_pembimbing'] ?? '') : ($latest['catatan_pembimbing_2'] ?? '')) ?></textarea>
-                                </div>
-                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm shadow-md">Simpan Review</button>
-                            </form>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Catatan / Feedback Anda</label>
+                            <textarea name="catatan_pembimbing" id="modalCatatan" rows="4" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm font-medium" placeholder="Tuliskan feedback atau arahan revisi di sini..."></textarea>
                         </div>
-                    <?php else: ?>
-                        <p class="text-sm text-slate-500 italic">Belum ada file draft yang diunggah mahasiswa ini untuk Preview 3.</p>
-                    <?php endif; ?>
+                        <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                            <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition">Batal</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-md transition transform hover:scale-105 active:scale-95">Simpan Review</button>
+                        </div>
+                    </form>
                 </div>
-                <?php endforeach; ?>
             </div>
 
         </div>
     </main>
 
     <script>
+        let currentTahap = 'Preview 1';
+        let bimbinganData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchBimbinganData();
+        });
+
         function switchDosenTab(tab) {
-            document.getElementById('dosenContent1').classList.add('hidden');
-            document.getElementById('dosenContent2').classList.add('hidden');
-            document.getElementById('dosenContent3').classList.add('hidden');
-            
             let btnClassInactive = 'px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'.split(' ');
             let btnClassActive = 'px-5 py-2.5 rounded-xl font-bold text-sm bg-orange-100 text-orange-700 border border-orange-300'.split(' ');
 
@@ -292,18 +210,145 @@
             });
 
             if(tab === 'preview1') {
-                document.getElementById('dosenContent1').classList.remove('hidden');
+                currentTahap = 'Preview 1';
                 document.getElementById('dosenTab1').classList.remove(...btnClassInactive);
                 document.getElementById('dosenTab1').classList.add(...btnClassActive);
             } else if(tab === 'preview2') {
-                document.getElementById('dosenContent2').classList.remove('hidden');
+                currentTahap = 'Preview 2';
                 document.getElementById('dosenTab2').classList.remove(...btnClassInactive);
                 document.getElementById('dosenTab2').classList.add(...btnClassActive);
             } else if(tab === 'preview3') {
-                document.getElementById('dosenContent3').classList.remove('hidden');
+                currentTahap = 'Preview 3';
                 document.getElementById('dosenTab3').classList.remove(...btnClassInactive);
                 document.getElementById('dosenTab3').classList.add(...btnClassActive);
             }
+            
+            fetchBimbinganData();
+        }
+
+        function fetchBimbinganData() {
+            const tbody = document.getElementById('bimbinganTableBody');
+            const posisi = <?= $posisi ?>;
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin text-xl"></i> Memuat data...</td></tr>';
+            
+            fetch(`<?= site_url('mahasiswa/ajax_get_dosen_bimbingan') ?>?posisi=${posisi}&tahap=${encodeURIComponent(currentTahap)}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.text();
+                })
+                .then(text => {
+                    let res;
+                    try { res = JSON.parse(text); } catch(e) {
+                        console.error('Server response (not JSON):', text);
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-rose-500 text-xs">Server mengembalikan response tidak valid. Cek Console (F12).</td></tr>`;
+                        return;
+                    }
+                    if(res.status) {
+                        bimbinganData = res.data;
+                        renderTable();
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-rose-500">${res.message}</td></tr>`;
+                    }
+                })
+                .catch(err => {
+                    console.error('Fetch error:', err);
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-rose-500">Terjadi kesalahan koneksi: ${err.message}</td></tr>`;
+                });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('bimbinganTableBody');
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            
+            let html = '';
+            let count = 0;
+            
+            bimbinganData.forEach((mhs, index) => {
+                const match = mhs.nim.toLowerCase().includes(keyword) || 
+                              mhs.nama_mahasiswa.toLowerCase().includes(keyword) ||
+                              (mhs.judul && mhs.judul.toLowerCase().includes(keyword));
+                              
+                if(!match) return;
+                count++;
+                
+                let previewHtml = `<span class="text-slate-400 italic text-xs">Belum ada berkas</span>`;
+                let timeHtml = `-`;
+                let statusBadge = `<span class="badge badge-secondary"><i class="bi bi-dash"></i> Kosong</span>`;
+                let btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold cursor-not-allowed border border-slate-200">Belum ada file</button>`;
+                
+                if (mhs.latest_preview) {
+                    const latest = mhs.latest_preview;
+                    const fileUrl = `<?= base_url('uploads/preview_ta/') ?>${latest.file_draft}`;
+                    previewHtml = `<a href="${fileUrl}" target="_blank" class="text-orange-600 hover:underline font-bold text-xs"><i class="bi bi-file-earmark-pdf-fill"></i> ${latest.file_draft}</a>`;
+                    
+                    const dt = new Date(latest.created_at);
+                    timeHtml = `<div class="text-xs font-semibold text-slate-700">${dt.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})}</div><div class="text-[10px] text-slate-500">${dt.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</div>`;
+                    
+                    let st = latest.status_pembimbing;
+                    if (st === 'Approved') statusBadge = `<span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Disetujui</span>`;
+                    else if (st === 'Revision') statusBadge = `<span class="badge badge-danger"><i class="bi bi-x-circle-fill"></i> Revisi</span>`;
+                    else statusBadge = `<span class="badge badge-warning"><i class="bi bi-clock-fill"></i> Pending</span>`;
+                    
+                    btnHtml = `<button onclick="openReviewModal(${index})" class="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 rounded-lg text-xs font-bold transition shadow-2xs"><i class="bi bi-pencil-square"></i> Review</button>`;
+                }
+                
+                html += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-4">
+                            <div class="font-bold text-slate-900">${mhs.nama_mahasiswa}</div>
+                            <div class="text-xs text-slate-500 font-mono mt-0.5">${mhs.nim}</div>
+                            <div class="text-[11px] text-slate-600 mt-1 line-clamp-1 italic">${mhs.judul || '-'}</div>
+                        </td>
+                        <td class="py-4 px-4">${previewHtml}</td>
+                        <td class="py-4 px-4 text-center">${timeHtml}</td>
+                        <td class="py-4 px-4 text-center">${statusBadge}</td>
+                        <td class="py-4 px-4 pr-6 text-right">${btnHtml}</td>
+                    </tr>
+                `;
+            });
+            
+            if(count === 0) {
+                html = `<tr><td colspan="5" class="text-center py-10 text-slate-500 font-medium">Tidak ada data mahasiswa ditemukan.</td></tr>`;
+            }
+            
+            tbody.innerHTML = html;
+        }
+
+        function openReviewModal(index) {
+            const mhs = bimbinganData[index];
+            const latest = mhs.latest_preview;
+            if(!latest) return;
+            
+            document.getElementById('modalTahapTitle').textContent = `Review Berkas ${currentTahap}`;
+            document.getElementById('modalStudentName').textContent = `${mhs.nama_mahasiswa} (${mhs.nim})`;
+            document.getElementById('modalJudul').textContent = mhs.judul || '-';
+            document.getElementById('modalStudentNotes').textContent = latest.catatan_mahasiswa || '-';
+            
+            document.getElementById('modalFileLink').href = `<?= base_url('uploads/preview_ta/') ?>${latest.file_draft}`;
+            document.getElementById('modalIdPreview').value = latest.id;
+            
+            // Populate form values
+            if (document.getElementById('modalStatus')) {
+                document.getElementById('modalStatus').value = latest.status_pembimbing || 'Pending';
+            }
+            
+            let catatanDosen = <?= $posisi ?> === 1 ? (latest.catatan_pembimbing || '') : (latest.catatan_pembimbing_2 || '');
+            document.getElementById('modalCatatan').value = catatanDosen;
+            
+            if (<?= $posisi ?> === 1 && document.getElementById('modalRiwayatContainer')) {
+                if (latest.catatan_pembimbing) {
+                    document.getElementById('modalRiwayatContainer').classList.remove('hidden');
+                    document.getElementById('modalCatatanSebelumnya').textContent = latest.catatan_pembimbing;
+                } else {
+                    document.getElementById('modalRiwayatContainer').classList.add('hidden');
+                }
+            }
+            
+            document.getElementById('reviewModal').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.add('hidden');
         }
     </script>
 </body>
