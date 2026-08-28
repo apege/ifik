@@ -203,7 +203,12 @@ class Mahasiswa_model extends CI_Model {
             }
         }
 
-        $this->db->select('pt.nim, pt.judul_1 as judul, COALESCE(u.name, pt.nim) as nama_mahasiswa');
+        $has_konsentrasi = $this->db->field_exists('konsentrasi_dkv', 'pendaftaran_ta');
+        $select = 'pt.nim, pt.judul_1 as judul, COALESCE(u.name, pt.nim) as nama_mahasiswa';
+        if ($has_konsentrasi) {
+            $select .= ', pt.konsentrasi_dkv';
+        }
+        $this->db->select($select);
         $this->db->from('pendaftaran_ta pt');
         $this->db->join('users u', 'u.nidn_nim = pt.nim', 'left');
         

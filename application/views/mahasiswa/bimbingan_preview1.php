@@ -513,80 +513,23 @@
                     </span>
                 </div>
 
-                <?php if(!empty($riwayat_preview1)): ?>
-                    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-2xs">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 text-slate-700 font-bold uppercase text-xs tracking-wider border-b border-slate-200">
-                                <tr>
-                                    <th class="py-4 px-6 text-center w-14">#</th>
-                                    <th class="py-4 px-6">Nama Berkas</th>
-                                    <th class="py-4 px-6">Catatan Mahasiswa</th>
-                                    <th class="py-4 px-6">Waktu Upload</th>
-                                    <th class="py-4 px-6 text-center">Status Pembimbing</th>
-                                    <th class="py-4 px-6">Catatan / Feedback</th>
-                                    <th class="py-4 px-6 text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium text-xs sm:text-sm">
-                                <?php $no = 1; foreach($riwayat_preview1 as $row): ?>
-                                    <?php
-                                        $st = $row['status_pembimbing'] ?? 'Pending';
-                                        $badge_cls = ($st === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (($st === 'Revision') ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-amber-100 text-amber-900 border-amber-300');
-                                        $badge_icon = ($st === 'Approved') ? 'bi-check-circle-fill text-emerald-600' : (($st === 'Revision') ? 'bi-x-circle-fill text-rose-600' : 'bi-clock-fill text-amber-600');
-                                        $badge_text = ($st === 'Approved') ? 'Disetujui (ACC)' : (($st === 'Revision') ? 'Perlu Revisi' : 'Menunggu Review');
-                                    ?>
-                                    <tr class="hover:bg-orange-50/30 transition-colors">
-                                        <td class="py-4.5 px-6 text-center font-bold text-slate-700"><?= $no++; ?></td>
-                                        <td class="py-4.5 px-6">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg shrink-0 box-3d">
-                                                    <i class="bi bi-file-earmark-pdf-fill"></i>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <span class="font-bold text-slate-900 block truncate max-w-xs text-sm"><?= htmlspecialchars($row['file_draft']); ?></span>
-                                                    <span class="text-[11px] text-slate-400 font-mono uppercase font-medium">Draft Preview 1</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4.5 px-6 text-slate-600 max-w-xs font-normal">
-                                            <p class="line-clamp-2 italic"><?= !empty($row['catatan_mahasiswa']) ? htmlspecialchars($row['catatan_mahasiswa']) : '-'; ?></p>
-                                        </td>
-                                        <td class="py-4.5 px-6 whitespace-nowrap text-slate-600 font-medium">
-                                            <?= date('d M Y, H:i', strtotime($row['created_at'])); ?> WIB
-                                        </td>
-                                        <td class="py-4.5 px-6 text-center whitespace-nowrap">
-                                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border <?= $badge_cls; ?> shadow-2xs">
-                                                <i class="bi <?= $badge_icon; ?>"></i> <?= $badge_text; ?>
-                                            </span>
-                                        </td>
-                                        <td class="py-4.5 px-6 text-slate-700 max-w-xs">
-                                            <?php if(!empty($row['catatan_pembimbing'])): ?>
-                                                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs italic font-medium text-slate-800">
-                                                    "<?= htmlspecialchars($row['catatan_pembimbing']); ?>"
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="text-slate-400 italic font-normal">Belum ada catatan</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="py-4.5 px-6 text-right whitespace-nowrap">
-                                            <a href="<?= base_url('uploads/preview_ta/' . $row['file_draft']); ?>" target="_blank" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold text-xs transition shadow-2xs hover:scale-105 active:scale-95">
-                                                <i class="bi bi-download"></i> Unduh
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="py-12 px-4 text-center rounded-3xl bg-slate-50/60 border border-dashed border-slate-200 space-y-2.5">
-                        <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl mx-auto box-3d shadow-xs">
-                            <i class="bi bi-inbox-fill"></i>
-                        </div>
-                        <h4 class="font-bold text-base text-slate-800">Belum Ada Riwayat Upload Preview 1</h4>
-                        <p class="text-xs text-slate-500 max-w-sm mx-auto font-normal">Silakan gunakan formulir di atas untuk mengunggah berkas draft Preview 1 Anda.</p>
-                    </div>
-                <?php endif; ?>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-2xs mt-4">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-bold uppercase py-3.5 border-b border-slate-200">
+                            <tr>
+                                <th class="py-4 px-6 w-14 text-center">#</th>
+                                <th class="py-4 px-6">File Draft</th>
+                                <th class="py-4 px-6">Catatan Anda</th>
+                                <th class="py-4 px-6">Waktu Upload</th>
+                                <th class="py-4 px-6 text-center">Status</th>
+                                <th class="py-4 px-6">Catatan Pembimbing 1</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium" id="logTablePreview1">
+                            <tr><td colspan="6" class="text-center py-8 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2 text-lg"></i> Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
@@ -688,36 +631,23 @@
                         Total: <?= count($riwayat_preview2); ?> Dokumen
                     </span>
                 </div>
-                <?php if(!empty($riwayat_preview2)): ?>
-                    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-2xs">
-                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
-                            <thead class="bg-slate-50 text-slate-700 font-bold uppercase py-3.5 border-b border-slate-200">
-                                <tr>
-                                    <th class="py-3.5 px-6">Nama Berkas</th>
-                                    <th class="py-3.5 px-6">Catatan Mahasiswa</th>
-                                    <th class="py-3.5 px-6">Waktu</th>
-                                    <th class="py-3.5 px-6 text-center">Status</th>
-                                    <th class="py-3.5 px-6">Catatan Penguji</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium">
-                                <?php foreach($riwayat_preview2 as $r): ?>
-                                    <tr>
-                                        <td class="py-4.5 px-6 font-bold text-slate-900"><?= htmlspecialchars($r['file_draft']); ?></td>
-                                        <td class="py-4.5 px-6 text-slate-600 font-normal"><?= htmlspecialchars($r['catatan_mahasiswa'] ?? '-'); ?></td>
-                                        <td class="py-4.5 px-6"><?= date('d M Y H:i', strtotime($r['created_at'])); ?></td>
-                                        <td class="py-4.5 px-6 text-center font-bold"><?= $r['status_pembimbing']; ?></td>
-                                        <td class="py-4.5 px-6 italic text-slate-700"><?= htmlspecialchars($r['catatan_pembimbing'] ?? '-'); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="py-10 px-4 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-xs text-slate-500 font-medium">
-                        Belum ada dokumen yang diunggah untuk Preview 2.
-                    </div>
-                <?php endif; ?>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-2xs mt-4">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-bold uppercase py-3.5 border-b border-slate-200">
+                            <tr>
+                                <th class="py-4 px-6 w-14 text-center">#</th>
+                                <th class="py-4 px-6">File Draft</th>
+                                <th class="py-4 px-6">Catatan Anda</th>
+                                <th class="py-4 px-6">Waktu Upload</th>
+                                <th class="py-4 px-6 text-center">Status</th>
+                                <th class="py-4 px-6">Catatan Penguji</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium" id="logTablePreview2">
+                            <tr><td colspan="6" class="text-center py-8 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2 text-lg"></i> Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -759,6 +689,34 @@
                 </div>
                 <?php endif; ?>
             </div>
+
+            <!-- Log Preview 3 -->
+            <div class="card-3d-warm rounded-3xl p-7 sm:p-9 space-y-6 w-full shadow-md shadow-indigo-500/5">
+                <div class="flex items-center justify-between border-b border-indigo-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 block mb-1">LOG AKTIVITAS PREVIEW 3</span>
+                        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+                            <i class="bi bi-clock-history text-indigo-600 text-xl"></i> Riwayat Pengajuan Berkas Preview 3
+                        </h3>
+                    </div>
+                </div>
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-2xs mt-4">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-bold uppercase py-3.5 border-b border-slate-200">
+                            <tr>
+                                <th class="py-4 px-6 w-14 text-center">#</th>
+                                <th class="py-4 px-6">File Draft</th>
+                                <th class="py-4 px-6">Catatan Anda</th>
+                                <th class="py-4 px-6">Waktu Upload</th>
+                                <th class="py-4 px-6 text-center">Status</th>
+                                <th class="py-4 px-6">Catatan Pembimbing 1</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium" id="logTablePreview3">
+                            <tr><td colspan="6" class="text-center py-8 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2 text-lg"></i> Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
         </div>
 
         <!-- ================= TAB CONTENT PANEL: SIDANG AKHIR ================= -->
@@ -828,7 +786,100 @@
                 document.getElementById('panelSidang').classList.remove('hidden');
                 document.getElementById('tabBtnSidang').classList.add('border-emerald-400', 'ring-4', 'ring-emerald-400/20');
             }
+            
+            if (targetTab.startsWith('preview')) {
+                let num = targetTab.replace('preview', '');
+                loadPreviewLog(`Preview ${num}`, `logTablePreview${num}`);
+            }
         }
+
+        // Fetch logs via AJAX
+        function loadPreviewLog(tahap, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            if(!tbody) return;
+            
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2 text-lg"></i> Memuat data...</td></tr>`;
+            
+            fetch(`<?= site_url('mahasiswa/ajax_get_preview_log') ?>?tahap=${encodeURIComponent(tahap)}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status) {
+                        renderLogTable(res.data, tbodyId);
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-500 font-bold">${res.message}</td></tr>`;
+                    }
+                })
+                .catch(err => {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-500 font-bold">Terjadi kesalahan koneksi</td></tr>`;
+                });
+        }
+
+        function renderLogTable(data, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            if(!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 px-4 text-slate-500 font-medium">Belum ada dokumen draft yang diunggah untuk tahap ini.</td></tr>`;
+                return;
+            }
+            
+            let html = '';
+            data.forEach((row, index) => {
+                let st = row.status_pembimbing || 'Pending';
+                let badgeCls = 'bg-amber-100 text-amber-900 border-amber-300';
+                let badgeIcon = 'bi-clock-fill text-amber-600';
+                let badgeText = 'Menunggu Review';
+                
+                if (st === 'Approved') {
+                    badgeCls = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                    badgeIcon = 'bi-check-circle-fill text-emerald-600';
+                    badgeText = 'Disetujui (ACC)';
+                } else if (st === 'Revision') {
+                    badgeCls = 'bg-rose-100 text-rose-800 border-rose-300';
+                    badgeIcon = 'bi-x-circle-fill text-rose-600';
+                    badgeText = 'Perlu Revisi';
+                }
+                
+                const dt = new Date(row.created_at);
+                const timeHtml = `${dt.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})} ${dt.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB`;
+                
+                let reviewerNote = row.catatan_pembimbing ? `<div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs italic font-medium text-slate-800">"${row.catatan_pembimbing}"</div>` : `<span class="text-slate-400 italic font-normal">Belum ada catatan</span>`;
+                
+                html += `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4.5 px-6 text-center font-bold text-slate-700">${index + 1}</td>
+                    <td class="py-4.5 px-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-lg shrink-0">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <a href="<?= base_url('uploads/preview_ta/') ?>${row.file_draft}" target="_blank" class="font-bold text-slate-900 block truncate max-w-xs text-sm hover:text-orange-600 hover:underline">${row.file_draft}</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4.5 px-6 text-slate-600 max-w-xs font-normal">
+                        <p class="line-clamp-2 italic">${row.catatan_mahasiswa || '-'}</p>
+                    </td>
+                    <td class="py-4.5 px-6 whitespace-nowrap text-slate-600 font-medium text-xs">
+                        ${timeHtml}
+                    </td>
+                    <td class="py-4.5 px-6 text-center whitespace-nowrap">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border ${badgeCls} shadow-2xs">
+                            <i class="bi ${badgeIcon}"></i> ${badgeText}
+                        </span>
+                    </td>
+                    <td class="py-4.5 px-6 text-slate-700 max-w-xs">
+                        ${reviewerNote}
+                    </td>
+                </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Initialize first load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPreviewLog('Preview 1', 'logTablePreview1');
+        });
     </script>
     <?php $this->load->view('partials/custom_cursor'); ?>
 </body>
