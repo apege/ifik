@@ -172,17 +172,19 @@
 
                 <!-- 4 Document Cards Grid -->
                 <div>
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                         <div>
-                            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
                                 <i class="bi bi-files text-orange-600"></i> Pemeriksaan 4 Dokumen Persyaratan
                             </h2>
-                            <span class="text-xs text-slate-500">Klik "Pratinjau Dokumen" untuk melihat isi berkas atau checklist jika berkas perlu revisi</span>
+                            <span class="text-xs text-slate-500">Periksa dan validasi dokumen pendaftaran mahasiswa secara teliti.</span>
                         </div>
-                        <!-- Quick All Valid Button -->
-                        <button type="button" onclick="markAllValid()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all active:scale-95">
-                            <i class="bi bi-check2-all"></i> Tandai Semua Valid
-                        </button>
+                        
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="markAllValid()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer">
+                                <i class="bi bi-check2-all"></i> Tandai Semua Valid
+                            </button>
+                        </div>
                     </div>
 
                     <?php
@@ -203,7 +205,7 @@
                         $berkas_items = array(
                             array(
                                 'key'       => 'ksm',
-                                'label'     => 'KSM (Kartu Studi Mahasiswa)',
+                                'label'     => '1. KSM (Kartu Studi Mahasiswa)',
                                 'desc'      => 'Bukti KRS semester aktif yang memuat mata kuliah Tugas Akhir.',
                                 'file'      => $detail['file_ksm'] ?? 'ksm_' . $detail['nim'] . '.pdf',
                                 'status'    => $detail['status_ksm'] ?? 'Pending',
@@ -212,7 +214,7 @@
                             ),
                             array(
                                 'key'       => 'transkrip',
-                                'label'     => 'Transkrip Nilai Akademik Terakhir',
+                                'label'     => '2. Transkrip Nilai Akademik Terakhir',
                                 'desc'      => 'Transkrip nilai resmi yang sudah divalidasi dan memenuhi syarat SKS kelulusan.',
                                 'file'      => $detail['file_transkrip'] ?? 'transkrip_' . $detail['nim'] . '.pdf',
                                 'status'    => $detail['status_transkrip'] ?? 'Pending',
@@ -221,7 +223,7 @@
                             ),
                             array(
                                 'key'       => 'pernyataan',
-                                'label'     => 'Surat Pernyataan Mahasiswa',
+                                'label'     => '3. Surat Pernyataan Mahasiswa',
                                 'desc'      => 'Surat kesanggupan menyelesaikan TA bermaterai dan ditandatangani.',
                                 'file'      => $detail['file_pernyataan'] ?? 'pernyataan_' . $detail['nim'] . '.pdf',
                                 'status'    => $detail['status_pernyataan'] ?? 'Pending',
@@ -230,7 +232,7 @@
                             ),
                             array(
                                 'key'       => 'bebas_lab',
-                                'label'     => 'Surat Bebas Laboratorium & Perpustakaan',
+                                'label'     => '4. Surat Bebas Laboratorium & Perpustakaan',
                                 'desc'      => 'Surat keterangan bebas pinjaman alat lab FIK dan buku perpustakaan.',
                                 'file'      => $detail['file_bebas_lab'] ?? 'bebas_lab_' . $detail['nim'] . '.pdf',
                                 'status'    => $detail['status_bebas_lab'] ?? 'Pending',
@@ -238,15 +240,30 @@
                                 'presets'   => array('Tanpa Stempel Resmi Lab', 'Pinjaman Alat Lab Belum Lunas', 'Buku Perpus Belum Kembali')
                             )
                         );
-
-                        $berkas_kurang_selected = explode(',', $detail['berkas_kurang'] ?? '');
+                        $raw_bk = $detail['berkas_kurang'] ?? '';
+                        $berkas_kurang_selected = array();
+                        if (!empty($raw_bk)) {
+                            if (is_string($raw_bk) && (strpos(trim($raw_bk), '[') === 0 || strpos(trim($raw_bk), '{') === 0)) {
+                                $decoded = json_decode($raw_bk, true);
+                                if (is_array($decoded)) {
+                                    $berkas_kurang_selected = array_map('trim', $decoded);
+                                }
+                            }
+                            if (empty($berkas_kurang_selected)) {
+                                $parts = explode(',', $raw_bk);
+                                foreach ($parts as $p) {
+                                    $p = trim($p, "[]\"' \t\n\r\0\x0B");
+                                    if ($p !== '') $berkas_kurang_selected[] = $p;
+                                }
+                            }
+                        }
                     ?>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div id="docGridContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <?php foreach($berkas_items as $b): ?>
                             <?php
-                                $is_valid = ($b['status'] === 'Valid');
                                 $is_invalid = ($b['status'] === 'Invalid') || in_array($b['key'], $berkas_kurang_selected);
+                                $is_valid = ($b['status'] === 'Valid') && !$is_invalid;
                                 $card_border = $is_valid ? 'border-emerald-200 bg-emerald-50/20' : ($is_invalid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-white');
                             ?>
                             <div class="clean-card doc-card rounded-2xl p-5 border <?= $card_border; ?> flex flex-col justify-between space-y-4" data-key="<?= $b['key']; ?>">
@@ -257,26 +274,37 @@
                                                 <i class="bi <?= $b['icon']; ?>"></i>
                                             </div>
                                             <div>
-                                                <h3 class="font-bold text-xs text-slate-900"><?= $b['label']; ?></h3>
+                                                <h3 class="font-black text-sm text-slate-900"><?= $b['label']; ?></h3>
                                                 <span class="text-[10px] text-slate-400 font-mono"><?= htmlspecialchars($b['file']); ?></span>
                                             </div>
                                         </div>
                                         
                                         <!-- Document Status Badge -->
-                                        <span class="doc-badge px-2 py-0.5 rounded text-[10px] font-bold <?= $is_valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($is_invalid ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600 border border-slate-200'); ?>">
+                                        <span class="doc-badge px-2.5 py-1 rounded-lg text-xs font-bold <?= $is_valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($is_invalid ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600 border border-slate-200'); ?>">
                                             <?= $is_valid ? 'Valid' : ($is_invalid ? 'Kurang/Revisi' : 'Belum Dicek'); ?>
                                         </span>
                                     </div>
-                                    <p class="text-[11px] text-slate-500 leading-relaxed"><?= $b['desc']; ?></p>
+                                    <p class="text-xs text-slate-500 leading-relaxed mb-3 font-medium"><?= $b['desc']; ?></p>
+
+                                    <!-- Document Action Buttons (Modal Preview & New Tab) -->
+                                    <div class="flex items-center gap-2 pt-1">
+                                        <button type="button" onclick="openPdfModal('<?= addslashes($b['label']); ?>', '<?= htmlspecialchars($b['file']); ?>', '<?= $b['key']; ?>', '<?= $resolve_pdf_url($b['file']); ?>')" 
+                                                class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all">
+                                            <i class="bi bi-file-earmark-pdf text-rose-400 text-sm"></i>
+                                            <span>Pratinjau Dokumen</span>
+                                        </button>
+                                        <a href="<?= $resolve_pdf_url($b['file']); ?>" target="_blank" 
+                                           class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all">
+                                            <i class="bi bi-box-arrow-up-right"></i> Unduh
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <!-- Action Buttons & Validation Toggle for Document -->
                                 <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                                    <!-- PDF Preview Button -->
-                                    <button type="button" onclick="openPdfModal('<?= addslashes($b['label']); ?>', '<?= htmlspecialchars($b['file']); ?>', '<?= $b['key']; ?>', '<?= $resolve_pdf_url($b['file']); ?>')" 
-                                            class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold shadow-xs flex items-center gap-1.5 transition-all active:scale-95">
-                                        <i class="bi bi-file-earmark-pdf text-rose-600"></i> Pratinjau Dokumen
-                                    </button>
+                                    <span class="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                                        <i class="bi bi-check2-circle text-orange-600"></i> Status Verifikasi:
+                                    </span>
 
                                      <!-- Mutually Exclusive Validation Checkboxes (Valid & Kurang) -->
                                      <div class="flex items-center gap-3">
@@ -340,6 +368,7 @@
 
                         <textarea id="catatan_admin" name="catatan_admin" rows="3" 
                                   placeholder="Tuliskan catatan perbaikan kepada mahasiswa..."
+                                  oninput="updateActionButtonsUI()"
                                   class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-white transition-all leading-relaxed"><?= htmlspecialchars($detail['catatan_admin'] ?? ''); ?></textarea>
                     </div>
 
@@ -349,7 +378,7 @@
                             <i class="bi bi-arrow-left"></i> Kembali ke Daftar
                         </a>
 
-                        <div class="flex items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-5 w-full sm:w-auto order-1 sm:order-2">
                             <!-- Button Reject / Kembalikan -->
                             <button type="submit" name="action" value="reject" id="btnActionReject" onclick="return confirmReject();" 
                                     class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
@@ -470,6 +499,18 @@
             document.getElementById('pdfModal').classList.add('hidden');
             document.getElementById('pdfModal').classList.remove('flex');
         }
+
+        // Close pdfModal when clicking dark backdrop outside content box
+        document.addEventListener('DOMContentLoaded', () => {
+            const pdfModal = document.getElementById('pdfModal');
+            if (pdfModal) {
+                pdfModal.addEventListener('click', (e) => {
+                    if (e.target === pdfModal) {
+                        closePdfModal();
+                    }
+                });
+            }
+        });
 
         function toggleDocStatus(key, isKurang) {
             const card = document.querySelector('.doc-card[data-key="' + key + '"]');
@@ -608,31 +649,71 @@
 
             const checkedValidCount = document.querySelectorAll('input[name="berkas_valid[]"]:checked').length;
             const checkedKurangCount = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length;
+            const mainCatatan = document.getElementById('catatan_admin') ? document.getElementById('catatan_admin').value.trim() : '';
+            const currentAdminStatus = '<?= $detail['status_approval_admin'] ?? 'Pending'; ?>';
 
-            // Approve Button Styling Logic
-            if (checkedKurangCount > 0 || checkedValidCount < 4) {
-                btnApprove.className = 'w-full sm:w-auto px-5 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 opacity-60 cursor-not-allowed transition-all';
-                btnApprove.title = checkedKurangCount > 0 
-                    ? 'Tidak bisa disetujui karena ada berkas yang ditandai Kurang/Revisi!' 
-                    : 'Belum semua 4 berkas dicentang Valid (' + checkedValidCount + '/4 Valid)';
+            // 1. Dynamic Reject / Batalkan Revisi Button Logic
+            btnReject.type = 'submit';
+
+            if (checkedKurangCount > 0) {
+                btnReject.name = 'action';
+                btnReject.value = 'reject';
+                btnReject.innerHTML = '<i class="bi bi-arrow-return-left"></i> Kembalikan ke Mahasiswa (Revisi)';
+                btnReject.className = 'btn-action-animated w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
+                btnReject.title = 'Kembalikan pengajuan ke mahasiswa untuk perbaikan berkas';
+                btnReject.onclick = function() { return confirmReject(); };
+            } else if (currentAdminStatus === 'Rejected') {
+                btnReject.name = 'action';
+                btnReject.value = 'cancel_reject';
+                btnReject.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Batalkan Revisi (Kembali ke Pending)';
+                btnReject.className = 'btn-action-animated w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
+                btnReject.title = 'Batalkan status revisi dan kembalikan mahasiswa ke status Pending';
+                btnReject.onclick = function() { return confirm('Apakah Anda yakin ingin MEMBATALKAN status revisi dan mengembalikan mahasiswa ke status Pending?'); };
+            } else if (mainCatatan.length > 0) {
+                btnReject.name = 'action';
+                btnReject.value = 'reject';
+                btnReject.innerHTML = '<i class="bi bi-arrow-return-left"></i> Kembalikan ke Mahasiswa (Revisi)';
+                btnReject.className = 'btn-action-animated w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
+                btnReject.title = 'Kembalikan pengajuan ke mahasiswa dengan catatan perbaikan';
+                btnReject.onclick = function() { return confirmReject(); };
             } else {
-                btnApprove.className = 'btn-action-animated w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all scale-105';
-                btnApprove.title = 'Semua 4 berkas valid! Klik untuk menyetujui pengajuan.';
+                btnReject.name = 'action';
+                btnReject.value = 'reject';
+                btnReject.innerHTML = '<i class="bi bi-arrow-return-left"></i> Kembalikan ke Mahasiswa (Revisi)';
+                btnReject.className = 'w-full sm:w-auto px-4 py-2.5 bg-rose-50 text-rose-300 border border-rose-100 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 opacity-60 cursor-not-allowed transition-all';
+                btnReject.title = 'Centang minimal 1 berkas Kurang/Revisi atau tuliskan catatan perbaikan';
+                btnReject.onclick = function() { return confirmReject(); };
             }
 
-            // Reject Button Styling Logic
+            // 2. Dynamic Approve Button Logic
             if (checkedKurangCount > 0) {
-                btnReject.className = 'btn-action-animated w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
-                btnReject.title = 'Kembalikan pengajuan ke mahasiswa untuk perbaikan ' + checkedKurangCount + ' berkas';
+                btnApprove.className = 'w-full sm:w-auto px-5 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 opacity-60 cursor-not-allowed transition-all';
+                btnApprove.title = 'Tidak bisa disetujui karena terdapat berkas yang ditandai Kurang/Revisi!';
             } else {
-                btnReject.className = 'w-full sm:w-auto px-4 py-2.5 bg-rose-50 text-rose-300 border border-rose-100 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 opacity-60 cursor-not-allowed transition-all';
-                btnReject.title = 'Centang minimal 1 berkas Kurang/Revisi untuk mengembalikan ke mahasiswa';
+                btnApprove.className = 'btn-action-animated w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
+                btnApprove.title = 'Semua berkas valid! Klik untuk menyetujui pengajuan.';
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             updateActionButtonsUI();
         });
+
+        function resetAllChoice() {
+            document.querySelectorAll('.doc-card').forEach(card => {
+                const cbValid = card.querySelector('input[name="berkas_valid[]"]');
+                const cbKurang = card.querySelector('input[name="berkas_kurang[]"]');
+                if (cbValid) cbValid.checked = false;
+                if (cbKurang) cbKurang.checked = false;
+                updateCardState(card);
+            });
+            const mainTextarea = document.getElementById('catatan_admin');
+            if (mainTextarea) {
+                mainTextarea.value = '';
+            }
+            updateActionButtonsUI();
+            showToast('Semua status berkas & catatan berhasil di-reset!');
+        }
 
         function markAllValid() {
             document.querySelectorAll('.doc-card').forEach(card => {
@@ -679,20 +760,20 @@
 
         function confirmReject() {
             const checkedCount = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length;
+            const checkedValid = document.querySelectorAll('input[name="berkas_valid[]"]:checked').length;
             const catatan = document.getElementById('catatan_admin').value.trim();
 
-            if (checkedCount === 0) {
-                alert('Peringatan: Silakan centang minimal 1 dokumen yang "Kurang / Revisi" sebelum mengembalikan pengajuan ke mahasiswa!');
+            if (checkedCount === 0 && checkedValid === 4) {
+                alert('Peringatan: Seluruh berkas telah dicentang Valid. Silakan gunakan tombol "Setujui & Teruskan ke Koordinator TA" jika semua berkas sudah sesuai!');
                 return false;
             }
 
-            if (!catatan) {
-                alert('Peringatan: Harap tuliskan catatan instruksi revisi agar mahasiswa tahu bagian apa saja yang harus diperbaiki!');
-                document.getElementById('catatan_admin').focus();
+            if (checkedCount === 0 && !catatan) {
+                alert('Peringatan: Silakan centang minimal 1 dokumen yang "Kurang / Revisi" atau tuliskan catatan instruksi revisi sebelum mengembalikan pengajuan ke mahasiswa!');
                 return false;
             }
 
-            return confirm('Yakin ingin mengembalikan pengajuan ini ke mahasiswa untuk perbaikan ' + checkedCount + ' berkas yang kurang/revisi?');
+            return confirm('Yakin ingin mengembalikan pengajuan ini ke mahasiswa untuk revisi/perbaikan berkas?');
         }
 
         function confirmApprove() {
@@ -713,6 +794,22 @@
             }
 
             return confirm('Yakin seluruh 4 berkas mahasiswa ini telah lengkap dan valid? Pengajuan akan diteruskan ke Koordinator TA.');
+        }
+        function toggleDocGrid(cols) {
+            const container = document.getElementById('docGridContainer');
+            const btnSingle = document.getElementById('btnLayoutSingle');
+            const btnGrid = document.getElementById('btnLayoutGrid');
+            if (!container) return;
+
+            if (cols === 1) {
+                container.className = 'grid grid-cols-1 gap-6';
+                if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
+                if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-all cursor-pointer';
+            } else {
+                container.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+                if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
+                if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-all cursor-pointer';
+            }
         }
     </script>
 

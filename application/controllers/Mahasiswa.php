@@ -179,6 +179,12 @@ class Mahasiswa extends CI_Controller {
                 'created_at'           => isset($existing_ta['created_at']) ? $existing_ta['created_at'] : date('Y-m-d H:i:s')
             );
 
+            // Update individual document status columns if new files were uploaded
+            if ($file_step3) $data_ta['status_ksm'] = 'Pending';
+            if ($file_step4) $data_ta['status_transkrip'] = 'Pending';
+            if ($file_step5) $data_ta['status_pernyataan'] = 'Pending';
+            if ($file_step6) $data_ta['status_bebas_lab'] = 'Pending';
+
             // Jika siswa mengunggah file baru saat LAA revisi, reset berkas_kurang setelah perbaikan
             if ($a_status === 'Pending' && !empty($existing_ta['berkas_kurang'])) {
                 $data_ta['berkas_kurang'] = NULL;
