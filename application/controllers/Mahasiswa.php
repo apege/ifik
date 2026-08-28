@@ -494,4 +494,51 @@ class Mahasiswa extends CI_Controller {
 
         redirect('mahasiswa/bimbingan?posisi=' . $posisi);
     }
+
+    // AJAX Endpoint: Realtime fetch status approval 4-tahap pendaftaran TA mahasiswa
+    public function get_status_pendaftaran_ajax() {
+        $nim = $this->_get_current_nim();
+        $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        if (!$pendaftaran || empty($pendaftaran['judul_1'])) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => false,
+                    'has_ta'  => false,
+                    'message' => 'Belum ada pengajuan Tugas Akhir.'
+                ]));
+            return;
+        }
+
+        $w_status  = $pendaftaran['status_approval_wali']  ?? 'Pending';
+        $a_status  = $pendaftaran['status_approval_admin'] ?? 'Pending';
+        $k_status  = $pendaftaran['status_approval_koor']  ?? 'Pending';
+        $kk_status = $pendaftaran['status_approval_kk']    ?? 'Pending';
+
+        $approved_count = 0;
+        if ($w_status === 'Approved') $approved_count++;
+        if ($a_status === 'Approved') $approved_count++;
+        if ($k_status === 'Approved') $approved_count++;
+        if ($kk_status === 'Approved') $approved_count++;
+
+        $progress_pct = round(($approved_count / 4) * 100);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success'        => true,
+                'has_ta'         => true,
+                'nim'            => $nim,
+                'current_stage'  => $pendaftaran['current_stage'] ?? 'Dosen Wali',
+                'status_wali'    => $w_status,
+                'status_admin'   => $a_status,
+                'status_koor'    => $k_status,
+                'status_kk'      => $kk_status,
+                'approved_count' => $approved_count,
+                'progress_pct'   => $progress_pct,
+                'judul_1'        => $pendaftaran['judul_1'] ?? ''
+            ]));
+    }
 }
+

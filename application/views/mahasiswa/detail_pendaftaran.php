@@ -647,6 +647,33 @@
         if (modal) modal.classList.add('hidden');
         if (modalIframe) modalIframe.src = 'about:blank';
     }
+
+    // AJAX Polling: Cek status pendaftaran secara real-time
+    (() => {
+        let lastStatusKey = '<?= ($pendaftaran['status_approval_wali'] ?? '') . "_" . ($pendaftaran['status_approval_admin'] ?? '') . "_" . ($pendaftaran['status_approval_koor'] ?? '') . "_" . ($pendaftaran['status_approval_kk'] ?? '') . "_" . ($pendaftaran['status_judul'] ?? ''); ?>';
+
+        async function checkStatus() {
+            try {
+                const res = await fetch('<?= site_url("mahasiswa/get_status_pendaftaran_ajax"); ?>', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) return;
+                const json = await res.json();
+                if (!json || !json.success || !json.has_ta) return;
+
+                const newKey = `${json.status_wali}_${json.status_admin}_${json.status_koor}_${json.status_kk}`;
+                if (lastStatusKey && newKey !== lastStatusKey) {
+                    console.log('Status pendaftaran berubah, reload otomatis...');
+                    window.location.reload();
+                }
+                lastStatusKey = newKey;
+            } catch (e) {
+                // Silent fail
+            }
+        }
+
+        setInterval(checkStatus, 6000);
+    })();
     </script>
     <?php $this->load->view('partials/custom_cursor'); ?>
 </body>
