@@ -49,6 +49,67 @@ class AdminLayanan extends CI_Controller {
     }
 
     /**
+     * AJAX Endpoint: Get realtime table data & stats for Admin Layanan
+     */
+    public function ajax_get_table() {
+        $filter_status = $this->input->get('status') ?: 'all';
+        $search        = trim($this->input->get('q') ?? '');
+        $per_page      = (int)($this->input->get('per_page') ?: 5);
+        if ($per_page < 1) $per_page = 5;
+
+        $page = (int)($this->input->get('page') ?: 1);
+        if ($page < 1) $page = 1;
+
+        $total_rows  = $this->AdminLayanan_model->get_count_pengajuan($filter_status, $search);
+        $total_pages = max(1, ceil($total_rows / $per_page));
+
+        if ($page > $total_pages) {
+            $page = $total_pages;
+        }
+
+        $offset = ($page - 1) * $per_page;
+
+        $stats = $this->AdminLayanan_model->get_stats();
+        $list  = $this->AdminLayanan_model->get_all_pengajuan($filter_status, $search, $per_page, $offset);
+
+        // Sanitize & format output for JSON
+        $formatted_list = array();
+        foreach ($list as $r) {
+            $full_name = trim(($r['nama_depan'] ?? '') . ' ' . ($r['nama_belakang'] ?? ''));
+            if (empty($full_name)) $full_name = 'Mahasiswa ' . ($r['nim'] ?? '');
+
+            $formatted_list[] = array(
+                'nim'                  => $r['nim'] ?? '',
+                'full_name'            => htmlspecialchars($full_name),
+                'first_char'           => strtoupper(substr($r['nama_depan'] ?? 'M', 0, 1)),
+                'prodi'                => htmlspecialchars($r['prodi'] ?? 'DKV'),
+                'kode_kk'              => htmlspecialchars($r['kode_kk'] ?? 'KK-VCM'),
+                'judul_1'              => htmlspecialchars($r['judul_1'] ?? ''),
+                'status_ksm'           => $r['status_ksm'] ?? 'Pending',
+                'status_transkrip'     => $r['status_transkrip'] ?? 'Pending',
+                'status_pernyataan'    => $r['status_pernyataan'] ?? 'Pending',
+                'status_bebas_lab'     => $r['status_bebas_lab'] ?? 'Pending',
+                'status_approval_wali' => $r['status_approval_wali'] ?? 'Pending',
+                'status_approval_admin'=> $r['status_approval_admin'] ?? 'Pending',
+                'is_wali_app'          => (($r['status_approval_wali'] ?? '') === 'Approved'),
+                'detail_url'           => site_url('adminlayanan/detail_berkas/' . ($r['nim'] ?? ''))
+            );
+        }
+
+        $this->output
+             ->set_content_type('application/json')
+             ->set_output(json_encode(array(
+                 'success'     => true,
+                 'stats'       => $stats,
+                 'page'        => $page,
+                 'per_page'    => $per_page,
+                 'total_rows'  => $total_rows,
+                 'total_pages' => $total_pages,
+                 'list'        => $formatted_list
+             )));
+    }
+
+    /**
      * Endpoint Autocomplete Search JSON untuk Admin Layanan
      */
     public function autocomplete() {
@@ -141,12 +202,23 @@ class AdminLayanan extends CI_Controller {
                 return;
             }
 
-            $berkas_kurang_json = json_encode($berkas_kurang_final);
-            $this->AdminLayanan_model->update_verifikasi($nim, 'reject', $berkas_kurang_json, $catatan_admin, $berkas_valid_arr, $berkas_kurang_final);
-            $this->session->set_flashdata('success', 'Status pengembalian/revisi berkas berhasil dikirimkan ke mahasiswa.');
+            $msg = 'Status pengembalian/revisi berkas berhasil dikirimkan ke mahasiswa.';
+            $this->session->set_flashdata('success', $msg);
         } else {
             $this->AdminLayanan_model->update_verifikasi($nim, 'approve', NULL, $catatan_admin);
-            $this->session->set_flashdata('success', 'Verifikasi berkas mahasiswa berhasil disetujui! Pengajuan diteruskan ke Koordinator TA.');
+            $msg = 'Verifikasi berkas mahasiswa berhasil disetujui! Pengajuan diteruskan ke Koordinator TA.';
+            $this->session->set_flashdata('success', $msg);
+        }
+
+        if ($this->input->is_ajax_request()) {
+            $this->output
+                 ->set_content_type('application/json')
+                 ->set_output(json_encode(array(
+                     'success' => true,
+                     'message' => $msg,
+                     'redirect_url' => site_url('adminlayanan')
+                 )));
+            return;
         }
 
         redirect('adminlayanan');
@@ -239,6 +311,7 @@ class AdminLayanan extends CI_Controller {
             return;
         }
 
+        $msg = "Verifikasi massal berhasil diselesaikan!";
         if ($action === 'approve_all') {
             $count = 0;
             foreach ($nims as $nim) {
@@ -248,7 +321,8 @@ class AdminLayanan extends CI_Controller {
                     $count++;
                 }
             }
-            $this->session->set_flashdata('success', "Berhasil menyetujui (Approve) $count berkas pendaftaran mahasiswa sekaligus!");
+            $msg = "Berhasil menyetujui (Approve) $count berkas pendaftaran mahasiswa sekaligus!";
+            $this->session->set_flashdata('success', $msg);
         } else if ($action === 'batch_update') {
             $verifications = json_decode($this->input->post('verifications_json') ?? '[]', true);
             $count_app = 0;
@@ -275,7 +349,18 @@ class AdminLayanan extends CI_Controller {
                     }
                 }
             }
-            $this->session->set_flashdata('success', "Verifikasi massal selesai! $count_app Mahasiswa Disetujui, $count_rej Mahasiswa Dikembalikan untuk Revisi.");
+            $msg = "Verifikasi massal selesai! $count_app Mahasiswa Disetujui, $count_rej Mahasiswa Dikembalikan untuk Revisi.";
+            $this->session->set_flashdata('success', $msg);
+        }
+
+        if ($this->input->is_ajax_request()) {
+            $this->output
+                 ->set_content_type('application/json')
+                 ->set_output(json_encode(array(
+                     'success' => true,
+                     'message' => $msg
+                 )));
+            return;
         }
 
         redirect('adminlayanan');

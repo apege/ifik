@@ -298,55 +298,49 @@
         <!-- Filter Tab Group for KK -->
         <div class="card-custom p-4 mb-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-                    <a href="<?= site_url('ketuakk?kk=all&status=' . $filter_status . '&per_page=' . $per_page); ?>" 
-                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap <?= $selected_kk === 'all' ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="kkFilterContainer">
+                    <button type="button" onclick="switchKkKK('all')" id="btnKK_all" 
+                       class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer <?= $selected_kk === 'all' ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Semua KK
-                    </a>
+                    </button>
                     <?php foreach($all_kk as $kk): ?>
-                        <a href="<?= site_url('ketuakk?kk=' . $kk['id'] . '&status=' . $filter_status . '&per_page=' . $per_page); ?>" 
-                           class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap <?= (string)$selected_kk === (string)$kk['id'] ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                        <button type="button" onclick="switchKkKK('<?= $kk['id']; ?>')" id="btnKK_<?= $kk['id']; ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer <?= (string)$selected_kk === (string)$kk['id'] ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                             <?= htmlspecialchars($kk['kode_kk']); ?>
-                        </a>
+                        </button>
                     <?php endforeach; ?>
                 </div>
 
                 <!-- Status Filter Pills -->
-                <div class="flex items-center gap-1.5">
-                    <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=all&per_page=' . $per_page); ?>" 
-                       class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all <?= $filter_status === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                <div class="flex items-center gap-1.5" id="statusFilterContainerKK">
+                    <button type="button" onclick="switchStatusKK('all')" id="btnStatusKK_all" 
+                       class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer <?= $filter_status === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Semua Status
-                    </a>
-                    <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=Pending&per_page=' . $per_page); ?>" 
-                       class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all <?= $filter_status === 'Pending' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    </button>
+                    <button type="button" onclick="switchStatusKK('Pending')" id="btnStatusKK_Pending" 
+                       class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer <?= $filter_status === 'Pending' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Siap Review
-                    </a>
-                    <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=Approved&per_page=' . $per_page); ?>" 
-                       class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all <?= $filter_status === 'Approved' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    </button>
+                    <button type="button" onclick="switchStatusKK('Approved')" id="btnStatusKK_Approved" 
+                       class="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer <?= $filter_status === 'Approved' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                         Disetujui
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Unified Search Pill Bar with AUTOCOMPLETE -->
+        <!-- Unified Search Pill Bar with AUTOCOMPLETE & INSTANT SEARCH -->
         <div class="card-custom p-4 mb-6 relative">
-            <form method="GET" action="<?= site_url('ketuakk'); ?>" id="formSearchKK" class="relative">
-                <input type="hidden" name="kk" value="<?= htmlspecialchars($selected_kk); ?>">
-                <input type="hidden" name="status" value="<?= htmlspecialchars($filter_status); ?>">
-                <input type="hidden" name="per_page" value="<?= $per_page; ?>">
-
+            <form onsubmit="return false;" id="formSearchKK" class="relative">
                 <div class="unified-search-pill">
                     <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm ml-1"></i>
                     <input type="text" name="q" id="inputSearchKK" autocomplete="off" value="<?= htmlspecialchars($search ?? ''); ?>" 
                            placeholder="Ketik nama mahasiswa, NIM, atau judul usulan TA..." 
                            class="w-full bg-transparent px-3 text-xs text-slate-800 font-semibold focus:outline-none">
                     
-                    <?php if(!empty($search)): ?>
-                        <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=' . $filter_status . '&per_page=' . $per_page); ?>" class="text-slate-400 hover:text-rose-600 text-xs font-bold px-2">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                        </a>
-                    <?php endif; ?>
+                    <button type="button" id="btnClearSearchKK" onclick="clearKKSearch()" class="<?= empty($search) ? 'hidden' : ''; ?> text-slate-400 hover:text-rose-600 text-xs font-bold px-2 cursor-pointer">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
                 </div>
 
                 <!-- Autocomplete Dropdown -->
@@ -376,7 +370,7 @@
                                 <th class="py-4 px-5 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 bg-white">
+                        <tbody id="tableBodyKK" class="divide-y divide-slate-100 bg-white">
                             <?php if(empty($list_mahasiswa)): ?>
                                 <tr>
                                     <td colspan="8" class="py-14 text-center text-slate-400">
@@ -505,49 +499,51 @@
             <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
                 <div class="flex items-center gap-3 text-slate-600">
                     <span class="font-medium text-slate-500">Tampilkan:</span>
-                    <select id="selectPerPage" class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-600 shadow-xs">
+                    <select id="selectPerPageKK" onchange="changeKKPerPage(this.value)" class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-brand-600 shadow-xs cursor-pointer">
                         <option value="5" <?= $per_page == 5 ? 'selected' : ''; ?>>5 per halaman</option>
                         <option value="10" <?= $per_page == 10 ? 'selected' : ''; ?>>10 per halaman</option>
                         <option value="20" <?= $per_page == 20 ? 'selected' : ''; ?>>20 per halaman</option>
                     </select>
                     <span class="text-slate-300">|</span>
-                    <span>
+                    <span id="txtShowingCountKK">
                         Menampilkan <strong><?= $total_rows > 0 ? (($page - 1) * $per_page + 1) : 0; ?></strong> - <strong><?= min($page * $per_page, $total_rows); ?></strong> dari <strong><?= $total_rows; ?></strong> mahasiswa
                     </span>
                 </div>
 
-                <?php if($total_pages > 1): ?>
-                    <div class="flex items-center gap-1">
-                        <?php if($page > 1): ?>
-                            <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=' . $filter_status . '&q=' . urlencode($search) . '&per_page=' . $per_page . '&page=' . ($page - 1)); ?>" 
-                               class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs">
-                                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
-                            </a>
-                        <?php else: ?>
-                            <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
-                                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
-                            </span>
-                        <?php endif; ?>
+                <div id="kkPaginationControls">
+                    <?php if($total_pages > 1): ?>
+                        <div class="flex items-center gap-1">
+                            <?php if($page > 1): ?>
+                                <button type="button" onclick="changeKKPage(<?= $page - 1; ?>)" 
+                                   class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">
+                                    <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+                                </button>
+                            <?php else: ?>
+                                <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
+                                    <i class="fa-solid fa-chevron-left text-[10px]"></i> Prev
+                                </span>
+                            <?php endif; ?>
 
-                        <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                            <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=' . $filter_status . '&q=' . urlencode($search) . '&per_page=' . $per_page . '&page=' . $i); ?>" 
-                               class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all <?= $i == $page ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'; ?>">
-                                <?= $i; ?>
-                            </a>
-                        <?php endfor; ?>
+                            <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                                <button type="button" onclick="changeKKPage(<?= $i; ?>)" 
+                                   class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer <?= $i == $page ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'; ?>">
+                                    <?= $i; ?>
+                                </button>
+                            <?php endfor; ?>
 
-                        <?php if($page < $total_pages): ?>
-                            <a href="<?= site_url('ketuakk?kk=' . $selected_kk . '&status=' . $filter_status . '&q=' . urlencode($search) . '&per_page=' . $per_page . '&page=' . ($page + 1)); ?>" 
-                               class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs">
-                                Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </a>
-                        <?php else: ?>
-                            <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
-                                Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+                            <?php if($page < $total_pages): ?>
+                                <button type="button" onclick="changeKKPage(<?= $page + 1; ?>)" 
+                                   class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">
+                                    Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </button>
+                            <?php else: ?>
+                                <span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">
+                                    Next <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
@@ -572,22 +568,256 @@
 
     </main>
 
-    <!-- AUTOCOMPLETE & LIVE SEARCH JAVASCRIPT -->
+    <!-- REAL-TIME AJAX JAVASCRIPT SYSTEM FOR KETUA KK -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1. Limit Selector Event
-            const selectPerPage = document.getElementById('selectPerPage');
-            if (selectPerPage) {
-                selectPerPage.addEventListener('change', function() {
-                    const perPageVal = this.value;
-                    const urlParams = new URLSearchParams(window.location.search);
-                    urlParams.set('per_page', perPageVal);
-                    urlParams.set('page', '1');
-                    window.location.search = urlParams.toString();
+        let currentKKState = {
+            kk: '<?= htmlspecialchars($selected_kk); ?>',
+            status: '<?= htmlspecialchars($filter_status); ?>',
+            search: '<?= addslashes($search ?? ""); ?>',
+            perPage: <?= $per_page; ?>,
+            page: <?= $page; ?>
+        };
+        let kkSearchTimer = null;
+
+        function refreshKKTable(isSilent = false) {
+            const url = `<?= site_url("ketuakk/ajax_get_table"); ?>?kk=${encodeURIComponent(currentKKState.kk)}&status=${encodeURIComponent(currentKKState.status)}&q=${encodeURIComponent(currentKKState.search)}&per_page=${currentKKState.perPage}&page=${currentKKState.page}`;
+
+            const tbody = document.getElementById('tableBodyKK');
+            if (!tbody) return;
+
+            if (!isSilent) {
+                tbody.style.opacity = '0.4';
+            }
+
+            fetch(url)
+                .then(res => res.json())
+                .then(res => {
+                    tbody.style.opacity = '1';
+
+                    if (!res.success) return;
+
+                    // 1. Render Rows
+                    if (!res.list || res.list.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8" class="py-14 text-center text-slate-400">
+                                    <i class="fa-solid fa-inbox text-4xl text-slate-300 mb-3 block"></i>
+                                    Tidak ada data mahasiswa ditemukan.
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        let html = '';
+                        res.list.forEach(row => {
+                            let isWaliApp = (row.status_approval_wali === 'Approved');
+                            let isAdminApp = (row.status_approval_admin === 'Approved');
+                            let isKoorApp = (row.status_approval_koor === 'Approved');
+                            let isKkApp = (row.status_approval_kk === 'Approved');
+                            let isKkRej = (row.status_approval_kk === 'Rejected');
+
+                            let canBulkApprove = (row.is_ready_for_kk && !isKkApp);
+
+                            let cbTd = canBulkApprove ? `
+                                <input type="checkbox" name="nim_list[]" value="${row.nim}" class="kk-checkbox w-4 h-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer">
+                            ` : `
+                                <input type="checkbox" disabled class="w-4 h-4 rounded border-slate-200 text-slate-300 opacity-40 cursor-not-allowed">
+                            `;
+
+                            let prereqBadge = `
+                                <div class="inline-flex items-center gap-1 bg-slate-50 px-3 py-1 rounded-xl border border-slate-200 text-[10px] font-mono shadow-xs">
+                                    <span class="${isWaliApp ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}">Wali</span>
+                                    <span class="text-slate-300">›</span>
+                                    <span class="${isAdminApp ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}">LAA</span>
+                                    <span class="text-slate-300">›</span>
+                                    <span class="${isKoorApp ? 'text-emerald-600 font-extrabold' : 'text-slate-400'}">Koor</span>
+                                </div>
+                            `;
+
+                            let statusBadge = '';
+                            if (isKkApp) {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check text-emerald-500"></i> Disetujui KK</span>`;
+                            } else if (isKkRej) {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-circle-xmark text-rose-500"></i> Ditolak KK</span>`;
+                            } else {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock text-amber-600"></i> Menunggu KK</span>`;
+                            }
+
+                            let unlockedBadge = isKkApp ? `
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold border border-emerald-200">
+                                    <i class="fa-solid fa-lock-open text-emerald-600"></i> Unlocked
+                                </span>` : `
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-semibold border border-slate-200">
+                                    <i class="fa-solid fa-lock text-slate-400"></i> Terkunci
+                                </span>`;
+
+                            let actionBtn = row.is_ready_for_kk ? `
+                                <a href="${row.detail_url}" class="btn-3d-kinetic">
+                                    <span class="bg"></span>
+                                    <span class="wrap">
+                                        <span class="content">
+                                            <i class="fa-solid fa-shield-halved icon-action"></i>
+                                            <span class="char state-1"><span>R</span><span>e</span><span>v</span><span>i</span><span>e</span><span>w</span></span>
+                                        </span>
+                                    </span>
+                                </a>` : `
+                                <span title="Prasyarat Dosen Wali, Admin LAA, atau Koordinator TA belum disetujui" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-semibold cursor-not-allowed opacity-75">
+                                    <i class="fa-solid fa-lock text-slate-400"></i> Locked
+                                </span>`;
+
+                            html += `
+                                <tr class="hover:bg-orange-50/40 transition-colors">
+                                    <td class="py-4 px-3 text-center w-10">${cbTd}</td>
+                                    <td class="py-4 px-5 whitespace-nowrap">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-orange-100 border border-orange-200 text-brand-600 font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                                                ${row.first_char}
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-900 text-xs">${row.full_name}</div>
+                                                <div class="text-[11px] text-slate-400 font-mono">${row.nim}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-5 whitespace-nowrap">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50 text-brand-700 rounded-lg text-[10px] font-bold border border-orange-200">
+                                            <i class="fa-solid fa-shapes text-[9px]"></i>
+                                            ${row.kode_kk}
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-5 min-w-[240px] max-w-xs">
+                                        <div class="font-semibold text-slate-800 line-clamp-2 text-xs leading-relaxed" title="${row.judul_1}">
+                                            ${row.judul_1}
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-5 text-center whitespace-nowrap">${prereqBadge}</td>
+                                    <td class="py-4 px-5 text-center whitespace-nowrap">${statusBadge}</td>
+                                    <td class="py-4 px-5 text-center whitespace-nowrap">${unlockedBadge}</td>
+                                    <td class="py-4 px-5 text-center whitespace-nowrap">${actionBtn}</td>
+                                </tr>
+                            `;
+                        });
+                        tbody.innerHTML = html;
+                        rebindKKCheckboxes();
+                    }
+
+                    // 2. Update Pagination Text & Controls
+                    currentKKState.page = res.page;
+                    currentKKState.total_pages = res.total_pages;
+
+                    const txtCount = document.getElementById('txtShowingCountKK');
+                    if (txtCount) {
+                        const start = res.total_rows > 0 ? ((res.page - 1) * res.per_page + 1) : 0;
+                        const end = Math.min(res.page * res.per_page, res.total_rows);
+                        txtCount.innerHTML = `Menampilkan <strong>${start}</strong> - <strong>${end}</strong> dari <strong>${res.total_rows}</strong> mahasiswa`;
+                    }
+
+                    renderKKPaginationControls(res.page, res.total_pages);
+                })
+                .catch(err => {
+                    if (tbody) tbody.style.opacity = '1';
+                    console.error('AJAX Error:', err);
+                });
+        }
+
+        function renderKKPaginationControls(page, totalPages) {
+            const container = document.getElementById('kkPaginationControls');
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div class="flex items-center gap-1">';
+            
+            if (page > 1) {
+                html += `<button type="button" onclick="changeKKPage(${page - 1})" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer"><i class="fa-solid fa-chevron-left text-[10px]"></i> Prev</button>`;
+            } else {
+                html += `<span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60"><i class="fa-solid fa-chevron-left text-[10px]"></i> Prev</span>`;
+            }
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === page) {
+                    html += `<button type="button" onclick="changeKKPage(${i})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-brand-600 text-white shadow-md cursor-pointer">${i}</button>`;
+                } else {
+                    html += `<button type="button" onclick="changeKKPage(${i})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 cursor-pointer">${i}</button>`;
+                }
+            }
+
+            if (page < totalPages) {
+                html += `<button type="button" onclick="changeKKPage(${page + 1})" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">Next <i class="fa-solid fa-chevron-right text-[10px]"></i></button>`;
+            } else {
+                html += `<span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60">Next <i class="fa-solid fa-chevron-right text-[10px]"></i></span>`;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function switchKkKK(kkVal) {
+            currentKKState.kk = kkVal;
+            currentKKState.page = 1;
+
+            const container = document.getElementById('kkFilterContainer');
+            if (container) {
+                const btns = container.querySelectorAll('button');
+                btns.forEach(b => {
+                    const id = b.id.replace('btnKK_', '');
+                    if (id === String(kkVal)) {
+                        b.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer bg-brand-600 text-white shadow-md';
+                    } else {
+                        b.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200';
+                    }
                 });
             }
 
-            // 2. BULK CHECKBOX SELECTION LISTENER
+            refreshKKTable();
+        }
+
+        function switchStatusKK(statusVal) {
+            currentKKState.status = statusVal;
+            currentKKState.page = 1;
+
+            const container = document.getElementById('statusFilterContainerKK');
+            if (container) {
+                const btns = container.querySelectorAll('button');
+                btns.forEach(b => {
+                    const id = b.id.replace('btnStatusKK_', '');
+                    if (id === statusVal) {
+                        b.className = 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ' + 
+                                       (id === 'Pending' ? 'bg-amber-600 text-white shadow-md' : (id === 'Approved' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-800 text-white shadow-md'));
+                    } else {
+                        b.className = 'px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer bg-slate-100 text-slate-600 hover:bg-slate-200';
+                    }
+                });
+            }
+
+            refreshKKTable();
+        }
+
+        function changeKKPerPage(perPageVal) {
+            currentKKState.perPage = parseInt(perPageVal) || 5;
+            currentKKState.page = 1;
+            refreshKKTable();
+        }
+
+        function changeKKPage(pageNum) {
+            currentKKState.page = parseInt(pageNum) || 1;
+            refreshKKTable();
+        }
+
+        function clearKKSearch() {
+            const input = document.getElementById('inputSearchKK');
+            const btnClear = document.getElementById('btnClearSearchKK');
+            if (input) input.value = '';
+            if (btnClear) btnClear.classList.add('hidden');
+
+            currentKKState.search = '';
+            currentKKState.page = 1;
+            refreshKKTable();
+        }
+
+        function rebindKKCheckboxes() {
             const selectAllKK = document.getElementById('selectAllKK');
             const kkCheckboxes = document.querySelectorAll('.kk-checkbox');
             const bulkToolbar = document.getElementById('bulkToolbar');
@@ -606,124 +836,102 @@
             }
 
             if (selectAllKK) {
-                selectAllKK.addEventListener('change', function() {
+                selectAllKK.checked = false;
+                selectAllKK.onchange = function() {
                     kkCheckboxes.forEach(cb => {
-                        if (!cb.disabled) {
-                            cb.checked = selectAllKK.checked;
-                        }
+                        if (!cb.disabled) cb.checked = this.checked;
                     });
                     updateBulkToolbar();
-                });
+                };
             }
 
             kkCheckboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
+                cb.onchange = function() {
                     updateBulkToolbar();
                     if (!this.checked && selectAllKK) {
                         selectAllKK.checked = false;
                     }
-                });
+                };
             });
 
-            // 2. INSTANT LIVE AUTOMATIC SEARCH & AUTOCOMPLETE ACROSS ALL PAGES
+            updateBulkToolbar();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
             const inputSearch = document.getElementById('inputSearchKK');
-            const dropdown = document.getElementById('autocompleteDropdown');
-            const resultsBox = document.getElementById('autocompleteResults');
-            const tableBody = document.querySelector('table tbody');
-            let debounceTimer = null;
+            const btnClear = document.getElementById('btnClearSearchKK');
 
             if (inputSearch) {
                 inputSearch.addEventListener('input', function() {
                     const q = this.value.trim();
 
-                    if (tableBody) {
-                        const rows = tableBody.querySelectorAll('tr');
-                        const qLower = q.toLowerCase();
-                        rows.forEach(row => {
-                            const text = row.innerText.toLowerCase();
-                            if (!qLower || text.includes(qLower)) {
-                                row.style.display = '';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        });
+                    if (btnClear) {
+                        if (q.length > 0) btnClear.classList.remove('hidden');
+                        else btnClear.classList.add('hidden');
                     }
 
-                    clearTimeout(debounceTimer);
-
-                    if (q.length < 2) {
-                        if (dropdown) dropdown.classList.add('hidden');
-                        if (q.length === 0) {
-                            debounceTimer = setTimeout(() => {
-                                const urlParams = new URLSearchParams(window.location.search);
-                                if (urlParams.has('q')) {
-                                    urlParams.delete('q');
-                                    urlParams.set('page', '1');
-                                    window.location.search = urlParams.toString();
-                                }
-                            }, 350);
-                        }
-                        return;
-                    }
-
-                    debounceTimer = setTimeout(() => {
-                        const kkVal = '<?= htmlspecialchars($selected_kk); ?>';
-                        fetch(`<?= site_url('ketuakk/autocomplete'); ?>?q=${encodeURIComponent(q)}&kk=${encodeURIComponent(kkVal)}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data && data.length > 0 && dropdown && resultsBox) {
-                                    let html = '';
-                                    data.forEach(item => {
-                                        if (item.is_prereq_ok) {
-                                            html += `
-                                                <a href="<?= site_url('ketuakk/detail/'); ?>${item.nim}" class="p-3 hover:bg-orange-50 transition-colors flex items-center justify-between gap-3 block group">
-                                                    <div>
-                                                        <div class="font-bold text-slate-900 group-hover:text-brand-600 text-xs">${item.nama} <span class="text-slate-400 font-mono text-[11px]">(${item.nim})</span></div>
-                                                        <div class="text-[11px] text-slate-500 line-clamp-1 italic">"${item.judul}"</div>
-                                                    </div>
-                                                    <span class="px-2.5 py-1 bg-orange-100 text-brand-700 text-[10px] font-bold rounded-lg shrink-0">Review &rarr;</span>
-                                                </a>
-                                            `;
-                                        } else {
-                                            html += `
-                                                <div class="p-3 bg-slate-50 text-slate-400 flex items-center justify-between gap-3 opacity-75 cursor-not-allowed">
-                                                    <div>
-                                                        <div class="font-bold text-slate-700 text-xs">${item.nama} <span class="text-slate-400 font-mono text-[11px]">(${item.nim})</span></div>
-                                                        <div class="text-[11px] text-slate-400 line-clamp-1 italic">"${item.judul}"</div>
-                                                    </div>
-                                                    <span class="px-2.5 py-1 bg-slate-200 text-slate-500 text-[10px] font-bold rounded-lg shrink-0 flex items-center gap-1"><i class="fa-solid fa-lock"></i> Locked</span>
-                                                </div>
-                                            `;
-                                        }
-                                    });
-                                    resultsBox.innerHTML = html;
-                                    dropdown.classList.remove('hidden');
-                                } else if (dropdown && resultsBox) {
-                                    resultsBox.innerHTML = `<div class="p-3.5 text-center text-slate-400 text-xs">Tidak ditemukan data cocok untuk "${q}"</div>`;
-                                    dropdown.classList.remove('hidden');
-                                }
-                            })
-                            .catch(err => {
-                                console.error('Autocomplete error:', err);
-                            });
-
-                        const currentUrlParams = new URLSearchParams(window.location.search);
-                        const currentQ = currentUrlParams.get('q') || '';
-                        if (currentQ !== q) {
-                            currentUrlParams.set('q', q);
-                            currentUrlParams.set('page', '1');
-                            window.location.search = currentUrlParams.toString();
-                        }
-                    }, 650);
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (dropdown && !inputSearch.contains(e.target) && !dropdown.contains(e.target)) {
-                        dropdown.classList.add('hidden');
-                    }
+                    clearTimeout(kkSearchTimer);
+                    kkSearchTimer = setTimeout(() => {
+                        currentKKState.search = q;
+                        currentKKState.page = 1;
+                        refreshKKTable();
+                    }, 250);
                 });
             }
+
+            // 3. Form Bulk Approval Submit Handler via AJAX
+            const formBulk = document.getElementById('formBulkApproval');
+            if (formBulk) {
+                formBulk.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const checkedCbs = document.querySelectorAll('.kk-checkbox:checked');
+                    if (checkedCbs.length === 0) return;
+
+                    const formData = new FormData(formBulk);
+                    fetch(formBulk.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        const bulkToolbar = document.getElementById('bulkToolbar');
+                        if (bulkToolbar) bulkToolbar.classList.add('hidden');
+                        
+                        const selectAllKK = document.getElementById('selectAllKK');
+                        if (selectAllKK) selectAllKK.checked = false;
+
+                        refreshKKTable();
+                        showKKToast(res.message || 'Persetujuan massal Ketua KK berhasil!');
+                    })
+                    .catch(err => {
+                        console.error('Bulk approval error:', err);
+                        formBulk.submit();
+                    });
+                });
+            }
+
+            // Silent Auto-polling every 8 seconds for real-time live data
+            setInterval(() => {
+                refreshKKTable(true);
+            }, 8000);
         });
+
+        function showKKToast(msg) {
+            let toast = document.getElementById('kkToastNotification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'kkToastNotification';
+                toast.className = 'fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-500/50 transition-all duration-500 transform translate-y-0 opacity-100';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i> <span class="text-xs font-bold">${msg}</span>`;
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
+        }
     </script>
 
 </body>

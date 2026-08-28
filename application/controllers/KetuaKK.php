@@ -52,6 +52,71 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
+     * AJAX Endpoint: Get realtime table data & stats for Ketua KK
+     */
+    public function ajax_get_table() {
+        $id_kk         = $this->input->get('kk') ?: 'all';
+        $filter_status = $this->input->get('status') ?: 'all';
+        $search        = trim($this->input->get('q') ?? '');
+        $per_page      = (int)($this->input->get('per_page') ?: 5);
+        if ($per_page < 1) $per_page = 5;
+
+        $page = (int)($this->input->get('page') ?: 1);
+        if ($page < 1) $page = 1;
+
+        $total_rows  = $this->KetuaKK_model->get_count_mahasiswa_by_kk($id_kk, $filter_status, $search);
+        $total_pages = max(1, ceil($total_rows / $per_page));
+
+        if ($page > $total_pages) {
+            $page = $total_pages;
+        }
+
+        $offset = ($page - 1) * $per_page;
+
+        $stats = $this->KetuaKK_model->get_stats($id_kk);
+        $list  = $this->KetuaKK_model->get_mahasiswa_by_kk($id_kk, $filter_status, $search, $per_page, $offset);
+
+        // Sanitize & format output for JSON
+        $formatted_list = array();
+        foreach ($list as $r) {
+            $full_name = trim(($r['nama_depan'] ?? '') . ' ' . ($r['nama_belakang'] ?? ''));
+            if (empty($full_name)) $full_name = 'Mahasiswa ' . ($r['nim'] ?? '');
+
+            $is_ready_for_kk = (($r['status_approval_wali'] ?? '') === 'Approved') && 
+                               (($r['status_approval_admin'] ?? '') === 'Approved') && 
+                               (($r['status_approval_koor'] ?? '') === 'Approved');
+
+            $formatted_list[] = array(
+                'nim'                  => $r['nim'] ?? '',
+                'full_name'            => htmlspecialchars($full_name),
+                'first_char'           => strtoupper(substr($r['nama_depan'] ?? 'M', 0, 1)),
+                'prodi'                => htmlspecialchars($r['prodi'] ?? 'DKV'),
+                'kode_kk'              => htmlspecialchars($r['kode_kk'] ?? 'KK-VCM'),
+                'nama_kk'              => htmlspecialchars($r['nama_kk'] ?? 'KK VCM'),
+                'judul_1'              => htmlspecialchars($r['judul_1'] ?? ''),
+                'status_approval_wali' => $r['status_approval_wali'] ?? 'Pending',
+                'status_approval_admin'=> $r['status_approval_admin'] ?? 'Pending',
+                'status_approval_koor' => $r['status_approval_koor'] ?? 'Pending',
+                'status_approval_kk'   => $r['status_approval_kk'] ?? 'Pending',
+                'is_ready_for_kk'      => $is_ready_for_kk,
+                'detail_url'           => site_url('ketuakk/detail/' . ($r['nim'] ?? ''))
+            );
+        }
+
+        $this->output
+             ->set_content_type('application/json')
+             ->set_output(json_encode(array(
+                 'success'     => true,
+                 'stats'       => $stats,
+                 'page'        => $page,
+                 'per_page'    => $per_page,
+                 'total_rows'  => $total_rows,
+                 'total_pages' => $total_pages,
+                 'list'        => $formatted_list
+             )));
+    }
+
+    /**
      * Endpoint Autocomplete Search JSON
      */
     public function autocomplete() {
@@ -139,10 +204,23 @@ class KetuaKK extends CI_Controller {
 
         $this->KetuaKK_model->update_approval_kk($nim, $status, $catatan);
 
+        $msg = "";
         if ($status === 'Approved') {
-            $this->session->set_flashdata('success', 'Persetujuan Ketua KK berhasil disimpan! Akses modul Bimbingan Tugas Akhir mahasiswa resmi DIBUKA (Unlocked).');
+            $msg = 'Persetujuan Ketua KK berhasil disimpan! Akses modul Bimbingan Tugas Akhir mahasiswa resmi DIBUKA (Unlocked).';
         } else {
-            $this->session->set_flashdata('success', 'Status penolakan/revisi Ketua KK berhasil diperbarui.');
+            $msg = 'Status penolakan/revisi Ketua KK berhasil diperbarui.';
+        }
+        $this->session->set_flashdata('success', $msg);
+
+        if ($this->input->is_ajax_request()) {
+            $this->output
+                 ->set_content_type('application/json')
+                 ->set_output(json_encode(array(
+                     'success' => true,
+                     'message' => $msg,
+                     'redirect_url' => site_url('ketuakk')
+                 )));
+            return;
         }
 
         redirect('ketuakk');
@@ -178,10 +256,26 @@ class KetuaKK extends CI_Controller {
             }
         }
 
+        $msg = "";
+        $is_success = false;
+
         if ($approved_count > 0) {
-            $this->session->set_flashdata('success', "Berhasil menyetujui $approved_count mahasiswa sekaligus! Akses modul Bimbingan Tugas Akhir mereka resmi DIBUKA (Unlocked).");
+            $is_success = true;
+            $msg = "Berhasil menyetujui $approved_count mahasiswa sekaligus! Akses modul Bimbingan Tugas Akhir mereka resmi DIBUKA (Unlocked).";
+            $this->session->set_flashdata('success', $msg);
         } else {
-            $this->session->set_flashdata('error', 'Tidak ada mahasiswa terpilih yang memenuhi prasyarat persetujuan.');
+            $msg = "Tidak ada mahasiswa terpilih yang memenuhi prasyarat persetujuan.";
+            $this->session->set_flashdata('error', $msg);
+        }
+
+        if ($this->input->is_ajax_request()) {
+            $this->output
+                 ->set_content_type('application/json')
+                 ->set_output(json_encode(array(
+                     'success' => $is_success,
+                     'message' => $msg
+                 )));
+            return;
         }
 
         redirect('ketuakk');
