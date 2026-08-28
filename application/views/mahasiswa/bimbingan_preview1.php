@@ -31,50 +31,8 @@
 </head>
 <body class="bg-gradient-to-br from-amber-50/40 via-orange-50/25 to-slate-100 min-h-screen text-slate-800 antialiased flex flex-col justify-between selection:bg-orange-500 selection:text-white">
 
-    <!-- Header Glass Navbar (Clean White Glass - Consistent) -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-orange-100/80 shadow-xs">
-        <div class="w-full px-4 sm:px-6 lg:px-10">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Brand -->
-                <div class="flex items-center gap-3.5">
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-500 text-white rounded-2xl font-bold text-xl flex items-center justify-center box-3d shadow-md shadow-orange-500/20">
-                        I
-                    </div>
-                    <div>
-                        <span class="font-bold text-lg sm:text-xl text-slate-900 tracking-tight block leading-none">IFIK Portal</span>
-                        <span class="text-[10px] sm:text-xs uppercase font-bold tracking-widest text-orange-600 mt-1 block">Akademik Mahasiswa</span>
-                    </div>
-                </div>
+    <?php $this->load->view('partials/mahasiswa_navbar'); ?>
 
-                <!-- Nav Menu -->
-                <nav class="hidden md:flex items-center gap-8 relative" id="mainNav">
-                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2.5 text-sm font-semibold tracking-wide">
-                        <i class="bi bi-grid-1x2-fill text-base"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link flex items-center gap-2.5 text-sm font-semibold tracking-wide">
-                        <i class="bi bi-file-earmark-text text-base"></i>
-                        <span>Pendaftaran TA</span>
-                    </a>
-                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link active-link flex items-center gap-2.5 text-sm font-bold tracking-wide">
-                        <i class="bi bi-person-video3 text-base"></i>
-                        <span>Bimbingan TA</span>
-                    </a>
-                </nav>
-
-                <!-- User Quick Info -->
-                <div class="flex items-center gap-3">
-                    <div class="hidden sm:flex flex-col text-right">
-                        <span class="text-sm font-bold text-slate-800 leading-tight"><?= $mahasiswa['nama_depan'] ?? 'Mahasiswa'; ?></span>
-                        <span class="text-xs text-slate-400 font-mono font-medium"><?= $mahasiswa['nim'] ?? 'NIM Mahasiswa'; ?></span>
-                    </div>
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center font-bold text-sm box-3d shadow-sm">
-                        <?= strtoupper(substr($mahasiswa['nama_depan'] ?? 'M', 0, 1)); ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
 
     <!-- Main Content (Full Width Fluid Layout) -->
     <main class="w-full px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex-grow space-y-7">
@@ -194,6 +152,94 @@
                             <h4 class="font-bold text-sm sm:text-base text-white/95 truncate mt-0.5"><?= htmlspecialchars($penguji_ta); ?></h4>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Card Tracker -->
+        <div class="card-3d-warm rounded-3xl p-6 sm:p-8 space-y-4 w-full shadow-lg border border-orange-100 mb-8">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2.5">
+                <i class="bi bi-info-circle-fill text-orange-500"></i> Status Bimbingan Terkini
+            </h3>
+            <?php 
+                $curr_status = 'Belum Memulai Bimbingan';
+                $curr_color = 'bg-slate-50 border-slate-200 text-slate-700';
+                $curr_icon = 'bi-dash-circle text-slate-400';
+                $curr_catatan = 'Silakan mulai dengan mengunggah berkas Preview 1.';
+                $curr_catatan2 = '';
+
+                if ($latest_p3) {
+                    if ($latest_p3['status_pembimbing'] == 'Approved') {
+                        $curr_status = 'Preview 3 Disetujui (Siap Sidang)';
+                        $curr_color = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                        $curr_icon = 'bi-check-circle-fill text-emerald-500';
+                        $curr_catatan = $latest_p3['catatan_pembimbing'];
+                    } else if ($latest_p3['status_pembimbing'] == 'Revision') {
+                        $curr_status = 'Preview 3 Revisi';
+                        $curr_color = 'bg-rose-50 border-rose-200 text-rose-800';
+                        $curr_icon = 'bi-x-circle-fill text-rose-500';
+                        $curr_catatan = $latest_p3['catatan_pembimbing'];
+                    } else {
+                        $curr_status = 'Preview 3 Sedang Direview';
+                        $curr_color = 'bg-amber-50 border-amber-200 text-amber-800';
+                        $curr_icon = 'bi-clock-fill text-amber-500';
+                        $curr_catatan = 'Menunggu review dari Pembimbing.';
+                    }
+                    $curr_catatan2 = $latest_p3['catatan_pembimbing_2'] ?? '';
+                } else if ($latest_p2) {
+                    if ($latest_p2['status_pembimbing'] == 'Approved') {
+                        $curr_status = 'Preview 2 Disetujui (Lanjut Preview 3)';
+                        $curr_color = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                        $curr_icon = 'bi-check-circle-fill text-emerald-500';
+                        $curr_catatan = $latest_p2['catatan_pembimbing'];
+                    } else if ($latest_p2['status_pembimbing'] == 'Revision') {
+                        $curr_status = 'Preview 2 Revisi';
+                        $curr_color = 'bg-rose-50 border-rose-200 text-rose-800';
+                        $curr_icon = 'bi-x-circle-fill text-rose-500';
+                        $curr_catatan = $latest_p2['catatan_pembimbing'];
+                    } else {
+                        $curr_status = 'Preview 2 Sedang Direview';
+                        $curr_color = 'bg-amber-50 border-amber-200 text-amber-800';
+                        $curr_icon = 'bi-clock-fill text-amber-500';
+                        $curr_catatan = 'Menunggu review dari Pembimbing.';
+                    }
+                    $curr_catatan2 = $latest_p2['catatan_pembimbing_2'] ?? '';
+                } else if ($latest_p1) {
+                    if ($latest_p1['status_pembimbing'] == 'Approved') {
+                        $curr_status = 'Preview 1 Disetujui (Lanjut Preview 2)';
+                        $curr_color = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                        $curr_icon = 'bi-check-circle-fill text-emerald-500';
+                        $curr_catatan = $latest_p1['catatan_pembimbing'];
+                    } else if ($latest_p1['status_pembimbing'] == 'Revision') {
+                        $curr_status = 'Preview 1 Revisi';
+                        $curr_color = 'bg-rose-50 border-rose-200 text-rose-800';
+                        $curr_icon = 'bi-x-circle-fill text-rose-500';
+                        $curr_catatan = $latest_p1['catatan_pembimbing'];
+                    } else {
+                        $curr_status = 'Preview 1 Sedang Direview';
+                        $curr_color = 'bg-amber-50 border-amber-200 text-amber-800';
+                        $curr_icon = 'bi-clock-fill text-amber-500';
+                        $curr_catatan = 'Menunggu review dari Pembimbing.';
+                    }
+                    $curr_catatan2 = $latest_p1['catatan_pembimbing_2'] ?? '';
+                }
+            ?>
+            <div class="p-4 rounded-2xl border <?= $curr_color ?> flex items-start gap-4">
+                <i class="bi <?= $curr_icon ?> text-2xl mt-1"></i>
+                <div class="flex-1">
+                    <h4 class="font-bold text-lg mb-1"><?= $curr_status ?></h4>
+                    <?php if(!empty($curr_catatan)): ?>
+                        <div class="text-sm mt-2 p-3 bg-white/50 rounded-lg border border-inherit">
+                            <strong>Catatan Pembimbing 1:</strong><br>
+                            <?= htmlspecialchars($curr_catatan) ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if(!empty($curr_catatan2)): ?>
+                        <div class="text-sm mt-2 p-3 bg-white/50 rounded-lg border border-inherit">
+                            <strong>Catatan Pembimbing 2:</strong><br>
+                            <?= htmlspecialchars($curr_catatan2) ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -548,6 +594,7 @@
                             </p>
                         </div>
 
+                        <?php if($is_p1_app): ?>
                         <?= form_open_multipart('mahasiswa/upload_preview', ['id' => 'formUploadPreview2', 'class' => 'space-y-6']); ?>
                             <input type="hidden" name="tahap_preview" value="Preview 2">
                             
@@ -586,6 +633,13 @@
                                 </button>
                             </div>
                         <?= form_close(); ?>
+                        <?php else: ?>
+                        <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl">
+                            <i class="bi bi-lock-fill text-4xl text-slate-400 mb-3 block"></i>
+                            <h4 class="font-bold text-lg text-slate-700">Tahap Terkunci</h4>
+                            <p class="text-slate-500 text-sm mt-2">Anda harus mendapatkan persetujuan (ACC) dari Pembimbing 1 di tahap Preview 1 sebelum dapat mengunggah berkas di tahap ini.</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -667,6 +721,7 @@
                     </p>
                 </div>
 
+                <?php if($is_p2_app): ?>
                 <?= form_open_multipart('mahasiswa/upload_preview', ['class' => 'space-y-6 max-w-3xl']); ?>
                     <input type="hidden" name="tahap_preview" value="Preview 3">
                     <div>
@@ -683,6 +738,13 @@
                         <i class="bi bi-send-check-fill mr-2"></i> Submit Berkas Pra-Sidang (Preview 3)
                     </button>
                 <?= form_close(); ?>
+                <?php else: ?>
+                <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl max-w-3xl">
+                    <i class="bi bi-lock-fill text-4xl text-slate-400 mb-3 block"></i>
+                    <h4 class="font-bold text-lg text-slate-700">Tahap Terkunci</h4>
+                    <p class="text-slate-500 text-sm mt-2">Anda harus mendapatkan persetujuan (ACC) dari Penguji di tahap Preview 2 sebelum dapat mengunggah berkas Preview 3.</p>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 

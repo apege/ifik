@@ -96,13 +96,16 @@ $route['onboarding/(:any)'] = 'Onboarding/$1';
 
 // Admin Layanan (LAA) Routes
 $route['adminlayanan'] = 'AdminLayanan/index';
+$route['adminlayanan/autocomplete'] = 'AdminLayanan/autocomplete';
 $route['adminlayanan/detail_berkas/(:any)'] = 'AdminLayanan/detail_berkas/$1';
 $route['adminlayanan/submit_verifikasi/(:any)'] = 'AdminLayanan/submit_verifikasi/$1';
 
 // Ketua KK Routes
 $route['ketuakk'] = 'KetuaKK/index';
+$route['ketuakk/autocomplete'] = 'KetuaKK/autocomplete';
 $route['ketuakk/detail/(:any)'] = 'KetuaKK/detail/$1';
 $route['ketuakk/submit_approval/(:any)'] = 'KetuaKK/submit_approval/$1';
+$route['ketuakk/submit_bulk_approval'] = 'KetuaKK/submit_bulk_approval';
 
 // Central Admin Panel Routes
 $route['admin'] = 'Admin/index';
@@ -114,6 +117,9 @@ $route['news/save'] = 'News/save';
 $route['news/delete/(:num)'] = 'News/delete/$1';
 $route['news/toggle/(:num)'] = 'News/toggle/$1';
 $route['news/get_all_json'] = 'News/get_all_json';
+
+// About / Baca Selengkapnya Route
+$route['dashboard/about'] = 'Dashboard/about';
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
