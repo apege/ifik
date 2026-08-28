@@ -78,6 +78,34 @@
             if (p1Bar) p1Bar.classList.remove('show');
             updateP2FloatingBatchBar();
             renderP2Table();
+
+            if (cfg.ajaxPreview2RealtimeUrl) {
+                fetch(cfg.ajaxPreview2RealtimeUrl)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.data) {
+                            state.p2List = data.data;
+                            if (data.stats) {
+                                const t = document.getElementById('statP2Total');
+                                const tr = document.getElementById('statP2Terjadwal');
+                                const ps = document.getElementById('statP2Penguji');
+                                const bl = document.getElementById('statP2Belum');
+                                if (t) t.textContent = data.stats.total;
+                                if (tr) {
+                                    const pct = data.stats.total > 0 ? Math.round((data.stats.terjadwal / data.stats.total) * 100) : 0;
+                                    tr.innerHTML = `${data.stats.terjadwal} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
+                                }
+                                if (ps) ps.textContent = data.stats.penguji_set;
+                                if (bl) {
+                                    const pct = data.stats.total > 0 ? Math.round((data.stats.belum_set / data.stats.total) * 100) : 0;
+                                    bl.innerHTML = `${data.stats.belum_set} <span class="text-xs font-semibold text-amber-600 font-normal">(${pct}%)</span>`;
+                                }
+                            }
+                            renderP2Table();
+                        }
+                    })
+                    .catch(() => {});
+            }
         }
     };
 
@@ -1007,9 +1035,44 @@
                             title: 'Batch Approval Berhasil!',
                             text: data.message,
                             confirmButtonColor: '#ea580c'
-                        }).then(() => {
-                            window.location.reload();
                         });
+
+                        closeBatchModal();
+                        clearAllSelection();
+
+                        if (cfg.ajaxRealtimeUrl) {
+                            fetch(cfg.ajaxRealtimeUrl)
+                                .then(r => r.json())
+                                .then(res => {
+                                    if (res && res.data) {
+                                        state.list = res.data;
+                                        if (res.stats) {
+                                            const totalEl = document.getElementById('statTotalCount');
+                                            const pendEl = document.getElementById('statPendingCount');
+                                            const appEl = document.getElementById('statApprovedCount');
+                                            const rejEl = document.getElementById('statRejectedCount');
+
+                                            if (totalEl) totalEl.textContent = res.stats.total;
+                                            if (pendEl) {
+                                                const pct = res.stats.total > 0 ? Math.round((res.stats.pending / res.stats.total) * 100) : 0;
+                                                pendEl.innerHTML = `${res.stats.pending} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
+                                            }
+                                            if (appEl) {
+                                                const pct = res.stats.total > 0 ? Math.round((res.stats.approved / res.stats.total) * 100) : 0;
+                                                appEl.innerHTML = `${res.stats.approved} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
+                                            }
+                                            if (rejEl) rejEl.textContent = res.stats.rejected;
+                                        }
+                                        renderTable();
+                                    }
+                                })
+                                .catch(e => {
+                                    console.debug('Realtime fetch after approval error:', e);
+                                    renderTable();
+                                });
+                        } else {
+                            renderTable();
+                        }
                     } else {
                         Swal.fire({
                             icon: 'error',
