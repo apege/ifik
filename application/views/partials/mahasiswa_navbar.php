@@ -37,11 +37,9 @@ $active_pendaftaran = (strpos(uri_string(), 'pendaftaran') !== false);
                 <a href="<?= site_url('mahasiswa'); ?>" class="nav-link <?= $active_dashboard ? 'active-link' : '' ?> flex items-center gap-2 tracking-wide">
                     <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
                 </a>
-                <?php if (!$is_dosen): ?>
                 <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link <?= $active_pendaftaran ? 'active-link' : '' ?> flex items-center gap-2 tracking-wide">
                     <i class="bi bi-file-earmark-text"></i> <span>Pendaftaran TA</span>
                 </a>
-                <?php endif; ?>
                 <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link <?= $active_bimbingan ? 'active-link' : '' ?> flex items-center gap-2 tracking-wide">
                     <i class="bi bi-person-video3"></i> <span>Bimbingan TA</span>
                 </a>

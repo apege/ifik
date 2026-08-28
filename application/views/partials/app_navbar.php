@@ -59,8 +59,8 @@
                 </a>
                 <?php endif; ?>
 
-                <!-- Ketua KK - Role 1 or 5 -->
-                <?php if (in_array($role_id, [1, 5])): ?>
+                <!-- Ketua KK - Role 1 or 7 -->
+                <?php if (in_array($role_id, [1, 7])): ?>
                 <a href="<?= site_url('ketuakk'); ?>" 
                    class="text-xs font-semibold flex items-center gap-1.5 transition-colors py-1 <?= $current_uri === 'ketuakk' ? 'text-orange-600 font-bold border-b-2 border-orange-600' : 'text-slate-600 hover:text-orange-600'; ?>">
                     <i class="bi bi-diagram-3-fill <?= $current_uri === 'ketuakk' ? 'text-orange-600' : 'text-slate-400'; ?>"></i>
@@ -68,8 +68,8 @@
                 </a>
                 <?php endif; ?>
 
-                <!-- Koordinator TA - Role 1 or 4 -->
-                <?php if (in_array($role_id, [1, 4])): ?>
+                <!-- Koordinator TA - Role 1 or 6 -->
+                <?php if (in_array($role_id, [1, 6])): ?>
                 <a href="<?= site_url('koordinatorta'); ?>" 
                    class="text-xs font-semibold flex items-center gap-1.5 transition-colors py-1 <?= $current_uri === 'koordinatorta' ? 'text-orange-600 font-bold border-b-2 border-orange-600' : 'text-slate-600 hover:text-orange-600'; ?>">
                     <i class="bi bi-mortarboard-fill <?= $current_uri === 'koordinatorta' ? 'text-orange-600' : 'text-slate-400'; ?>"></i>
