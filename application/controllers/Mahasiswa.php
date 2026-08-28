@@ -217,8 +217,16 @@ class Mahasiswa extends CI_Controller {
                 $current_stage = 'Selesai Approval';
             }
 
+            // Lookup id_dosen_wali dari tabel dosen_wali berdasarkan nip_dosen_wali mahasiswa
+            $mhs_data      = $this->db->get_where('mahasiswa', ['nim' => $nim])->row_array();
+            $nip_dw        = !empty($mhs_data['nip_dosen_wali']) ? $mhs_data['nip_dosen_wali'] : null;
+            $dw_row        = $nip_dw ? $this->db->get_where('dosen_wali', ['nip' => $nip_dw])->row_array() : null;
+            $id_dosen_wali = $dw_row ? $dw_row['id'] : null;
+
             $data_ta = array(
+
                 'nim'                  => $nim,
+                'id_dosen_wali'        => $id_dosen_wali,
                 'jenis_ta'             => $this->input->post('jenis_ta'),
                 'judul_1'              => $this->input->post('judul_1'),
                 'judul_2'              => $this->input->post('judul_2'),
@@ -486,4 +494,51 @@ class Mahasiswa extends CI_Controller {
 
         redirect('mahasiswa/bimbingan?posisi=' . $posisi);
     }
+
+    // AJAX Endpoint: Realtime fetch status approval 4-tahap pendaftaran TA mahasiswa
+    public function get_status_pendaftaran_ajax() {
+        $nim = $this->_get_current_nim();
+        $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+
+        if (!$pendaftaran || empty($pendaftaran['judul_1'])) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => false,
+                    'has_ta'  => false,
+                    'message' => 'Belum ada pengajuan Tugas Akhir.'
+                ]));
+            return;
+        }
+
+        $w_status  = $pendaftaran['status_approval_wali']  ?? 'Pending';
+        $a_status  = $pendaftaran['status_approval_admin'] ?? 'Pending';
+        $k_status  = $pendaftaran['status_approval_koor']  ?? 'Pending';
+        $kk_status = $pendaftaran['status_approval_kk']    ?? 'Pending';
+
+        $approved_count = 0;
+        if ($w_status === 'Approved') $approved_count++;
+        if ($a_status === 'Approved') $approved_count++;
+        if ($k_status === 'Approved') $approved_count++;
+        if ($kk_status === 'Approved') $approved_count++;
+
+        $progress_pct = round(($approved_count / 4) * 100);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success'        => true,
+                'has_ta'         => true,
+                'nim'            => $nim,
+                'current_stage'  => $pendaftaran['current_stage'] ?? 'Dosen Wali',
+                'status_wali'    => $w_status,
+                'status_admin'   => $a_status,
+                'status_koor'    => $k_status,
+                'status_kk'      => $kk_status,
+                'approved_count' => $approved_count,
+                'progress_pct'   => $progress_pct,
+                'judul_1'        => $pendaftaran['judul_1'] ?? ''
+            ]));
+    }
 }
+

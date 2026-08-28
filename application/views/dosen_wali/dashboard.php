@@ -121,7 +121,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Mahasiswa</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalMhs; ?></h3>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statTotalMhs"><?= $totalMhs; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Bimbingan Akademik</p>
                         </div>
                         
@@ -165,7 +165,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Menunggu Approval</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statPendingMhs"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditolak / Disetujui</p>
                         </div>
                         
@@ -209,7 +209,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statApprovedMhs"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Admin</p>
                         </div>
                         
@@ -253,7 +253,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Perlu Revisi</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $rejectedCount; ?></h3>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statRejectedMhs"><?= $rejectedCount; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Telah Ditolak / Perlu Revisi</p>
                         </div>
                         
@@ -405,7 +405,8 @@
 
     <script>
     (() => {
-        const allRows    = Array.from(document.querySelectorAll('.mhs-row'));
+        let allRows      = Array.from(document.querySelectorAll('.mhs-row'));
+        const tableBody  = document.getElementById('tableBodyMhs');
         const filterRows = document.getElementById('filterRows');
         const btnAdd     = document.getElementById('btnAddFilter');
         const btnReset   = document.getElementById('btnReset');
@@ -427,6 +428,7 @@
         let pintasStatus = 'all';
         let currentPage  = 1;
         let perPage      = parseInt(perPageSel.value);
+        let lastDataHash = '';
 
         function colSelect(selected = 'all') {
             return `<select class="filter-col border border-orange-200 rounded-lg px-2 py-1.5 text-xs font-medium bg-white outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 transition">${COLUMNS.map(c => `<option value="${c.value}" ${c.value === selected ? 'selected' : ''}>${c.label}</option>`).join('')}</select>`;
@@ -536,7 +538,75 @@
 
         perPageSel.addEventListener('change', () => { perPage = parseInt(perPageSel.value); currentPage = 1; applyAll(); });
 
+        // AJAX Polling: Update table and stats dynamically without page reload
+        async function pollRealtimeData() {
+            try {
+                const res = await fetch('<?= site_url("dosenwali/get_mahasiswa_ajax"); ?>', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) return;
+                const json = await res.json();
+                if (!json || !json.success) return;
+
+                const currentHash = JSON.stringify(json.data);
+                if (currentHash === lastDataHash) return; // No changes, skip DOM update
+                lastDataHash = currentHash;
+
+                // Update Stats
+                if (json.stats) {
+                    const elTotal = document.getElementById('statTotalMhs');
+                    const elPending = document.getElementById('statPendingMhs');
+                    const elApproved = document.getElementById('statApprovedMhs');
+                    const elRejected = document.getElementById('statRejectedMhs');
+
+                    if (elTotal) elTotal.textContent = json.stats.total;
+                    if (elPending) elPending.innerHTML = `${json.stats.pending} <span class="text-xs font-semibold text-cyan-600 font-normal">(${json.stats.total > 0 ? Math.round((json.stats.pending / json.stats.total)*100) : 0}%)</span>`;
+                    if (elApproved) elApproved.innerHTML = `${json.stats.approved} <span class="text-xs font-semibold text-emerald-600 font-normal">(${json.stats.approved_pct}%)</span>`;
+                    if (elRejected) elRejected.textContent = json.stats.rejected;
+                }
+
+                // Update Table Rows
+                if (json.data && json.data.length > 0) {
+                    tableBody.innerHTML = json.data.map(mhs => {
+                        const st = mhs.status_approval_wali || 'Pending';
+                        const badgeStyle = (st === 'Approved') 
+                            ? 'bg-emerald-100 text-emerald-700 border-emerald-300' 
+                            : ((st === 'Rejected') ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-amber-100 text-amber-700 border-amber-300');
+                        const judulShort = mhs.judul ? (mhs.judul.length > 45 ? mhs.judul.substring(0, 45) + '...' : mhs.judul) : '<span class="text-slate-400 italic font-normal">Belum Mendaftar</span>';
+
+                        return `
+                            <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="${st}" data-nim="${(mhs.nim || '').toLowerCase()}" data-nama="${(mhs.nama || '').toLowerCase()}" data-judul="${(mhs.judul || '').toLowerCase()}" data-stage="${(mhs.current_stage || 'draft').toLowerCase()}">
+                                <td class="py-4 px-5 pl-6 font-bold text-slate-900 mhs-nim">${mhs.nim}</td>
+                                <td class="py-4 px-5 font-semibold text-slate-800 mhs-nama">${mhs.nama}</td>
+                                <td class="py-4 px-5 text-slate-600 max-w-xs truncate">${judulShort}</td>
+                                <td class="py-4 px-5">
+                                    <span class="px-3 py-1 font-semibold text-[11px] rounded-full border shadow-xs inline-block ${badgeStyle}">${st}</span>
+                                </td>
+                                <td class="py-4 px-5">
+                                    <span class="px-3 py-1 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 shadow-xs inline-block">${mhs.current_stage || 'Draft'}</span>
+                                </td>
+                                <td class="py-4 px-5 pr-6 text-right">
+                                    <a href="${mhs.detail_url}" class="btn-3d-orange inline-flex items-center gap-1.5 text-white font-bold px-4 py-2 rounded-xl text-xs">
+                                        <i class="bi bi-search text-xs"></i> Detail & Approval
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                // Refresh row reference and re-apply current active filters
+                allRows = Array.from(document.querySelectorAll('.mhs-row'));
+                applyAll();
+            } catch (err) {
+                console.warn('Realtime polling error:', err);
+            }
+        }
+
         addFilterRow();
+
+        // Start background polling every 7 seconds
+        setInterval(pollRealtimeData, 7000);
     })();
     </script>
 </body>
