@@ -38,8 +38,9 @@ class Mahasiswa extends CI_Controller {
     public function edit_pendaftaran() {
         $nim = $this->_get_current_nim();
         $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        $has_ta = !empty($pendaftaran['judul_1']);
 
-        if (empty($pendaftaran)) {
+        if (!$has_ta) {
             redirect('mahasiswa/pendaftaran_ta');
             return;
         }
@@ -142,11 +143,12 @@ class Mahasiswa extends CI_Controller {
     public function pendaftaran_ta() {
         $nim = $this->_get_current_nim();
         $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        $has_ta = !empty($pendaftaran['judul_1']);
 
         $has_revisi = false;
         $is_locked = false;
 
-        if (!empty($pendaftaran)) {
+        if ($has_ta) {
             $w_status  = $pendaftaran['status_approval_wali'] ?? 'Pending';
             $a_status  = $pendaftaran['status_approval_admin'] ?? 'Pending';
             $k_status  = $pendaftaran['status_approval_koor'] ?? 'Pending';
@@ -161,6 +163,7 @@ class Mahasiswa extends CI_Controller {
         $data['pendaftaran'] = $pendaftaran;
         $data['is_locked'] = $is_locked;
         $data['has_revisi'] = $has_revisi;
+        $data['has_ta'] = $has_ta;
 
         if ($this->input->post()) {
             // Konfigurasi Upload File PDF
