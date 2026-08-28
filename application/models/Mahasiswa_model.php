@@ -162,45 +162,55 @@ class Mahasiswa_model extends CI_Model {
             'penguji_2' => ''
         );
 
-        if ($this->db->table_exists('ta_pembimbing')) {
-            $this->db->select('u1.name as p1, u2.name as p2');
-            $this->db->from('ta_pembimbing tp');
-            $this->db->join('users u1', 'u1.id = tp.id_pembimbing_1', 'left');
-            $this->db->join('users u2', 'u2.id = tp.id_pembimbing_2', 'left');
-            $this->db->where('tp.nim', $nim);
-            $p = $this->db->get()->row_array();
-            if ($p) {
-                $result['pembimbing_1'] = $p['p1'];
-                $result['pembimbing_2'] = $p['p2'];
-            }
-        }
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $this->db->select('pembimbing_1, pembimbing_2, penguji_1, penguji_2');
+            $this->db->where('nim', $nim);
+            $pt = $this->db->get('pendaftaran_ta')->row_array();
 
-        if ($this->db->table_exists('ta_penguji')) {
-            $this->db->select('u1.name as p1, u2.name as p2');
-            $this->db->from('ta_penguji tp');
-            $this->db->join('users u1', 'u1.id = tp.id_penguji_1', 'left');
-            $this->db->join('users u2', 'u2.id = tp.id_penguji_2', 'left');
-            $this->db->where('tp.nim', $nim);
-            $p = $this->db->get()->row_array();
-            if ($p) {
-                $result['penguji_1'] = $p['p1'];
-                $result['penguji_2'] = $p['p2'];
+            if ($pt) {
+                $result['pembimbing_1'] = $this->_get_dosen_name($pt['pembimbing_1']);
+                $result['pembimbing_2'] = $this->_get_dosen_name($pt['pembimbing_2']);
+                $result['penguji_1'] = $this->_get_dosen_name($pt['penguji_1']);
+                $result['penguji_2'] = $this->_get_dosen_name($pt['penguji_2']);
             }
         }
+        
         return $result;
+    }
+
+    private function _get_dosen_name($nip) {
+        if (empty($nip)) return '';
+        if ($this->db->table_exists('users')) {
+            $u = $this->db->get_where('users', ['nidn_nim' => $nip])->row_array();
+            if ($u && !empty($u['name'])) return $u['name'];
+        }
+        if ($this->db->table_exists('dosen_wali')) {
+            $dw = $this->db->get_where('dosen_wali', ['nip' => $nip])->row_array();
+            if ($dw && !empty($dw['nama_dosen'])) return $dw['nama_dosen'];
+        }
+        return '';
     }
 
     // Mengambil daftar mahasiswa bimbingan bagi seorang Dosen
     public function get_students_by_dosen($dosen_id, $posisi = 1) {
-        if (!$this->db->table_exists('ta_pembimbing') || !$this->db->table_exists('pendaftaran_ta')) return [];
-        $this->db->select('pt.nim, pt.judul_1 as judul, u.name as nama_mahasiswa');
-        $this->db->from('ta_pembimbing tp');
-        $this->db->join('pendaftaran_ta pt', 'pt.nim = tp.nim', 'inner');
-        $this->db->join('users u', 'u.nidn_nim = tp.nim', 'left');
+        if (!$this->db->table_exists('pendaftaran_ta')) return [];
+        
+        $nip_dosen = '';
+        if ($this->db->table_exists('users')) {
+            $u = $this->db->get_where('users', ['id' => $dosen_id])->row_array();
+            if ($u) {
+                $nip_dosen = $u['nidn_nim'];
+            }
+        }
+
+        $this->db->select('pt.nim, pt.judul_1 as judul, COALESCE(u.name, pt.nim) as nama_mahasiswa');
+        $this->db->from('pendaftaran_ta pt');
+        $this->db->join('users u', 'u.nidn_nim = pt.nim', 'left');
+        
         if ($posisi == 1) {
-            $this->db->where('tp.id_pembimbing_1', $dosen_id);
+            $this->db->where('pt.pembimbing_1', $nip_dosen);
         } else {
-            $this->db->where('tp.id_pembimbing_2', $dosen_id);
+            $this->db->where('pt.pembimbing_2', $nip_dosen);
         }
         return $this->db->get()->result_array();
     }
