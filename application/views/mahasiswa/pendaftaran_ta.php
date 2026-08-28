@@ -40,6 +40,22 @@
                     </div>
                 </div>
 
+                <!-- Nav Menu -->
+                <nav class="hidden md:flex items-center gap-7 relative" id="mainNav">
+                    <a href="<?= site_url('mahasiswa'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" class="nav-link active-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Pendaftaran TA</span>
+                    </a>
+                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="nav-link flex items-center gap-2 tracking-wide">
+                        <i class="bi bi-person-video3"></i>
+                        <span>Bimbingan TA</span>
+                    </a>
+                </nav>
+
                 <!-- User Quick Info -->
                 <div class="flex items-center gap-2.5">
                     <div class="hidden sm:flex flex-col text-right">
@@ -113,6 +129,31 @@
                 </div>
             </div>
         </div>
+
+        <?php if(!empty($has_revisi)): ?>
+            <!-- Revision Notice Banner -->
+            <div class="p-5 mb-6 rounded-2xl bg-rose-500/10 border-2 border-rose-400/80 text-rose-950 shadow-xs flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-bold box-3d shrink-0">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                </div>
+                <div class="flex-grow">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-rose-800 block">STATUS: PERLU REVISI / PERBAIKAN BERKAS</span>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed mt-1">
+                        Terdapat catatan perbaikan dari peninjau. Formulir telah diaktifkan kembali sehingga Anda dapat memperbarui data atau mengunggah ulang dokumen PDF yang diminta.
+                    </p>
+                    <?php if(!empty($pendaftaran['catatan_wali'])): ?>
+                        <div class="mt-2.5 p-3 bg-white/80 rounded-xl border border-rose-200 text-xs text-rose-900 font-medium">
+                            <strong>Catatan Dosen Wali:</strong> <?= htmlspecialchars($pendaftaran['catatan_wali']); ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if(!empty($pendaftaran['catatan_admin'])): ?>
+                        <div class="mt-2 p-3 bg-white/80 rounded-xl border border-rose-200 text-xs text-rose-900 font-medium">
+                            <strong>Catatan Admin Layanan (LAA):</strong> <?= htmlspecialchars($pendaftaran['catatan_admin']); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <?php if(!empty($is_locked)): ?>
             <!-- Locked View-Only Notice Banner -->
