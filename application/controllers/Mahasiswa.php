@@ -217,8 +217,16 @@ class Mahasiswa extends CI_Controller {
                 $current_stage = 'Selesai Approval';
             }
 
+            // Lookup id_dosen_wali dari tabel dosen_wali berdasarkan nip_dosen_wali mahasiswa
+            $mhs_data      = $this->db->get_where('mahasiswa', ['nim' => $nim])->row_array();
+            $nip_dw        = !empty($mhs_data['nip_dosen_wali']) ? $mhs_data['nip_dosen_wali'] : null;
+            $dw_row        = $nip_dw ? $this->db->get_where('dosen_wali', ['nip' => $nip_dw])->row_array() : null;
+            $id_dosen_wali = $dw_row ? $dw_row['id'] : null;
+
             $data_ta = array(
+
                 'nim'                  => $nim,
+                'id_dosen_wali'        => $id_dosen_wali,
                 'jenis_ta'             => $this->input->post('jenis_ta'),
                 'judul_1'              => $this->input->post('judul_1'),
                 'judul_2'              => $this->input->post('judul_2'),
