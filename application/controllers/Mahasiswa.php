@@ -390,16 +390,13 @@ class Mahasiswa extends CI_Controller {
         $data['latest_p2'] = $data['riwayat_preview2'][0] ?? null;
         $data['latest_p3'] = $data['riwayat_preview3'][0] ?? null;
 
-        // Default Mock Pembimbing & Penguji jika belum di-set di database
-        $data['pembimbing_1'] = !empty($pembimbing_penguji['pembimbing_1']) 
-            ? $pembimbing_penguji['pembimbing_1'] 
-            : (!empty($data['pendaftaran']['nama_pembimbing_1']) ? $data['pendaftaran']['nama_pembimbing_1'] : 'Dr. Rina Fitriana, S.Ds., M.Ds.');
-        $data['pembimbing_2'] = !empty($pembimbing_penguji['pembimbing_2']) 
-            ? $pembimbing_penguji['pembimbing_2'] 
-            : (!empty($data['pendaftaran']['nama_pembimbing_2']) ? $data['pendaftaran']['nama_pembimbing_2'] : 'Agung Pratama, S.T., M.Kom.');
-        $data['penguji_ta'] = !empty($pembimbing_penguji['penguji_1']) 
-            ? $pembimbing_penguji['penguji_1'] 
-            : 'Bambang Sudarsono, S.T., M.T.';
+        // Ambil Data Pembimbing & Penguji Asli dari Database
+        $data['pembimbing_1'] = !empty($pembimbing_penguji['pembimbing_1']) ? $pembimbing_penguji['pembimbing_1'] : '';
+        $data['pembimbing_2'] = !empty($pembimbing_penguji['pembimbing_2']) ? $pembimbing_penguji['pembimbing_2'] : '';
+        $data['penguji_ta'] = !empty($pembimbing_penguji['penguji_1']) ? $pembimbing_penguji['penguji_1'] : '';
+
+        // Cek apakah minimal pembimbing 1 dan 2 sudah di-assign
+        $data['is_pembimbing_assigned'] = (!empty($data['pembimbing_1']) && !empty($data['pembimbing_2']));
 
         $this->load->view('mahasiswa/bimbingan_preview1', $data);
     }
