@@ -226,10 +226,10 @@
             fetchBimbinganData();
         }
 
-        function fetchBimbinganData() {
+        function fetchBimbinganData(silent = false) {
             const tbody = document.getElementById('bimbinganTableBody');
             const posisi = <?= $posisi ?>;
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin text-xl"></i> Memuat data...</td></tr>';
+            if(!silent) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin text-xl"></i> Memuat data...</td></tr>';
             
             fetch(`<?= site_url('mahasiswa/ajax_get_dosen_bimbingan') ?>?posisi=${posisi}&tahap=${encodeURIComponent(currentTahap)}`)
                 .then(res => {
@@ -350,6 +350,74 @@
         function closeReviewModal() {
             document.getElementById('reviewModal').classList.add('hidden');
         }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-5 right-5 z-[9999] p-4 rounded-xl text-white font-bold shadow-lg transition-opacity ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            toast.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} mr-2"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(()=>toast.remove(), 300); }, 3000);
+        }
+
+        const formReview = document.getElementById('formReview');
+        if (formReview) {
+            formReview.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                const originalBtnText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Menyimpan...';
+                
+                const formData = new FormData(this);
+                
+                fetch(this.action + '_ajax', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status) {
+                        showToast(data.message, 'success');
+                        closeReviewModal();
+                        // Dosen list will automatically update via SSE
+                    } else {
+                        showToast(data.message || 'Gagal menyimpan', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('Kesalahan koneksi', 'error');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnText;
+                });
+            });
+        }
+
+        let dosenEventSource = null;
+        function startDosenSSE() {
+            if (dosenEventSource) dosenEventSource.close();
+            const posisi = <?= $posisi ?>;
+            dosenEventSource = new EventSource(`<?= site_url('mahasiswa/sse_dosen_bimbingan') ?>?posisi=${posisi}`);
+            
+            dosenEventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if(data && data.length !== undefined) {
+                        // SSE sends data only when there is a change.
+                        // We use the existing fetchBimbinganData() to refresh the view to ensure 
+                        // format compatibility with the current rendering logic.
+                        fetchBimbinganData(true);
+                    }
+                } catch(e) { console.error('SSE Error:', e); }
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            startDosenSSE();
+        });
     </script>
 </body>
 </html>
