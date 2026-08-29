@@ -559,7 +559,7 @@
                                     Berkas Progress Bab 4 &amp; Link Prototype / Demo <span class="text-rose-500">*</span>
                                 </label>
                                 
-                                <div class="drop-zone relative border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/30 hover:bg-amber-50/60 rounded-3xl p-8 sm:p-10 text-center transition-all cursor-pointer group">
+                                <div class="drop-zone relative border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/30 hover:bg-amber-50/60 rounded-3xl p-8 sm:p-10 text-center transition-all cursor-pointer group" id="dropZoneP2">
                                     <input type="file" name="file_draft" id="fileDraftP2" accept=".pdf,.docx,.zip" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                     <div class="space-y-3.5 pointer-events-none">
                                         <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-tr from-amber-500 to-orange-400 text-white group-hover:scale-105 flex items-center justify-center text-3xl mx-auto transition-transform box-3d shadow-md shadow-amber-500/20">
@@ -572,6 +572,15 @@
                                             <p class="text-xs text-slate-500 font-medium mt-1">PDF, DOCX, atau ZIP (Maksimal 10MB)</p>
                                         </div>
                                     </div>
+                                </div>
+                                <div id="fileBadgeP2" class="hidden mt-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-bold flex items-center justify-between shadow-xs">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shrink-0 box-3d">
+                                            <i class="bi bi-file-earmark-check-fill"></i>
+                                        </div>
+                                        <span id="fileNameP2" class="truncate font-mono">draft.pdf</span>
+                                    </div>
+                                    <span id="fileSizeP2" class="text-xs text-emerald-800 font-bold shrink-0 ml-3 bg-white px-3 py-1 rounded-xl border border-emerald-200">2.4 MB</span>
                                 </div>
                             </div>
 
@@ -665,13 +674,39 @@
                 </div>
 
                 <?php if($is_p2_app): ?>
-                <?= form_open_multipart('mahasiswa/upload_preview', ['class' => 'space-y-6 max-w-3xl']); ?>
+                <?= form_open_multipart('mahasiswa/upload_preview', ['id' => 'formUploadPreview3', 'class' => 'space-y-6 max-w-3xl']); ?>
                     <input type="hidden" name="tahap_preview" value="Preview 3">
                     <div>
                         <label class="block text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2.5">
                             Dokumen Lengkap Pra-Sidang (PDF / ZIP) <span class="text-rose-500">*</span>
                         </label>
-                        <input type="file" name="file_draft" accept=".pdf,.docx,.zip" required class="w-full p-4 border border-indigo-200 rounded-2xl bg-indigo-50/30 text-xs sm:text-sm font-semibold">
+                        
+                        <div class="drop-zone relative border-2 border-dashed border-indigo-300 hover:border-indigo-500 bg-indigo-50/30 hover:bg-indigo-50/60 rounded-3xl p-8 sm:p-10 text-center transition-all cursor-pointer group" id="dropZoneP3">
+                            <input type="file" name="file_draft" id="fileDraftP3" accept=".pdf,.docx,.zip" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="space-y-3.5 pointer-events-none">
+                                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-tr from-indigo-500 to-purple-400 text-white group-hover:scale-105 flex items-center justify-center text-3xl mx-auto transition-transform box-3d shadow-md shadow-indigo-500/20">
+                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm sm:text-base font-bold text-slate-900">
+                                        Klik untuk memilih file atau seret &amp; lepas ke sini
+                                    </p>
+                                    <p class="text-xs text-slate-500 font-medium mt-1">
+                                        PDF, DOCX, atau ZIP (Maksimal ukuran: 10MB)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="fileBadgeP3" class="hidden mt-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-bold flex items-center justify-between shadow-xs">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shrink-0 box-3d">
+                                    <i class="bi bi-file-earmark-check-fill"></i>
+                                </div>
+                                <span id="fileNameP3" class="truncate font-mono">draft.pdf</span>
+                            </div>
+                            <span id="fileSizeP3" class="text-xs text-emerald-800 font-bold shrink-0 ml-3 bg-white px-3 py-1 rounded-xl border border-emerald-200">2.4 MB</span>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2.5">Catatan Kelayakan Pra-Sidang</label>
@@ -746,29 +781,105 @@
 
     <script src="<?= base_url('assets/js/navbar_animated.js'); ?>?v=<?= time(); ?>"></script>
     <script>
-        // File selection preview for Preview 1
-        const fileInputP1 = document.getElementById('fileDraftP1');
-        const fileBadgeP1 = document.getElementById('fileBadgeP1');
-        const fileNameP1 = document.getElementById('fileNameP1');
-        const fileSizeP1 = document.getElementById('fileSizeP1');
-
-        if (fileInputP1) {
-            fileInputP1.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const file = this.files[0];
-                    fileNameP1.textContent = file.name;
-                    fileSizeP1.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-                    fileBadgeP1.classList.remove('hidden');
-                }
-            });
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-5 right-5 z-[9999] p-4 rounded-xl text-white font-bold shadow-lg transition-opacity ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            toast.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} mr-2"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(()=>toast.remove(), 300); }, 3000);
         }
+
+        function setupFileUploader(tahapId) {
+            const fileInput = document.getElementById('fileDraftP' + tahapId);
+            const fileBadge = document.getElementById('fileBadgeP' + tahapId);
+            const fileName = document.getElementById('fileNameP' + tahapId);
+            const fileSize = document.getElementById('fileSizeP' + tahapId);
+            const dropZone = document.getElementById('dropZoneP' + tahapId);
+
+            if (fileInput && fileBadge) {
+                fileInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const file = this.files[0];
+                        fileName.textContent = file.name;
+                        fileSize.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                        fileBadge.classList.remove('hidden');
+                    }
+                });
+            }
+
+            if (dropZone && fileInput) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.add('opacity-50'), false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.remove('opacity-50'), false);
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if(files.length > 0) {
+                        fileInput.files = files;
+                        const event = new Event('change');
+                        fileInput.dispatchEvent(event);
+                    }
+                }, false);
+            }
+        }
+        setupFileUploader(1);
+        setupFileUploader(2);
+        setupFileUploader(3);
+
+        // AJAX Form Submit
+        ['formUploadPreview1', 'formUploadPreview2', 'formUploadPreview3'].forEach((formId, idx) => {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const btn = this.querySelector('button[type="submit"]');
+                    const originalBtnContent = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin mr-2"></i> Mengunggah...';
+
+                    fetch('<?= site_url('mahasiswa/upload_preview_ajax') ?>', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.status) {
+                            showToast(data.message, 'success');
+                            this.reset();
+                            const fileBadge = document.getElementById('fileBadgeP' + (idx+1));
+                            if(fileBadge) fileBadge.classList.add('hidden');
+                        } else {
+                            showToast(data.message || 'Terjadi kesalahan saat mengunggah', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast('Kesalahan koneksi', 'error');
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalBtnContent;
+                    });
+                });
+            }
+        });
 
         // Tab Switcher Logic
         function switchPreviewTab(targetTab) {
-            // Hide all tab panels
             document.querySelectorAll('.tab-panel').forEach(el => el.classList.add('hidden'));
-
-            // Reset tab button borders & rings
             document.querySelectorAll('.tab-card').forEach(el => {
                 el.classList.remove('ring-4', 'ring-orange-400/20', 'ring-amber-400/20', 'ring-indigo-400/20', 'ring-emerald-400/20', 'border-orange-500', 'border-amber-300', 'border-indigo-300', 'border-emerald-400');
             });
@@ -786,36 +897,11 @@
                 document.getElementById('panelSidang').classList.remove('hidden');
                 document.getElementById('tabBtnSidang').classList.add('border-emerald-400', 'ring-4', 'ring-emerald-400/20');
             }
-            
-            if (targetTab.startsWith('preview')) {
-                let num = targetTab.replace('preview', '');
-                loadPreviewLog(`Preview ${num}`, `logTablePreview${num}`);
-            }
-        }
-
-        // Fetch logs via AJAX
-        function loadPreviewLog(tahap, tbodyId) {
-            const tbody = document.getElementById(tbodyId);
-            if(!tbody) return;
-            
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2 text-lg"></i> Memuat data...</td></tr>`;
-            
-            fetch(`<?= site_url('mahasiswa/ajax_get_preview_log') ?>?tahap=${encodeURIComponent(tahap)}`)
-                .then(res => res.json())
-                .then(res => {
-                    if (res.status) {
-                        renderLogTable(res.data, tbodyId);
-                    } else {
-                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-500 font-bold">${res.message}</td></tr>`;
-                    }
-                })
-                .catch(err => {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-500 font-bold">Terjadi kesalahan koneksi</td></tr>`;
-                });
         }
 
         function renderLogTable(data, tbodyId) {
             const tbody = document.getElementById(tbodyId);
+            if(!tbody) return;
             if(!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 px-4 text-slate-500 font-medium">Belum ada dokumen draft yang diunggah untuk tahap ini.</td></tr>`;
                 return;
@@ -876,9 +962,33 @@
             tbody.innerHTML = html;
         }
 
-        // Initialize first load
+        // SSE Realtime Updates
+        let mahasiswaEventSource = null;
+        function startMahasiswaSSE() {
+            if (mahasiswaEventSource) mahasiswaEventSource.close();
+            mahasiswaEventSource = new EventSource('<?= site_url('mahasiswa/sse_mahasiswa_bimbingan') ?>');
+            mahasiswaEventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if(data) {
+                        if(data.riwayat_p1) renderLogTable(data.riwayat_p1, 'logTablePreview1');
+                        if(data.riwayat_p2) renderLogTable(data.riwayat_p2, 'logTablePreview2');
+                        if(data.riwayat_p3) renderLogTable(data.riwayat_p3, 'logTablePreview3');
+                        
+                        const orig_is_p1_app = <?= $is_p1_app ? 'true' : 'false' ?>;
+                        const orig_is_p2_app = <?= $is_p2_app ? 'true' : 'false' ?>;
+                        const orig_is_p3_app = <?= $is_p3_app ? 'true' : 'false' ?>;
+                        
+                        if ((data.is_p1_app && !orig_is_p1_app) || (data.is_p2_app && !orig_is_p2_app) || (data.is_p3_app && !orig_is_p3_app)) {
+                            window.location.reload();
+                        }
+                    }
+                } catch(e) { console.error('SSE Error:', e); }
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadPreviewLog('Preview 1', 'logTablePreview1');
+            startMahasiswaSSE();
         });
     </script>
     <?php $this->load->view('partials/custom_cursor'); ?>

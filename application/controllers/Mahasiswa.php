@@ -601,4 +601,191 @@ class Mahasiswa extends CI_Controller {
             'data' => $riwayat
         ]);
     }
+    // AJAX Endpoint: Upload draft preview mahasiswa tanpa reload
+    public function upload_preview_ajax() {
+        header('Content-Type: application/json');
+        $nim = $this->_get_current_nim();
+        $tahap = $this->input->post('tahap_preview') ?: 'Preview 1';
+
+        $upload_dir = './uploads/preview_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config['upload_path']   = $upload_dir;
+        $config['allowed_types'] = 'pdf|docx|zip';
+        $config['max_size']      = 10240;
+        $clean_tahap = str_replace(' ', '', strtoupper($tahap));
+        $config['file_name']     = $clean_tahap . '_' . $nim . '_' . time();
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload('file_draft')) {
+            echo json_encode([
+                'status' => false,
+                'message' => $this->upload->display_errors('', '')
+            ]);
+            return;
+        }
+
+        $upload_data = $this->upload->data();
+        $file_name = $upload_data['file_name'];
+        $catatan = trim($this->input->post('catatan_mahasiswa') ?? '');
+
+        $data_insert = array(
+            'nim'                => $nim,
+            'tahap_preview'      => $tahap,
+            'file_draft'         => $file_name,
+            'catatan_mahasiswa'  => $catatan,
+            'status_pembimbing'  => 'Pending',
+            'created_at'         => date('Y-m-d H:i:s')
+        );
+
+        $this->Mahasiswa_model->save_upload_preview($data_insert);
+        
+        $riwayat = $this->Mahasiswa_model->get_riwayat_preview($nim, $tahap);
+        $latest = $riwayat[0] ?? null;
+
+        echo json_encode([
+            'status' => true,
+            'message' => "Draft Berkas {$tahap} berhasil diunggah!",
+            'tahap' => $tahap,
+            'upload_count' => count($riwayat),
+            'latest_preview' => $latest,
+            'riwayat' => $riwayat
+        ]);
+    }
+
+    // AJAX Endpoint: Review dosen tanpa reload
+    public function review_preview_ajax() {
+        header('Content-Type: application/json');
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id != 4) {
+            echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $id = $this->input->post('id_preview');
+        $posisi = $this->input->post('posisi');
+        $catatan = $this->input->post('catatan_pembimbing');
+        $status = $this->input->post('status_pembimbing');
+
+        if (empty($id)) {
+            echo json_encode(['status' => false, 'message' => 'ID preview tidak valid']);
+            return;
+        }
+
+        if ($posisi == 1) {
+            $data = [
+                'status_pembimbing' => $status,
+                'catatan_pembimbing' => $catatan
+            ];
+            $this->Mahasiswa_model->update_review_preview($id, $data);
+            $message = 'Review Pembimbing 1 berhasil disimpan.';
+        } else if ($posisi == 2) {
+            $data = [
+                'catatan_pembimbing_2' => $catatan
+            ];
+            $this->Mahasiswa_model->update_review_preview($id, $data);
+            $message = 'Komentar Pembimbing 2 berhasil disimpan.';
+        } else {
+            echo json_encode(['status' => false, 'message' => 'Posisi tidak valid']);
+            return;
+        }
+
+        echo json_encode([
+            'status' => true,
+            'message' => $message
+        ]);
+    }
+
+    public function sse_dosen_bimbingan() {
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+        header('X-Accel-Buffering: no'); 
+        session_write_close(); // FIX FOR MAX EXECUTION TIME
+
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id != 4) {
+            echo "data: " . json_encode(['status' => false, 'message' => 'Unauthorized']) . "\n\n";
+            ob_flush(); flush(); exit;
+        }
+
+        $dosen_id = $this->session->userdata('user_id');
+        $posisi = $this->input->get('posisi') ?: 1;
+        $lastData = null;
+
+        while (true) {
+            $students = $this->Mahasiswa_model->get_students_by_dosen($dosen_id, $posisi);
+            $data = [];
+            foreach ($students as $student) {
+                $p1 = $this->Mahasiswa_model->get_latest_preview_status($student['nim'], 'Preview 1');
+                $p2 = $this->Mahasiswa_model->get_latest_preview_status($student['nim'], 'Preview 2');
+                $p3 = $this->Mahasiswa_model->get_latest_preview_status($student['nim'], 'Preview 3');
+                $data[] = [
+                    'nim' => $student['nim'],
+                    'nama_mahasiswa' => $student['nama_mahasiswa'] ?? $student['nim'],
+                    'judul' => $student['judul'] ?? '-',
+                    'preview1' => $p1,
+                    'preview2' => $p2,
+                    'preview3' => $p3
+                ];
+            }
+
+            $json = json_encode($data);
+            if ($json !== $lastData) {
+                echo "data: " . $json . "\n\n";
+                ob_flush(); flush();
+                $lastData = $json;
+            }
+
+            if (connection_aborted()) break;
+            sleep(3);
+        }
+        exit;
+    }
+
+    public function sse_mahasiswa_bimbingan() {
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+        header('X-Accel-Buffering: no');
+        session_write_close(); // FIX FOR MAX EXECUTION TIME
+
+        $nim = $this->_get_current_nim();
+        $lastData = null;
+
+        while (true) {
+            $riwayat_p1 = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
+            $riwayat_p2 = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 2');
+            $riwayat_p3 = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 3');
+
+            $data = [
+                'riwayat_p1' => $riwayat_p1,
+                'riwayat_p2' => $riwayat_p2,
+                'riwayat_p3' => $riwayat_p3,
+                'latest_p1' => $riwayat_p1[0] ?? null,
+                'latest_p2' => $riwayat_p2[0] ?? null,
+                'latest_p3' => $riwayat_p3[0] ?? null,
+                'upload_count_p1' => count($riwayat_p1),
+                'upload_count_p2' => count($riwayat_p2),
+                'upload_count_p3' => count($riwayat_p3),
+                'is_p1_app' => (bool)(($riwayat_p1[0]['status_pembimbing'] ?? null) == 'Approved'),
+                'is_p2_app' => (bool)(($riwayat_p2[0]['status_pembimbing'] ?? null) == 'Approved'),
+                'is_p3_app' => (bool)(($riwayat_p3[0]['status_pembimbing'] ?? null) == 'Approved'),
+            ];
+
+            $json = json_encode($data);
+            if ($json !== $lastData) {
+                echo "data: " . $json . "\n\n";
+                ob_flush(); flush();
+                $lastData = $json;
+            }
+
+            if (connection_aborted()) break;
+            sleep(3);
+        }
+        exit;
+    }
 }
