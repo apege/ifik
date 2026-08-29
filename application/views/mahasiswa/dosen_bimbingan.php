@@ -226,10 +226,10 @@
             fetchBimbinganData();
         }
 
-        function fetchBimbinganData() {
+        function fetchBimbinganData(silent = false) {
             const tbody = document.getElementById('bimbinganTableBody');
             const posisi = <?= $posisi ?>;
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin text-xl"></i> Memuat data...</td></tr>';
+            if(!silent) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin text-xl"></i> Memuat data...</td></tr>';
             
             fetch(`<?= site_url('mahasiswa/ajax_get_dosen_bimbingan') ?>?posisi=${posisi}&tahap=${encodeURIComponent(currentTahap)}`)
                 .then(res => {
@@ -409,7 +409,7 @@
                         // SSE sends data only when there is a change.
                         // We use the existing fetchBimbinganData() to refresh the view to ensure 
                         // format compatibility with the current rendering logic.
-                        fetchBimbinganData();
+                        fetchBimbinganData(true);
                     }
                 } catch(e) { console.error('SSE Error:', e); }
             };

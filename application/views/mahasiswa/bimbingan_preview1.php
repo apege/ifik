@@ -163,7 +163,7 @@
         </div>
 
         <!-- Status Card Tracker -->
-        <div class="card-3d-warm rounded-3xl p-6 sm:p-8 space-y-4 w-full shadow-lg border border-orange-100 mb-8">
+        <div id="statusCardContainer" class="card-3d-warm rounded-3xl p-6 sm:p-8 space-y-4 w-full shadow-lg border border-orange-100 mb-8">
             <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2.5">
                 <i class="bi bi-info-circle-fill text-orange-500"></i> Status Bimbingan Terkini
             </h3>
@@ -962,6 +962,38 @@
             tbody.innerHTML = html;
         }
 
+        function renderStatusCard(data) {
+            let statusHtml = '';
+            if (data.is_p3_app) {
+                statusHtml = `<div class="p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-800 flex items-start gap-4">
+                    <i class="bi bi-check-circle-fill text-2xl mt-1 text-emerald-500"></i>
+                    <div><h4 class="font-bold text-lg">Preview 3 Disetujui (Siap Sidang)</h4></div>
+                </div>`;
+            } else if (data.is_p2_app) {
+                statusHtml = `<div class="p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-800 flex items-start gap-4">
+                    <i class="bi bi-check-circle-fill text-2xl mt-1 text-emerald-500"></i>
+                    <div><h4 class="font-bold text-lg">Preview 2 Disetujui (Lanjut Preview 3)</h4></div>
+                </div>`;
+            } else if (data.is_p1_app) {
+                statusHtml = `<div class="p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-800 flex items-start gap-4">
+                    <i class="bi bi-check-circle-fill text-2xl mt-1 text-emerald-500"></i>
+                    <div><h4 class="font-bold text-lg">Preview 1 Disetujui (Lanjut Preview 2)</h4></div>
+                </div>`;
+            } else {
+                let statusText = 'Preview 1 Sedang Direview';
+                if (data.latest_p3) statusText = 'Preview 3 Sedang Direview';
+                else if (data.latest_p2) statusText = 'Preview 2 Sedang Direview';
+                statusHtml = `<div class="p-4 rounded-2xl border bg-amber-50 border-amber-200 text-amber-800 flex items-start gap-4">
+                    <i class="bi bi-clock-fill text-2xl mt-1 text-amber-500"></i>
+                    <div><h4 class="font-bold text-lg">${statusText}</h4></div>
+                </div>`;
+            }
+            document.getElementById('statusCardContainer').innerHTML = `
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2.5">
+                    <i class="bi bi-info-circle-fill text-orange-500"></i> Status Bimbingan Terkini
+                </h3>` + statusHtml;
+        }
+
         // SSE Realtime Updates
         let mahasiswaEventSource = null;
         function startMahasiswaSSE() {
@@ -971,13 +1003,14 @@
                 try {
                     const data = JSON.parse(event.data);
                     if(data) {
-                        if(data.riwayat_p1) renderLogTable(data.riwayat_p1, 'logTablePreview1');
-                        if(data.riwayat_p2) renderLogTable(data.riwayat_p2, 'logTablePreview2');
-                        if(data.riwayat_p3) renderLogTable(data.riwayat_p3, 'logTablePreview3');
+                        renderLogTable(data.riwayat_p1, 'logTablePreview1');
+                        renderLogTable(data.riwayat_p2, 'logTablePreview2');
+                        renderLogTable(data.riwayat_p3, 'logTablePreview3');
+                        renderStatusCard(data);
                         
-                        const orig_is_p1_app = <?= $is_p1_app ? 'true' : 'false' ?>;
-                        const orig_is_p2_app = <?= $is_p2_app ? 'true' : 'false' ?>;
-                        const orig_is_p3_app = <?= $is_p3_app ? 'true' : 'false' ?>;
+                        const orig_is_p1_app = <?php echo $is_p1_app ? 'true' : 'false'; ?>;
+                        const orig_is_p2_app = <?php echo $is_p2_app ? 'true' : 'false'; ?>;
+                        const orig_is_p3_app = <?php echo $is_p3_app ? 'true' : 'false'; ?>;
                         
                         if ((data.is_p1_app && !orig_is_p1_app) || (data.is_p2_app && !orig_is_p2_app) || (data.is_p3_app && !orig_is_p3_app)) {
                             window.location.reload();
