@@ -458,9 +458,29 @@
                             title: 'Berhasil Disimpan!',
                             text: data.message,
                             confirmButtonColor: '#ea580c'
-                        }).then(() => {
-                            window.location.reload();
                         });
+
+                        // Instantly update live state without page reload
+                        config.stKoor = selectedDecision;
+                        if (config.ajaxRealtimeUrl) {
+                            fetch(config.ajaxRealtimeUrl)
+                                .then(res => res.json())
+                                .then(latest => {
+                                    if (latest && latest.status) {
+                                        config.stWali = latest.status_approval_wali;
+                                        config.stAdmin = latest.status_approval_admin;
+                                        config.stKoor = latest.status_approval_koor;
+                                        config.stKk = latest.status_approval_kk;
+                                        config.activeStageNum = latest.activeStageNum;
+                                        config.tahapTerakhir = latest.tahapTerakhir;
+                                        config.isWaliApproved = (latest.status_approval_wali === 'Approved');
+                                        config.isLAAApproved = (latest.status_approval_admin === 'Approved');
+                                        config.isKoorApproved = (latest.status_approval_koor === 'Approved');
+
+                                        renderStagesGrid(latest);
+                                    }
+                                });
+                        }
                     } else {
                         Swal.fire({
                             icon: 'error',
