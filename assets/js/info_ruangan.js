@@ -554,12 +554,13 @@
         // Render Pertama
         renderRowPage(activeList, currentRotateIndex, pageSize, false);
 
-        // Putar Otomatis 4 Baris Setiap 4.5 Detik dengan Animasi Slide Smooth (Tanpa Titik / Badge)
+        // Putar Otomatis 4 Baris Setiap 9 Detik secara konsisten
+        if (rowRotateInterval) clearInterval(rowRotateInterval);
         if (totalPages > 1) {
             rowRotateInterval = setInterval(() => {
                 currentRotateIndex = (currentRotateIndex + 1) % totalPages;
                 renderRowPage(activeList, currentRotateIndex, pageSize, true);
-            }, 4500);
+            }, 9000);
         }
     }
 
@@ -576,12 +577,12 @@
             return;
         }
 
-        // ANIMASI TRANSISI ROTASI BARIS (SLIDE & FADE SMOOTH)
+        // ANIMASI TRANSISI ROTASI BARIS (SLIDE & FADE SMOOTH DAN TENANG)
         const existingRows = wrapper.querySelectorAll('.room-item');
         existingRows.forEach(row => {
-            row.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            row.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
             row.style.opacity = '0';
-            row.style.transform = 'translateY(-6px)';
+            row.style.transform = 'translateY(-8px)';
         });
 
         setTimeout(() => {
@@ -592,24 +593,24 @@
             const newRows = wrapper.querySelectorAll('.room-item');
             newRows.forEach((row, idx) => {
                 row.style.opacity = '0';
-                row.style.transform = 'translateY(8px)';
+                row.style.transform = 'translateY(10px)';
 
                 setTimeout(() => {
-                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    row.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
                     row.style.opacity = '1';
                     row.style.transform = 'translateY(0)';
 
-                    // ANIMASI KETIK TEKS KARAKTER PER KARAKTER (TYPEWRITER EFFECT)
+                    // ANIMASI KETIK TEKS KARAKTER PER KARAKTER HALUS
                     const titleEl = row.querySelector('.room-info h3');
                     const subEl   = row.querySelector('.room-info p');
                     const userEl  = row.querySelector('.tag-user-name');
 
-                    if (titleEl) typeTextEffect(titleEl, 20);
-                    if (subEl)   typeTextEffect(subEl, 14);
-                    if (userEl)  typeTextEffect(userEl, 16);
-                }, idx * 60);
+                    if (titleEl) typeTextEffect(titleEl, 30);
+                    if (subEl)   typeTextEffect(subEl, 22);
+                    if (userEl)  typeTextEffect(userEl, 25);
+                }, idx * 90);
             });
-        }, 220);
+        }, 420);
     }
 
     function typeTextEffect(element, speed) {
