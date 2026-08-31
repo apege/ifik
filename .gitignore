@@ -40,6 +40,9 @@ uploads/persyaratan_ta/*
 !uploads/persyaratan_ta/index.html
 uploads/preview_ta/*
 !uploads/preview_ta/index.html
+uploads/ruangan/*
+!uploads/ruangan/index.html
+
 
 # React UI & Agents
 /components/
