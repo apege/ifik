@@ -1,9 +1,23 @@
+<?php
+$bulan_map = array('01'=>'Januari','02'=>'Februari','03'=>'Maret','04'=>'April','05'=>'Mei','06'=>'Juni','07'=>'Juli','08'=>'Agustus','09'=>'September','10'=>'Oktober','11'=>'November','12'=>'Desember');
+$tgl = isset($berita->tanggal) ? $berita->tanggal : '';
+if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tgl)) {
+    $parts = explode('-', $tgl);
+    $tgl_formatted = (int)$parts[2] . ' ' . ($bulan_map[$parts[1]] ?? '') . ' ' . $parts[0];
+} else {
+    $tgl_formatted = !empty($tgl) ? $tgl : date('d Januari Y');
+}
+
+$kategori = !empty($berita->kategori) ? $berita->kategori : 'Berita Acara';
+$judul = !empty($berita->judul) ? $berita->judul : 'Detail Berita';
+$gambar_url = !empty($berita->gambar) ? base_url($berita->gambar) : base_url('assets/images/background.png');
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Berita - Fakultas Industri Kreatif</title>
+    <title><?= htmlspecialchars($judul) ?> - Fakultas Industri Kreatif</title>
     <!-- Font Inter untuk kesan modern & premium -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -74,7 +88,6 @@
             position: relative;
             width: 100vw;
             height: 65vh;
-            background-image: url('<?= base_url("assets/images/background.png") ?>');
             background-size: cover;
             background-position: center;
             background-attachment: fixed; /* Parallax effect */
@@ -200,27 +213,21 @@
     </nav>
 
     <!-- Gambar Besar Parallax -->
-    <div class="article-hero">
+    <div class="article-hero" style="background-image: url('<?= $gambar_url ?>');">
         <div class="hero-overlay"></div>
     </div>
 
     <!-- Konten Berita -->
     <div class="article-container animate-up">
-        <span class="article-meta">Berita Acara &bull; 12 Agustus 2026</span>
-        <h1 class="article-title">Pameran Karya Mahasiswa FIK 2026 Sukses Digelar Secara Megah</h1>
+        <span class="article-meta"><?= htmlspecialchars($kategori) ?> &bull; <?= htmlspecialchars($tgl_formatted) ?></span>
+        <h1 class="article-title"><?= htmlspecialchars($judul) ?></h1>
         
         <div class="article-content">
-            <p>Fakultas Industri Kreatif kembali membuktikan komitmennya dalam mencetak talenta-talenta muda berbakat melalui ajang tahunan yang paling ditunggu, yakni "Pameran Karya Mahasiswa FIK 2026". Acara yang berlangsung meriah selama tiga hari berturut-turut ini sukses menarik perhatian tidak hanya civitas akademika, tetapi juga para praktisi dan pelaku industri kreatif nasional.</p>
-            
-            <p>Dengan mengusung tema <em>"Future Intersection: Where Art Meets Technology"</em>, pameran kali ini menghadirkan lebih dari 200 karya inovatif. Mulai dari instalasi seni interaktif, prototipe desain produk futuristik, hingga eksplorasi WebGL dan realitas virtual (VR) yang memungkinkan pengunjung masuk ke dalam dunia digital tanpa batas dan berinteraksi langsung dengan karya-karya visual tingkat tinggi.</p>
-            
-            <blockquote>"Karya-karya yang dipamerkan tahun ini benar-benar melampaui ekspektasi kami. Mahasiswa tidak hanya berpikir tentang estetika visual, tetapi juga memprioritaskan fungsionalitas dan interaksi manusia dengan teknologi di masa depan," <br><br><span style="font-size:1rem; color:#64748b; font-style:normal;">— Dekan Fakultas Industri Kreatif</span></blockquote>
-            
-            <img src="<?= base_url('assets/images/ifik_portal_3d_render.jpg') ?>" alt="Suasana Pameran">
-            
-            <p>Selain pameran karya, acara ini juga diramaikan dengan berbagai sesi seminar, <em>workshop</em>, dan <em>talkshow</em> yang menghadirkan narasumber ternama dari berbagai perusahaan teknologi dan studio desain terkemuka di Indonesia. Hal ini sejalan dengan visi IFIK untuk terus menjembatani celah (gap) antara dunia akademis dan kebutuhan industri nyata yang bergerak sangat cepat.</p>
-            
-            <p>Pameran ini diharapkan tidak hanya menjadi etalase pamer karya saja, tetapi juga membuka peluang kolaborasi riil dan karir cemerlang bagi mahasiswa di masa depan. Tercatat, banyak di antara karya yang dipamerkan bahkan langsung mendapatkan tawaran inkubasi, pendanaan awal (seed funding), dan pengembangan lebih lanjut dari para investor teknologi yang hadir di penghujung acara.</p>
+            <?php if (!empty($berita->konten)): ?>
+                <?= $berita->konten ?>
+            <?php else: ?>
+                <p><?= nl2br(htmlspecialchars($berita->excerpt ?? '')) ?></p>
+            <?php endif; ?>
         </div>
     </div>
 
