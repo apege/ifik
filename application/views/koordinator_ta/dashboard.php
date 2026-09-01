@@ -45,6 +45,9 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
 
+    <!-- Timepicker Stylesheet -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/timepicker.css?v=' . time()); ?>">
+
     <!-- Koordinator TA Stylesheet -->
     <link rel="stylesheet" href="<?= base_url('assets/css/koordinator_ta.css?v=' . time()); ?>">
 
@@ -68,6 +71,14 @@
             border: 1px solid #e2e8f0;
             box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
             border-radius: 1rem;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         /* Radial Analog Clock Styles (Tahap Preview 2) */
@@ -405,6 +416,8 @@
             text-decoration: none;
             user-select: none;
             font-family: inherit;
+            border-radius: 9999px;
+            overflow: hidden;
         }
 
         .btn-3d-kinetic .bg {
@@ -433,6 +446,28 @@
             transform: scale(1.02);
         }
 
+        .btn-3d-kinetic.btn-emerald .bg {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+            box-shadow: 0 4px 14px -2px rgba(16, 185, 129, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+        }
+
+        .btn-3d-kinetic.btn-emerald:hover .bg {
+            background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+            box-shadow: 0 6px 20px -2px rgba(16, 185, 129, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transform: scale(1.02);
+        }
+
+        .btn-3d-kinetic.btn-amber .bg {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            box-shadow: 0 4px 14px -2px rgba(245, 158, 11, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+        }
+
+        .btn-3d-kinetic.btn-amber:hover .bg {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #92400e 100%);
+            box-shadow: 0 6px 20px -2px rgba(245, 158, 11, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transform: scale(1.02);
+        }
+
         .btn-3d-kinetic.btn-compact .wrap {
             min-width: 114px;
             height: 32px;
@@ -449,6 +484,34 @@
 
         .btn-3d-kinetic:active .bg {
             transform: scale(0.98);
+        }
+
+        /* CUSTOM FLATPICKR CALENDAR MATCHING AJUKAN BOOKING */
+        .flatpickr-calendar {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 16px 35px -5px rgba(0, 0, 0, 0.15) !important;
+            z-index: 999999 !important;
+            background: #ffffff !important;
+        }
+        .flatpickr-months {
+            padding: 4px 0 !important;
+        }
+        .flatpickr-months .flatpickr-month {
+            color: #0f172a !important;
+            font-weight: 800 !important;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 800 !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+            background: #ea580c !important;
+            border-color: #ea580c !important;
+            color: #ffffff !important;
+        }
+        .flatpickr-day.today {
+            border-color: #ea580c !important;
         }
 
         .btn-3d-kinetic .splash {
@@ -606,17 +669,21 @@
 
     <main class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Section Tab Switcher (Tahap Pendaftaran TA vs Tahap Preview 2) -->
+        <!-- Section Tab Switcher (Tahap Pendaftaran TA vs Preview 2 vs Penjadwalan Sidang) -->
         <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
             <div class="inline-flex p-1.5 bg-slate-200/70 backdrop-blur-md rounded-2xl border border-slate-300/60 shadow-inner">
                 <button type="button" id="tabBtnPendaftaran" onclick="switchDashboardTab('pendaftaran')" class="dashboard-tab-btn active px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-300 flex items-center gap-2 bg-white text-orange-600 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-graduation-cap text-sm"></i>
-                    <span>Pendaftaran TA (Plotting Pembimbing)</span>
+                    <span>1. Pendaftaran TA (Plotting Pembimbing)</span>
                 </button>
                 <button type="button" id="tabBtnPreview2" onclick="switchDashboardTab('preview2')" class="dashboard-tab-btn px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-300 flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/50 cursor-pointer">
                     <i class="fa-solid fa-chalkboard-user text-sm text-indigo-500"></i>
-                    <span>Tahap Preview 2 (Plotting Penguji & Sidang)</span>
-                    <span class="px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-indigo-100 text-indigo-700 ml-1">Baru</span>
+                    <span>2. Tahap Preview 2 (Plotting Penguji)</span>
+                </button>
+                <button type="button" id="tabBtnSidang" onclick="switchDashboardTab('sidang')" class="dashboard-tab-btn px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-300 flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/50 cursor-pointer">
+                    <i class="fa-solid fa-calendar-check text-sm text-amber-500"></i>
+                    <span>3. Penjadwalan Sidang TA & Ruangan</span>
+                    <span class="px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-100 text-amber-800 ml-1">Dinamis</span>
                 </button>
             </div>
         </div>
@@ -891,8 +958,8 @@
         <!-- Table with Rotating Conic-Gradient Border (Exact Import Akun Style) -->
         <div class="table-rotating-border-wrap">
             <span class="table-rotating-border-spin"></span>
-            <div class="table-rotating-border-inner overflow-x-auto">
-                <table class="table-custom-rounded text-left text-xs">
+            <div class="table-rotating-border-inner overflow-x-auto no-scrollbar">
+                <table class="table-custom-rounded text-left text-xs w-full">
                     <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
                         <tr>
                             <th class="w-10 py-4 px-4 pl-6 text-center">
@@ -922,29 +989,32 @@
                 <!-- Pagination buttons rendered via JS -->
             </div>
         </div>
-
-        <!-- FLOATING BATCH ACTION BAR (Slide up from bottom when checked) -->
-        <div id="floatingBatchBar" class="floating-batch-bar w-full max-w-4xl px-4">
+        <!-- FLOATING BATCH ACTION BAR (Tab 1: Pendaftaran TA) -->
+        <div id="floatingBatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
             <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] aspect-square rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-orange-600/30 shrink-0">
                         <span id="selectedCountBadge">0</span>
                     </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih untuk Aksi Massal</h4>
-                        <div id="selectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1">
-                        </div>
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih</h4>
+                        <div id="selectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1"></div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 shrink-0">
-                    <button type="button" onclick="openBatchModal('Approved')" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/30 transition flex items-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-user-check"></i> Setujui & Plot Dosen
+                <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+                    <!-- Button 1: Cek Dokumen Massal (Multi-Detail Review) -->
+                    <button type="button" onclick="event.stopPropagation(); openP1BatchReviewModal();" class="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-orange-600/30 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-layer-group text-sm"></i> 📂 Cek Dokumen Massal (Multi-Detail)
                     </button>
-                    <button type="button" onclick="openBatchModal('Rejected')" class="px-4 py-2.5 bg-rose-600/90 hover:bg-rose-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-ban"></i> Tolak
+
+                    <!-- Button 2: Quick Batch Plotting -->
+                    <button type="button" onclick="event.stopPropagation(); openBatchModal('Approved');" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-bolt text-amber-300"></i> Plot Cepat
                     </button>
-                    <button type="button" onclick="clearAllSelection()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
+
+                    <!-- Button 3: Cancel -->
+                    <button type="button" onclick="event.stopPropagation(); clearAllSelection();" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
                         <i class="fa-solid fa-xmark"></i> Batal
                     </button>
                 </div>
@@ -1228,15 +1298,14 @@
                         <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
                             <tr>
                                 <th class="w-8 py-3.5 px-3 text-center">
-                                    <input type="checkbox" id="selectAllCheckboxP2" onchange="toggleSelectAllP2(this)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer" title="Pilih Semua di Halaman Ini">
+                                <input type="checkbox" id="selectAllCheckboxP2" onchange="toggleSelectAllP2(this)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer" title="Pilih Semua di Halaman Ini">
                                 </th>
                                 <th class="w-24 py-3.5 px-2 font-bold">NIM</th>
                                 <th class="w-36 py-3.5 px-2 font-semibold">Nama Mahasiswa</th>
                                 <th class="py-3.5 px-2">Usulan Judul TA</th>
                                 <th class="w-36 py-3.5 px-2">Dosen Pembimbing</th>
                                 <th class="w-36 py-3.5 px-2">Dosen Penguji</th>
-                                <th class="w-28 py-3.5 px-2 text-center">Jadwal & Ruangan</th>
-                                <th class="w-24 py-3.5 px-2 text-center">Status</th>
+                                <th class="w-28 py-3.5 px-2 text-center">Status</th>
                                 <th class="w-32 py-3.5 px-3 pr-4 text-right">Aksi</th>
                             </tr>
                         </thead>
@@ -1256,26 +1325,24 @@
                     <!-- Pagination buttons rendered via JS -->
                 </div>
             </div>
-
-            <!-- FLOATING BATCH ACTION BAR FOR PREVIEW 2 -->
-            <div id="floatingP2BatchBar" class="floating-batch-bar w-full max-w-4xl px-4">
+            <!-- FLOATING BATCH ACTION BAR (Tab 2: Preview 2) -->
+            <div id="floatingP2BatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
                 <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] aspect-square rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-600/30 shrink-0">
                             <span id="p2SelectedCountBadge">0</span>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih untuk Penetapan Penguji Massal</h4>
-                            <div id="p2SelectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1">
-                            </div>
+                            <div id="p2SelectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1"></div>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button type="button" onclick="openP2BatchModal()" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
-                            <i class="fa-solid fa-users-gear"></i> Plot Penguji & Jadwal Massal
+                        <button type="button" onclick="event.stopPropagation(); openP2BatchModal();" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-users-gear"></i> Plot Penguji Massal
                         </button>
-                        <button type="button" onclick="clearAllP2Selection()" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
+                        <button type="button" onclick="event.stopPropagation(); clearAllP2Selection();" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
                             <i class="fa-solid fa-xmark"></i> Batal
                         </button>
                     </div>
@@ -1284,24 +1351,763 @@
 
         </div> <!-- /#tabContentPreview2 -->
 
+        <!-- ========================================================= -->
+        <!-- TAB 3: PENJADWALAN SIDANG TA & MANAJEMEN RUANGAN DINAMIS -->
+        <!-- ========================================================= -->
+        <div id="tabContentSidang" class="hidden space-y-6">
+
+            <?php
+                $totalSidang = count($list_sidang ?? []);
+                $terjadwalSidang = 0;
+                $belumSetSidang = 0;
+
+                if(!empty($list_sidang)) {
+                    foreach($list_sidang as $rs) {
+                        $stSd = $rs['status_sidang'] ?? 'Belum Dijadwalkan';
+                        if($stSd === 'Terjadwal') $terjadwalSidang++;
+                        else $belumSetSidang++;
+                    }
+                }
+                $totalRuangan = count($ruangan_list ?? []);
+            ?>
+
+            <!-- Stats Overview Cards (Tahap Sidang) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- 1. Total Mahasiswa Sidang (Amber) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Total Mahasiswa Sidang</p>
+                                <h3 id="statSidangTotal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Siap Dijadwalkan Sidang</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Terjadwal Sidang (Emerald) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Sudah Terjadwal</p>
+                                <h3 id="statSidangTerjadwal" class="text-2xl font-black text-emerald-600 mt-1 tracking-tight"><?= $terjadwalSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Waktu & Ruangan Lengkap</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Belum Dijadwalkan (Rose/Amber) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Dijadwalkan</p>
+                                <h3 id="statSidangBelumSet" class="text-2xl font-black text-rose-600 mt-1 tracking-tight"><?= $belumSetSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Penentuan Jadwal</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Ruangan Sidang Aktif Dinamis (Cyan/Teal) -->
+                <div onclick="openModalKelolaRuangan()" class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Ruangan Sidang Aktif</p>
+                                <h3 id="statSidangRuanganCount" class="text-2xl font-black text-cyan-700 mt-1 tracking-tight"><?= $totalRuangan; ?></h3>
+                                <p class="text-xs font-medium text-cyan-600 mt-1 flex items-center gap-1 font-semibold">
+                                    <i class="fa-solid fa-sliders text-[10px]"></i> Kelola Ruangan
+                                </p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-door-open text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <span class="text-[10px] font-bold text-cyan-600 group-hover:underline">Tambah / Hapus →</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Toolbar & Filters (Exact Card Container from Tab 1 & Tab 2) -->
+            <div class="card-custom p-5 mb-8 space-y-4">
+                
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2.5 tracking-tight">
+                            <i class="fa-solid fa-calendar-check text-amber-500 text-lg"></i> Daftar Pendaftaran &amp; Penjadwalan Sidang TA
+                        </h2>
+                        <p class="text-xs text-slate-500 font-normal mt-0.5">Kelola tanggal sidang, rentang waktu, dan alokasi ruangan sidang mahasiswa secara dinamis.</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button type="button" onclick="openModalKelolaRuangan()" class="px-4 py-2.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 font-bold rounded-xl text-xs shadow-2xs transition inline-flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-door-open text-cyan-600"></i>
+                            <span>Kelola Ruangan Sidang</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Row 1: Unified Multi-Search Bar for Sidang -->
+                <div class="relative search-pill-container" id="sidangMultiSearchWrapper">
+                    <div class="unified-search-pill">
+                        <!-- Category Selector Dropdown -->
+                        <div class="relative custom-dropdown-container">
+                            <input type="hidden" id="sidangMainCategorySelect" value="query">
+                            <button type="button" onclick="toggleCustomDropdown('sidang-main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-amber-600 focus:outline-none">
+                                <span id="label-filter-sidang-main-cat" class="truncate max-w-[130px]">Cari Kata Kunci</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-sidang-main-cat"></i>
+                            </button>
+                            <div id="menu-filter-sidang-main-cat" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                                <div onclick="selectSidangMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-amber-50 text-amber-600"><span>🔍 Kata Kunci (Semua)</span></div>
+                                <div onclick="selectSidangMainCategory('nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>🏷️ Nama Mahasiswa</span></div>
+                                <div onclick="selectSidangMainCategory('nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>🆔 NIM Mahasiswa</span></div>
+                                <div onclick="selectSidangMainCategory('judul', '📖 Judul Tugas Akhir', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>📖 Judul Tugas Akhir</span></div>
+                                <div onclick="selectSidangMainCategory('pembimbing', '👔 Dosen Pembimbing', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>👔 Dosen Pembimbing</span></div>
+                                <div onclick="selectSidangMainCategory('penguji', '👨‍🏫 Dosen Penguji', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>👨‍🏫 Dosen Penguji</span></div>
+                                <div onclick="selectSidangMainCategory('ruangan', '🏛️ Ruangan Sidang', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>🏛️ Ruangan Sidang</span></div>
+                                <div onclick="selectSidangMainCategory('status', '⚡ Status Sidang', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>⚡ Status Sidang</span></div>
+                            </div>
+                        </div>
+
+                        <div class="unified-divider"></div>
+
+                        <!-- Input Text Value Container -->
+                        <div id="sidangMainValueContainer" class="flex-1 flex items-center">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
+                            <input type="text" id="sidangMainSearchInput" oninput="handleUnifiedMultiSearchSidang()" placeholder="Cari Nama, NIM, Judul TA, Pembimbing, Penguji, Ruangan..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                        </div>
+
+                        <!-- Main Custom Select Dropdown Container -->
+                        <div id="sidangMainCustomSelectWrap" class="hidden flex-1 relative custom-dropdown-container">
+                            <input type="hidden" id="sidangMainCustomSelectVal" value="">
+                            <button type="button" onclick="toggleCustomDropdown('sidang-main-select', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
+                                <span id="label-filter-sidang-main-select" class="flex items-center gap-1.5 truncate">Semua Status</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-sidang-main-select"></i>
+                            </button>
+                            <div id="menu-filter-sidang-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Standalone Add Filter Button (+ 1/4) -->
+                    <button type="button" id="standaloneAddBtnSidang" onclick="toggleOrAddFilterRowSidang(event)" class="btn-standalone-add hover:border-amber-500 hover:text-amber-600" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span id="filterCountBadgeSidang" class="badge-standalone-count bg-amber-600">1/4</span>
+                    </button>
+
+                    <!-- Extra Filter Rows Card Popover -->
+                    <div id="extraRowsCardSidang" class="extra-rows-card space-y-2.5">
+                        <div id="additionalFilterRowsContainerSidang" class="space-y-2.5">
+                        </div>
+                        
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2 text-xs">
+                            <span class="text-slate-400 text-[11px]">Gunakan kombinasi kriteria untuk mempersempit pencarian jadwal sidang.</span>
+                            <button type="button" onclick="resetSidangMultiSearch()" class="text-rose-600 hover:text-rose-700 font-bold transition-colors cursor-pointer">
+                                Reset All Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Page Size & Records Count -->
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-xs text-slate-500 font-medium">
+                        <span>Kelola jadwal dan ruangan sidang tugas akhir mahasiswa secara terstruktur.</span>
+                    </div>
+
+                    <!-- Page Size & Counter Right -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 px-3 h-9 rounded-xl shadow-2xs">
+                            <span class="font-medium">Tampilkan</span>
+                            <select id="sidangPageSizeSelect" onchange="changeSidangPageSize(this.value)" class="h-6 px-1.5 text-xs font-bold bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="font-medium">data/hal</span>
+                            <span class="text-slate-300">|</span>
+                            <span>Total: <strong class="total-rows-count text-slate-900 font-bold" id="sidangToolbarTotalCount"><?= $totalSidang; ?></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Table with Rotating Conic-Gradient Border (Exact Tab 1 & Tab 2 Style) -->
+            <div class="table-rotating-border-wrap">
+                <span class="table-rotating-border-spin"></span>
+                <div class="table-rotating-border-inner overflow-hidden">
+                    <table class="table-custom-rounded text-left text-xs w-full">
+                        <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
+                            <tr>
+                                <th class="w-8 py-3.5 px-3 text-center">
+                                    <input type="checkbox" id="selectAllCheckboxSidang" onchange="toggleSelectAllSidang(this)" class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 cursor-pointer" title="Pilih Semua di Halaman Ini">
+                                </th>
+                                <th class="w-24 py-3.5 px-2 font-bold">NIM</th>
+                                <th class="w-36 py-3.5 px-2 font-semibold">Nama Mahasiswa</th>
+                                <th class="py-3.5 px-2">Usulan Judul TA</th>
+                                <th class="w-36 py-3.5 px-2">Dosen Pembimbing</th>
+                                <th class="w-36 py-3.5 px-2">Dosen Penguji</th>
+                                <th class="w-32 py-3.5 px-2">Waktu Sidang</th>
+                                <th class="w-28 py-3.5 px-2">Ruangan</th>
+                                <th class="w-28 py-3.5 px-2 text-center">Status</th>
+                                <th class="w-32 py-3.5 px-3 pr-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium bg-white" id="tbodySidang">
+                            <!-- Injected via JS renderSidangTable() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table Bottom Pagination Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
+                <div>
+                    Menampilkan data <strong id="sidangPageStart" class="text-slate-800 font-bold">1</strong> - <strong id="sidangPageEnd" class="text-slate-800 font-bold">10</strong> dari total <strong id="sidangTotalRecords" class="text-slate-800 font-bold"><?= $totalSidang; ?></strong> mahasiswa
+                </div>
+                <div class="pagination-controls-bottom flex items-center gap-1" id="sidangPaginationNav">
+                    <!-- Dynamic pagination buttons -->
+                </div>
+            </div>
+
+            <!-- Floating Action Bar for Sidang Multi-Selection -->
+            <div id="floatingSidangBatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700/60 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+                <div class="flex items-center gap-2">
+                    <span id="floatingSidangCount" class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">0</span>
+                    <span class="text-xs font-bold text-slate-200">Mahasiswa Terpilih</span>
+                </div>
+                <div class="h-4 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openModalBatchSidang()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Jadwalkan Massal (<span id="floatingSidangBatchCountText">0</span>)</span>
+                    </button>
+                    <button type="button" onclick="clearAllSidangSelection()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition cursor-pointer">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+        </div> <!-- /#tabContentSidang -->
+
     </main>
 
-    <!-- PREVIEW 2 PLOTTING MODAL (SINGLE & BATCH) -->
-    <div id="modalPreview2Plotting" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
-        <!-- Backdrop click listener -->
-        <div class="fixed inset-0" onclick="closeP2Modal()"></div>
+    <!-- ========================================================= -->
+    <!-- MODAL 1: MANAJEMEN RUANGAN SIDANG DINAMIS                 -->
+    <!-- ========================================================= -->
+    <div id="modalKelolaRuangan" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalKelolaRuangan()"></div>
 
-        <!-- Modal Dialog Card -->
-        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <!-- Modal Header -->
-            <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50/60 via-white to-white shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-indigo-600/20 shrink-0">
-                        <i class="fa-solid fa-chalkboard-user"></i>
+            <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-cyan-50/80 via-white to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-cyan-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-cyan-600/20 shrink-0">
+                        <i class="fa-solid fa-door-open"></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-slate-900 leading-snug">Plotting Dosen Penguji & Jadwal Sidang Preview 2</h3>
-                        <p class="text-xs text-slate-500">Tetapkan Dosen Penguji 1 & 2 serta tentukan ruangan dan waktu sidang.</p>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug">Manajemen Ruangan Sidang Dinamis</h3>
+                        <p class="text-xs text-slate-500">Tambah ruangan baru atau hapus ruangan yang sudah tidak digunakan untuk sidang.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalKelolaRuangan()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Form Tambah Ruangan Baru -->
+                <div class="p-4 sm:p-5 bg-gradient-to-br from-cyan-50/50 to-slate-50 border border-cyan-200/70 rounded-2xl space-y-3.5">
+                    <h4 class="text-xs font-bold text-cyan-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle text-cyan-600"></i> Tambah Ruangan Sidang Baru
+                    </h4>
+                    
+                    <form id="formTambahRuangan" onsubmit="submitTambahRuangan(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Kode Ruangan <span class="text-rose-500">*</span></label>
+                            <input type="text" name="kode_ruangan" id="inputKodeRuangan" placeholder="Contoh: IK.02.04" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none uppercase shadow-2xs">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Nama Ruangan <span class="text-rose-500">*</span></label>
+                            <input type="text" name="nama_ruangan" id="inputNamaRuangan" placeholder="Contoh: Ruang Sidang 3 FIK" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none shadow-2xs">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Lokasi / Gedung</label>
+                            <input type="text" name="lokasi" id="inputLokasiRuangan" placeholder="Gedung FIK Lantai 2" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none shadow-2xs">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" id="btnSubmitRuangan" class="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-md shadow-cyan-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-plus text-xs"></i> Simpan Ruangan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Table Daftar Ruangan Aktif -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Ruangan Sidang Terdaftar:</label>
+                        <span id="badgeTotalRuanganModal" class="text-[11px] font-bold text-cyan-700 bg-cyan-50 border border-cyan-200 px-2.5 py-0.5 rounded-full">0 Ruangan</span>
+                    </div>
+
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-2.5 px-3.5">Kode</th>
+                                    <th class="py-2.5 px-3.5">Nama Ruangan</th>
+                                    <th class="py-2.5 px-3.5">Lokasi</th>
+                                    <th class="py-2.5 px-3.5 text-center">Status</th>
+                                    <th class="py-2.5 px-3.5 text-center w-20">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRuanganList" class="divide-y divide-slate-100">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 sm:p-5 border-t border-slate-100 flex items-center justify-end bg-slate-50/50">
+                <button type="button" onclick="closeModalKelolaRuangan()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 2: SET JADWAL SIDANG SINGLE MAHASISWA               -->
+    <!-- ========================================================= -->
+    <div id="modalSingleSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalSingleSidang()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/80 via-white to-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-amber-500/20 shrink-0">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Penjadwalan Sidang Tugas Akhir</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5" id="singleSidangStudentInfo">Atur tanggal, ruangan, dan jam pelaksanaan sidang.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalSingleSidang()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="formSingleSidang" onsubmit="submitSingleSidang(event)" class="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <input type="hidden" name="nim" id="singleSidangNim">
+
+                <!-- 1. TANGGAL SIDANG -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Tanggal Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="tgl_sidang" id="singleSidangTgl" required placeholder="Pilih Tanggal Sidang..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer transition">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none">
+                            <i class="fa-solid fa-calendar-day text-base"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. RUANGAN SIDANG (SEARCH AUTOCOMPLETE & DYNAMIC INPUT) -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                            Ruangan Sidang <span class="text-rose-500">*</span>
+                        </label>
+                        <button type="button" onclick="openModalKelolaRuangan()" class="text-xs text-cyan-600 hover:text-cyan-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle text-[11px]"></i> Kelola Ruangan
+                        </button>
+                    </div>
+                    <div class="relative custom-combobox-wrap" id="singleRuanganCombobox">
+                        <input type="text" 
+                               id="singleSidangRuanganInput" 
+                               placeholder="Cari ruangan atau ketik nama ruangan baru..." 
+                               autocomplete="off"
+                               class="w-full pl-11 pr-11 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs transition cursor-pointer" 
+                               oninput="filterRuanganDropdown('single', this.value)" 
+                               onfocus="openRuanganDropdown('single')"
+                               onclick="openRuanganDropdown('single')">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-600 pointer-events-none">
+                            <i class="fa-solid fa-door-open text-base"></i>
+                        </div>
+                        <button type="button" onclick="toggleRuanganDropdown('single')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                            <i class="fa-solid fa-chevron-down text-sm transition duration-200" id="singleRuanganArrow"></i>
+                        </button>
+                        <input type="hidden" name="ruangan_sidang" id="singleSidangRuangan" required>
+
+                        <!-- Dropdown Menu List -->
+                        <div id="singleRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
+                            <!-- Injected dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. WAKTU SIDANG (EXACT INTERACTIVE RADIAL CLOCK PICKER) -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Waktu Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Mulai</label>
+                            <input type="text" name="jam_mulai_sidang" id="singleSidangJamMulai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('single', 'mulai')" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Selesai</label>
+                            <input type="text" name="jam_selesai_sidang" id="singleSidangJamSelesai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('single', 'selesai')">
+                        </div>
+                    </div>
+
+                    <!-- Inline Radial Clock Picker Panel (Single) -->
+                    <div id="singleInlineClockPanel" style="display:none; margin-top: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 22px; box-shadow: 0 12px 30px rgba(0,0,0,0.04);">
+                        <div style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
+                            <!-- Kiri: Display Waktu & Quick Drag Slots -->
+                            <div style="flex: 1.15; min-width: 280px; background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div id="singleInlineTpLabel" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">PILIH JAM MULAI</div>
+                                <div style="font-size: 3rem; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em;">
+                                    <span id="singleTpDisplayHour" onclick="setSidangClockMode('single', 'hour')" style="cursor:pointer;">14</span><span style="color:#cbd5e1; margin:0 3px;">:</span><span id="singleTpDisplayMinute" onclick="setSidangClockMode('single', 'minute')" style="cursor:pointer; color:#94a3b8;">00</span>
+                                </div>
+                                <div style="display:inline-block; background:#ede9fe; color:#7c3aed; font-size:0.75rem; font-weight:700; border-radius:20px; padding:3px 12px; margin-bottom:16px;">24 Jam</div>
+
+                                <div style="font-size: 0.8rem; color: #7c3aed; font-weight: 700; margin-bottom: 12px; width:100%; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>⚡ Slot Waktu Cepat</span>
+                                    <span style="font-size:0.7rem; color:#94a3b8; font-weight:500;">(drag untuk rentang)</span>
+                                </div>
+                                <div id="singleTpTimeSlots" style="display:grid; grid-template-columns:1fr 1fr; gap:7px; user-select:none; width:100%;">
+                                    <div class="tp-slot" data-start="08:00" data-end="09:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">08:00 – 09:00</div>
+                                    <div class="tp-slot" data-start="09:00" data-end="10:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">09:00 – 10:00</div>
+                                    <div class="tp-slot" data-start="10:00" data-end="11:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">10:00 – 11:00</div>
+                                    <div class="tp-slot" data-start="11:00" data-end="12:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">11:00 – 12:00</div>
+                                    <div class="tp-slot" data-start="12:00" data-end="13:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">12:00 – 13:00</div>
+                                    <div class="tp-slot" data-start="13:00" data-end="14:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">13:00 – 14:00</div>
+                                    <div class="tp-slot" data-start="14:00" data-end="15:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">14:00 – 15:00</div>
+                                    <div class="tp-slot" data-start="15:00" data-end="16:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">15:00 – 16:00</div>
+                                    <div class="tp-slot" data-start="16:00" data-end="17:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">16:00 – 17:00</div>
+                                    <div class="tp-slot" data-start="17:00" data-end="18:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">17:00 – 18:00</div>
+                                </div>
+                            </div>
+
+                            <!-- Kanan: Radial Analog Clock -->
+                            <div style="flex: 1.25; min-width: 280px; display:flex; flex-direction:column; align-items:center; background:#ffffff; border-radius:16px; padding:22px; border:1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div class="tp-tab-wrap" style="display:flex; width:100%; border-radius:12px; background:#f1f5f9; padding:4px; margin-bottom:16px;">
+                                    <div id="singleTpTabHour" class="active" onclick="setSidangClockMode('single', 'hour')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">🕐 Jam</div>
+                                    <div id="singleTpTabMinute" onclick="setSidangClockMode('single', 'minute')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">⏱ Menit</div>
+                                </div>
+                                <div id="singleTpClockContainer" style="position:relative; width:240px; height:240px; border-radius:50%; background:#f8fafc; border:2px solid #e2e8f0; box-shadow:inset 0 2px 6px rgba(0,0,0,0.03); flex-shrink:0; margin:0 auto;">
+                                    <div id="singleTpClockHand" style="position:absolute; bottom:50%; left:50%; width:2px; height:95px; background:#7c3aed; border-radius:2px; transform-origin:bottom center; transform:translateX(-50%) rotate(0deg); transition:transform 0.15s ease; z-index:5;"></div>
+                                    <div style="position:absolute; top:50%; left:50%; width:10px; height:10px; background:#7c3aed; border-radius:50%; transform:translate(-50%,-50%); z-index:10;"></div>
+                                    <div id="singleTpClockNumbers"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid #e2e8f0;">
+                            <button type="button" onclick="closeSidangInlinePicker('single')" style="padding:10px 22px; border-radius:12px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:0.85rem; font-weight:700; cursor:pointer;">Batal</button>
+                            <button type="button" onclick="applySidangInlinePicker('single')" style="padding:10px 26px; border-radius:12px; border:none; background:#7c3aed; color:#fff; font-size:0.85rem; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.3);">✔ Terapkan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModalSingleSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitSingleSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-save text-xs sm:text-sm"></i> Simpan Jadwal Sidang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 3: BATCH PENJADWALAN SIDANG MASSAL                  -->
+    <!-- ========================================================= -->
+    <div id="modalBatchSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalBatchSidang()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/80 via-white to-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-amber-500/20 shrink-0">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Jadwalkan Sidang Massal</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Terapkan tanggal, ruangan, dan jam sidang ke seluruh mahasiswa terpilih.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalBatchSidang()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="formBatchSidang" onsubmit="submitBatchSidang(event)" class="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Selected Students List -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                            Mahasiswa Terpilih
+                        </label>
+                        <span id="badgeBatchSidangCount" class="text-xs font-extrabold text-amber-800 bg-amber-100/80 border border-amber-300 px-3 py-1 rounded-full">0 Mahasiswa</span>
+                    </div>
+                    <div id="batchSidangSelectedList" class="max-h-36 overflow-y-auto space-y-1.5 border border-slate-200 p-3 rounded-2xl bg-slate-50/60 text-xs custom-scrollbar">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- 1. TANGGAL SIDANG -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Tanggal Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="tgl_sidang" id="batchSidangTgl" required placeholder="Pilih Tanggal Sidang..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer transition">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none">
+                            <i class="fa-solid fa-calendar-day text-base"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. RUANGAN SIDANG (SEARCH AUTOCOMPLETE & DYNAMIC INPUT) -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                            Ruangan Sidang <span class="text-rose-500">*</span>
+                        </label>
+                        <button type="button" onclick="openModalKelolaRuangan()" class="text-xs text-cyan-600 hover:text-cyan-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle text-[11px]"></i> Kelola Ruangan
+                        </button>
+                    </div>
+                    <div class="relative custom-combobox-wrap" id="batchRuanganCombobox">
+                        <input type="text" 
+                               id="batchSidangRuanganInput" 
+                               placeholder="Cari ruangan atau ketik nama ruangan baru..." 
+                               autocomplete="off"
+                               class="w-full pl-11 pr-11 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs transition cursor-pointer" 
+                               oninput="filterRuanganDropdown('batch', this.value)" 
+                               onfocus="openRuanganDropdown('batch')"
+                               onclick="openRuanganDropdown('batch')">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-600 pointer-events-none">
+                            <i class="fa-solid fa-door-open text-base"></i>
+                        </div>
+                        <button type="button" onclick="toggleRuanganDropdown('batch')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                            <i class="fa-solid fa-chevron-down text-sm transition duration-200" id="batchRuanganArrow"></i>
+                        </button>
+                        <input type="hidden" name="ruangan_sidang" id="batchSidangRuangan" required>
+
+                        <!-- Dropdown Menu List -->
+                        <div id="batchRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
+                            <!-- Injected dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. WAKTU SIDANG (EXACT INTERACTIVE RADIAL CLOCK PICKER BATCH) -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Waktu Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Mulai</label>
+                            <input type="text" name="jam_mulai_sidang" id="batchSidangJamMulai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('batch', 'mulai')" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Selesai</label>
+                            <input type="text" name="jam_selesai_sidang" id="batchSidangJamSelesai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('batch', 'selesai')">
+                        </div>
+                    </div>
+
+                    <!-- Inline Radial Clock Picker Panel (Batch) -->
+                    <div id="batchInlineClockPanel" style="display:none; margin-top: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 22px; box-shadow: 0 12px 30px rgba(0,0,0,0.04);">
+                        <div style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
+                            <!-- Kiri: Display Waktu & Quick Drag Slots -->
+                            <div style="flex: 1.15; min-width: 280px; background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div id="batchInlineTpLabel" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">PILIH JAM MULAI</div>
+                                <div style="font-size: 3rem; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em;">
+                                    <span id="batchTpDisplayHour" onclick="setSidangClockMode('batch', 'hour')" style="cursor:pointer;">14</span><span style="color:#cbd5e1; margin:0 3px;">:</span><span id="batchTpDisplayMinute" onclick="setSidangClockMode('batch', 'minute')" style="cursor:pointer; color:#94a3b8;">00</span>
+                                </div>
+                                <div style="display:inline-block; background:#ede9fe; color:#7c3aed; font-size:0.75rem; font-weight:700; border-radius:20px; padding:3px 12px; margin-bottom:16px;">24 Jam</div>
+
+                                <div style="font-size: 0.8rem; color: #7c3aed; font-weight: 700; margin-bottom: 12px; width:100%; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>⚡ Slot Waktu Cepat</span>
+                                    <span style="font-size:0.7rem; color:#94a3b8; font-weight:500;">(drag untuk rentang)</span>
+                                </div>
+                                <div id="batchTpTimeSlots" style="display:grid; grid-template-columns:1fr 1fr; gap:7px; user-select:none; width:100%;">
+                                    <div class="tp-slot" data-start="08:00" data-end="09:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">08:00 – 09:00</div>
+                                    <div class="tp-slot" data-start="09:00" data-end="10:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">09:00 – 10:00</div>
+                                    <div class="tp-slot" data-start="10:00" data-end="11:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">10:00 – 11:00</div>
+                                    <div class="tp-slot" data-start="11:00" data-end="12:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">11:00 – 12:00</div>
+                                    <div class="tp-slot" data-start="12:00" data-end="13:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">12:00 – 13:00</div>
+                                    <div class="tp-slot" data-start="13:00" data-end="14:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">13:00 – 14:00</div>
+                                    <div class="tp-slot" data-start="14:00" data-end="15:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">14:00 – 15:00</div>
+                                    <div class="tp-slot" data-start="15:00" data-end="16:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">15:00 – 16:00</div>
+                                    <div class="tp-slot" data-start="16:00" data-end="17:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">16:00 – 17:00</div>
+                                    <div class="tp-slot" data-start="17:00" data-end="18:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">17:00 – 18:00</div>
+                                </div>
+                            </div>
+
+                            <!-- Kanan: Radial Analog Clock -->
+                            <div style="flex: 1.25; min-width: 280px; display:flex; flex-direction:column; align-items:center; background:#ffffff; border-radius:16px; padding:22px; border:1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div class="tp-tab-wrap" style="display:flex; width:100%; border-radius:12px; background:#f1f5f9; padding:4px; margin-bottom:16px;">
+                                    <div id="batchTpTabHour" class="active" onclick="setSidangClockMode('batch', 'hour')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">🕐 Jam</div>
+                                    <div id="batchTpTabMinute" onclick="setSidangClockMode('batch', 'minute')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">⏱ Menit</div>
+                                </div>
+                                <div id="batchTpClockContainer" style="position:relative; width:240px; height:240px; border-radius:50%; background:#f8fafc; border:2px solid #e2e8f0; box-shadow:inset 0 2px 6px rgba(0,0,0,0.03); flex-shrink:0; margin:0 auto;">
+                                    <div id="batchTpClockHand" style="position:absolute; bottom:50%; left:50%; width:2px; height:95px; background:#7c3aed; border-radius:2px; transform-origin:bottom center; transform:translateX(-50%) rotate(0deg); transition:transform 0.15s ease; z-index:5;"></div>
+                                    <div style="position:absolute; top:50%; left:50%; width:10px; height:10px; background:#7c3aed; border-radius:50%; transform:translate(-50%,-50%); z-index:10;"></div>
+                                    <div id="batchTpClockNumbers"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid #e2e8f0;">
+                            <button type="button" onclick="closeSidangInlinePicker('batch')" style="padding:10px 22px; border-radius:12px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:0.85rem; font-weight:700; cursor:pointer;">Batal</button>
+                            <button type="button" onclick="applySidangInlinePicker('batch')" style="padding:10px 26px; border-radius:12px; border:none; background:#7c3aed; color:#fff; font-size:0.85rem; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.3);">✔ Terapkan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModalBatchSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitBatchSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-save text-xs sm:text-sm"></i> Terapkan Jadwal Massal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PREVIEW 2 PLOTTING MODAL (PER-MAHASISWA PLOTTING SAMA SEPERTI TA) -->
+    <div id="modalPreview2Plotting" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeP2Modal()">
+
+        <!-- Modal Dialog Card -->
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Modal Header (Fixed at top) -->
+            <div class="p-4 sm:p-5 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50/70 via-white to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-indigo-600/25 shrink-0">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-snug">Aksi Plotting Dosen Penguji per Mahasiswa</h3>
+                        <p class="text-xs text-slate-500">Tentukan Dosen Penguji 1 &amp; 2 untuk tiap mahasiswa terpilih (dapat berbeda-beda).</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeP2Modal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
@@ -1312,226 +2118,44 @@
             <!-- Modal Form -->
             <form id="formP2Plotting" onsubmit="submitP2Plotting(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 <!-- Scrollable Body Content -->
-                <div class="p-5 sm:p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
-                    
-                    <!-- Selected Student(s) Summary -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Mahasiswa Terpilih:</label>
-                            <span id="p2ModalSelectedCountBadge" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">1 Mahasiswa</span>
-                        </div>
-                        <div id="p2ModalSelectedList" class="max-h-32 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
-                        </div>
-                    </div>
-
-                    <!-- Dosen Penguji Section -->
-                    <div class="space-y-4 pt-2 border-t border-slate-100">
-                        <h4 class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-user-tie text-indigo-600"></i> Penetapan Dosen Penguji
-                        </h4>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Dosen Penguji 1 -->
-                            <div class="modal-combobox-wrapper relative" data-p2-slot="1">
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5">Dosen Penguji 1 <span class="text-rose-500">*</span></label>
-                                <input type="hidden" id="p2ModalInputPenguji1" name="penguji_1" value="">
-
-                                <!-- Chip Preview -->
-                                <div id="p2ModalChipPenguji1" class="hidden p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</div>
-                                        <span id="p2ModalChipPenguji1Text" class="text-xs font-bold text-indigo-950 truncate"></span>
-                                    </div>
-                                    <button type="button" onclick="changeP2ModalDosen(1)" class="text-xs text-indigo-600 font-bold hover:underline cursor-pointer ml-2 shrink-0">Ganti</button>
-                                </div>
-
-                                <!-- Search Input -->
-                                <div id="p2ModalSearchContainer1" class="relative">
-                                    <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
-                                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
-                                        <input type="text" id="p2ModalSearchPenguji1" onfocus="openP2ModalDosenList(1)" onclick="openP2ModalDosenList(1)" oninput="filterP2ModalDosen(1)" placeholder="Cari nama / NIP penguji 1..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800" autocomplete="off">
-                                        <button type="button" id="p2ModalClear1" onclick="clearP2ModalSearch(1)" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
-                                    </div>
-                                    <div id="p2ModalDropdownList1" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-52 overflow-y-auto custom-scrollbar p-1 divide-y divide-slate-100"></div>
-                                </div>
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/60">
+                    <!-- Top Bar: Summary & Action -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daftar Mahasiswa &amp; Plotting Penguji:</label>
+                                <span id="p2ModalSelectedCountBadge" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Mahasiswa</span>
                             </div>
-
-                            <!-- Dosen Penguji 2 -->
-                            <div class="modal-combobox-wrapper relative" data-p2-slot="2">
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5">Dosen Penguji 2 <span class="text-rose-500">*</span></label>
-                                <input type="hidden" id="p2ModalInputPenguji2" name="penguji_2" value="">
-
-                                <!-- Chip Preview -->
-                                <div id="p2ModalChipPenguji2" class="hidden p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</div>
-                                        <span id="p2ModalChipPenguji2Text" class="text-xs font-bold text-indigo-950 truncate"></span>
-                                    </div>
-                                    <button type="button" onclick="changeP2ModalDosen(2)" class="text-xs text-indigo-600 font-bold hover:underline cursor-pointer ml-2 shrink-0">Ganti</button>
-                                </div>
-
-                                <!-- Search Input -->
-                                <div id="p2ModalSearchContainer2" class="relative">
-                                    <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
-                                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
-                                        <input type="text" id="p2ModalSearchPenguji2" onfocus="openP2ModalDosenList(2)" onclick="openP2ModalDosenList(2)" oninput="filterP2ModalDosen(2)" placeholder="Cari nama / NIP penguji 2..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800" autocomplete="off">
-                                        <button type="button" id="p2ModalClear2" onclick="clearP2ModalSearch(2)" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
-                                    </div>
-                                    <div id="p2ModalDropdownList2" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-52 overflow-y-auto custom-scrollbar p-1 divide-y divide-slate-100"></div>
-                                </div>
-                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Pilih Dosen Penguji 1 &amp; 2 secara mandiri pada setiap kartu mahasiswa di bawah.</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="applyQuickFirstP2ToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen penguji dari Mahasiswa #1 ke semua mahasiswa lainnya">
+                                <i class="fa-solid fa-copy"></i> Salin Mahasiswa #1 ke Semua
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Jadwal & Ruangan Section -->
-                    <div class="space-y-4 pt-3 border-t border-slate-100">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                                <i class="fa-solid fa-calendar-check text-indigo-600"></i> Penjadwalan & Ruangan Sidang
-                            </h4>
-                            <span class="text-[11px] font-semibold text-slate-400">Urutan: Ruangan &rarr; Tanggal &rarr; Waktu</span>
-                        </div>
-
-                        <!-- 1. Pilih Ruangan Sidang (Search Autocomplete Combobox) -->
-                        <div class="modal-combobox-wrapper relative" data-p2-slot="ruangan">
-                            <label class="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1.5">
-                                <i class="fa-solid fa-door-open text-indigo-600"></i> Pilih Ruangan Sidang:
-                            </label>
-                            <input type="hidden" id="p2ModalRuangan" name="ruangan_sidang" value="">
-
-                            <!-- Chip Preview -->
-                            <div id="p2ModalChipRuangan" class="hidden p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                                        <i class="fa-solid fa-building-columns"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p id="p2ModalChipRuanganName" class="text-xs font-bold text-indigo-950 truncate"></p>
-                                        <p id="p2ModalChipRuanganDetails" class="text-[10px] text-indigo-700 truncate"></p>
-                                    </div>
-                                </div>
-                                <button type="button" onclick="changeP2ModalRuangan()" class="text-xs text-indigo-600 font-bold hover:underline cursor-pointer ml-2 shrink-0">Ganti</button>
-                            </div>
-
-                            <!-- Search Input -->
-                            <div id="p2ModalSearchRuanganContainer" class="relative">
-                                <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
-                                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
-                                    <input type="text" id="p2ModalSearchRuangan" onfocus="openP2ModalRuanganList()" onclick="openP2ModalRuanganList()" oninput="filterP2ModalRuangan(this.value)" placeholder="Cari ruangan sidang (contoh: Aula Utama, Lab 3D, Ruang Sidang 1)..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800" autocomplete="off">
-                                    <button type="button" id="p2ModalClearRuangan" onclick="clearP2ModalRuanganSearch()" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
-                                </div>
-                                <div id="p2ModalDropdownRuangan" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-52 overflow-y-auto custom-scrollbar p-1 divide-y divide-slate-100"></div>
-                            </div>
-                        </div>
-
-                        <!-- 2. Tanggal & Jam Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <!-- Tanggal Sidang (Flatpickr) -->
-                            <div class="sm:col-span-1">
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-calendar-day text-indigo-600"></i> Tanggal Sidang:
-                                </label>
-                                <div class="relative">
-                                    <i class="fa-solid fa-calendar-days absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                                    <input type="text" id="p2ModalTanggal" name="tgl_sidang" placeholder="Pilih Tanggal..." class="w-full text-xs pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-bold text-slate-800" readonly>
-                                </div>
-                            </div>
-
-                            <!-- Jam Mulai -->
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-hourglass-start text-indigo-600"></i> Jam Mulai:
-                                </label>
-                                <div class="relative">
-                                    <i class="fa-solid fa-clock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                                    <input type="text" id="p2ModalJamMulai" name="jam_mulai_sidang" placeholder="-- : --" class="w-full text-xs pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-bold text-slate-800" readonly onclick="openP2InlineTimePicker('mulai')">
-                                </div>
-                            </div>
-
-                            <!-- Jam Selesai -->
-                            <div>
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-hourglass-end text-indigo-600"></i> Jam Selesai:
-                                </label>
-                                <div class="relative">
-                                    <i class="fa-solid fa-clock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
-                                    <input type="text" id="p2ModalJamSelesai" name="jam_selesai_sidang" placeholder="-- : --" class="w-full text-xs pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer font-bold text-slate-800" readonly onclick="openP2InlineTimePicker('selesai')">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Interactive Radial Analog Clock & Quick Slot Picker Panel -->
-                        <div id="p2InlineClockPanel" class="hidden mt-2 bg-gradient-to-br from-slate-50 via-indigo-50/20 to-slate-50 border border-indigo-200/80 rounded-2xl p-4 shadow-lg animate-in fade-in duration-200">
-                            <div class="flex flex-col sm:flex-row gap-4 items-center sm:items-start justify-between">
-                                
-                                <!-- Left: Time Display & Preset Sidang Slots -->
-                                <div class="w-full sm:w-1/2 bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-2xs flex flex-col items-center">
-                                    <div id="p2TpTargetLabel" class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
-                                        <i class="fa-solid fa-stopwatch"></i> PENGATURAN JAM MULAI
-                                    </div>
-                                    <div class="text-3xl font-black text-slate-900 tracking-tight my-0.5 flex items-center">
-                                        <span id="p2TpDisplayHour" onclick="setP2ClockMode('hour')" class="cursor-pointer hover:text-indigo-600 px-1 rounded-lg hover:bg-indigo-50 transition">08</span>
-                                        <span class="text-slate-300 mx-0.5">:</span>
-                                        <span id="p2TpDisplayMinute" onclick="setP2ClockMode('minute')" class="cursor-pointer hover:text-indigo-600 px-1 rounded-lg hover:bg-indigo-50 transition text-slate-400">00</span>
-                                    </div>
-                                    <span class="text-[9px] font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full mb-2.5">Format 24 Jam</span>
-
-                                    <!-- Quick Sidang 1-Hour Time Slots (Draggable Range) -->
-                                    <div class="w-full">
-                                        <div class="flex items-center justify-between mb-1.5">
-                                            <p class="text-[10px] font-bold text-slate-700 flex items-center gap-1">
-                                                <i class="fa-solid fa-bolt text-amber-500"></i> Slot Waktu Sidang (1 Jam):
-                                            </p>
-                                            <span class="text-[9px] text-slate-400 font-medium">(Bisa drag untuk rentang)</span>
-                                        </div>
-                                        <div id="p2TimeSlots" class="grid grid-cols-2 gap-1.5 w-full text-[11px] select-none">
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="08:00" data-end="09:00">08:00 – 09:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="09:00" data-end="10:00">09:00 – 10:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="10:00" data-end="11:00">10:00 – 11:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="11:00" data-end="12:00">11:00 – 12:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="13:00" data-end="14:00">13:00 – 14:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="14:00" data-end="15:00">14:00 – 15:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="15:00" data-end="16:00">15:00 – 16:00</div>
-                                            <div class="p2-tp-slot p-2 border border-slate-200 rounded-lg text-center font-bold text-slate-700 bg-white hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition shadow-2xs select-none" data-start="16:00" data-end="17:00">16:00 – 17:00</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Right: Radial Analog Clock Dial (240px x 240px) -->
-                                <div class="w-full sm:w-1/2 bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-2xs flex flex-col items-center">
-                                    <div class="flex items-center gap-1.5 p-0.5 bg-slate-100 rounded-lg mb-3 w-full max-w-[200px] text-xs font-bold text-center">
-                                        <div id="p2TpTabHour" onclick="setP2ClockMode('hour')" class="flex-1 py-1 px-2 rounded-md bg-indigo-600 text-white cursor-pointer shadow-2xs transition">🕐 Jam</div>
-                                        <div id="p2TpTabMinute" onclick="setP2ClockMode('minute')" class="flex-1 py-1 px-2 rounded-md text-slate-600 hover:text-slate-900 cursor-pointer transition">⏱ Menit</div>
-                                    </div>
-                                    
-                                    <div id="p2TpClockContainer" class="relative w-[240px] h-[240px] rounded-full bg-slate-50 border-2 border-slate-200 shadow-inner flex-shrink-0 cursor-pointer select-none">
-                                        <div id="p2TpClockHand"></div>
-                                        <div class="absolute top-1/2 left-1/2 w-2.5 h-2.5 bg-indigo-600 rounded-full -translate-x-1/2 -translate-y-1/2 z-[10] pointer-events-none"></div>
-                                        <div id="p2TpClockNumbers"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Clock Action Footer -->
-                            <div class="flex items-center justify-end gap-2 pt-2.5 mt-2.5 border-t border-slate-200/80">
-                                <button type="button" onclick="closeP2InlineTimePicker()" class="px-3 py-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition cursor-pointer">Tutup</button>
-                                <button type="button" onclick="applyP2InlineTimePicker()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30 transition cursor-pointer flex items-center gap-1.5">
-                                    <i class="fa-solid fa-check"></i> Terapkan Waktu
-                                </button>
-                            </div>
-                        </div>
+                    <!-- Per-Student Accordion / Card List Container -->
+                    <div id="p2ModalSelectedList" class="space-y-3.5">
+                        <!-- Rendered dynamically via JS -->
                     </div>
 
+                    <!-- Catatan Global Koordinator TA -->
+                    <div class="pt-3 border-t border-slate-200">
+                        <label class="text-xs font-bold text-slate-700 block mb-1">Catatan Koordinator TA (Opsional untuk Seluruh Mahasiswa):</label>
+                        <textarea id="p2ModalGlobalCatatanKoor" name="catatan_koor" rows="2" placeholder="Masukkan catatan atau arahan umum (opsional)..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none shadow-2xs"></textarea>
+                    </div>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-4 sm:px-6 border-t border-slate-100 bg-slate-50/90 flex items-center justify-end gap-3 shrink-0">
+                <div class="p-4 sm:px-6 border-t border-slate-200 bg-white flex items-center justify-end gap-3 shrink-0">
                     <button type="button" onclick="closeP2Modal()" class="px-5 py-2.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">
                         Batal
                     </button>
-                    <button type="submit" id="modalP2BtnSubmit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-600/20 transition cursor-pointer flex items-center gap-2">
+                    <button type="submit" id="modalP2BtnSubmit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs rounded-xl shadow-md shadow-indigo-600/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
                         <i class="fa-solid fa-floppy-disk"></i>
-                        <span id="modalP2BtnSubmitText">Simpan Penetapan Penguji & Jadwal</span>
+                        <span id="modalP2BtnSubmitText">Simpan Penetapan Dosen Penguji</span>
                     </button>
                 </div>
             </form>
@@ -1539,21 +2163,19 @@
     </div>
 
     <!-- BATCH APPROVAL & DOSEN PLOTTING MODAL -->
-    <div id="batchApprovalModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
-        <!-- Backdrop click listener -->
-        <div class="fixed inset-0" onclick="closeBatchModal()"></div>
+    <div id="batchApprovalModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeBatchModal()">
 
         <!-- Modal Dialog Card -->
-        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden">
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <!-- Modal Header (Fixed at top) -->
-            <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-orange-50/60 via-white to-white shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-orange-600/20 shrink-0">
+            <div class="p-4 sm:p-5 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-orange-50/70 via-white to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-orange-600/25 shrink-0">
                         <i class="fa-solid fa-users-gear"></i>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-slate-900 leading-snug">Aksi Approval & Plotting Dosen Massal</h3>
-                        <p class="text-xs text-slate-500">Terapkan keputusan persetujuan dan dosen pembimbing ke beberapa mahasiswa sekaligus.</p>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-snug">Aksi Approval &amp; Plotting Dosen per Mahasiswa</h3>
+                        <p class="text-xs text-slate-500">Tentukan Dosen Pembimbing 1 &amp; 2 untuk tiap mahasiswa terpilih (dapat berbeda-beda).</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeBatchModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
@@ -1564,117 +2186,155 @@
             <!-- Modal Form (Flex Column with scrollable middle area and fixed footer) -->
             <form id="formBatchApproval" onsubmit="submitBatchApproval(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 <!-- Scrollable Body Content -->
-                <div class="p-5 sm:p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/60">
                     <input type="hidden" id="batchStatusInput" name="status" value="Approved">
 
-                    <!-- 1. Selected Students Summary -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Mahasiswa yang Dipilih:</label>
-                            <span id="modalSelectedCountBadge" class="text-[11px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">0 Mahasiswa</span>
-                        </div>
-                        <div id="modalSelectedList" class="max-h-32 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
-                        </div>
-                    </div>
-
-                    <!-- 2. Decision Selector (Approve / Reject) -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">Keputusan Koordinator TA:</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div id="modalOptApprove" onclick="setBatchDecisionStatus('Approved')" class="flex items-center gap-2.5 p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-bold text-xs cursor-pointer shadow-xs">
-                                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                                <div>
-                                    <p class="leading-none">Setujui (Approve)</p>
-                                    <p class="text-[10px] text-emerald-700 font-normal mt-0.5">Lanjut ke Ketua KK + Tetapkan Pembimbing</p>
-                                </div>
+                    <!-- Top Bar: Summary & Action -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daftar Mahasiswa &amp; Plotting Pembimbing:</label>
+                                <span id="modalSelectedCountBadge" class="text-[11px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">0 Mahasiswa</span>
                             </div>
-                            <div id="modalOptReject" onclick="setBatchDecisionStatus('Rejected')" class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium text-xs cursor-pointer hover:bg-slate-50 shadow-xs">
-                                <i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>
-                                <div>
-                                    <p class="leading-none font-bold">Tolak (Minta Revisi)</p>
-                                    <p class="text-[10px] text-slate-500 font-normal mt-0.5">Kirim catatan revisi ke mahasiswa</p>
-                                </div>
-                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Pilih Dosen Pembimbing 1 &amp; 2 secara mandiri pada setiap kartu mahasiswa di bawah.</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="applyQuickFirstToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing dari Mahasiswa #1 ke semua mahasiswa lainnya">
+                                <i class="fa-solid fa-copy"></i> Salin Mahasiswa #1 ke Semua
+                            </button>
                         </div>
                     </div>
 
-                    <!-- 3. Section Dosen Pembimbing (Shown when Approve) -->
-                    <div id="modalSectionDosen" class="space-y-4 pt-2 border-t border-slate-100">
-                        <h4 class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-chalkboard-user text-brand-600"></i> Penetapan Dosen Pembimbing Massal
-                        </h4>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Dosen Pembimbing 1 -->
-                            <div class="modal-combobox-wrapper relative" data-slot="1">
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5">Dosen Pembimbing 1 <span class="text-rose-500">*</span></label>
-                                <input type="hidden" id="modalInputPembimbing1" name="pembimbing_1" value="">
-
-                                <!-- Chip Preview -->
-                                <div id="modalChipP1" class="hidden p-2.5 bg-orange-50 border border-orange-300 rounded-xl flex items-center justify-between shadow-2xs">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div class="w-6 h-6 rounded-lg bg-orange-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</div>
-                                        <span id="modalChipNameP1" class="text-xs font-bold text-orange-950 truncate"></span>
-                                    </div>
-                                    <button type="button" onclick="changeModalDosen(1)" class="text-xs text-orange-600 font-bold hover:underline cursor-pointer ml-2 shrink-0">Ganti</button>
-                                </div>
-
-                                <!-- Search Input -->
-                                <div id="modalSearchContainer1" class="relative">
-                                    <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 bg-white focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 shadow-2xs">
-                                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
-                                        <input type="text" id="modalSearchP1" onfocus="openModalDosenDropdown(1)" onclick="openModalDosenDropdown(1)" oninput="filterModalDosen(1)" placeholder="Cari nama / NIP pembimbing 1..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800" autocomplete="off">
-                                        <button type="button" id="modalClearP1" onclick="clearModalSearch(1)" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
-                                    </div>
-                                    <div id="modalDropdownList1" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-52 overflow-y-auto custom-scrollbar p-1 divide-y divide-slate-100"></div>
-                                </div>
-                            </div>
-
-                            <!-- Dosen Pembimbing 2 -->
-                            <div class="modal-combobox-wrapper relative" data-slot="2">
-                                <label class="text-xs font-bold text-slate-700 block mb-1.5">Dosen Pembimbing 2 <span class="text-rose-500">*</span></label>
-                                <input type="hidden" id="modalInputPembimbing2" name="pembimbing_2" value="">
-
-                                <!-- Chip Preview -->
-                                <div id="modalChipP2" class="hidden p-2.5 bg-orange-50 border border-orange-300 rounded-xl flex items-center justify-between shadow-2xs">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <div class="w-6 h-6 rounded-lg bg-orange-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</div>
-                                        <span id="modalChipNameP2" class="text-xs font-bold text-orange-950 truncate"></span>
-                                    </div>
-                                    <button type="button" onclick="changeModalDosen(2)" class="text-xs text-orange-600 font-bold hover:underline cursor-pointer ml-2 shrink-0">Ganti</button>
-                                </div>
-
-                                <!-- Search Input -->
-                                <div id="modalSearchContainer2" class="relative">
-                                    <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 bg-white focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 shadow-2xs">
-                                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
-                                        <input type="text" id="modalSearchP2" onfocus="openModalDosenDropdown(2)" onclick="openModalDosenDropdown(2)" oninput="filterModalDosen(2)" placeholder="Cari nama / NIP pembimbing 2..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800" autocomplete="off">
-                                        <button type="button" id="modalClearP2" onclick="clearModalSearch(2)" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
-                                    </div>
-                                    <div id="modalDropdownList2" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-52 overflow-y-auto custom-scrollbar p-1 divide-y divide-slate-100"></div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Per-Student Accordion / Card List Container -->
+                    <div id="modalSelectedList" class="space-y-3.5">
+                        <!-- Rendered dynamically via JS -->
                     </div>
 
-                    <!-- 4. Catatan Koordinator TA -->
-                    <div>
-                        <label class="text-xs font-bold text-slate-700 block mb-1.5">Catatan Koordinator TA:</label>
-                        <textarea name="catatan_koor" rows="2" placeholder="Masukkan catatan atau arahan untuk seluruh mahasiswa terpilih..." class="w-full text-xs p-3 border border-slate-300 rounded-xl bg-slate-50 focus:bg-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none"></textarea>
+                    <!-- Catatan Global Koordinator TA -->
+                    <div class="pt-3 border-t border-slate-200">
+                        <label class="text-xs font-bold text-slate-700 block mb-1">Catatan Koordinator TA (Opsional untuk Seluruh Mahasiswa):</label>
+                        <textarea id="modalGlobalCatatanKoor" name="catatan_koor" rows="2" placeholder="Masukkan catatan atau arahan umum (opsional)..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl bg-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none shadow-2xs"></textarea>
                     </div>
                 </div>
 
                 <!-- Modal Footer (Fixed at bottom) -->
-                <div class="p-4 sm:px-6 border-t border-slate-100 bg-slate-50/90 flex items-center justify-end gap-3 shrink-0">
+                <div class="p-4 sm:px-6 border-t border-slate-200 bg-white flex items-center justify-end gap-3 shrink-0">
                     <button type="button" onclick="closeBatchModal()" class="px-5 py-2.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">
                         Batal
                     </button>
-                    <button type="submit" id="modalBtnSubmit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-2">
+                    <button type="submit" id="modalBtnSubmit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
                         <i class="fa-solid fa-floppy-disk"></i>
-                        <span id="modalBtnSubmitText">Terapkan Keputusan Massal</span>
+                        <span id="modalBtnSubmitText">Simpan &amp; Lanjutkan ke Ketua KK</span>
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MULTI-STUDENT BATCH REVIEW MODAL (CEK DOKUMEN & PLOTTING INDIVIDU MASSAL) -->
+    <div id="p1BatchReviewModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto" onclick="if(event.target===this)closeP1BatchReviewModal()">
+        <div class="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+            
+            <!-- Modal Header: Multi-Student Summary & Quick Nav Anchors -->
+            <div class="bg-slate-900 text-white shrink-0 border-b border-slate-800">
+                <!-- Top Row: Title & Action -->
+                <div class="p-4 sm:p-5 px-6 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-orange-600/30 shrink-0">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <h3 class="text-base font-extrabold text-white tracking-tight leading-snug">
+                                    Peninjauan Dokumen &amp; Penetapan Pembimbing Massal
+                                </h3>
+                                <span class="bg-orange-500/90 text-white px-3 py-0.5 rounded-full text-xs font-bold whitespace-nowrap shadow-xs" id="p1ModalStudentCounter">
+                                    0 Mahasiswa Terpilih
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">Tinjau berkas persyaratan dan tetapkan Dosen Pembimbing 1 &amp; 2 per individu mahasiswa.</p>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="closeP1BatchReviewModal()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer shrink-0">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                <!-- Sub Navigation Bar: Quick Jump Toolbar with Navigation Arrows -->
+                <div class="px-4 sm:px-6 py-2.5 bg-slate-950/80 border-t border-slate-800/80 flex items-center gap-2.5 relative">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1.5 hidden sm:flex">
+                        <i class="fa-solid fa-compass text-orange-400"></i> Lompat Cepat:
+                    </span>
+
+                    <!-- Left Scroll Arrow -->
+                    <button type="button" id="btnScrollP1Left" onclick="scrollP1StudentTabs('left')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95" title="Geser ke kiri">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <!-- Scroll Container with Grab/Wheel support -->
+                    <div id="p1ModalStudentTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 min-w-0 select-none cursor-grab">
+                        <!-- Quick Jump Anchors injected dynamically via JS -->
+                    </div>
+
+                    <!-- Right Scroll Arrow -->
+                    <button type="button" id="btnScrollP1Right" onclick="scrollP1StudentTabs('right')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95 animate-pulse hover:animate-none" title="Geser ke kanan">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content Body (Stacked View for All Selected Students) -->
+            <div class="p-5 sm:p-6 overflow-y-auto space-y-8 flex-1 bg-slate-100/80 custom-scrollbar" id="p1BatchModalBody">
+                <div class="py-16 text-center text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl text-orange-500 mb-3 block"></i>
+                    Memuat data dokumen &amp; profil seluruh mahasiswa terpilih...
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions Bar -->
+            <div class="p-4 px-6 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="applyFirstStudentDosenToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing yang dipilih pada Mahasiswa #1 ke seluruh mahasiswa lainnya">
+                        <i class="fa-solid fa-copy"></i> Salin Pembimbing Mahasiswa #1 ke Semua
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="closeP1BatchReviewModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button" id="btnSubmitP1BatchReview" onclick="submitP1MultiDetailPlottings()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span id="btnSubmitP1BatchReviewText">SIMPAN SEMUA PEMBIMBING &amp; SETUJUI</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- DOCUMENT PDF PREVIEW MODAL -->
+    <div id="p1PdfModal" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-2xl max-w-5xl w-full h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+            <div class="p-3.5 px-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-white flex items-center gap-2" id="p1PdfModalTitle">Pratinjau Dokumen PDF</h3>
+                        <p class="text-[10px] text-slate-400" id="p1PdfModalSubtitle">Memuat tampilan dokumen...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeP1PdfModal()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex-1 bg-slate-100 p-2 overflow-hidden">
+                <iframe id="p1PdfModalFrame" src="about:blank" class="w-full h-full border-none rounded-xl bg-white shadow-inner"></iframe>
+            </div>
         </div>
     </div>
 
@@ -1683,13 +2343,21 @@
         window.DASHBOARD_CONFIG = {
             list: <?= json_encode($list_mahasiswa ?? []); ?>,
             listPreview2: <?= json_encode($list_preview2 ?? []); ?>,
+            listSidang: <?= json_encode($list_sidang ?? []); ?>,
             dosenList: <?= json_encode($dosen_list ?? []); ?>,
             ruanganList: <?= json_encode($ruangan_list ?? []); ?>,
             ajaxBatchUrl: "<?= site_url('koordinatorta/ajax_batch_approval'); ?>",
+            ajaxBatchDetailsUrl: "<?= site_url('koordinatorta/ajax_get_batch_details'); ?>",
             ajaxRealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_dashboard'); ?>",
             ajaxPreview2UpdateUrl: "<?= site_url('koordinatorta/ajax_update_preview2_penguji'); ?>",
             ajaxPreview2BatchUrl: "<?= site_url('koordinatorta/ajax_batch_preview2_penguji'); ?>",
             ajaxPreview2RealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_preview2'); ?>",
+            ajaxSidangUpdateUrl: "<?= site_url('koordinatorta/ajax_update_jadwal_sidang'); ?>",
+            ajaxSidangBatchUrl: "<?= site_url('koordinatorta/ajax_batch_jadwal_sidang'); ?>",
+            ajaxSidangRealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_sidang'); ?>",
+            ajaxTambahRuanganUrl: "<?= site_url('koordinatorta/ajax_tambah_ruangan'); ?>",
+            ajaxHapusRuanganUrl: "<?= site_url('koordinatorta/ajax_hapus_ruangan'); ?>",
+            ajaxGetRuanganUrl: "<?= site_url('koordinatorta/ajax_get_ruangan_list'); ?>",
             detailUrlPrefix: "<?= site_url('koordinatorta/detail_mahasiswa/'); ?>"
         };
     </script>

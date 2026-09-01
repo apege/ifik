@@ -454,9 +454,9 @@
                                     </div>
                                 </div>
                                 <?php if(!empty($url)): ?>
-                                    <a href="<?= $url; ?>" target="_blank" class="text-xs bg-white hover:bg-orange-50 text-orange-600 hover:text-orange-700 border border-slate-200 hover:border-orange-300 font-bold px-3.5 py-2 rounded-xl shadow-2xs transition inline-flex items-center gap-1.5">
+                                    <button type="button" onclick="openPdfPreviewModal('<?= $url; ?>', '<?= addslashes($title); ?> - <?= addslashes($detail['nama'] ?? ''); ?>')" class="text-xs bg-white hover:bg-orange-50 text-orange-600 hover:text-orange-700 border border-slate-200 hover:border-orange-300 font-bold px-3.5 py-2 rounded-xl shadow-2xs transition inline-flex items-center gap-1.5 cursor-pointer">
                                         <i class="fa-solid fa-eye text-xs"></i> Lihat PDF
-                                    </a>
+                                    </button>
                                 <?php else: ?>
                                     <span class="text-[11px] text-slate-400 italic">Tidak Ada</span>
                                 <?php endif; ?>
@@ -478,6 +478,27 @@
                 </section>
 
                 <!-- TAB 4: KEPUTUSAN APPROVAL & PLOTTING DOSEN PEMBIMBING -->
+                <?php
+                    $p1Dosen = null;
+                    $p2Dosen = null;
+                    if (!empty($detail['pembimbing_1']) && !empty($dosen_list)) {
+                        foreach ($dosen_list as $d) {
+                            if (strval($d['nip']) === strval($detail['pembimbing_1'])) {
+                                $p1Dosen = $d;
+                                break;
+                            }
+                        }
+                    }
+                    if (!empty($detail['pembimbing_2']) && !empty($dosen_list)) {
+                        foreach ($dosen_list as $d) {
+                            if (strval($d['nip']) === strval($detail['pembimbing_2'])) {
+                                $p2Dosen = $d;
+                                break;
+                            }
+                        }
+                    }
+                    $isAlreadyApproved = (strcasecmp($stKoor, 'Approved') === 0);
+                ?>
                 <section id="tabPanel-3" class="tab-panel card-custom p-6 sm:p-8 space-y-6">
                     <div class="flex items-center justify-between pb-5 border-b border-slate-200">
                         <div class="flex items-center gap-3.5">
@@ -495,219 +516,279 @@
                         </span>
                     </div>
 
-                    <form id="formApprovalKoor" onsubmit="handleAjaxApproval(event)" class="space-y-6">
-                        <input type="hidden" name="nim" value="<?= $detail['nim']; ?>">
-
-                        <!-- 1. Keputusan Status -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                                <i class="fa-solid fa-gavel text-orange-600 text-xs"></i> Pilih Keputusan Persetujuan <span class="text-rose-500">*</span>:
-                            </label>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <!-- Option Approve -->
-                                <label class="relative flex items-center justify-between p-4 sm:p-5 rounded-2xl cursor-pointer transition-all duration-200 <?= ($stKoor !== 'Rejected') ? 'border-2 border-emerald-500 bg-gradient-to-br from-emerald-50/90 to-teal-50/40 ring-4 ring-emerald-500/10 shadow-lg shadow-emerald-500/10' : 'border border-slate-200 bg-white hover:bg-slate-50 hover:-translate-y-0.5 shadow-xs'; ?>" id="labelOptApprove">
-                                    <input type="radio" name="status" value="Approved" <?= ($stKoor !== 'Rejected') ? 'checked' : ''; ?> onchange="onStatusDecisionChange('Approved')" class="sr-only">
-                                    
-                                    <div class="flex items-center gap-3.5 min-w-0">
-                                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-md shadow-emerald-500/25">
-                                            <i class="fa-solid fa-circle-check"></i>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <span class="font-bold text-sm text-slate-900 block leading-tight">Approve (Disetujui)</span>
-                                            <span class="text-xs text-slate-500 block mt-0.5 truncate">Lanjut ke Ketua KK & tetapkan pembimbing</span>
-                                        </div>
+                    <?php if ($isAlreadyApproved): ?>
+                        <!-- READ-ONLY STATE: SUDAH DISETUJUI & PLOTTING TERKUNCI -->
+                        <div class="space-y-6">
+                            <!-- Alert Info Banner -->
+                            <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
+                                <div class="flex items-center gap-3.5">
+                                    <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                                        <i class="fa-solid fa-lock"></i>
                                     </div>
-
-                                    <div class="shrink-0 ml-3" id="indicatorApprove">
-                                        <div class="w-6 h-6 rounded-full <?= ($stKoor !== 'Rejected') ? 'bg-emerald-600 text-white shadow-sm' : 'border-2 border-slate-300 bg-white text-transparent'; ?> flex items-center justify-center text-xs transition">
-                                            <i class="fa-solid fa-check"></i>
-                                        </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold text-emerald-950 uppercase tracking-wide">Pendaftaran Telah Disetujui &amp; Dosen Pembimbing Ditetapkan</h4>
+                                        <p class="text-[11px] text-emerald-800 mt-0.5">Penetapan dosen pembimbing telah disimpan dan proses pendaftaran telah diteruskan ke Ketua KK.</p>
                                     </div>
-                                </label>
-
-                                <!-- Option Reject -->
-                                <label class="relative flex items-center justify-between p-4 sm:p-5 rounded-2xl cursor-pointer transition-all duration-200 <?= ($stKoor === 'Rejected') ? 'border-2 border-rose-500 bg-gradient-to-br from-rose-50/90 to-pink-50/40 ring-4 ring-rose-500/10 shadow-lg shadow-rose-500/10' : 'border border-slate-200 bg-white hover:bg-slate-50 hover:-translate-y-0.5 shadow-xs'; ?>" id="labelOptReject">
-                                    <input type="radio" name="status" value="Rejected" <?= ($stKoor === 'Rejected') ? 'checked' : ''; ?> onchange="onStatusDecisionChange('Rejected')" class="sr-only">
-                                    
-                                    <div class="flex items-center gap-3.5 min-w-0">
-                                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-500 text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-md shadow-rose-500/25">
-                                            <i class="fa-solid fa-circle-xmark"></i>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <span class="font-bold text-sm text-slate-900 block leading-tight">Reject (Tolak / Revisi)</span>
-                                            <span class="text-xs text-slate-500 block mt-0.5 truncate">Kirim catatan perbaikan ke mahasiswa</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="shrink-0 ml-3" id="indicatorReject">
-                                        <div class="w-6 h-6 rounded-full <?= ($stKoor === 'Rejected') ? 'bg-rose-600 text-white shadow-sm' : 'border-2 border-slate-300 bg-white text-transparent'; ?> flex items-center justify-center text-xs transition">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- 2. Plotting Dosen Pembimbing 1 & 2 (Visible when Approved) -->
-                        <div id="sectionPembimbing" class="space-y-5 pt-5 border-t border-slate-200 <?= ($stKoor === 'Rejected') ? 'hidden' : ''; ?>">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-users text-orange-600 text-xs"></i> Plotting Dosen Pembimbing <span class="text-rose-500">*</span>
+                                </div>
+                                <span class="px-3 py-1 bg-white text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold shrink-0 shadow-2xs">
+                                    <i class="fa-solid fa-check-double mr-1 text-emerald-600"></i> Terkunci (Read-Only)
                                 </span>
-                                <span class="text-[11px] text-slate-400 font-medium">Pembimbing 1 & 2 wajib berbeda</span>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <!-- Dosen Pembimbing 1 Search Autocomplete -->
-                                <div class="relative" id="comboboxWrapper1" style="z-index: 25;">
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                                        <span>Dosen Pembimbing 1 (Utama): <span class="text-rose-500">*</span></span>
-                                        <span id="badgeP1" class="hidden text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
-                                    </label>
+                            <!-- Plotting Summary Cards (Readonly) -->
+                            <div class="space-y-3">
+                                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-chalkboard-user text-orange-600 text-sm"></i> Dosen Pembimbing Terpilih:
+                                </span>
 
-                                    <input type="hidden" name="pembimbing_1" id="inputPembimbing1" value="<?= $detail['pembimbing_1'] ?? ''; ?>">
-
-                                    <!-- Search Input -->
-                                    <div class="relative" id="searchContainer1">
-                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <!-- Pembimbing 1 -->
+                                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-2xs space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-bold text-slate-700">Dosen Pembimbing 1 (Utama)</span>
+                                            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
                                         </div>
-                                        <input 
-                                            type="text" 
-                                            id="searchP1" 
-                                            autocomplete="off"
-                                            placeholder="Ketik nama dosen atau NIP..." 
-                                            onfocus="openDosenDropdown(1)" 
-                                            onclick="openDosenDropdown(1)"
-                                            oninput="filterDosen(1)" 
-                                            class="w-full text-xs font-bold pl-9 pr-14 py-3 bg-white border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-2xs transition cursor-pointer"
-                                        >
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5">
-                                            <button type="button" id="clearP1" onclick="clearDosenSelection(1)" class="hidden text-slate-400 hover:text-slate-600 transition">
-                                                <i class="fa-solid fa-circle-xmark text-xs"></i>
-                                            </button>
-                                            <button type="button" onclick="openDosenDropdown(1)" class="text-slate-400 hover:text-orange-600 transition">
-                                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Selected Chip Card -->
-                                    <div id="chipP1" class="hidden mt-2 p-3 bg-gradient-to-r from-orange-50 to-amber-50/60 border border-orange-200/80 rounded-xl flex items-center justify-between shadow-2xs">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="chipAvatarP1">
-                                                <i class="fa-solid fa-user-tie text-xs"></i>
+                                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                                            <div class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                                                1
                                             </div>
                                             <div class="min-w-0">
-                                                <p id="chipNameP1" class="text-xs font-bold text-slate-900 truncate"></p>
-                                                <p id="chipNipP1" class="text-[10px] text-slate-500 font-mono mt-0.5"></p>
+                                                <p class="text-xs font-bold text-slate-900 truncate"><?= htmlspecialchars($p1Dosen['nama_dosen'] ?? ($detail['pembimbing_1'] ?? '-')); ?></p>
+                                                <p class="text-[10px] text-slate-500 font-mono mt-0.5">NIP: <?= htmlspecialchars($p1Dosen['nip'] ?? ($detail['pembimbing_1'] ?? '-')); ?></p>
                                             </div>
                                         </div>
-                                        <button type="button" onclick="changeDosen(1)" class="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-white hover:bg-orange-100/60 border border-orange-200 px-3 py-1.5 rounded-lg transition shadow-2xs shrink-0 ml-2 inline-flex items-center gap-1">
-                                            <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Ganti
-                                        </button>
                                     </div>
 
-                                    <!-- Floating Dropdown Results -->
-                                    <div id="dropdownList1" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 ring-1 ring-black/5">
-                                        <!-- populated via JS -->
-                                    </div>
-                                </div>
-
-                                <!-- Dosen Pembimbing 2 Search Autocomplete -->
-                                <div class="relative" id="comboboxWrapper2" style="z-index: 20;">
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                                        <span>Dosen Pembimbing 2 (Pendamping): <span class="text-rose-500">*</span></span>
-                                        <span id="badgeP2" class="hidden text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
-                                    </label>
-
-                                    <input type="hidden" name="pembimbing_2" id="inputPembimbing2" value="<?= $detail['pembimbing_2'] ?? ''; ?>">
-
-                                    <!-- Search Input -->
-                                    <div class="relative" id="searchContainer2">
-                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                    <!-- Pembimbing 2 -->
+                                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-2xs space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-bold text-slate-700">Dosen Pembimbing 2 (Pendamping)</span>
+                                            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
                                         </div>
-                                        <input 
-                                            type="text" 
-                                            id="searchP2" 
-                                            autocomplete="off"
-                                            placeholder="Ketik nama dosen atau NIP..." 
-                                            onfocus="openDosenDropdown(2)" 
-                                            onclick="openDosenDropdown(2)"
-                                            oninput="filterDosen(2)" 
-                                            class="w-full text-xs font-bold pl-9 pr-14 py-3 bg-white border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-2xs transition cursor-pointer"
-                                        >
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5">
-                                            <button type="button" id="clearP2" onclick="clearDosenSelection(2)" class="hidden text-slate-400 hover:text-slate-600 transition">
-                                                <i class="fa-solid fa-circle-xmark text-xs"></i>
-                                            </button>
-                                            <button type="button" onclick="openDosenDropdown(2)" class="text-slate-400 hover:text-orange-600 transition">
-                                                <i class="fa-solid fa-chevron-down text-xs"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Selected Chip Card -->
-                                    <div id="chipP2" class="hidden mt-2 p-3 bg-gradient-to-r from-orange-50 to-amber-50/60 border border-orange-200/80 rounded-xl flex items-center justify-between shadow-2xs">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="chipAvatarP2">
-                                                <i class="fa-solid fa-user-tie text-xs"></i>
+                                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                                            <div class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                                                2
                                             </div>
                                             <div class="min-w-0">
-                                                <p id="chipNameP2" class="text-xs font-bold text-slate-900 truncate"></p>
-                                                <p id="chipNipP2" class="text-[10px] text-slate-500 font-mono mt-0.5"></p>
+                                                <p class="text-xs font-bold text-slate-900 truncate"><?= htmlspecialchars($p2Dosen['nama_dosen'] ?? ($detail['pembimbing_2'] ?? '-')); ?></p>
+                                                <p class="text-[10px] text-slate-500 font-mono mt-0.5">NIP: <?= htmlspecialchars($p2Dosen['nip'] ?? ($detail['pembimbing_2'] ?? '-')); ?></p>
                                             </div>
                                         </div>
-                                        <button type="button" onclick="changeDosen(2)" class="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-white hover:bg-orange-100/60 border border-orange-200 px-3 py-1.5 rounded-lg transition shadow-2xs shrink-0 ml-2 inline-flex items-center gap-1">
-                                            <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Ganti
-                                        </button>
-                                    </div>
-
-                                    <!-- Floating Dropdown Results -->
-                                    <div id="dropdownList2" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 ring-1 ring-black/5">
-                                        <!-- populated via JS -->
                                     </div>
                                 </div>
                             </div>
 
-                            <p id="pembimbingConflictWarning" class="hidden text-xs font-bold text-rose-600 flex items-center gap-1.5 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
-                                <i class="fa-solid fa-circle-exclamation text-xs"></i> Dosen Pembimbing 1 dan Pembimbing 2 tidak boleh sama! Silakan pilih dosen yang berbeda.
-                            </p>
+                            <!-- Catatan Koordinator -->
+                            <div class="pt-2">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                                    Catatan Koordinator TA:
+                                </label>
+                                <div class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-800 leading-relaxed shadow-2xs">
+                                    <?= !empty($detail['catatan_koor']) ? nl2br(htmlspecialchars($detail['catatan_koor'])) : '<span class="text-slate-400 italic">Tidak ada catatan khusus yang diberikan.</span>'; ?>
+                                </div>
+                            </div>
+
+                            <!-- Action Footer -->
+                            <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
+                                <button type="button" onclick="switchDockTab(2)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs border border-slate-200 shadow-xs inline-flex items-center gap-2 transition cursor-pointer">
+                                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                                    <span>Kembali ke Berkas</span>
+                                </button>
+
+                                <button type="button" disabled class="bg-slate-100 text-slate-400 font-bold px-6 py-3 rounded-xl text-xs border border-slate-200 cursor-not-allowed inline-flex items-center gap-2 shadow-2xs">
+                                    <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                                    <span>Pendaftaran Telah Disetujui (Terkunci)</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- 3. Catatan Koordinator TA -->
-                        <div class="pt-2">
-                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2" id="catatanLabel">
-                                Catatan Koordinator TA:
-                            </label>
-                            <textarea class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium text-slate-800 leading-relaxed transition" name="catatan_koor" id="catatanKoor" rows="3" placeholder="Masukkan catatan usulan judul atau arahan untuk mahasiswa/pembimbing..."><?= $detail['catatan_koor'] ?? ''; ?></textarea>
-                            <p class="hidden text-xs font-semibold text-rose-600 mt-2 flex items-center gap-1.5" id="catatanWarning">
-                                <i class="fa-solid fa-circle-exclamation text-xs"></i> Alasan penolakan wajib diisi sebelum menyimpan keputusan Reject!
-                            </p>
-                        </div>
+                    <?php else: ?>
+                        <!-- EDITABLE FORM (MASIH PENDING / PERLU APPROVAL) -->
+                        <form id="formApprovalKoor" onsubmit="handleAjaxApproval(event)" class="space-y-6">
+                            <input type="hidden" name="nim" value="<?= $detail['nim']; ?>">
+                            <input type="hidden" name="status" value="Approved">
 
-                        <!-- 4. Tombol Submit Approval via AJAX -->
-                        <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
-                            <button type="button" onclick="switchDockTab(2)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs border border-slate-200 shadow-xs inline-flex items-center gap-2 transition">
-                                <i class="fa-solid fa-arrow-left text-xs"></i>
-                                <span>Kembali ke Berkas</span>
-                            </button>
+                            <!-- 1. Plotting Dosen Pembimbing 1 & 2 -->
+                            <div id="sectionPembimbing" class="space-y-5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fa-solid fa-chalkboard-user text-orange-600 text-sm"></i> Plotting Dosen Pembimbing <span class="text-rose-500">*</span>
+                                    </span>
+                                    <span class="text-[11px] text-slate-400 font-medium">Pembimbing 1 &amp; 2 wajib berbeda</span>
+                                </div>
 
-                            <button type="submit" id="btnSubmitApproval" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md shadow-orange-600/20 inline-flex items-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                                <span id="btnSubmitText">Simpan Keputusan Approval & Pembimbing</span>
-                            </button>
-                        </div>
-                    </form>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <!-- Dosen Pembimbing 1 Search Autocomplete -->
+                                    <div class="relative" id="comboboxWrapper1" style="z-index: 25;">
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                                            <span>Dosen Pembimbing 1 (Utama): <span class="text-rose-500">*</span></span>
+                                            <span id="badgeP1" class="hidden text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
+                                        </label>
+
+                                        <input type="hidden" name="pembimbing_1" id="inputPembimbing1" value="<?= $detail['pembimbing_1'] ?? ''; ?>">
+
+                                        <!-- Search Input -->
+                                        <div class="relative" id="searchContainer1">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                id="searchP1" 
+                                                autocomplete="off"
+                                                placeholder="Ketik nama dosen atau NIP..." 
+                                                onfocus="openDosenDropdown(1)" 
+                                                onclick="openDosenDropdown(1)"
+                                                oninput="filterDosen(1)" 
+                                                class="w-full text-xs font-bold pl-9 pr-14 py-3 bg-white border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-2xs transition cursor-pointer"
+                                            >
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5">
+                                                <button type="button" id="clearP1" onclick="clearDosenSelection(1)" class="hidden text-slate-400 hover:text-slate-600 transition">
+                                                    <i class="fa-solid fa-circle-xmark text-xs"></i>
+                                                </button>
+                                                <button type="button" onclick="openDosenDropdown(1)" class="text-slate-400 hover:text-orange-600 transition">
+                                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Selected Chip Card -->
+                                        <div id="chipP1" class="hidden mt-2 p-3 bg-gradient-to-r from-orange-50 to-amber-50/60 border border-orange-200/80 rounded-xl flex items-center justify-between shadow-2xs">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="chipAvatarP1">
+                                                    <i class="fa-solid fa-user-tie text-xs"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p id="chipNameP1" class="text-xs font-bold text-slate-900 truncate"></p>
+                                                    <p id="chipNipP1" class="text-[10px] text-slate-500 font-mono mt-0.5"></p>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="changeDosen(1)" class="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-white hover:bg-orange-100/60 border border-orange-200 px-3 py-1.5 rounded-lg transition shadow-2xs shrink-0 ml-2 inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Ganti
+                                            </button>
+                                        </div>
+
+                                        <!-- Floating Dropdown Results -->
+                                        <div id="dropdownList1" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 ring-1 ring-black/5">
+                                            <!-- populated via JS -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Dosen Pembimbing 2 Search Autocomplete -->
+                                    <div class="relative" id="comboboxWrapper2" style="z-index: 20;">
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                                            <span>Dosen Pembimbing 2 (Pendamping): <span class="text-rose-500">*</span></span>
+                                            <span id="badgeP2" class="hidden text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
+                                        </label>
+
+                                        <input type="hidden" name="pembimbing_2" id="inputPembimbing2" value="<?= $detail['pembimbing_2'] ?? ''; ?>">
+
+                                        <!-- Search Input -->
+                                        <div class="relative" id="searchContainer2">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                id="searchP2" 
+                                                autocomplete="off"
+                                                placeholder="Ketik nama dosen atau NIP..." 
+                                                onfocus="openDosenDropdown(2)" 
+                                                onclick="openDosenDropdown(2)"
+                                                oninput="filterDosen(2)" 
+                                                class="w-full text-xs font-bold pl-9 pr-14 py-3 bg-white border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-2xs transition cursor-pointer"
+                                            >
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5">
+                                                <button type="button" id="clearP2" onclick="clearDosenSelection(2)" class="hidden text-slate-400 hover:text-slate-600 transition">
+                                                    <i class="fa-solid fa-circle-xmark text-xs"></i>
+                                                </button>
+                                                <button type="button" onclick="openDosenDropdown(2)" class="text-slate-400 hover:text-orange-600 transition">
+                                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Selected Chip Card -->
+                                        <div id="chipP2" class="hidden mt-2 p-3 bg-gradient-to-r from-orange-50 to-amber-50/60 border border-orange-200/80 rounded-xl flex items-center justify-between shadow-2xs">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm" id="chipAvatarP2">
+                                                    <i class="fa-solid fa-user-tie text-xs"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p id="chipNameP2" class="text-xs font-bold text-slate-900 truncate"></p>
+                                                    <p id="chipNipP2" class="text-[10px] text-slate-500 font-mono mt-0.5"></p>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="changeDosen(2)" class="text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-white hover:bg-orange-100/60 border border-orange-200 px-3 py-1.5 rounded-lg transition shadow-2xs shrink-0 ml-2 inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Ganti
+                                            </button>
+                                        </div>
+
+                                        <!-- Floating Dropdown Results -->
+                                        <div id="dropdownList2" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 ring-1 ring-black/5">
+                                            <!-- populated via JS -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p id="pembimbingConflictWarning" class="hidden text-xs font-bold text-rose-600 flex items-center gap-1.5 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                                    <i class="fa-solid fa-circle-exclamation text-xs"></i> Dosen Pembimbing 1 dan Pembimbing 2 tidak boleh sama! Silakan pilih dosen yang berbeda.
+                                </p>
+                            </div>
+
+                            <!-- 3. Catatan Koordinator TA -->
+                            <div class="pt-2">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2" id="catatanLabel">
+                                    Catatan Koordinator TA:
+                                </label>
+                                <textarea class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none text-xs font-medium text-slate-800 leading-relaxed transition" name="catatan_koor" id="catatanKoor" rows="3" placeholder="Masukkan catatan usulan judul atau arahan untuk mahasiswa/pembimbing..."><?= $detail['catatan_koor'] ?? ''; ?></textarea>
+                                <p class="hidden text-xs font-semibold text-rose-600 mt-2 flex items-center gap-1.5" id="catatanWarning">
+                                    <i class="fa-solid fa-circle-exclamation text-xs"></i> Alasan penolakan wajib diisi sebelum menyimpan keputusan Reject!
+                                </p>
+                            </div>
+
+                            <!-- 4. Tombol Submit Approval via AJAX -->
+                            <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
+                                <button type="button" onclick="switchDockTab(2)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs border border-slate-200 shadow-xs inline-flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                                    <span>Kembali ke Berkas</span>
+                                </button>
+
+                                <button type="submit" id="btnSubmitApproval" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md shadow-orange-600/20 inline-flex items-center gap-2 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                    <span id="btnSubmitText">Simpan Keputusan Approval & Pembimbing</span>
+                                </button>
+                            </div>
+                        </form>
+                    <?php endif; ?>
                 </section>
 
             </div>
 
         </div>
 
-    </main>
+    <!-- DOCUMENT PDF PREVIEW MODAL -->
+    <div id="pdfPreviewModal" class="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-2xl max-w-5xl w-full h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+            <div class="p-3.5 px-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-white flex items-center gap-2" id="pdfModalTitle">Pratinjau Dokumen PDF</h3>
+                        <p class="text-[10px] text-slate-400" id="pdfModalSubtitle">Memuat tampilan dokumen...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closePdfPreviewModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex-1 bg-slate-100 p-2 overflow-hidden">
+                <iframe id="pdfModalFrame" src="about:blank" class="w-full h-full border-none rounded-xl bg-white shadow-inner"></iframe>
+            </div>
+        </div>
+    </div>
 
     <!-- Global Config for External Modular Script -->
     <script>
