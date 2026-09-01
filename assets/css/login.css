@@ -76,20 +76,20 @@ body {
 }
 
 .hero-title {
-  font-size: 3.8rem;
+  font-size: 2.75rem;
   font-weight: 900;
-  line-height: 0.96;
+  line-height: 1.1;
   color: #1c0a00;
   text-shadow: 0 2px 8px rgba(255, 255, 255, 0.6);
-  margin-bottom: 18px;
-  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
 }
 
 .hero-sub {
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   color: #4a1c03;
-  line-height: 1.6;
+  line-height: 1.65;
   max-width: 100%;
   background: transparent;
   backdrop-filter: none;
@@ -98,6 +98,16 @@ body {
   border-radius: 0;
   border: none;
   box-shadow: none;
+}
+
+.hero-highlight {
+  font-weight: 800;
+  color: #1c0a00;
+  background: rgba(245, 158, 11, 0.22);
+  padding: 1px 6px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 1px 0;
 }
 
 /* ─── HANG ROOT ───────────────────────────────── */
@@ -316,7 +326,7 @@ body {
 
 .card-brand {
   display: flex; align-items: center; gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 .brand-badge {
   width: 32px; height: 32px;
@@ -327,7 +337,7 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 .brand-logo-img {
-  height: 34px;
+  height: 36px;
   width: auto;
   object-fit: contain;
 }
@@ -341,7 +351,11 @@ body {
   color: #1c0a00; margin-bottom: 4px;
 }
 .card-sub {
-  font-size: 0.72rem; color: #78350f; margin-bottom: 22px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #78350f;
+  margin-bottom: 20px;
+  line-height: 1.4;
 }
 
 /* Flash error & success */
