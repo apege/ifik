@@ -116,14 +116,23 @@ function renderClock() {
     
     // Position hand
     let val = isSelectingHour ? selectedHour : selectedMinute;
-    let angle = isSelectingHour ? (val % 12) * 30 : val * 6;
+    let targetAngle = isSelectingHour ? (val % 12) * 30 : val * 6;
+    
+    // Continuous shortest rotational path (eliminates 360-degree reverse spin on 11 <-> 12)
+    if (typeof hand.currentAngle === 'undefined') {
+        hand.currentAngle = targetAngle;
+    } else {
+        let diff = (targetAngle - (hand.currentAngle % 360) + 540) % 360 - 180;
+        hand.currentAngle += diff;
+    }
     
     // Determine if we point to inner circle (hours 13-00)
     let isInner = isSelectingHour && (val === 0 || val > 12);
     let handHeight = isInner ? '60px' : '95px';
     
     hand.style.height = handHeight;
-    hand.style.transform = `translate(-50%, 0) rotate(${angle}deg)`;
+    hand.style.transition = isDragging ? 'none' : 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)';
+    hand.style.transform = `translate(-50%, 0) rotate(${hand.currentAngle}deg)`;
 }
 
 let isDragging = false;
