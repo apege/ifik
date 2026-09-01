@@ -673,6 +673,43 @@
     }
 
     // =========================================================
+    // 5. PDF PREVIEW POPUP MODAL
+    // =========================================================
+    window.openPdfPreviewModal = function (url, title) {
+        const modal = document.getElementById('pdfPreviewModal');
+        const frame = document.getElementById('pdfModalFrame');
+        const titleEl = document.getElementById('pdfModalTitle');
+        const subEl = document.getElementById('pdfModalSubtitle');
+
+        if (frame) frame.src = url;
+        if (titleEl) titleEl.innerText = title || 'Pratinjau Dokumen PDF';
+        if (subEl) subEl.innerText = url.split('/').pop() || 'Dokumen Persyaratan';
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        }
+    };
+
+    window.closePdfPreviewModal = function () {
+        const modal = document.getElementById('pdfPreviewModal');
+        const frame = document.getElementById('pdfModalFrame');
+        if (frame) frame.src = 'about:blank';
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+    };
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closePdfPreviewModal();
+        }
+    });
+
+    // =========================================================
     // INITIALIZATION ON DOM READY
     // =========================================================
     document.addEventListener('DOMContentLoaded', () => {

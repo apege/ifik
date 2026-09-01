@@ -40,8 +40,8 @@
     <!-- LEFT HERO TEXT -->
     <div class="hero-text" id="heroText">
       <img src="<?= base_url('assets/images/logo-dummy.webp'); ?>" alt="Logo IFIK" class="hero-logo-img">
-      <h1 class="hero-title">Your next<br>idea starts<br>here.</h1>
-      <p class="hero-sub">Satu ruang untuk terhubung, berkarya, dan mengembangkan ide terbaikmu.</p>
+      <h1 class="hero-title">Masuk dengan<br>Email Tel-U.</h1>
+      <p class="hero-sub">Gunakan akun email resmi <span class="hero-highlight">@telkomuniversity.ac.id</span> atau <span class="hero-highlight">@student.telkomuniversity.ac.id</span> untuk mengakses layanan portal IFIK.</p>
     </div>
 
     <!-- RIGHT — HANGING CARD WITH ROPE -->
@@ -133,7 +133,6 @@
             <img src="<?= base_url('assets/images/logo-dummy.webp'); ?>" alt="Logo IFIK" class="brand-logo-img">
           </div>
 
-          <h2 class="card-title">Masuk ke workspace.</h2>
           <p class="card-sub">Gunakan email Telkom University kamu</p>
 
           <!-- Flash Error -->

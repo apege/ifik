@@ -923,21 +923,53 @@
             box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
         }
 
+        /* MODERN CLEAN TABLE COLUMN HEADER */
+        .table-column-header {
+            display: grid;
+            grid-template-columns: 240px 170px 115px 1fr 175px;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.4);
+            border-bottom: 1.8px solid #cbd5e1;
+            font-size: 0.74rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 10px;
+        }
+        .th-col {
+            display: flex;
+            align-items: center;
+        }
+        .th-col.th-user-time {
+            justify-content: center;
+            text-align: center;
+        }
+        .th-col.th-date {
+            justify-content: center;
+            text-align: center;
+        }
+        .th-col.th-status {
+            justify-content: flex-start;
+            padding-left: 14px;
+        }
+
         /* CLEAN FLAT LIST WITH SUBTLE DIVIDERS (NO HEAVY CARD BOXES) */
         .table-cards-list {
             display: flex;
             flex-direction: column;
-            border-top: 1px solid #e8e2d5;
         }
 
         .table-row-card {
             display: grid;
-            grid-template-columns: 280px 200px 1fr 180px;
+            grid-template-columns: 240px 170px 115px 1fr 175px;
             align-items: center;
             background: transparent;
             border-bottom: 1px solid #e8e2d5;
             padding: 16px 12px;
-            gap: 20px;
+            gap: 16px;
             cursor: pointer;
             transition: background 0.15s ease, border-radius 0.15s ease;
         }
@@ -989,29 +1021,36 @@
             text-overflow: ellipsis;
         }
 
-        /* VERTICALLY STACKED PILLS: USER (TOP) + TIME (BOTTOM) */
+        /* VERTICALLY STACKED PILLS WITH UNIFORM FIXED WIDTH: USER (TOP) + TIME (BOTTOM) */
         .tr-user-time-col {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 6px;
+            width: 170px;
+            flex-shrink: 0;
         }
         .tr-pill-user {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             background: #ffffff;
             border: 1.5px solid #334155;
             border-radius: 999px;
-            padding: 3px 12px;
+            padding: 4px 12px;
             font-size: 0.78rem;
             font-weight: 700;
             color: #1e293b;
             white-space: nowrap;
+            width: 160px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .tr-pill-user span {
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 180px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            white-space: nowrap;
         }
         .tr-pill-time {
             display: inline-flex;
@@ -1020,35 +1059,65 @@
             background: #ffffff;
             border: 1.5px solid #fb923c;
             border-radius: 999px;
-            padding: 3px 14px;
+            padding: 4px 12px;
             font-size: 0.78rem;
             font-weight: 700;
             color: #ea580c;
             white-space: nowrap;
+            width: 160px;
+            box-sizing: border-box;
             box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
         .tr-date-col {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 800;
             color: #1e293b;
             text-align: center;
             letter-spacing: -0.2px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
+        /* KETERANGAN COLUMN BESIDE DATE */
+        .tr-desc-col {
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+        }
+        .tr-desc-text {
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            max-width: 100%;
+        }
+
+        /* STATUS BADGE WITH UNIFORM FIXED WIDTH */
         .tr-status-col {
             display: flex;
             justify-content: flex-end;
+            width: 175px;
+            flex-shrink: 0;
         }
         .tr-status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
+            justify-content: flex-start;
+            gap: 8px;
             font-size: 0.8rem;
             font-weight: 700;
             padding: 5px 14px;
             border-radius: 999px;
             white-space: nowrap;
+            width: 165px;
+            box-sizing: border-box;
+            text-align: left;
         }
 
         .table-pagination-wrap {
@@ -1195,11 +1264,14 @@
 
                 <!-- Text Search Container -->
                 <div style="position: relative; flex: 1; display: flex; align-items: center;" id="mainValueContainer">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" style="position: absolute; left: 8px; pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <button type="button" onclick="triggerSearchSubmit()" title="Klik untuk Cari (atau tekan Enter)" style="background: none; border: none; padding: 0; margin: 0; position: absolute; left: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; z-index: 2;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </button>
                     <input type="text" id="mainSearchInput" placeholder="Cari ruangan, peminjam, kode (key)..." 
                            oninput="handleUnifiedMultiSearch(this)" 
+                           onkeydown="if(event.key === 'Enter') { triggerSearchSubmit(); }"
                            onfocus="onMainInputFocused()"
-                           autocomplete="off" class="unified-input-key main-val-field">
+                           autocomplete="off" class="unified-input-key main-val-field" style="padding-left: 28px;">
                     <button id="clearMainSearchBtn" onclick="clearMainSearch()" style="display: none; position: absolute; right: 6px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem;">&times;</button>
                 </div>
 
@@ -1250,14 +1322,20 @@
                     <!-- Additional rows appended via JS -->
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 6px;">
-                    <button type="button" id="cardAddRowBtn" onclick="addExtraFilterRow()" style="background: #fff7ed; border: 1.5px solid #ffedd5; color: #ea580c; border-radius: 8px; font-weight: 700; font-size: 0.76rem; padding: 5px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 10px; margin-top: 8px; gap: 8px;">
+                    <button type="button" id="cardAddRowBtn" onclick="addExtraFilterRow()" style="background: #fff7ed; border: 1.5px solid #ffedd5; color: #ea580c; border-radius: 8px; font-weight: 700; font-size: 0.76rem; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s ease;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Tambah Baris Filter
+                        Tambah Baris
                     </button>
-                    <button type="button" onclick="resetHeaderMultiSearch()" style="background: none; border: none; color: #dc2626; font-weight: 700; font-size: 0.76rem; cursor: pointer; padding: 5px 8px;">
-                        Reset All Filters
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" onclick="resetHeaderMultiSearch()" style="background: none; border: none; color: #dc2626; font-weight: 700; font-size: 0.76rem; cursor: pointer; padding: 6px 8px;">
+                            Reset
+                        </button>
+                        <button type="button" onclick="triggerSearchSubmit()" style="background: #ea580c; border: none; color: #ffffff; border-radius: 8px; font-weight: 700; font-size: 0.78rem; padding: 6px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25); transition: all 0.15s ease;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            Cari Filter
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1345,6 +1423,15 @@
                         </select>
                     </div>
                 </div>
+            </div>
+
+            <!-- Table Column Header -->
+            <div class="table-column-header">
+                <div class="th-col th-room">Ruangan</div>
+                <div class="th-col th-user-time">Peminjam & Waktu</div>
+                <div class="th-col th-date">Tanggal</div>
+                <div class="th-col th-desc">Keterangan / Keperluan</div>
+                <div class="th-col th-status">Status</div>
             </div>
 
             <!-- Table Cards List (Scrollable) -->
@@ -1611,6 +1698,7 @@
                 <div style="position: relative; flex: 1; display: flex; align-items: center;" id="valContainer_${rowId}">
                     <input type="text" class="extra-input-key" placeholder="Ketik kode / nama ruangan..." 
                            oninput="handleUnifiedMultiSearch(this)" 
+                           onkeydown="if(event.key === 'Enter') { handleUnifiedMultiSearch(this, true); hideAutocomplete(); }"
                            autocomplete="off">
                 </div>
 
@@ -1751,7 +1839,6 @@
             }
 
             hideAutocomplete();
-            applyMultiFilters();
         }
 
         function setupDatePickerIfNeeded(inputEl, catVal) {
@@ -1912,7 +1999,17 @@
         // ==========================================
         // AUTOCOMPLETE & SEARCH LOGIC
         // ==========================================
-        function handleUnifiedMultiSearch(inputEl) {
+        function triggerSearchSubmit() {
+            const mainInput = document.getElementById('mainSearchInput');
+            if (mainInput) {
+                handleUnifiedMultiSearch(mainInput, true);
+            } else {
+                applyMultiFilters();
+            }
+            hideAutocomplete();
+        }
+
+        function handleUnifiedMultiSearch(inputEl, isImmediate = false) {
             activeTargetInput = inputEl;
             const clearBtn = document.getElementById('clearMainSearchBtn');
             if (clearBtn && inputEl.id === 'mainSearchInput') {
@@ -1928,14 +2025,18 @@
 
             const query = inputEl.value.trim().toLowerCase();
 
-            // Handle Autocomplete Suggestions for Kategori and Ruangan
+            // Handle Autocomplete Suggestions for Kategori and Ruangan (Saran saat mengetik)
             if (query.length > 0 && (catType === 'kategori' || catType === 'ruangan' || catType === 'keyword')) {
                 showAutocomplete(inputEl, query, catType);
             } else {
                 hideAutocomplete();
             }
 
-            applyMultiFilters();
+            // HANYA FILTER SAAT ENTER / KLIK CARI / PILIH DROPDOWN / HAPUS INPUT
+            // (Mencegah beban komputasi berat saat ribuan data diketik)
+            if (isImmediate || query.length === 0) {
+                applyMultiFilters();
+            }
         }
 
         function clearMainSearch() {
@@ -2058,6 +2159,7 @@
                 activeTargetInput.value = val;
                 activeTargetInput.focus();
             }
+            if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
             hideAutocomplete();
             applyMultiFilters();
         }
@@ -2124,16 +2226,57 @@
             }
         }
 
+        // ==========================================
+        // INDONESIAN DATE FORMATTING UTILITIES
+        // ==========================================
+        const INDO_MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const INDO_MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        function formatIndoDate(dateInput, short = false) {
+            if (!dateInput) return '-';
+            const parts = String(dateInput).split('T')[0].split('-');
+            if (parts.length < 3) return dateInput;
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            if (isNaN(year) || isNaN(month) || isNaN(day) || month < 0 || month > 11) return dateInput;
+            const monthName = short ? INDO_MONTHS_SHORT[month] : INDO_MONTHS[month];
+            return `${day} ${monthName} ${year}`;
+        }
+
+        function formatIndoDateRange(startStr, endStr, short = false) {
+            if (!startStr) return '-';
+            if (!endStr || startStr === endStr) {
+                return formatIndoDate(startStr, short);
+            }
+            const p1 = String(startStr).split('-');
+            const p2 = String(endStr).split('-');
+            if (p1.length < 3 || p2.length < 3) return `${startStr} - ${endStr}`;
+            
+            const y1 = parseInt(p1[0], 10), m1 = parseInt(p1[1], 10) - 1, d1 = parseInt(p1[2], 10);
+            const y2 = parseInt(p2[0], 10), m2 = parseInt(p2[1], 10) - 1, d2 = parseInt(p2[2], 10);
+
+            const mName1 = short ? INDO_MONTHS_SHORT[m1] : INDO_MONTHS[m1];
+            const mName2 = short ? INDO_MONTHS_SHORT[m2] : INDO_MONTHS[m2];
+
+            if (y1 === y2 && m1 === m2) {
+                return `${d1} - ${d2} ${mName2} ${y2}`;
+            } else if (y1 === y2) {
+                return `${d1} ${mName1} - ${d2} ${mName2} ${y2}`;
+            } else {
+                return `${d1} ${mName1} ${y1} - ${d2} ${mName2} ${y2}`;
+            }
+        }
+
         function updateHeaderMonthTitle() {
             const monthTitle = document.getElementById('gcalMonthTitle');
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
             if (monthTitle) {
                 const endOfWeek = new Date(currentWeekStart);
                 endOfWeek.setDate(endOfWeek.getDate() + 6);
                 if (currentWeekStart.getMonth() === endOfWeek.getMonth()) {
-                    monthTitle.innerText = `${monthNames[currentWeekStart.getMonth()]} ${currentWeekStart.getFullYear()}`;
+                    monthTitle.innerText = `${INDO_MONTHS[currentWeekStart.getMonth()]} ${currentWeekStart.getFullYear()}`;
                 } else {
-                    monthTitle.innerText = `${monthNames[currentWeekStart.getMonth()].substring(0,3)} - ${monthNames[endOfWeek.getMonth()].substring(0,3)} ${endOfWeek.getFullYear()}`;
+                    monthTitle.innerText = `${INDO_MONTHS_SHORT[currentWeekStart.getMonth()]} - ${INDO_MONTHS_SHORT[endOfWeek.getMonth()]} ${endOfWeek.getFullYear()}`;
                 }
             }
         }
@@ -2289,7 +2432,11 @@
                         </div>
 
                         <div class="tr-date-col">
-                            ${b.tanggal_mulai || '-'}
+                            ${formatIndoDateRange(b.tanggal_mulai, b.tanggal_selesai)}
+                        </div>
+
+                        <div class="tr-desc-col" title="${b.keterangan || '-'}">
+                            <span class="tr-desc-text">${b.keterangan || '-'}</span>
                         </div>
 
                         <div class="tr-status-col">
@@ -2633,11 +2780,7 @@
             document.getElementById('detailNamaRuangan').innerText = booking.nama_ruangan || '';
             document.getElementById('detailNamaLengkap').innerText = booking.nama_lengkap || '-';
 
-            let tglStr = booking.tanggal_mulai;
-            if (booking.tanggal_selesai && booking.tanggal_selesai !== booking.tanggal_mulai) {
-                tglStr += ' s/d ' + booking.tanggal_selesai;
-            }
-            document.getElementById('detailTanggal').innerText = tglStr;
+            document.getElementById('detailTanggal').innerText = formatIndoDateRange(booking.tanggal_mulai, booking.tanggal_selesai);
 
             const jMulai = booking.jam_mulai ? booking.jam_mulai.substring(0, 5) : '00:00';
             const jSelesai = booking.jam_selesai ? booking.jam_selesai.substring(0, 5) : '00:00';
