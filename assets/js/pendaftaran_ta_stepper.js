@@ -18,15 +18,18 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentStep = 1;
     let isRestoringDraft = false;
 
-    // Direct navigation support from Dashboard redirect (e.g. ?step=3) or localStorage / sessionStorage
+    // Direct navigation support from Dashboard redirect (e.g. ?step=3), localStorage / sessionStorage, or server DB draft step
     const urlParams = new URLSearchParams(window.location.search);
     const urlStep = parseInt(urlParams.get('step'));
     const savedStep = parseInt(localStorage.getItem(STEP_KEY) || sessionStorage.getItem(STEP_KEY));
+    const serverStep = parseInt(window.SERVER_DRAFT_STEP);
 
     if (urlStep && urlStep >= 1 && urlStep <= totalSteps) {
         currentStep = urlStep;
     } else if (savedStep && savedStep >= 1 && savedStep <= totalSteps) {
         currentStep = savedStep;
+    } else if (serverStep && serverStep >= 1 && serverStep <= totalSteps) {
+        currentStep = serverStep;
     }
 
     const btnNext = document.getElementById('btnNext');
@@ -55,23 +58,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         clearTimeout(toastTimeout);
         toastTimeout = setTimeout(() => {
-            hideInPageAlert();
+            toastAlert.classList.add('translate-y-[-20px]', 'opacity-0');
+            setTimeout(() => {
+                toastAlert.classList.add('hidden');
+            }, 300);
         }, 5000);
     }
 
-    function hideInPageAlert() {
-        if (!toastAlert) return;
-        toastAlert.classList.add('opacity-0', 'translate-y-[-20px]');
-        setTimeout(() => {
-            toastAlert.classList.add('hidden');
-        }, 300);
-    }
-
     if (btnCloseToast) {
-        btnCloseToast.addEventListener('click', hideInPageAlert);
+        btnCloseToast.addEventListener('click', () => {
+            toastAlert.classList.add('translate-y-[-20px]', 'opacity-0');
+            setTimeout(() => {
+                toastAlert.classList.add('hidden');
+            }, 300);
+        });
     }
 
-    // Update UI step state
+    // Update Stepper UI and Steps
     function updateStepUI() {
         if (stepCounterText) {
             stepCounterText.textContent = `LANGKAH ${currentStep} / ${totalSteps}`;
@@ -111,36 +114,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     stepItem.classList.add('active');
                     stepItem.classList.remove('completed');
                     if (counter) {
-                        counter.className = 'step-counter w-11 h-11 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center text-sm shadow-md ring-8 ring-orange-100 transition-all duration-300 z-10';
+                        counter.className = 'step-counter w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-bold flex items-center justify-center text-sm box-3d ring-4 ring-orange-200/80 transition-all duration-300 z-10';
                         counter.innerHTML = i;
                     }
                     if (title) {
-                        title.className = 'step-title font-bold text-xs text-orange-500 mt-2.5 text-center transition-all duration-300';
+                        title.className = 'step-title font-bold text-xs sm:text-sm text-orange-600 mt-2 text-center transition-all duration-300 px-1';
                     }
                 } else if (i < currentStep) {
                     stepItem.classList.add('completed');
                     stepItem.classList.remove('active');
                     if (counter) {
-                        counter.className = 'step-counter w-11 h-11 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm transition-all duration-300 z-10';
+                        counter.className = 'step-counter w-11 h-11 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm border border-slate-300 transition-all duration-300 z-10';
                         counter.innerHTML = '<i class="bi bi-check-lg text-base"></i>';
                     }
                     if (title) {
-                        title.className = 'step-title font-medium text-xs text-slate-500 mt-2.5 text-center transition-all duration-300';
+                        title.className = 'step-title font-medium text-xs sm:text-sm text-slate-600 mt-2 text-center transition-all duration-300 px-1';
                     }
                 } else {
                     stepItem.classList.remove('active', 'completed');
                     if (counter) {
-                        counter.className = 'step-counter w-11 h-11 rounded-full bg-slate-100 text-slate-400 font-semibold flex items-center justify-center text-sm transition-all duration-300 z-10';
+                        counter.className = 'step-counter w-11 h-11 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-sm transition-all duration-300 z-10';
                         counter.innerHTML = i;
                     }
                     if (title) {
-                        title.className = 'step-title font-medium text-xs text-slate-400 mt-2.5 text-center transition-all duration-300';
+                        title.className = 'step-title font-medium text-xs sm:text-sm text-slate-400 mt-2 text-center transition-all duration-300 px-1';
                     }
                 }
             }
         }
 
-        // Stepper progress line width
         const progressLine = document.getElementById('stepperProgressLine');
         if (progressLine) {
             const percent = ((currentStep - 1) / (totalSteps - 1)) * 100;
@@ -175,82 +177,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             return false;
         }
-
-        // Update Right Sidebar (Progres Pendaftaran)
-        let filledCount = 0;
-        for (let i = 1; i <= totalSteps; i++) {
-            const sideItem = document.getElementById(`side-step-${i}`);
-            if (!sideItem) continue;
-
-            const counter = sideItem.querySelector('.side-step-counter');
-            const title = sideItem.querySelector('.side-step-title');
-            const badge = sideItem.querySelector('.side-step-badge');
-
-            const isFilled = checkStepCompletionStatus(i);
-            if (isFilled) filledCount++;
-
-            // Sidebar item clickable to navigate back to previous steps
-            sideItem.style.cursor = (i <= currentStep) ? 'pointer' : 'default';
-            sideItem.onclick = () => {
-                if (i < currentStep) {
-                    currentStep = i;
-                    updateStepUI();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            };
-
-            if (i === currentStep) {
-                sideItem.classList.remove('opacity-50');
-                sideItem.classList.add('opacity-100');
-                if (counter) {
-                    if (isFilled) {
-                        counter.className = 'side-step-counter w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0';
-                        counter.innerHTML = '<i class="bi bi-check-lg text-xs"></i>';
-                    } else {
-                        counter.className = 'side-step-counter w-7 h-7 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-bold text-xs flex items-center justify-center box-3d shrink-0';
-                        counter.textContent = i;
-                    }
-                }
-                if (title) title.className = 'side-step-title text-xs font-bold text-slate-900';
-                if (badge) {
-                    badge.textContent = isFilled ? 'Terisi' : 'Aktif';
-                    badge.className = isFilled 
-                        ? 'side-step-badge text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200 block'
-                        : 'side-step-badge text-[10px] font-bold text-orange-700 bg-orange-100/90 px-2.5 py-0.5 rounded-full border border-orange-200 block';
-                }
-            } else if (isFilled) {
-                sideItem.classList.remove('opacity-50');
-                sideItem.classList.add('opacity-100');
-                if (counter) {
-                    counter.className = 'side-step-counter w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center shadow-xs shrink-0';
-                    counter.innerHTML = '<i class="bi bi-check-lg text-xs"></i>';
-                }
-                if (title) title.className = 'side-step-title text-xs font-semibold text-slate-800';
-                if (badge) {
-                    badge.textContent = 'Terisi';
-                    badge.className = 'side-step-badge text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200 block';
-                }
-            } else {
-                sideItem.classList.add('opacity-50');
-                sideItem.classList.remove('opacity-100');
-                if (counter) {
-                    counter.className = 'side-step-counter w-7 h-7 rounded-full bg-slate-100 text-slate-400 font-semibold text-xs border border-slate-300 flex items-center justify-center shrink-0';
-                    counter.textContent = i;
-                }
-                if (title) title.className = 'side-step-title text-xs font-medium text-slate-400';
-                if (badge) {
-                    badge.classList.add('hidden');
-                }
-            }
-        }
-
-        // Calculate and update Kelengkapan Percentage Bar based on REAL file uploads
-        const completenessPercent = Math.round((filledCount / totalSteps) * 100);
-        const percentText = document.getElementById('sidebarCompletenessPercent');
-        const percentBar = document.getElementById('sidebarCompletenessBar');
-
-        if (percentText) percentText.textContent = `${completenessPercent}%`;
-        if (percentBar) percentBar.style.width = `${completenessPercent}%`;
 
         // Control Buttons
         if (btnPrev) {
@@ -321,10 +247,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (step === 3) {
             const inputKsm = document.querySelector('input[name="file_ksm"]');
             const oldKsm = document.querySelector('input[name="file_ksm_old"]');
-            const hasFile = (inputKsm && inputKsm.files && inputKsm.files.length > 0) || (oldKsm && oldKsm.value.trim() !== '');
-            if (!hasFile) {
+            const hasKsm = (inputKsm && inputKsm.files && inputKsm.files.length > 0) || (oldKsm && oldKsm.value.trim() !== '');
+            if (!hasKsm) {
                 isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF KSM pada Langkah 3 sebelum melanjutkan!';
+                errorMessage = '⚠️ Harap unggah berkas KSM PDF pada Langkah 3 sebelum melanjutkan!';
                 inputKsm?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
             } else {
                 inputKsm?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
@@ -332,10 +258,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (step === 4) {
             const inputTranskrip = document.querySelector('input[name="file_transkrip"]');
             const oldTranskrip = document.querySelector('input[name="file_transkrip_old"]');
-            const hasFile = (inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0) || (oldTranskrip && oldTranskrip.value.trim() !== '');
-            if (!hasFile) {
+            const hasTranskrip = (inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0) || (oldTranskrip && oldTranskrip.value.trim() !== '');
+            if (!hasTranskrip) {
                 isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF Transkrip Nilai pada Langkah 4 sebelum melanjutkan!';
+                errorMessage = '⚠️ Harap unggah berkas Transkrip Nilai PDF pada Langkah 4 sebelum melanjutkan!';
                 inputTranskrip?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
             } else {
                 inputTranskrip?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
@@ -343,10 +269,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (step === 5) {
             const inputPernyataan = document.querySelector('input[name="file_pernyataan"]');
             const oldPernyataan = document.querySelector('input[name="file_pernyataan_old"]');
-            const hasFile = (inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0) || (oldPernyataan && oldPernyataan.value.trim() !== '');
-            if (!hasFile) {
+            const hasPernyataan = (inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0) || (oldPernyataan && oldPernyataan.value.trim() !== '');
+            if (!hasPernyataan) {
                 isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF Surat Pernyataan pada Langkah 5 sebelum melanjutkan!';
+                errorMessage = '⚠️ Harap unggah berkas Surat Pernyataan PDF pada Langkah 5 sebelum melanjutkan!';
                 inputPernyataan?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
             } else {
                 inputPernyataan?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
@@ -354,10 +280,10 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (step === 6) {
             const inputBebasLab = document.querySelector('input[name="file_bebas_lab"]');
             const oldBebasLab = document.querySelector('input[name="file_bebas_lab_old"]');
-            const hasFile = (inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0) || (oldBebasLab && oldBebasLab.value.trim() !== '');
-            if (!hasFile) {
+            const hasBebasLab = (inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0) || (oldBebasLab && oldBebasLab.value.trim() !== '');
+            if (!hasBebasLab) {
                 isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF Surat Bebas Lab pada Langkah 6 sebelum mengirim pendaftaran!';
+                errorMessage = '⚠️ Harap unggah berkas Surat Bebas Lab PDF pada Langkah 6 sebelum mengirim pendaftaran!';
                 inputBebasLab?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
             } else {
                 inputBebasLab?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
@@ -386,10 +312,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnNext) {
         btnNext.addEventListener('click', function () {
             if (validateStep(currentStep)) {
-                saveDraft();
                 if (currentStep < totalSteps) {
                     currentStep++;
                     updateStepUI();
+                    saveDraft();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             }
@@ -398,10 +324,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (btnPrev) {
         btnPrev.addEventListener('click', function () {
-            saveDraft();
             if (currentStep > 1) {
                 currentStep--;
                 updateStepUI();
+                saveDraft();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 const dashboardLink = document.querySelector('a[href*="/mahasiswa"]')?.href;
@@ -659,7 +585,50 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // --- DRAFT FORM PERSISTENCE ---
+    // --- DRAFT FORM PERSISTENCE WITH SERVER-SYNC ---
+    let serverSaveTimeout = null;
+
+    function setAutoSaveIndicator(status) {
+        const indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) return;
+
+        if (status === 'saving') {
+            indicator.className = 'text-[11px] font-bold text-amber-700 bg-amber-100/90 border border-amber-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs transition-all';
+            indicator.innerHTML = '<i class="bi bi-arrow-repeat animate-spin text-amber-600"></i><span id="autoSaveText">Menyimpan ke Server...</span>';
+        } else if (status === 'saved') {
+            indicator.className = 'text-[11px] font-bold text-emerald-700 bg-emerald-100/90 border border-emerald-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs transition-all';
+            indicator.innerHTML = '<i class="bi bi-cloud-check-fill text-emerald-600"></i><span id="autoSaveText">Tersimpan di Server</span>';
+        }
+    }
+
+    function saveDraftToServer(draftData) {
+        if (!window.SAVE_DRAFT_AJAX_URL) return;
+        setAutoSaveIndicator('saving');
+
+        const formData = new FormData();
+        formData.append('draft_step', draftData.draft_step || currentStep);
+        if (draftData.jenis_ta) formData.append('jenis_ta', draftData.jenis_ta);
+        if (draftData.judul_1 !== undefined) formData.append('judul_1', draftData.judul_1);
+        if (draftData.judul_2 !== undefined) formData.append('judul_2', draftData.judul_2);
+        if (draftData.judul_3 !== undefined) formData.append('judul_3', draftData.judul_3);
+        if (draftData.judul_en !== undefined) formData.append('judul_en', draftData.judul_en);
+
+        fetch(window.SAVE_DRAFT_AJAX_URL, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.success) {
+                setAutoSaveIndicator('saved');
+            }
+        })
+        .catch(err => {
+            console.warn('Auto-save to server warning:', err);
+            setAutoSaveIndicator('saved');
+        });
+    }
+
     function saveDraft() {
         if (isRestoringDraft) return;
         try {
@@ -682,6 +651,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const draft = {
+                draft_step: currentStep,
                 jenis_ta: jenisVal,
                 judul_1: j1Val,
                 judul_2: j2Val,
@@ -694,6 +664,12 @@ document.addEventListener('DOMContentLoaded', function () {
             sessionStorage.setItem(DRAFT_KEY, payload);
             localStorage.setItem(STEP_KEY, currentStep);
             sessionStorage.setItem(STEP_KEY, currentStep);
+
+            // Debounce background server sync (400ms)
+            clearTimeout(serverSaveTimeout);
+            serverSaveTimeout = setTimeout(() => {
+                saveDraftToServer(draft);
+            }, 400);
         } catch (e) {}
     }
 
@@ -993,6 +969,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             updateAddButtonState();
         });
+    });
+
+    // Attach real-time input listeners for auto-saving title fields
+    ['inputJudul1', 'inputJudul2', 'inputJudul3', 'inputJudulEn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => {
+                saveDraft();
+            });
+            el.addEventListener('change', () => {
+                saveDraft();
+            });
+        }
     });
 
     // Initialize UI and load draft on load

@@ -336,8 +336,8 @@
 
         .modal-card {
             width: 100%;
-            max-width: 680px;
-            max-height: 88vh;
+            max-width: 780px;
+            max-height: 90vh;
             background: #ffffff;
             border-radius: 20px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.25);
@@ -345,6 +345,7 @@
             display: flex;
             flex-direction: column;
             margin: auto;
+            box-sizing: border-box;
         }
 
         .modal-card form {

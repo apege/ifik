@@ -1,144 +1,158 @@
-<!-- Global Custom Cursor Partial: Glowing Orange Solid Circle (Strict Hide Default Laptop Cursor Everywhere) -->
+<!-- Global Custom Cursor Partial: Glowing Orange Solid Circle (Hover Expand Support) -->
 <style>
     /* Ensure SweetAlert2 popups always render in front of all modal overlays */
     .swal2-container {
         z-index: 2147483600 !important;
     }
 
-    /* Hide default laptop/OS cursor on ALL elements & pseudo-elements globally */
-    html, body, *, *::before, *::after, 
-    a, button, input, select, textarea, label, option, optgroup, [role="button"], img, table, tr, td, th, 
-    ::-webkit-scrollbar, ::-webkit-scrollbar-thumb, ::-webkit-resizer, .swal2-container, .swal2-popup, .swal2-styled {
+    /* Hide default laptop/OS cursor on ALL elements globally */
+    *, *::before, *::after, html, body, a, button, input, select, textarea, label, [role="button"], tr, td, th {
         cursor: none !important;
     }
 
-    /* Hide default browser up/down number input spinners */
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        margin: 0 !important;
-        display: none !important;
-    }
-    input[type=number] {
-        -moz-appearance: textfield !important;
-    }
-
-    .custom-cursor-circle {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 18px;
-        height: 18px;
-        border: 2.5px solid #ea580c;
-        background: rgba(234, 88, 12, 0.45);
-        backdrop-filter: blur(1px);
-        -webkit-backdrop-filter: blur(1px);
-        border-radius: 50%;
-        pointer-events: none;
+    #customCursorCircle {
+        position: fixed !important;
+        top: -100px;
+        left: -100px;
+        width: 24px !important;
+        height: 24px !important;
+        border: 2.5px solid #ea580c !important;
+        background: rgba(234, 88, 12, 0.25) !important;
+        backdrop-filter: blur(1px) !important;
+        -webkit-backdrop-filter: blur(1px) !important;
+        border-radius: 50% !important;
+        pointer-events: none !important;
         z-index: 2147483647 !important;
-        transform: translate(-50%, -50%);
-        transition: width 0.18s cubic-bezier(0.25, 1, 0.5, 1),
-                    height 0.18s cubic-bezier(0.25, 1, 0.5, 1),
-                    background-color 0.18s ease,
-                    border-color 0.18s ease,
-                    opacity 0.25s ease;
-        box-shadow: 0 0 12px rgba(234, 88, 12, 0.8);
-        opacity: 0;
+        transform: translate(-50%, -50%) !important;
+        box-shadow: 0 0 16px rgba(234, 88, 12, 0.8), inset 0 0 6px rgba(234, 88, 12, 0.2) !important;
+        transition: width 0.22s cubic-bezier(0.25, 1, 0.5, 1),
+                    height 0.22s cubic-bezier(0.25, 1, 0.5, 1),
+                    background-color 0.22s ease,
+                    border-color 0.22s ease,
+                    border-width 0.22s ease,
+                    box-shadow 0.22s ease !important;
+        will-change: left, top, width, height;
     }
 
-    body.cursor-hover .custom-cursor-circle {
-        width: 32px;
-        height: 32px;
-        background: rgba(234, 88, 12, 0.55);
-        border-color: #ea580c;
-        border-width: 3px;
-        box-shadow: 0 0 18px rgba(234, 88, 12, 0.95);
+    /* Membesar saat mendekat / hover ke button, link, atau elemen interaktif */
+    html.cursor-hover #customCursorCircle,
+    body.cursor-hover #customCursorCircle,
+    #customCursorCircle.hovered {
+        width: 48px !important;
+        height: 48px !important;
+        background: rgba(234, 88, 12, 0.35) !important;
+        border-color: #ea580c !important;
+        border-width: 3px !important;
+        box-shadow: 0 0 26px rgba(234, 88, 12, 0.95), inset 0 0 10px rgba(234, 88, 12, 0.35) !important;
     }
 
-    body.cursor-active .custom-cursor-circle {
-        width: 12px;
-        height: 12px;
-        background: #ea580c;
-        border-color: #ea580c;
-        box-shadow: 0 0 10px #ea580c;
+    /* Efek klik ditekan */
+    html.cursor-active #customCursorCircle,
+    body.cursor-active #customCursorCircle,
+    #customCursorCircle.active {
+        width: 14px !important;
+        height: 14px !important;
+        background: #ea580c !important;
+        border-color: #ea580c !important;
+        border-width: 3px !important;
     }
 </style>
 
-<div class="custom-cursor-dot" id="customCursorDot"></div>
-<div class="custom-cursor-circle" id="customCursorCircle"></div>
+<div id="customCursorCircle"></div>
 
 <script>
-    (function() {
-        document.addEventListener('DOMContentLoaded', () => {
-            const circle = document.getElementById('customCursorCircle');
-            if (!circle) return;
+(function() {
+    function setupCursor() {
+        let circle = document.getElementById('customCursorCircle');
+        const rootContainer = document.documentElement || document.body;
 
-            let mouseX = -100, mouseY = -100;
-            let circleX = -100, circleY = -100;
-            let isVisible = false;
+        if (!circle) {
+            circle = document.createElement('div');
+            circle.id = 'customCursorCircle';
+            rootContainer.appendChild(circle);
+        } else if (circle.parentElement !== rootContainer) {
+            rootContainer.appendChild(circle);
+        }
 
-            window.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
+        let mouseX = -100, mouseY = -100;
+        let circleX = -100, circleY = -100;
 
-                if (!isVisible) {
-                    circle.style.opacity = '1';
-                    isVisible = true;
-                }
-            });
+        function updateMouse(e) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        }
 
-            window.addEventListener('mouseleave', () => {
-                circle.style.opacity = '0';
-                isVisible = false;
-            });
-
-            window.addEventListener('mouseenter', () => {
-                circle.style.opacity = '1';
-                isVisible = true;
-            });
-
-            function renderCursor() {
-                circleX += (mouseX - circleX) * 0.24;
-                circleY += (mouseY - circleY) * 0.24;
-
-                circle.style.transform = `translate(${circleX}px, ${circleY}px) translate(-50%, -50%)`;
-                requestAnimationFrame(renderCursor);
+        function updateTouch(e) {
+            if (e.touches && e.touches[0]) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
             }
-            requestAnimationFrame(renderCursor);
+        }
 
-            // Force hide default cursor on pointerdown/focus events everywhere
-            ['focusin', 'click', 'pointerdown', 'mousemove'].forEach(evt => {
-                document.addEventListener(evt, (e) => {
-                    document.documentElement.style.cursor = 'none';
-                    document.body.style.cursor = 'none';
-                    if (e.target && e.target.style) {
-                        e.target.style.cursor = 'none';
-                    }
-                }, true);
-            });
+        window.addEventListener('mousemove', updateMouse, { passive: true });
+        document.addEventListener('mousemove', updateMouse, { passive: true });
+        window.addEventListener('pointermove', updateMouse, { passive: true });
+        document.addEventListener('pointermove', updateMouse, { passive: true });
+        window.addEventListener('touchmove', updateTouch, { passive: true });
+        window.addEventListener('touchstart', updateTouch, { passive: true });
 
-            // Hover state logic for all interactive elements
-            const hoverTargets = 'a, button, input, select, textarea, [role="button"], .card, tr, .btn-action, .lab-add-room-btn, .file-pill, label, option';
-            document.addEventListener('mouseover', (e) => {
-                if (e.target.closest(hoverTargets)) {
-                    document.body.classList.add('cursor-hover');
-                }
-            });
+        function render() {
+            circleX += (mouseX - circleX) * 0.28;
+            circleY += (mouseY - circleY) * 0.28;
+            circle.style.left = circleX + 'px';
+            circle.style.top = circleY + 'px';
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
 
-            document.addEventListener('mouseout', (e) => {
-                if (e.target.closest(hoverTargets)) {
-                    document.body.classList.remove('cursor-hover');
-                }
-            });
+        // Selector seluruh elemen yang bisa diklik / berinteraksi
+        const hoverSelector = 'a, button, input, select, textarea, label, [role="button"], tr, [onclick], .cursor-pointer, .box-3d, .btn-action, .nav-link, .card-3d-orange, img, svg, i.bi, i.fa-solid';
+        
+        document.addEventListener('mouseover', function(e) {
+            if (e.target && e.target.closest && (e.target.closest(hoverSelector) || window.getComputedStyle(e.target).cursor === 'pointer')) {
+                document.documentElement.classList.add('cursor-hover');
+                document.body.classList.add('cursor-hover');
+                circle.classList.add('hovered');
+            }
+        }, { passive: true });
 
-            document.addEventListener('mousedown', () => {
-                document.body.classList.add('cursor-active');
-            });
+        document.addEventListener('mouseout', function(e) {
+            if (e.target && e.target.closest && (e.target.closest(hoverSelector) || window.getComputedStyle(e.target).cursor === 'pointer')) {
+                document.documentElement.classList.remove('cursor-hover');
+                document.body.classList.remove('cursor-hover');
+                circle.classList.remove('hovered');
+            }
+        }, { passive: true });
 
-            document.addEventListener('mouseup', () => {
-                document.body.classList.remove('cursor-active');
-            });
-        });
-    })();
+        document.addEventListener('mousedown', function() {
+            document.documentElement.classList.add('cursor-active');
+            document.body.classList.add('cursor-active');
+            circle.classList.add('active');
+        }, { passive: true });
+
+        document.addEventListener('mouseup', function() {
+            document.documentElement.classList.remove('cursor-active');
+            document.body.classList.remove('cursor-active');
+            circle.classList.remove('active');
+        }, { passive: true });
+
+        document.addEventListener('pointerdown', function() {
+            document.documentElement.classList.add('cursor-active');
+            document.body.classList.add('cursor-active');
+            circle.classList.add('active');
+        }, { passive: true });
+
+        document.addEventListener('pointerup', function() {
+            document.documentElement.classList.remove('cursor-active');
+            document.body.classList.remove('cursor-active');
+            circle.classList.remove('active');
+        }, { passive: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupCursor);
+    } else {
+        setupCursor();
+    }
+})();
 </script>

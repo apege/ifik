@@ -353,7 +353,7 @@
     .modal-overlay.active { display: flex; }
     .modal-card {
       width: 100%;
-      max-width: 680px;
+      max-width: 780px;
       max-height: 90vh;
       background: #ffffff;
       border-radius: 20px;
@@ -362,6 +362,7 @@
       display: flex;
       flex-direction: column;
       margin: auto;
+      box-sizing: border-box;
     }
     .modal-card form {
       display: flex;
@@ -369,49 +370,67 @@
       flex: 1;
       overflow: hidden;
       min-height: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
     .modal-header {
-      padding: 18px 24px;
+      padding: 18px 26px;
       background: #0f172a;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
     .modal-header h3 { font-size: 1.05rem; font-weight: 800; }
     .modal-close {
       background: none; border: none;
       color: #94a3b8; font-size: 1.5rem;
       cursor: pointer;
+      transition: color 0.15s;
     }
+    .modal-close:hover { color: #ffffff; }
     .modal-body {
-      padding: 22px;
+      padding: 24px 28px;
       overflow-y: auto;
+      overflow-x: hidden;
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .modal-footer {
-      padding: 16px 24px;
+      padding: 16px 26px;
       background: #f8fafc;
       border-top: 1px solid #e2e8f0;
       display: flex;
       justify-content: flex-end;
       gap: 12px;
       flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
     .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .form-grid-2 > div {
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
     @media(max-width: 640px) {
       .form-grid-2 { grid-template-columns: 1fr; }
     }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; width: 100%; box-sizing: border-box; }
     .form-group label {
       font-size: 0.78rem;
       font-weight: 800;
@@ -480,7 +499,7 @@
     .upload-dropzone {
       background: #f8fafc;
       border: 2px dashed #cbd5e1;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 16px 12px;
       display: flex;
       flex-direction: column;
@@ -491,6 +510,8 @@
       cursor: pointer;
       transition: all 0.25s ease;
       min-height: 110px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .upload-dropzone:hover { border-color: #ea580c; background: #fffaf5; }
     .upload-dropzone.dragover { border-color: #ea580c; background: #fff7ed; }
@@ -500,22 +521,67 @@
     }
     .dropzone-preview {
       width: 100%;
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       background: #ffffff;
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      margin-top: 8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1.5px solid #e2e8f0;
+      margin-top: 10px;
+      min-width: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
     .dropzone-preview img {
-      width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+      width: 42px; height: 42px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid #e2e8f0;
+    }
+    .dropzone-preview .preview-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex: 1;
+      min-width: 0;
+      gap: 2px;
+    }
+    .dropzone-preview .preview-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    .dropzone-preview .preview-size {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
     }
     .btn-remove-file {
-      width: 22px; height: 22px; border-radius: 50%; background: #fee2e2;
-      color: #ef4444; border: none; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; font-weight: 800; margin-left: auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #fee2e2;
+      color: #ef4444;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .btn-remove-file:hover {
+      background: #fecaca;
+      transform: scale(1.1);
     }
     .swal2-container { z-index: 99999999 !important; }
   </style>
@@ -944,9 +1010,9 @@
                           </div>
                           <div id="previewFotoBox" class="dropzone-preview" style="display:none;">
                               <img id="previewFotoImg" src="" alt="Preview Foto">
-                              <div style="display:flex; flex-direction:column; overflow:hidden; flex:1;">
-                                  <span id="previewFotoText" style="font-size:0.75rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">foto.jpg</span>
-                                  <span id="previewFotoSize" style="font-size:0.68rem; color:#64748b;">File Siap</span>
+                              <div class="preview-info">
+                                  <span id="previewFotoText" class="preview-name">foto.jpg</span>
+                                  <span id="previewFotoSize" class="preview-size">File Siap</span>
                               </div>
                               <button type="button" class="btn-remove-file" onclick="clearFileFoto(event)" title="Hapus berkas foto">&times;</button>
                           </div>
@@ -963,10 +1029,10 @@
                               <span style="font-size:0.68rem; color:#94a3b8; margin-top:2px;">.GLB, .FBX, .GLTF, .OBJ (Maks 50MB)</span>
                           </div>
                           <div id="previewModelBox" class="dropzone-preview" style="display:none;">
-                              <div style="width:38px; height:38px; border-radius:8px; background:#fff7ed; border:1px solid #ffedd5; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">🧊</div>
-                              <div style="display:flex; flex-direction:column; overflow:hidden; flex:1;">
-                                  <span id="previewModelText" style="font-size:0.75rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">model.glb</span>
-                                  <span id="previewModelSize" style="font-size:0.68rem; color:#64748b;">Model 3D Siap</span>
+                              <div style="width:42px; height:42px; border-radius:10px; background:#fff7ed; border:1px solid #ffedd5; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;">🧊</div>
+                              <div class="preview-info">
+                                  <span id="previewModelText" class="preview-name">model.glb</span>
+                                  <span id="previewModelSize" class="preview-size">Model 3D Siap</span>
                               </div>
                               <button type="button" class="btn-remove-file" onclick="clearFileModel(event)" title="Hapus berkas 3D">&times;</button>
                           </div>
