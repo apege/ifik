@@ -8,6 +8,24 @@ class User_model extends CI_Model {
         parent::__construct();
         date_default_timezone_set('Asia/Jakarta');
         $this->load->database();
+        $this->_ensure_columns();
+    }
+
+    private function _ensure_columns()
+    {
+        if (!$this->db->table_exists('users')) return;
+        $fields = $this->db->list_fields('users');
+        $user_cols = array(
+            'password_changed' => "TINYINT(1) NOT NULL DEFAULT 0",
+            'token'            => "VARCHAR(255) NULL",
+            'email_status'     => "VARCHAR(20) DEFAULT 'belum'",
+            'email_sent_at'    => "DATETIME NULL"
+        );
+        foreach ($user_cols as $col => $def) {
+            if (!in_array($col, $fields)) {
+                $this->db->query("ALTER TABLE `users` ADD COLUMN `{$col}` {$def}");
+            }
+        }
     }
 
     /**

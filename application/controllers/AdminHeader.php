@@ -18,8 +18,20 @@ class AdminHeader extends CI_Controller {
 
     public function index()
     {
+        $this->load->model('Booking_model');
         $data['settings'] = $this->Header_model->get_settings();
-        $data['slides'] = $this->Header_model->get_slides();
+        $data['slides']   = $this->Header_model->get_slides();
+        $data['kategori'] = $this->Booking_model->get_all_kategori();
+        
+        // Fetch data ruangan dengan nama kategori
+        $this->db->select('ruangan.*, kategori_ruangan.nama_kategori');
+        $this->db->from('ruangan');
+        $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
+        $this->db->order_by('ruangan.id', 'ASC');
+        $data['ruangan'] = $this->db->get()->result();
+
+        $data['active_tab'] = $this->input->get('tab', true) === 'fasilitas' ? 'fasilitas' : 'header';
+
         $this->load->view('admin/header_settings', $data);
     }
 

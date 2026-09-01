@@ -369,6 +369,7 @@
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_ksm" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_ksm_old" id="file_ksm_old" value="<?= htmlspecialchars($pendaftaran['file_ksm'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -431,6 +432,7 @@
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_transkrip" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_transkrip_old" id="file_transkrip_old" value="<?= htmlspecialchars($pendaftaran['file_transkrip'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -493,6 +495,7 @@
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_pernyataan" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_pernyataan_old" id="file_pernyataan_old" value="<?= htmlspecialchars($pendaftaran['file_pernyataan'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -555,6 +558,7 @@
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_bebas_lab" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_bebas_lab_old" id="file_bebas_lab_old" value="<?= htmlspecialchars($pendaftaran['file_bebas_lab'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -630,7 +634,8 @@
     </footer>
 
     <script>
-        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ''); ?>";
+        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ($this->session->userdata('nim') ?: ($this->session->userdata('nidn_nim') ?: ''))); ?>";
+        window.UPLOAD_AJAX_URL = "<?= site_url('mahasiswa/ajax_upload_file_ta'); ?>";
     </script>
     <script src="<?= base_url('assets/js/navbar_animated.js'); ?>?v=<?= time(); ?>"></script>
     <script src="<?= base_url('assets/js/pendaftaran_ta_stepper.js'); ?>?v=<?= time(); ?>"></script>

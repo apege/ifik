@@ -32,7 +32,15 @@ class Booking_model extends CI_Model {
                 `nama_ruangan` VARCHAR(150) NOT NULL,
                 `kapasitas` INT DEFAULT 30,
                 `lokasi` VARCHAR(150) DEFAULT 'Gedung Sebatik (FIK)',
-                `status` ENUM('Tersedia', 'Tidak Tersedia', 'Perbaikan') DEFAULT 'Tersedia'
+                `status` ENUM('Tersedia', 'Tidak Tersedia', 'Perbaikan') DEFAULT 'Tersedia',
+                `foto` VARCHAR(255) NULL,
+                `model_3d` VARCHAR(255) NULL,
+                `tagline` VARCHAR(255) NULL,
+                `jumlah_unit` VARCHAR(100) NULL,
+                `jam_operasional` VARCHAR(100) NULL,
+                `deskripsi` TEXT NULL,
+                `spesifikasi_fasilitas` TEXT NULL,
+                `tata_tertib` TEXT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
             $this->db->query("INSERT IGNORE INTO `ruangan` (`id`, `id_kategori`, `kode_ruangan`, `nama_ruangan`, `kapasitas`, `lokasi`, `status`) VALUES
@@ -40,6 +48,24 @@ class Booking_model extends CI_Model {
                 (2, 1, 'LAB-UIUX', 'Lab UI/UX & Web Development', 35, 'Gedung Sebatik Lt. 2', 'Tersedia'),
                 (3, 2, 'LAB-GRAFIS', 'Studio Desain Grafis & Seni', 30, 'Gedung Sebatik Lt. 1', 'Tersedia'),
                 (4, 3, 'AUD-FIK', 'Auditorium FIK', 150, 'Gedung Sebatik Lt. 3', 'Tersedia')");
+        } else {
+            // Auto-migrasi: pastikan seluruh kolom lengkap jika tabel dibuat dengan skema lama
+            $fields = $this->db->list_fields('ruangan');
+            $new_cols = array(
+                'foto'                  => "VARCHAR(255) NULL",
+                'model_3d'              => "VARCHAR(255) NULL",
+                'tagline'               => "VARCHAR(255) NULL",
+                'jumlah_unit'           => "VARCHAR(100) NULL",
+                'jam_operasional'       => "VARCHAR(100) NULL",
+                'deskripsi'             => "TEXT NULL",
+                'spesifikasi_fasilitas' => "TEXT NULL",
+                'tata_tertib'           => "TEXT NULL"
+            );
+            foreach ($new_cols as $col => $type) {
+                if (!in_array($col, $fields)) {
+                    $this->db->query("ALTER TABLE `ruangan` ADD COLUMN `{$col}` {$type}");
+                }
+            }
         }
 
         if (!$this->db->table_exists('peminjaman')) {

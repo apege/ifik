@@ -1180,7 +1180,7 @@
             const startM = document.getElementById('txtJamBukaMin').innerText;
             const endH = document.getElementById('txtJamTutupHour').innerText;
             const endM = document.getElementById('txtJamTutupMin').innerText;
-            document.getElementById('inputJamOperasional').value = `${formattedDays} | ${startH}:${startM} – ${endH}:${endM} WIB`;
+            document.getElementById('inputJamOperasional').value = `${formattedDays} | ${startH}:${startM} - ${endH}:${endM} WIB`;
         }
 
         function formatFileSize(bytes) {
@@ -1401,25 +1401,32 @@
 
             Swal.fire({
                 title: 'Menyimpan Data...',
-                text: 'Harap tunggu, berkas foto & 3D model sedang diunggah.',
+                text: 'Harap tunggu, data ruangan dan berkas sedang diproses...',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
 
             fetch(targetUrl, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
-            .then(res => res.text())
-            .then(text => {
+            .then(res => res.text().then(text => ({ ok: res.ok, status: res.status, text: text })))
+            .then(({ ok, status, text }) => {
                 try {
                     const data = JSON.parse(text);
                     if (data.status === 'success') {
                         Swal.fire('Berhasil!', data.message, 'success').then(() => {
                             window.location.reload();
                         });
+                    } else if (data.redirect) {
+                        Swal.fire('Sesi Login Berakhir', data.message || 'Silakan login kembali.', 'warning').then(() => {
+                            window.location.href = data.redirect;
+                        });
                     } else {
-                        Swal.fire('Gagal', data.message, 'error');
+                        Swal.fire('Gagal Menyimpan', data.message || 'Terjadi kesalahan pada data ruangan.', 'error');
                     }
                 } catch(e) {
                     console.error('Raw Server Output:', text);
@@ -1427,7 +1434,8 @@
                 }
             })
             .catch(err => {
-                Swal.fire('Error', 'Gagal terhubung ke server.', 'error');
+                console.error('Fetch Error:', err);
+                Swal.fire('Koneksi Terputus', 'Gagal terhubung ke server. Harap pastikan server aktif.', 'error');
             });
         }
 

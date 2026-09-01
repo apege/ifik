@@ -537,6 +537,69 @@ class Mahasiswa extends CI_Controller {
                 'judul_1'        => $pendaftaran['judul_1'] ?? ''
             ]));
     }
+
+    // AJAX Endpoint: Instant Background Auto-Upload berkas persyaratan TA (Step 3-6)
+    public function ajax_upload_file_ta() {
+        $nim = $this->_get_current_nim();
+        $field_name = $this->input->post('field_name'); // 'file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'
+
+        $allowed_fields = ['file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'];
+        if (!in_array($field_name, $allowed_fields)) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => false, 'message' => 'Field tidak valid.']));
+            return;
+        }
+
+        $upload_dir = './uploads/persyaratan_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config['upload_path']   = $upload_dir;
+        $config['allowed_types'] = 'pdf';
+        $config['max_size']      = 5120; // 5MB
+        $config['file_name']     = $field_name . '_' . $nim . '_' . time();
+
+        $this->load->library('upload', $config);
+        $this->upload->initialize($config);
+
+        if ($this->upload->do_upload($field_name)) {
+            $upload_data = $this->upload->data();
+            $file_name = $upload_data['file_name'];
+
+            // Simpan / update ke database sebagai draft
+            $existing_ta = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+            if ($existing_ta) {
+                $this->db->where('nim', $nim)->update('pendaftaran_ta', [$field_name => $file_name]);
+            } else {
+                $this->db->insert('pendaftaran_ta', [
+                    'nim'        => $nim,
+                    $field_name  => $file_name,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success'    => true,
+                    'field_name' => $field_name,
+                    'file_name'  => $file_name,
+                    'file_size'  => number_format($upload_data['file_size'] / 1024, 2) . ' MB',
+                    'file_url'   => base_url('uploads/persyaratan_ta/' . $file_name),
+                    'message'    => 'Berkas berhasil diunggah dan tersimpan di server.'
+                ]));
+        } else {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => false,
+                    'message' => strip_tags($this->upload->display_errors())
+                ]));
+        }
+    }
+
     // AJAX Endpoint: Get list of students and their previews for Dosen Bimbingan
     public function ajax_get_dosen_bimbingan() {
         header('Content-Type: application/json');

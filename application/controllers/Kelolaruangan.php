@@ -9,12 +9,37 @@ class Kelolaruangan extends CI_Controller {
         $this->load->helper(array('url', 'file'));
         $this->load->model('Booking_model');
         
+        $is_ajax = $this->input->is_ajax_request() || 
+                   $this->input->get_request_header('X-Requested-With') === 'XMLHttpRequest' ||
+                   (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
         // Autentikasi Khusus Admin System (role_id = 1)
         if (!$this->session->userdata('logged_in')) {
+            if ($is_ajax) {
+                if (ob_get_length()) ob_clean();
+                header('Content-Type: application/json');
+                http_response_code(401);
+                echo json_encode([
+                    'status'   => 'error', 
+                    'message'  => 'Sesi login telah berakhir. Silakan login kembali.',
+                    'redirect' => base_url('login')
+                ]);
+                exit;
+            }
             redirect('login');
         }
         
-        if ($this->session->userdata('role_id') != 1) {
+        if ((int)$this->session->userdata('role_id') !== 1) {
+            if ($is_ajax) {
+                if (ob_get_length()) ob_clean();
+                header('Content-Type: application/json');
+                http_response_code(403);
+                echo json_encode([
+                    'status'  => 'error', 
+                    'message' => 'Hanya Admin System yang memiliki hak akses untuk menambah atau mengubah ruangan.'
+                ]);
+                exit;
+            }
             $this->session->set_flashdata('error', 'Hanya Admin System yang dapat mengakses halaman Kelola Ruangan.');
             redirect('dashboard');
         }
@@ -22,17 +47,7 @@ class Kelolaruangan extends CI_Controller {
 
     public function index()
     {
-        $data['title'] = 'Kelola Data Ruangan & Laboratorium';
-        $data['kategori'] = $this->Booking_model->get_all_kategori();
-        
-        // Fetch ketersediaan ruangan gabung dengan nama kategori
-        $this->db->select('ruangan.*, kategori_ruangan.nama_kategori');
-        $this->db->from('ruangan');
-        $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
-        $this->db->order_by('ruangan.id', 'ASC');
-        $data['ruangan'] = $this->db->get()->result();
-
-        $this->load->view('admin/ruangan/index', $data);
+        redirect('adminheader?tab=fasilitas');
     }
 
     private function _upload_file($field_name, $upload_path, $allowed_types)
@@ -41,23 +56,25 @@ class Kelolaruangan extends CI_Controller {
             return null;
         }
 
-        if (!is_dir($upload_path)) {
-            mkdir($upload_path, 0777, true);
+        $full_dir = FCPATH . rtrim($upload_path, '/') . '/';
+        if (!is_dir($full_dir)) {
+            @mkdir($full_dir, 0777, true);
         }
 
-        $config['upload_path']   = $upload_path;
+        $config['upload_path']   = $full_dir;
         $config['allowed_types'] = '*'; // Allow all valid images & 3D binary files (.glb, .fbx, .gltf, .obj)
         $config['max_size']      = 102400; // Max 100MB for 3D models
         $config['encrypt_name']  = TRUE;
 
-        $this->load->library('upload', $config);
+        $this->load->library('upload');
         $this->upload->initialize($config, TRUE);
 
         if ($this->upload->do_upload($field_name)) {
             $data = $this->upload->data();
-            return $upload_path . $data['file_name'];
+            return rtrim($upload_path, '/') . '/' . $data['file_name'];
         } else {
-            log_message('error', 'Upload Error: ' . $this->upload->display_errors());
+            $err = $this->upload->display_errors('', '');
+            log_message('error', 'Upload Error (' . $field_name . '): ' . $err);
         }
         return null;
     }

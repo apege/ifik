@@ -16,11 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch(e) {}
 
     let currentStep = 1;
+    let isRestoringDraft = false;
 
-    // Direct navigation support from Dashboard redirect (e.g. ?step=3) or localStorage
+    // Direct navigation support from Dashboard redirect (e.g. ?step=3) or localStorage / sessionStorage
     const urlParams = new URLSearchParams(window.location.search);
     const urlStep = parseInt(urlParams.get('step'));
-    const savedStep = parseInt(localStorage.getItem(STEP_KEY));
+    const savedStep = parseInt(localStorage.getItem(STEP_KEY) || sessionStorage.getItem(STEP_KEY));
 
     if (urlStep && urlStep >= 1 && urlStep <= totalSteps) {
         currentStep = urlStep;
@@ -99,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 stepItem.style.cursor = (i <= currentStep) ? 'pointer' : 'default';
                 stepItem.onclick = () => {
                     if (i < currentStep) {
+                        saveDraft();
                         currentStep = i;
                         updateStepUI();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -384,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnNext) {
         btnNext.addEventListener('click', function () {
             if (validateStep(currentStep)) {
+                saveDraft();
                 if (currentStep < totalSteps) {
                     currentStep++;
                     updateStepUI();
@@ -395,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (btnPrev) {
         btnPrev.addEventListener('click', function () {
+            saveDraft();
             if (currentStep > 1) {
                 currentStep--;
                 updateStepUI();
@@ -514,7 +518,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!file) return;
 
             if (fileNameEl) fileNameEl.textContent = file.name;
-            if (fileSizeEl) fileSizeEl.textContent = isSaved ? 'Berkas Tersimpan (Siap Diperbarui Jika Perlu)' : `${(file.size / 1024 / 1024).toFixed(2)} MB • PDF Terverifikasi`;
+            if (fileSizeEl) {
+                fileSizeEl.innerHTML = isSaved 
+                    ? '<span class="text-emerald-700 font-semibold"><i class="bi bi-cloud-check-fill"></i> Berkas Tersimpan di Server</span>' 
+                    : `${(file.size / 1024 / 1024).toFixed(2)} MB • PDF Terverifikasi`;
+            }
 
             if (promptContainer) {
                 promptContainer.classList.add('hidden');
@@ -532,6 +540,40 @@ document.addEventListener('DOMContentLoaded', function () {
             zone.classList.remove('border-rose-500', 'bg-rose-50');
             zone.classList.add('border-emerald-400', 'bg-emerald-50/20');
             updateStepUI();
+        }
+
+        // Background Auto-Upload function
+        async function uploadFileViaAjax(fieldName, file) {
+            if (!window.UPLOAD_AJAX_URL) return;
+            const fd = new FormData();
+            fd.append('field_name', fieldName);
+            fd.append(fieldName, file);
+
+            if (fileSizeEl) {
+                fileSizeEl.innerHTML = '<span class="text-orange-600 font-semibold animate-pulse"><i class="bi bi-arrow-repeat animate-spin"></i> Mengunggah ke server...</span>';
+            }
+
+            try {
+                const res = await fetch(window.UPLOAD_AJAX_URL, {
+                    method: 'POST',
+                    body: fd,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const json = await res.json();
+                if (json && json.success) {
+                    if (oldFileInput) oldFileInput.value = json.file_name;
+                    if (fileSizeEl) {
+                        fileSizeEl.innerHTML = `<span class="text-emerald-700 font-semibold"><i class="bi bi-cloud-check-fill"></i> ${json.file_size} • Tersimpan di Server</span>`;
+                    }
+                    showInPageAlert(`✅ Berkas ${file.name} berhasil tersimpan di server!`, 'success');
+                    saveDraft();
+                    updateStepUI();
+                } else {
+                    showInPageAlert(json.message || 'Gagal menyimpan berkas ke server.', 'error');
+                }
+            } catch (err) {
+                console.error('Auto-upload error:', err);
+            }
         }
 
         // Initialize prefilled old file card on load
@@ -560,6 +602,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (files[0].type === 'application/pdf' || files[0].name.toLowerCase().endsWith('.pdf')) {
                     fileInput.files = files;
                     renderFileCard(files[0]);
+                    uploadFileViaAjax(fileInput.name, files[0]);
                 } else {
                     showInPageAlert('⚠️ Hanya berkas berformat .PDF yang diperbolehkan!', 'error');
                 }
@@ -583,6 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 renderFileCard(fileInput.files[0]);
+                uploadFileViaAjax(fileInput.name, fileInput.files[0]);
             }
         });
 
@@ -609,6 +653,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectedContainer.style.display = 'none';
                 }
                 zone.classList.remove('border-emerald-400', 'bg-emerald-50/20');
+                saveDraft();
                 updateStepUI();
             });
         }
@@ -616,63 +661,161 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- DRAFT FORM PERSISTENCE ---
     function saveDraft() {
+        if (isRestoringDraft) return;
         try {
-            const draft = {
-                jenis_ta: document.getElementById('inputJenisTA')?.value || '',
-                judul_1: document.getElementById('inputJudul1')?.value || '',
-                judul_2: document.getElementById('inputJudul2')?.value || '',
-                judul_3: document.getElementById('inputJudul3')?.value || '',
-                judul_en: document.getElementById('inputJudulEn')?.value || ''
+            const jenisVal = document.getElementById('inputJenisTA')?.value || '';
+            const j1Val    = document.getElementById('inputJudul1')?.value || '';
+            const j2Val    = document.getElementById('inputJudul2')?.value || '';
+            const j3Val    = document.getElementById('inputJudul3')?.value || '';
+            const jEnVal   = document.getElementById('inputJudulEn')?.value || '';
+            const filesObj = {
+                file_ksm: document.getElementById('file_ksm_old')?.value || '',
+                file_transkrip: document.getElementById('file_transkrip_old')?.value || '',
+                file_pernyataan: document.getElementById('file_pernyataan_old')?.value || '',
+                file_bebas_lab: document.getElementById('file_bebas_lab_old')?.value || ''
             };
-            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+
+            // Guard against wiping existing draft on initial empty DOM renders
+            if (!jenisVal && !j1Val && !j2Val && !j3Val && !jEnVal && !filesObj.file_ksm && !filesObj.file_transkrip && !filesObj.file_pernyataan && !filesObj.file_bebas_lab) {
+                const existing = localStorage.getItem(DRAFT_KEY);
+                if (existing) return; // Keep existing draft intact
+            }
+
+            const draft = {
+                jenis_ta: jenisVal,
+                judul_1: j1Val,
+                judul_2: j2Val,
+                judul_3: j3Val,
+                judul_en: jEnVal,
+                files: filesObj
+            };
+            const payload = JSON.stringify(draft);
+            localStorage.setItem(DRAFT_KEY, payload);
+            sessionStorage.setItem(DRAFT_KEY, payload);
+            localStorage.setItem(STEP_KEY, currentStep);
+            sessionStorage.setItem(STEP_KEY, currentStep);
         } catch (e) {}
     }
 
     function loadDraft() {
         try {
-            const draftStr = localStorage.getItem(DRAFT_KEY);
+            const draftStr = localStorage.getItem(DRAFT_KEY) || sessionStorage.getItem(DRAFT_KEY);
             if (!draftStr) return;
             const draft = JSON.parse(draftStr);
 
+            isRestoringDraft = true;
+
+            // 1. Jenis TA (update input + dropdown UI directly without triggering click events)
             if (draft.jenis_ta) {
                 const inputJenis = document.getElementById('inputJenisTA');
-                if (inputJenis && !inputJenis.value) {
+                if (inputJenis) {
                     inputJenis.value = draft.jenis_ta;
                     const opt = document.querySelector(`.dropdown-option[data-value="${draft.jenis_ta}"]`);
-                    if (opt) opt.click();
+                    if (opt) {
+                        const triggerLabel = opt.closest('.custom-dropdown')?.querySelector('.trigger-label');
+                        const labelText = opt.querySelector('span')?.textContent || draft.jenis_ta;
+                        if (triggerLabel) {
+                            triggerLabel.textContent = labelText;
+                            triggerLabel.className = 'trigger-label text-slate-900 font-semibold';
+                        }
+                        const allOpts = opt.closest('.dropdown-menu')?.querySelectorAll('.dropdown-option');
+                        if (allOpts) {
+                            allOpts.forEach(o => {
+                                o.classList.remove('bg-orange-100/80', 'text-orange-700', 'font-bold');
+                                const check = o.querySelector('.check-icon');
+                                if (check) check.classList.add('hidden');
+                            });
+                        }
+                        opt.classList.add('bg-orange-100/80', 'text-orange-700', 'font-bold');
+                        const check = opt.querySelector('.check-icon');
+                        if (check) check.classList.remove('hidden');
+
+                        const previewJenisTA = document.getElementById('previewJenisTA');
+                        const previewTextJenisTA = document.getElementById('previewTextJenisTA');
+                        if (previewJenisTA && previewTextJenisTA) {
+                            previewTextJenisTA.textContent = labelText;
+                            previewJenisTA.classList.remove('hidden');
+                        }
+                    }
                 }
             }
+
+            // 2. Judul Utama 1
             if (draft.judul_1) {
                 const el = document.getElementById('inputJudul1');
-                if (el && !el.value) el.value = draft.judul_1;
+                if (el) el.value = draft.judul_1;
             }
+
+            // 3. Judul Alternatif 2
             if (draft.judul_2) {
                 const el = document.getElementById('inputJudul2');
-                if (el && !el.value) {
+                if (el) {
                     el.value = draft.judul_2;
                     const c2 = document.getElementById('containerJudul2');
                     if (c2) c2.classList.remove('hidden');
                 }
             }
+
+            // 4. Judul Alternatif 3
             if (draft.judul_3) {
                 const el = document.getElementById('inputJudul3');
-                if (el && !el.value) {
+                if (el) {
                     el.value = draft.judul_3;
                     const c3 = document.getElementById('containerJudul3');
                     if (c3) c3.classList.remove('hidden');
                 }
             }
+
+            // 5. Judul Translation EN
             if (draft.judul_en) {
                 const el = document.getElementById('inputJudulEn');
-                if (el && !el.value) el.value = draft.judul_en;
+                if (el) el.value = draft.judul_en;
             }
-        } catch (e) {}
+
+            // 6. Restore File Cards for Steps 3 - 6
+            const fileFields = ['file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'];
+            fileFields.forEach(f => {
+                const oldInput = document.getElementById(f + '_old');
+                const savedFileName = (oldInput && oldInput.value.trim()) ? oldInput.value.trim() : (draft.files ? draft.files[f] : '');
+                if (savedFileName) {
+                    if (oldInput) oldInput.value = savedFileName;
+                    const zone = document.querySelector(`input[name="${f}"]`)?.closest('.drop-zone');
+                    if (zone) {
+                        const fileNameEl = zone.querySelector('.file-name');
+                        const fileSizeEl = zone.querySelector('.file-size');
+                        const promptContainer = zone.querySelector('.drop-zone-prompt');
+                        const selectedContainer = zone.querySelector('.drop-zone-selected');
+                        const stepContainer = zone.closest('.step-content');
+                        const stepAlert = stepContainer ? stepContainer.querySelector('.step-inline-alert') : null;
+
+                        if (fileNameEl) fileNameEl.textContent = savedFileName.split('/').pop();
+                        if (fileSizeEl) fileSizeEl.innerHTML = '<span class="text-emerald-700 font-semibold"><i class="bi bi-cloud-check-fill"></i> Berkas Tersimpan di Server</span>';
+                        if (promptContainer) {
+                            promptContainer.classList.add('hidden');
+                            promptContainer.style.display = 'none';
+                        }
+                        if (selectedContainer) {
+                            selectedContainer.classList.remove('hidden');
+                            selectedContainer.style.display = 'flex';
+                        }
+                        if (stepAlert) stepAlert.classList.add('hidden');
+                        zone.classList.remove('border-rose-500', 'bg-rose-50');
+                        zone.classList.add('border-emerald-400', 'bg-emerald-50/20');
+                    }
+                }
+            });
+
+            isRestoringDraft = false;
+        } catch (e) {
+            isRestoringDraft = false;
+        }
     }
 
     // Form submission validation & draft listening
     const form = document.querySelector('form');
     if (form) {
         form.addEventListener('input', saveDraft);
+        form.addEventListener('change', saveDraft);
 
         form.addEventListener('submit', function (e) {
             for (let step = 1; step <= totalSteps; step++) {
@@ -684,10 +827,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
             }
-            // Clear saved draft & step upon valid submit
+            // Clear saved draft & step ONLY upon valid and successful submit
             try {
                 localStorage.removeItem(STEP_KEY);
                 localStorage.removeItem(DRAFT_KEY);
+                sessionStorage.removeItem(STEP_KEY);
+                sessionStorage.removeItem(DRAFT_KEY);
             } catch (err) {}
         });
     }
