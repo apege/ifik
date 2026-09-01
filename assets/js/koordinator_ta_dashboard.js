@@ -277,11 +277,11 @@
     }
 
     function getPlaceholderForCategory(cat) {
-        if (cat === 'nama') return 'Cari nama mahasiswa (misal: Budi)...';
-        if (cat === 'nim') return 'Cari NIM (misal: 1301210045)...';
-        if (cat === 'judul') return 'Cari topik atau judul TA...';
-        if (cat === 'konsentrasi') return 'Cari bidang/konsentrasi (misal: AI, Cyber)...';
-        return 'Cari Nama, NIM, Judul TA, Tahap...';
+        if (cat === 'nama') return 'Ketik nama mahasiswa lalu tekan Enter atau klik Cari...';
+        if (cat === 'nim') return 'Ketik NIM lalu tekan Enter atau klik Cari...';
+        if (cat === 'judul') return 'Ketik topik/judul TA lalu tekan Enter atau klik Cari...';
+        if (cat === 'konsentrasi') return 'Ketik bidang/peminatan lalu tekan Enter atau klik Cari...';
+        return 'Ketik kata kunci lalu tekan Enter atau klik Cari...';
     }
 
     function addAdditionalFilterRow(e) {
@@ -352,7 +352,7 @@
                 <!-- Input Text Value Container -->
                 <div id="extraValueContainer_${rowId}" class="${isTextCategory(defaultCrit) ? 'flex-1 flex items-center' : 'hidden'}">
                     <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                    <input type="text" id="extraInput_${rowId}" oninput="handleUnifiedMultiSearch()" placeholder="${getPlaceholderForCategory(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                    <input type="text" id="extraInput_${rowId}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearch(); }" placeholder="${getPlaceholderForCategory(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
                 </div>
 
                 <!-- Custom Dropdown Value Container -->
@@ -424,7 +424,6 @@
         }
 
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
     };
 
     function updateMainValueOptions(cat) {
@@ -461,7 +460,6 @@
         document.getElementById('mainCustomSelectVal').value = val;
         document.getElementById('label-filter-main-select').innerText = labelText;
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
     };
 
     window.selectExtraCategory = function (rowId, cat, label, el) {
@@ -485,7 +483,6 @@
         }
 
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
     };
 
     function updateExtraValueOptions(rowId, cat) {
@@ -522,7 +519,6 @@
         document.getElementById(`extraValueVal_${rowId}`).value = val;
         document.getElementById(`label-filter-extra-val-${rowId}`).innerText = labelText;
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
     };
 
     window.resetImportMultiSearch = function () {
@@ -2258,13 +2254,13 @@
     }
 
     function getPlaceholderForP2Category(cat) {
-        if (cat === 'nama') return 'Cari nama mahasiswa (misal: Budi)...';
-        if (cat === 'nim') return 'Cari NIM (misal: 1301210045)...';
-        if (cat === 'judul') return 'Cari topik atau judul TA...';
-        if (cat === 'pembimbing') return 'Cari nama/NIP dosen pembimbing...';
-        if (cat === 'penguji') return 'Cari nama/NIP dosen penguji...';
-        if (cat === 'ruangan') return 'Cari ruangan sidang (misal: Aula, Lab)...';
-        return 'Cari Nama, NIM, Judul TA, Dosen Penguji, Ruangan...';
+        if (cat === 'nama') return 'Ketik nama mahasiswa lalu tekan Enter atau klik Cari...';
+        if (cat === 'nim') return 'Ketik NIM lalu tekan Enter atau klik Cari...';
+        if (cat === 'judul') return 'Ketik topik/judul TA lalu tekan Enter atau klik Cari...';
+        if (cat === 'pembimbing') return 'Ketik nama pembimbing lalu tekan Enter atau klik Cari...';
+        if (cat === 'penguji') return 'Ketik nama penguji lalu tekan Enter atau klik Cari...';
+        if (cat === 'ruangan') return 'Ketik ruangan sidang lalu tekan Enter atau klik Cari...';
+        return 'Ketik kata kunci lalu tekan Enter atau klik Cari...';
     }
 
     function addAdditionalP2FilterRow(e) {
@@ -2337,7 +2333,7 @@
                 <!-- Input Text Value Container -->
                 <div id="extraP2ValueContainer_${rowId}" class="${isTextP2Category(defaultCrit) ? 'flex-1 flex items-center' : 'hidden'}">
                     <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                    <input type="text" id="extraP2Input_${rowId}" oninput="handleUnifiedMultiSearchP2()" placeholder="${getPlaceholderForP2Category(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                    <input type="text" id="extraP2Input_${rowId}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearchP2(); }" placeholder="${getPlaceholderForP2Category(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
                 </div>
 
                 <!-- Custom Dropdown Value Container -->
@@ -2415,7 +2411,6 @@
         }
 
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchP2();
     };
 
     function updateP2MainValueOptions(cat) {
@@ -2443,7 +2438,6 @@
         if (valInput) valInput.value = val;
         if (label) label.innerText = labelText;
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchP2();
     };
 
     window.selectP2ExtraCategory = function (rowId, cat, label, el) {
@@ -2473,7 +2467,6 @@
         }
 
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchP2();
     };
 
     function updateP2ExtraValueOptions(rowId, cat) {
@@ -2501,7 +2494,6 @@
         if (valInput) valInput.value = val;
         if (label) label.innerText = labelText;
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchP2();
     };
 
     window.resetP2MultiSearch = function () {
@@ -4774,7 +4766,6 @@
         }
 
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchSidang();
     };
 
     function updateSidangMainValueOptions(cat) {
@@ -4801,7 +4792,6 @@
         if (valInput) valInput.value = val;
         if (label) label.innerText = labelText;
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchSidang();
     };
 
     window.toggleOrAddFilterRowSidang = function (e) {
@@ -4867,7 +4857,7 @@
             </div>
 
             <div id="extraSidangValueContainer_${rowId}" class="flex-1 flex items-center bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs">
-                <input type="text" id="extraSidangInput_${rowId}" oninput="handleUnifiedMultiSearchSidang()" placeholder="Ketik nama mahasiswa sidang..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800">
+                <input type="text" id="extraSidangInput_${rowId}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearchSidang(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
             </div>
 
             <div id="extraSidangCustomSelectWrap_${rowId}" class="hidden flex-1 relative custom-dropdown-container">
@@ -4916,7 +4906,6 @@
         }
 
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchSidang();
     };
 
     function updateSidangExtraValueOptions(rowId, cat) {
@@ -4943,7 +4932,6 @@
         if (valInput) valInput.value = val;
         if (label) label.innerText = labelText;
         closeAllCustomDropdowns();
-        handleUnifiedMultiSearchSidang();
     };
 
     window.removeFilterRowSidang = function (rowId) {

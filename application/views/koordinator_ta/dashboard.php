@@ -893,9 +893,9 @@
                     <div class="unified-divider"></div>
 
                     <!-- Input Text Value Container -->
-                    <div id="mainValueContainer" class="flex-1 flex items-center">
-                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                        <input type="text" id="mainSearchInput" oninput="handleUnifiedMultiSearch()" placeholder="Cari Nama, NIM, Judul TA, Tahap..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                    <div id="mainValueContainer" class="flex-1 flex items-center min-w-0">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                        <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearch(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
                     </div>
 
                     <!-- Main Custom Select Dropdown Container -->
@@ -908,6 +908,11 @@
                         <div id="menu-filter-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
                         </div>
                     </div>
+
+                    <!-- Tombol Cari -->
+                    <button type="button" onclick="handleUnifiedMultiSearch()" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                    </button>
                 </div>
 
                 <!-- Standalone Add Filter Button (+ 1/4) -->
@@ -1228,9 +1233,9 @@
                         <div class="unified-divider"></div>
 
                         <!-- Input Text Value Container -->
-                        <div id="p2MainValueContainer" class="flex-1 flex items-center">
-                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                            <input type="text" id="p2MainSearchInput" oninput="handleUnifiedMultiSearchP2()" placeholder="Cari Nama, NIM, Judul TA, Dosen Penguji, Ruangan..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                        <div id="p2MainValueContainer" class="flex-1 flex items-center min-w-0">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                            <input type="text" id="p2MainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearchP2(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
                         </div>
 
                         <!-- Main Custom Select Dropdown Container -->
@@ -1243,6 +1248,11 @@
                             <div id="menu-filter-p2-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
                             </div>
                         </div>
+
+                        <!-- Tombol Cari Preview 2 -->
+                        <button type="button" onclick="handleUnifiedMultiSearchP2()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                        </button>
                     </div>
 
                     <!-- Standalone Add Filter Button (+ 1/4) -->
@@ -1560,9 +1570,9 @@
                         <div class="unified-divider"></div>
 
                         <!-- Input Text Value Container -->
-                        <div id="sidangMainValueContainer" class="flex-1 flex items-center">
-                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                            <input type="text" id="sidangMainSearchInput" oninput="handleUnifiedMultiSearchSidang()" placeholder="Cari Nama, NIM, Judul TA, Pembimbing, Penguji, Ruangan..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                        <div id="sidangMainValueContainer" class="flex-1 flex items-center min-w-0">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                            <input type="text" id="sidangMainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearchSidang(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
                         </div>
 
                         <!-- Main Custom Select Dropdown Container -->
@@ -1575,6 +1585,11 @@
                             <div id="menu-filter-sidang-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
                             </div>
                         </div>
+
+                        <!-- Tombol Cari Sidang -->
+                        <button type="button" onclick="handleUnifiedMultiSearchSidang()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                        </button>
                     </div>
 
                     <!-- Standalone Add Filter Button (+ 1/4) -->
