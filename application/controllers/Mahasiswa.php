@@ -699,6 +699,51 @@ class Mahasiswa extends CI_Controller {
         ]);
     }
 
+    // AJAX Endpoint: Review massal dosen
+    public function review_preview_batch_ajax() {
+        header('Content-Type: application/json');
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id != 4) {
+            echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $ids = $this->input->post('ids');
+        $posisi = $this->input->post('posisi');
+
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => false, 'message' => 'Tidak ada data yang dipilih']);
+            return;
+        }
+
+        if ($posisi == 1) {
+            $data = [
+                'status_pembimbing' => 'Approved',
+                'catatan_pembimbing' => ''
+            ];
+            foreach ($ids as $id) {
+                $this->Mahasiswa_model->update_review_preview($id, $data);
+            }
+            $message = count($ids) . ' berkas berhasil disetujui (P1).';
+        } else if ($posisi == 2) {
+            $data = [
+                'catatan_pembimbing_2' => 'Telah ditinjau (massal)'
+            ];
+            foreach ($ids as $id) {
+                $this->Mahasiswa_model->update_review_preview($id, $data);
+            }
+            $message = count($ids) . ' berkas berhasil diberi catatan (P2).';
+        } else {
+            echo json_encode(['status' => false, 'message' => 'Posisi tidak valid']);
+            return;
+        }
+
+        echo json_encode([
+            'status' => true,
+            'message' => $message
+        ]);
+    }
+
     public function sse_dosen_bimbingan() {
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');

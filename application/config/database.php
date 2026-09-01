@@ -75,9 +75,9 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => '100.83.19.18',
-	'username' => 'ci3_user',
-	'password' => 'ci3_password',
+	'hostname' => 'localhost',
+	'username' => 'root',
+	'password' => '',
 	'database' => 'db_ifik',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
