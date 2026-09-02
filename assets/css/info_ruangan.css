@@ -115,7 +115,7 @@
     /* MODERN CLEAN TABLE COLUMN HEADER */
     .room-column-header {
         display: grid;
-        grid-template-columns: 240px 170px 115px 1fr 175px;
+        grid-template-columns: 230px 170px 150px 1fr 170px;
         align-items: center;
         gap: 16px;
         padding: 10px 0;
@@ -139,6 +139,10 @@
         justify-content: center;
         text-align: center;
     }
+    .rth-col.rth-desc {
+        justify-content: flex-start;
+        padding-left: 20px;
+    }
     .rth-col.rth-status {
         justify-content: flex-start;
         padding-left: 14px;
@@ -146,7 +150,7 @@
 
     .room-item {
         display: grid;
-        grid-template-columns: 240px 170px 115px 1fr 175px;
+        grid-template-columns: 230px 170px 150px 1fr 170px;
         align-items: center;
         min-height: 72px;
         padding: 14px 0;
@@ -275,11 +279,12 @@
     /* KETERANGAN COLUMN BESIDE DATE */
     .room-item-desc {
         min-width: 0;
-        overflow: hidden;
+        overflow: visible;
         display: flex;
         align-items: center;
-        padding: 0 8px;
+        padding: 0 8px 0 20px;
         min-height: 1.2em;
+        position: relative;
     }
     .room-desc-text {
         font-size: 0.84rem;
@@ -292,6 +297,142 @@
         max-width: 100%;
         min-height: 1.2em;
         line-height: 1.2;
+    }
+
+    /* FLOATING RICH KETERANGAN TOOLTIP ON HOVER */
+    .desc-hover-tooltip {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 20px;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 0.78rem;
+        box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(6px);
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        pointer-events: none;
+        z-index: 1000;
+        min-width: 200px;
+        max-width: 360px;
+        white-space: normal;
+        line-height: 1.45;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        word-break: break-word;
+    }
+    .desc-hover-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 24px;
+        border-width: 6px;
+        border-style: solid;
+        border-color: #0f172a transparent transparent transparent;
+    }
+    .room-item-desc:hover .desc-hover-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    .dht-badge {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #fb923c;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+        display: block;
+    }
+    .dht-content {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #f8fafc;
+        line-height: 1.4;
+    }
+
+    /* FLOATING RICH ROOM DETAIL TOOLTIP ON HOVER */
+    .room-item-left {
+        position: relative;
+    }
+    .room-hover-tooltip {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 56px;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 0.78rem;
+        box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(6px);
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        pointer-events: none;
+        z-index: 1000;
+        min-width: 220px;
+        max-width: 320px;
+        white-space: normal;
+        line-height: 1.4;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+    }
+    .room-hover-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 20px;
+        border-width: 6px;
+        border-style: solid;
+        border-color: #0f172a transparent transparent transparent;
+    }
+    .room-item-left:hover .room-hover-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    .rht-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .rht-code {
+        font-weight: 800;
+        color: #fb923c;
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+    }
+    .rht-cat {
+        font-size: 0.68rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.15);
+        color: #e2e8f0;
+        padding: 2px 7px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+    .rht-title {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+    .rht-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.72rem;
+        color: #94a3b8;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        padding-top: 5px;
+        margin-top: 4px;
     }
 
     /* STATUS BADGE WITH UNIFORM FIXED WIDTH */
