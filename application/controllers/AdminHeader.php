@@ -79,55 +79,69 @@ class AdminHeader extends CI_Controller {
     {
         $label = $this->input->post('label', true);
         
-        if (empty($_FILES['media_file']['name'])) {
+        if (empty($_FILES['media_files']['name'][0])) {
              $this->session->set_flashdata('error', 'Harap pilih file untuk diupload.');
              redirect('adminheader');
              return;
         }
 
-        $file_ext = strtolower(pathinfo($_FILES['media_file']['name'], PATHINFO_EXTENSION));
-        if (in_array($file_ext, ['mp4', 'webm', 'ogg'])) {
-            $media_type = 'video';
-            $config['upload_path']   = './assets/vids/';
-            $config['allowed_types'] = 'mp4|webm|ogg';
-            $config['max_size']      = 20000; // 20MB
-        } else {
-            $media_type = 'image';
-            $config['upload_path']   = './assets/images/';
-            $config['allowed_types'] = 'gif|jpg|jpeg|png|webp';
-            $config['max_size']      = 5048; // 5MB
-        }
-        $config['file_name'] = 'slide_' . time();
+        $durations = $this->input->post('durations');
+        $overlay_title = $this->input->post('overlay_title', true);
+        $overlay_description = $this->input->post('overlay_description');
 
-        // Cari urutan terakhir
         $slides = $this->Header_model->get_slides();
         $order_num = count($slides) + 1;
-        
-        $duration = (int)$this->input->post('duration');
-        if ($duration < 1 || $media_type == 'video') $duration = 4;
-
-        // Data teks overlay dari toggle ON/OFF
-        $show_text           = (int)$this->input->post('show_text');
-        $overlay_title       = $this->input->post('overlay_title', true);
-        $overlay_description = $this->input->post('overlay_description'); // HTML dari TinyMCE — jangan di-escape
-
-        $insert_data = [
-            'label'               => $label,
-            'media_type'          => $media_type,
-            'order_num'           => $order_num,
-            'duration'            => $duration,
-            'show_text'           => $show_text,
-            'overlay_title'       => $show_text ? $overlay_title       : null,
-            'overlay_description' => $show_text ? $overlay_description : null,
-            'created_at'          => date('Y-m-d H:i:s')
-        ];
 
         $this->load->library('upload');
-        $this->upload->initialize($config);
+        
+        $uploaded_files = [];
+        $files_count = count($_FILES['media_files']['name']);
+        
+        for ($i = 0; $i < $files_count; $i++) {
+            $_FILES['file']['name']     = $_FILES['media_files']['name'][$i];
+            $_FILES['file']['type']     = $_FILES['media_files']['type'][$i];
+            $_FILES['file']['tmp_name'] = $_FILES['media_files']['tmp_name'][$i];
+            $_FILES['file']['error']    = $_FILES['media_files']['error'][$i];
+            $_FILES['file']['size']     = $_FILES['media_files']['size'][$i];
+            
+            $file_ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+            if (in_array($file_ext, ['mp4', 'webm', 'ogg'])) {
+                $type = 'video';
+                $config['upload_path']   = './assets/vids/';
+                $config['allowed_types'] = 'mp4|webm|ogg';
+                $config['max_size']      = 20000;
+            } else {
+                $type = 'image';
+                $config['upload_path']   = './assets/images/';
+                $config['allowed_types'] = 'gif|jpg|jpeg|png|webp';
+                $config['max_size']      = 5048;
+            }
+            $config['file_name'] = 'slide_' . time() . '_' . $i;
 
-        if ($this->upload->do_upload('media_file')) {
-            $uploadData = $this->upload->data();
-            $insert_data['media_path'] = $uploadData['file_name'];
+            $this->upload->initialize($config);
+            
+            if ($this->upload->do_upload('file')) {
+                $uploadData = $this->upload->data();
+                $uploaded_files[] = [
+                    'file' => $uploadData['file_name'],
+                    'type' => $type,
+                    'duration' => isset($durations[$i]) ? (int)$durations[$i] : 3
+                ];
+            }
+        }
+        
+        if (count($uploaded_files) > 0) {
+            $insert_data = [
+                'label'               => $label,
+                'media_type'          => (count($uploaded_files) > 1) ? 'multi' : $uploaded_files[0]['type'],
+                'media_path'          => json_encode($uploaded_files),
+                'order_num'           => $order_num,
+                'duration'            => 0,
+                'show_text'           => 1,
+                'overlay_title'       => $overlay_title,
+                'overlay_description' => $overlay_description,
+                'created_at'          => date('Y-m-d H:i:s')
+            ];
 
             if ($this->Header_model->add_slide($insert_data)) {
                 $this->session->set_flashdata('success', 'Slide baru berhasil ditambahkan.');
@@ -135,7 +149,7 @@ class AdminHeader extends CI_Controller {
                 $this->session->set_flashdata('error', 'Gagal menyimpan slide ke database.');
             }
         } else {
-            $this->session->set_flashdata('error', $this->upload->display_errors('', ''));
+            $this->session->set_flashdata('error', 'Gagal mengupload file media.');
         }
 
         redirect('adminheader');
@@ -219,13 +233,19 @@ class AdminHeader extends CI_Controller {
     {
         $slide = $this->Header_model->get_slide($id);
         if ($slide) {
-            // Hapus file fisik
-            $path = ($slide->media_type == 'video') ? './assets/vids/' : './assets/images/';
-            $file_path = $path . $slide->media_path;
-            
-            // Jangan hapus file default bawaan
-            if (!in_array($slide->media_path, ['Fakultas.jpg', 'vidtelkom.mp4', 'background.png']) && file_exists($file_path)) {
-                unlink($file_path);
+            $decoded = json_decode($slide->media_path, true);
+            if (is_array($decoded) && isset($decoded[0]['file'])) {
+                foreach ($decoded as $item) {
+                    $path = ($item['type'] == 'video') ? './assets/vids/' : './assets/images/';
+                    $file_path = $path . $item['file'];
+                    if (file_exists($file_path)) unlink($file_path);
+                }
+            } else {
+                $path = ($slide->media_type == 'video') ? './assets/vids/' : './assets/images/';
+                $file_path = $path . $slide->media_path;
+                if (!in_array($slide->media_path, ['Fakultas.jpg', 'vidtelkom.mp4', 'background.png']) && file_exists($file_path)) {
+                    unlink($file_path);
+                }
             }
 
             if ($this->Header_model->delete_slide($id)) {

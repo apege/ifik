@@ -285,14 +285,6 @@
         <!-- 0. Tombol Dashboard -->
         <li class="nav-item">
             <a href="<?= base_url() ?>" class="nav-link" onclick="scrollToDashboard(event)">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
-                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-                    </svg>
-                </span>
                 <span>Dashboard</span>
             </a>
         </li>
@@ -300,13 +292,6 @@
         <!-- 1. Layanan LAB -->
         <li class="nav-item">
             <a href="<?= site_url('welcome') ?>" class="nav-link">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
-                </span>
                 <span>Layanan LAB</span>
             </a>
             <div class="nav-dropdown">
@@ -357,12 +342,6 @@
         <!-- 2. Layanan LAA -->
         <li class="nav-item">
             <a href="<?= site_url('welcome') ?>" class="nav-link">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </span>
                 <span>Layanan LAA</span>
             </a>
             <div class="nav-dropdown">
@@ -400,13 +379,6 @@
         <!-- 3. Center of Excelent -->
         <li class="nav-item">
             <a href="<?= site_url('welcome') ?>" class="nav-link">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="6"></circle>
-                        <circle cx="12" cy="12" r="2"></circle>
-                    </svg>
-                </span>
                 <span>Center of Excelent</span>
             </a>
             <div class="nav-dropdown">
@@ -453,14 +425,6 @@
         <!-- 4. Ticketing -->
         <li class="nav-item">
             <a href="<?= site_url('welcome') ?>" class="nav-link">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
-                        <path d="M13 5v2"></path>
-                        <path d="M13 17v2"></path>
-                        <path d="M13 11v2"></path>
-                    </svg>
-                </span>
                 <span>Ticketing</span>
             </a>
             <div class="nav-dropdown">
@@ -479,13 +443,6 @@
         <!-- 5. Galeri Karya FIK -->
         <li class="nav-item">
             <a href="<?= site_url('welcome') ?>" class="nav-link">
-                <span class="btn-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>
-                </span>
                 <span>Galeri Karya FIK</span>
             </a>
         </li>
@@ -498,23 +455,12 @@
         <?php if ($is_mahasiswa): ?>
             <li class="nav-item">
                 <a href="<?= site_url('mahasiswa') ?>" class="nav-link">
-                    <span class="btn-box">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-                        </svg>
-                    </span>
                     <span>Portal Mahasiswa</span>
                 </a>
             </li>
         <?php else: ?>
             <li class="nav-item">
                 <a href="<?= site_url('admin') ?>" class="nav-link">
-                    <span class="btn-box">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                    </span>
                     <span>Admin Panel</span>
                 </a>
                 <div class="nav-dropdown nav-dropdown--right">
