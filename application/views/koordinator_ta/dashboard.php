@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- FontAwesome 6 -->
+    <!-- FontAwesome 6 & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     
@@ -40,6 +40,17 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Flatpickr Datepicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+
+    <!-- Timepicker Stylesheet -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/timepicker.css?v=' . time()); ?>">
+
+    <!-- Koordinator TA Stylesheet -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/koordinator_ta.css?v=' . time()); ?>">
+
     <style>
         body {
             background-color: #fbf7f1;
@@ -62,20 +73,71 @@
             border-radius: 1rem;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-        ::-webkit-scrollbar-track {
-            background: #f8fafc;
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 99px;
+
+        /* Radial Analog Clock Styles (Tahap Preview 2) */
+        #p2TpClockHand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            width: 2px;
+            background: #4f46e5;
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transform: translate(-50%, 0) rotate(0deg);
+            transition: none;
+            z-index: 5;
+            pointer-events: none;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ea580c;
+
+        #p2TpClockHand::after {
+            content: '';
+            position: absolute;
+            top: -14px;
+            left: -13px;
+            width: 28px;
+            height: 28px;
+            background: #4f46e5;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.45);
+            z-index: 1;
+        }
+
+        .p2-tp-clock-number {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+            user-select: none;
+        }
+
+        .p2-tp-clock-number.inner {
+            font-size: 0.7rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .p2-tp-clock-number.active {
+            background: #4f46e5 !important;
+            color: #ffffff !important;
+            border-radius: 50% !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.45) !important;
+            z-index: 20 !important;
         }
 
         /* Unified Multi-Search Pill Component (Exact Import Akun Style) */
@@ -187,11 +249,9 @@
             gap: 8px;
             z-index: 10;
         }
-
         .extra-filter-row.open-dropdown {
             z-index: 120 !important;
         }
-
         .custom-dropdown-container.open {
             z-index: 130 !important;
         }
@@ -246,7 +306,6 @@
             border-spacing: 0 !important;
             width: 100%;
         }
-
         .table-custom-rounded thead tr th:first-child {
             border-top-left-radius: 14px;
         }
@@ -254,7 +313,6 @@
             border-top-right-radius: 14px;
         }
 
-        /* STAGGERED ROW SLIDE-DOWN ANIMATION ON PAGINATION */
         @keyframes rowSlideDown {
             0% {
                 opacity: 0;
@@ -272,14 +330,13 @@
                 filter: blur(0px);
             }
         }
-
         .table-row-animate {
             animation: rowSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
             animation-delay: calc(var(--row-index, 0) * 0.045s);
             will-change: transform, opacity, filter;
         }
 
-        /* 3D KINETIC INTERACTIVE BUTTON (Letter-by-Letter Blur Animation + Path & Splash) */
+        /* 3D KINETIC INTERACTIVE BUTTON */
         @keyframes charAppear {
             0% {
                 transform: translateY(120%);
@@ -309,36 +366,41 @@
                 opacity: 1;
                 filter: blur(0);
             }
+            30% {
+                transform: translateY(-20%);
+                opacity: 0.9;
+                filter: blur(1px);
+            }
+            70% {
+                transform: translateY(50%);
+                opacity: 0.3;
+                filter: blur(4px);
+            }
             100% {
-                transform: translateY(-120%);
+                transform: translateY(120%);
                 opacity: 0;
-                filter: blur(6px);
+                filter: blur(8px);
             }
         }
 
         @keyframes splashAnimation {
             0% {
-                stroke-dasharray: 2 60;
-                stroke-dashoffset: 0;
+                transform: translate(-50%, -50%) scale(0.6) rotate(0deg);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.15) rotate(180deg);
+                opacity: 0.5;
             }
             100% {
-                stroke-dasharray: 2 60;
-                stroke-dashoffset: -60;
+                transform: translate(-50%, -50%) scale(1.3) rotate(360deg);
+                opacity: 0;
             }
         }
 
         @keyframes pathAnimation {
-            0% {
-                stroke: rgba(255, 255, 255, 0.8);
-                stroke-dashoffset: 0;
-            }
-            50% {
-                stroke: #fed7aa;
-            }
-            100% {
-                stroke: rgba(255, 255, 255, 0.8);
-                stroke-dashoffset: -400;
-            }
+            0% { stroke-dashoffset: 200; }
+            100% { stroke-dashoffset: 0; }
         }
 
         .btn-3d-kinetic {
@@ -346,53 +408,120 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: transparent;
-            border: none;
             cursor: pointer;
-            padding: 0;
-            text-decoration: none !important;
-            user-select: none;
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             outline: none;
-        }
-
-        .btn-3d-kinetic:hover {
-            transform: translateY(-2px) scale(1.03);
-        }
-
-        .btn-3d-kinetic:active {
-            transform: translateY(1px) scale(0.97);
+            border: none;
+            background: transparent;
+            padding: 0;
+            text-decoration: none;
+            user-select: none;
+            font-family: inherit;
+            border-radius: 9999px;
+            overflow: hidden;
         }
 
         .btn-3d-kinetic .bg {
             position: absolute;
             inset: 0;
             border-radius: 9999px;
-            background: linear-gradient(180deg, #fb923c 0%, #ea580c 60%, #c2410c 100%);
-            box-shadow: 
-                0 10px 24px -4px rgba(234, 88, 12, 0.5),
-                0 4px 10px -2px rgba(0, 0, 0, 0.2),
-                inset 0 1.5px 2px rgba(255, 255, 255, 0.7),
-                inset 0 -2.5px 3px rgba(124, 45, 18, 0.65);
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+            box-shadow: 0 4px 14px -2px rgba(234, 88, 12, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-3d-kinetic:hover .bg {
-            background: linear-gradient(180deg, #fdba74 0%, #f97316 55%, #ea580c 100%);
-            box-shadow: 
-                0 14px 30px -4px rgba(234, 88, 12, 0.65),
-                0 6px 14px -2px rgba(0, 0, 0, 0.25),
-                inset 0 2px 3px rgba(255, 255, 255, 0.85),
-                inset 0 -2.5px 3px rgba(124, 45, 18, 0.7);
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%);
+            box-shadow: 0 6px 20px -2px rgba(234, 88, 12, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transform: scale(1.02);
+        }
+
+        .btn-3d-kinetic.btn-indigo .bg {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
+            box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+        }
+
+        .btn-3d-kinetic.btn-indigo:hover .bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 50%, #3730a3 100%);
+            box-shadow: 0 6px 20px -2px rgba(79, 70, 229, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transform: scale(1.02);
+        }
+
+        .btn-3d-kinetic.btn-emerald .bg {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+            box-shadow: 0 4px 14px -2px rgba(16, 185, 129, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+        }
+
+        .btn-3d-kinetic.btn-emerald:hover .bg {
+            background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+            box-shadow: 0 6px 20px -2px rgba(16, 185, 129, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transform: scale(1.02);
+        }
+
+        .btn-3d-kinetic.btn-amber .bg {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+            box-shadow: 0 4px 14px -2px rgba(245, 158, 11, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+        }
+
+        .btn-3d-kinetic.btn-amber:hover .bg {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #92400e 100%);
+            box-shadow: 0 6px 20px -2px rgba(245, 158, 11, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+            transform: scale(1.02);
+        }
+
+        .btn-3d-kinetic.btn-compact .wrap {
+            min-width: 114px;
+            height: 32px;
+            padding: 4px 10px;
+        }
+
+        .btn-3d-kinetic.btn-compact .char {
+            font-size: 10.5px;
+        }
+
+        .btn-3d-kinetic.btn-compact .icon-action {
+            font-size: 10px;
+        }
+
+        .btn-3d-kinetic:active .bg {
+            transform: scale(0.98);
+        }
+
+        /* CUSTOM FLATPICKR CALENDAR MATCHING AJUKAN BOOKING */
+        .flatpickr-calendar {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 16px 35px -5px rgba(0, 0, 0, 0.15) !important;
+            z-index: 999999 !important;
+            background: #ffffff !important;
+        }
+        .flatpickr-months {
+            padding: 4px 0 !important;
+        }
+        .flatpickr-months .flatpickr-month {
+            color: #0f172a !important;
+            font-weight: 800 !important;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 800 !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+            background: #ea580c !important;
+            border-color: #ea580c !important;
+            color: #ffffff !important;
+        }
+        .flatpickr-day.today {
+            border-color: #ea580c !important;
         }
 
         .btn-3d-kinetic .splash {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.55);
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 140px;
+            height: 90px;
             pointer-events: none;
-            stroke: #fdba74;
             opacity: 0;
             transition: opacity 0.3s ease;
             z-index: 1;
@@ -490,11 +619,9 @@
             animation-delay: calc(var(--i) * 0.022s);
         }
 
-        /* Hover states: state-1 blurs out, state-2 appears with blur-in */
         .btn-3d-kinetic:hover .char.state-1 span {
             animation-name: charDisappear;
         }
-
         .btn-3d-kinetic:hover .char.state-2 span {
             animation-name: charAppear;
         }
@@ -505,13 +632,12 @@
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             display: inline-block;
         }
-
         .btn-3d-kinetic:hover .icon-action {
             transform: translateX(4px) scale(1.15);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased pb-16">
+<body class="bg-slate-50 text-slate-800 antialiased pb-24">
 
     <!-- Top Navigation Header -->
     <header class="sticky top-0 z-40 glass-header px-6 py-4 mb-8">
@@ -541,7 +667,31 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6">
+    <main class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Section Tab Switcher (Tahap Pendaftaran TA vs Preview 2 vs Penjadwalan Sidang) -->
+        <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+            <div class="inline-flex p-1.5 bg-slate-200/70 backdrop-blur-md rounded-2xl border border-slate-300/60 shadow-inner">
+                <button type="button" id="tabBtnPendaftaran" onclick="switchDashboardTab('pendaftaran')" class="dashboard-tab-btn active px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-300 flex items-center gap-2 bg-white text-orange-600 shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-graduation-cap text-sm"></i>
+                    <span>1. Pendaftaran TA (Plotting Pembimbing)</span>
+                </button>
+                <button type="button" id="tabBtnPreview2" onclick="switchDashboardTab('preview2')" class="dashboard-tab-btn px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-300 flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/50 cursor-pointer">
+                    <i class="fa-solid fa-chalkboard-user text-sm text-indigo-500"></i>
+                    <span>2. Tahap Preview 2 (Plotting Penguji)</span>
+                </button>
+                <button type="button" id="tabBtnSidang" onclick="switchDashboardTab('sidang')" class="dashboard-tab-btn px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-300 flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-white/50 cursor-pointer">
+                    <i class="fa-solid fa-calendar-check text-sm text-amber-500"></i>
+                    <span>3. Penjadwalan Sidang TA & Ruangan</span>
+                    <span class="px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-100 text-amber-800 ml-1">Dinamis</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: PENDAFTARAN TA (PLOTTING PEMBIMBING)               -->
+        <!-- ========================================================= -->
+        <div id="tabContentPendaftaran" class="space-y-6">
 
         <?php
             $totalMhs = count($list_mahasiswa ?? []);
@@ -564,7 +714,6 @@
             <!-- 1. Total Mahasiswa TA Card -->
             <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                 <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
                         <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-brand-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
@@ -572,15 +721,13 @@
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                     </div>
 
-                    <!-- Content -->
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Mahasiswa TA</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalMhs; ?></h3>
+                            <h3 id="statTotalCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalMhs; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Pengajuan Tugas Akhir</p>
                         </div>
                         
-                        <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
                             <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
@@ -589,7 +736,6 @@
                         </div>
                     </div>
 
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
                     <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                         <div class="w-1/3 h-0.5 bg-gradient-to-r from-brand-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
                         <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
@@ -598,17 +744,12 @@
                             <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                         </div>
                     </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-brand-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
 
             <!-- 2. Menunggu Approval Card (Cyan) -->
             <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                 <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
                         <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
@@ -616,15 +757,13 @@
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                     </div>
 
-                    <!-- Content -->
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Menunggu Approval</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <h3 id="statPendingCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditolak / Disetujui</p>
                         </div>
                         
-                        <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
                             <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
@@ -633,7 +772,6 @@
                         </div>
                     </div>
 
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
                     <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                         <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
                         <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
@@ -642,17 +780,12 @@
                             <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                         </div>
                     </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-cyan-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
 
             <!-- 3. Disetujui Card (Emerald) -->
             <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                 <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
                         <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
@@ -660,15 +793,13 @@
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                     </div>
 
-                    <!-- Content -->
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <h3 id="statApprovedCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Ketua KK</p>
                         </div>
                         
-                        <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
                             <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
@@ -677,7 +808,6 @@
                         </div>
                     </div>
 
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
                     <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                         <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
                         <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
@@ -686,17 +816,12 @@
                             <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                         </div>
                     </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-emerald-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
 
             <!-- 4. Perlu Revisi Card (Amber) -->
             <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                 <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
                         <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
@@ -704,15 +829,13 @@
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                     </div>
 
-                    <!-- Content -->
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Perlu Revisi</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $rejectedCount; ?></h3>
+                            <h3 id="statRejectedCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $rejectedCount; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Telah Ditolak / Perlu Revisi</p>
                         </div>
                         
-                        <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
                             <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
@@ -721,7 +844,6 @@
                         </div>
                     </div>
 
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
                     <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
                         <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
                         <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
@@ -730,10 +852,6 @@
                             <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                         </div>
                     </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-amber-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
             </div>
         </div>
@@ -758,50 +876,29 @@
                     <div class="relative custom-dropdown-container">
                         <input type="hidden" id="mainCategorySelect" value="query">
                         <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-brand-600 focus:outline-none">
-                            <span id="label-filter-main-cat">Cari Kata Kunci</span>
+                            <span id="label-filter-main-cat" class="truncate max-w-[130px]">Cari Kata Kunci</span>
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-main-cat"></i>
                         </button>
                         <div id="menu-filter-main-cat" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
-                            <div onclick="selectMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600">
-                                <span>🔍 Kata Kunci (Semua)</span>
-                                <i class="fa-solid fa-check text-xs check-icon"></i>
-                            </div>
-                            <div onclick="selectMainCategory('nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600">
-                                <span>🏷️ Nama Mahasiswa</span>
-                                <i class="fa-solid fa-check text-xs check-icon hidden"></i>
-                            </div>
-                            <div onclick="selectMainCategory('nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600">
-                                <span>🆔 NIM Mahasiswa</span>
-                                <i class="fa-solid fa-check text-xs check-icon hidden"></i>
-                            </div>
-                            <div onclick="selectMainCategory('judul', '📖 Judul Tugas Akhir', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600">
-                                <span>📖 Judul Tugas Akhir</span>
-                                <i class="fa-solid fa-check text-xs check-icon hidden"></i>
-                            </div>
-                            <div onclick="selectMainCategory('konsentrasi', '🎯 Bidang / Peminatan', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600">
-                                <span>🎯 Bidang / Peminatan</span>
-                                <i class="fa-solid fa-check text-xs check-icon hidden"></i>
-                            </div>
-                            <div onclick="selectMainCategory('status', '⚡ Status Approval', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600">
-                                <span>⚡ Status Approval</span>
-                                <i class="fa-solid fa-check text-xs check-icon hidden"></i>
-                            </div>
-                            <div onclick="selectMainCategory('tahap', '🔄 Tahap Saat Ini', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600">
-                                <span>🔄 Tahap Saat Ini</span>
-                                <i class="fa-solid fa-check text-xs check-icon hidden"></i>
-                            </div>
+                            <div onclick="selectMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600"><span>🔍 Kata Kunci (Semua)</span></div>
+                            <div onclick="selectMainCategory('nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🏷️ Nama Mahasiswa</span></div>
+                            <div onclick="selectMainCategory('nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🆔 NIM Mahasiswa</span></div>
+                            <div onclick="selectMainCategory('judul', '📖 Judul Tugas Akhir', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>📖 Judul Tugas Akhir</span></div>
+                            <div onclick="selectMainCategory('konsentrasi', '🎯 Bidang / Peminatan', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🎯 Bidang / Peminatan</span></div>
+                            <div onclick="selectMainCategory('status', '⚡ Status Approval', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>⚡ Status Approval</span></div>
+                            <div onclick="selectMainCategory('tahap', '🔄 Tahap Saat Ini', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🔄 Tahap Saat Ini</span></div>
                         </div>
                     </div>
 
                     <div class="unified-divider"></div>
 
-                    <!-- Main Text Input Container -->
-                    <div id="mainValueContainer" class="flex-1 flex items-center relative">
-                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                        <input type="text" id="mainSearchInput" oninput="handleUnifiedMultiSearch()" placeholder="Cari Nama, NIM, Judul TA, Tahap..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                    <!-- Input Text Value Container -->
+                    <div id="mainValueContainer" class="flex-1 flex items-center min-w-0">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                        <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearch(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
                     </div>
 
-                    <!-- Main Custom Select Dropdown Container (When Category == status or tahap) -->
+                    <!-- Main Custom Select Dropdown Container -->
                     <div id="mainCustomSelectWrap" class="hidden flex-1 relative custom-dropdown-container">
                         <input type="hidden" id="mainCustomSelectVal" value="">
                         <button type="button" onclick="toggleCustomDropdown('main-select', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
@@ -809,9 +906,13 @@
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-main-select"></i>
                         </button>
                         <div id="menu-filter-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
-                            <!-- Options injected dynamically -->
                         </div>
                     </div>
+
+                    <!-- Tombol Cari -->
+                    <button type="button" onclick="handleUnifiedMultiSearch()" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                    </button>
                 </div>
 
                 <!-- Standalone Add Filter Button (+ 1/4) -->
@@ -823,7 +924,6 @@
                 <!-- Extra Filter Rows Card Popover -->
                 <div id="extraRowsCard" class="extra-rows-card space-y-2.5">
                     <div id="additionalFilterRowsContainer" class="space-y-2.5">
-                        <!-- Extra filter rows injected dynamically -->
                     </div>
                     
                     <div class="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2 text-xs">
@@ -835,7 +935,7 @@
                 </div>
             </div>
 
-            <!-- Row 2: Page Size & Records Count (Exact Import Akun Style) -->
+            <!-- Row 2: Page Size & Records Count -->
             <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                 <div class="text-xs text-slate-500 font-medium">
                     <span>Kelola & telusuri data pengajuan tugas akhir mahasiswa secara langsung.</span>
@@ -863,20 +963,23 @@
         <!-- Table with Rotating Conic-Gradient Border (Exact Import Akun Style) -->
         <div class="table-rotating-border-wrap">
             <span class="table-rotating-border-spin"></span>
-            <div class="table-rotating-border-inner overflow-x-auto">
-                <table class="table-custom-rounded text-left text-xs">
+            <div class="table-rotating-border-inner overflow-x-auto no-scrollbar">
+                <table class="table-custom-rounded text-left text-xs w-full">
                     <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
                         <tr>
-                            <th class="py-4 px-5 pl-6">NIM</th>
-                            <th class="py-4 px-5">Nama Mahasiswa</th>
-                            <th class="py-4 px-5">Usulan Judul TA (Utama)</th>
-                            <th class="py-4 px-5 text-center">Status Approval</th>
-                            <th class="py-4 px-5 text-center">Tahap Saat Ini</th>
-                            <th class="py-4 px-5 pr-6 text-right">Aksi</th>
+                            <th class="w-10 py-4 px-4 pl-6 text-center">
+                                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" class="w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-slate-300 cursor-pointer" title="Pilih Semua di Halaman Ini">
+                            </th>
+                            <th class="py-4 px-4 font-bold">NIM</th>
+                            <th class="py-4 px-4">Nama Mahasiswa</th>
+                            <th class="py-4 px-4">Usulan Judul TA (Utama)</th>
+                            <th class="py-4 px-4 text-center">Status Approval</th>
+                            <th class="py-4 px-4 text-center">Tahap Saat Ini</th>
+                            <th class="py-4 px-4 pr-6 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-medium bg-white" id="tableBodyMhs">
-                        <!-- Injected via renderTable() -->
+                        <!-- Injected via JS renderTable() -->
                     </tbody>
                 </table>
             </div>
@@ -891,741 +994,1390 @@
                 <!-- Pagination buttons rendered via JS -->
             </div>
         </div>
+        <!-- FLOATING BATCH ACTION BAR (Tab 1: Pendaftaran TA) -->
+        <div id="floatingBatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+            <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+                <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] aspect-square rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-orange-600/30 shrink-0">
+                        <span id="selectedCountBadge">0</span>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih</h4>
+                        <div id="selectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1"></div>
+                    </div>
+                </div>
 
-    </main>
-
-    <!-- Unified Multi-Search & Pagination JS Engine (Exact Copy from import_email.php) -->
-    <script>
-    const state = {
-        list: <?= json_encode($list_mahasiswa ?? []); ?>,
-        currentPage: 1,
-        pageSize: 10,
-    };
-
-    let extraRowCounter = 0;
-
-    function showExtraCard() {
-        const extraCard = document.getElementById('extraRowsCard');
-        if (extraCard) extraCard.style.display = 'block';
-    }
-
-    function hideExtraCard() {
-        const extraCard = document.getElementById('extraRowsCard');
-        if (extraCard) extraCard.style.display = 'none';
-    }
-
-    function isExtraCardVisible() {
-        const extraCard = document.getElementById('extraRowsCard');
-        return extraCard && (extraCard.style.display === 'block' || window.getComputedStyle(extraCard).display !== 'none');
-    }
-
-    function handleUnifiedMultiSearch() {
-        state.currentPage = 1;
-        renderTable();
-    }
-
-    function updateFilterBadge() {
-        const totalRows = document.querySelectorAll('.extra-filter-row').length + 1;
-        const badge = document.getElementById('filterCountBadge');
-        if (badge) badge.innerText = `${totalRows}/4`;
-    }
-
-    function toggleCustomDropdown(type, event) {
-        if (event) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-        const menu = document.getElementById('menu-filter-' + type);
-        const arrow = document.getElementById('arrow-filter-' + type);
-        const isHidden = menu ? menu.classList.contains('hidden') : true;
-
-        closeAllCustomDropdowns();
-
-        if (menu && isHidden) {
-            menu.classList.remove('hidden');
-            if (arrow) arrow.classList.add('rotate-180');
-
-            const parentRow = menu.closest('.extra-filter-row');
-            if (parentRow) parentRow.classList.add('open-dropdown');
-
-            const parentContainer = menu.closest('.custom-dropdown-container');
-            if (parentContainer) parentContainer.classList.add('open');
-        }
-    }
-
-    function closeAllCustomDropdowns() {
-        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
-        document.querySelectorAll('.dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
-        document.querySelectorAll('.extra-filter-row').forEach(r => r.classList.remove('open-dropdown'));
-        document.querySelectorAll('.custom-dropdown-container').forEach(c => c.classList.remove('open'));
-    }
-
-    function toggleOrAddFilterRow(e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        closeAllCustomDropdowns();
-
-        const extraRowsCount = document.querySelectorAll('.extra-filter-row').length;
-
-        if (extraRowsCount > 0 && !isExtraCardVisible()) {
-            showExtraCard();
-            return;
-        }
-
-        if (extraRowsCount >= 3) {
-            const extraCard = document.getElementById('extraRowsCard');
-            if (extraCard && extraCard.style.display === 'block') {
-                hideExtraCard();
-            } else {
-                showExtraCard();
-            }
-            return;
-        }
-
-        addAdditionalFilterRow(e);
-    }
-
-    function isTextCategory(cat) {
-        return cat !== 'status' && cat !== 'tahap';
-    }
-
-    function getPlaceholderForCategory(cat) {
-        if (cat === 'nama') return 'Cari nama mahasiswa (misal: Budi)...';
-        if (cat === 'nim') return 'Cari NIM (misal: 1301210045)...';
-        if (cat === 'judul') return 'Cari topik atau judul TA...';
-        if (cat === 'konsentrasi') return 'Cari bidang/konsentrasi (misal: AI, Cyber)...';
-        return 'Cari Nama, NIM, Judul TA, Tahap...';
-    }
-
-    function addAdditionalFilterRow(e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        const extraRowsCount = document.querySelectorAll('.extra-filter-row').length;
-        if (extraRowsCount >= 3) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Maksimal 4 Filter',
-                text: 'Maksimal 4 kriteria filter pencarian yang dapat aktif secara bersamaan.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            return;
-        }
-
-        showExtraCard();
-
-        extraRowCounter++;
-        const rowId = extraRowCounter;
-
-        const allCriteria = ['query', 'nama', 'nim', 'judul', 'konsentrasi', 'status', 'tahap'];
-        const mainCat = document.getElementById('mainCategorySelect') ? document.getElementById('mainCategorySelect').value : 'query';
-        const usedCriteria = [mainCat];
-        document.querySelectorAll('.extra-cat-select').forEach(el => usedCriteria.push(el.value));
-
-        const defaultCrit = allCriteria.find(c => !usedCriteria.includes(c)) || 'status';
-
-        let defaultLabel = '⚡ Status Approval';
-        if (defaultCrit === 'nama') defaultLabel = '🏷️ Nama Mahasiswa';
-        else if (defaultCrit === 'nim') defaultLabel = '🆔 NIM Mahasiswa';
-        else if (defaultCrit === 'judul') defaultLabel = '📖 Judul Tugas Akhir';
-        else if (defaultCrit === 'konsentrasi') defaultLabel = '🎯 Bidang / Peminatan';
-        else if (defaultCrit === 'tahap') defaultLabel = '🔄 Tahap Saat Ini';
-        else if (defaultCrit === 'query') defaultLabel = '🔍 Kata Kunci (Semua)';
-
-        const container = document.getElementById('additionalFilterRowsContainer');
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'extra-filter-row';
-        rowDiv.id = `extraRow_${rowId}`;
-
-        rowDiv.innerHTML = `
-            <div class="unified-search-pill">
-                <!-- Extra Category Dropdown -->
-                <div class="relative custom-dropdown-container">
-                    <input type="hidden" id="extraCatSelect_${rowId}" class="extra-cat-select" value="${defaultCrit}">
-                    <button type="button" onclick="toggleCustomDropdown('extra-cat-${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-brand-600 focus:outline-none">
-                        <span id="label-filter-extra-cat-${rowId}">${defaultLabel}</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-extra-cat-${rowId}"></i>
+                <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+                    <!-- Button 1: Cek Dokumen Massal (Multi-Detail Review) -->
+                    <button type="button" onclick="event.stopPropagation(); openP1BatchReviewModal();" class="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-orange-600/30 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-layer-group text-sm"></i> 📂 Cek Dokumen Massal (Multi-Detail)
                     </button>
-                    <div id="menu-filter-extra-cat-${rowId}" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
-                        <div onclick="selectExtraCategory(${rowId}, 'query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'query' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>🔍 Kata Kunci (Semua)</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'query' ? '' : 'hidden'}"></i>
+
+                    <!-- Button 2: Quick Batch Plotting -->
+                    <button type="button" onclick="event.stopPropagation(); openBatchModal('Approved');" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-bolt text-amber-300"></i> Plot Cepat
+                    </button>
+
+                    <!-- Button 3: Cancel -->
+                    <button type="button" onclick="event.stopPropagation(); clearAllSelection();" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
+                        <i class="fa-solid fa-xmark"></i> Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        </div> <!-- /#tabContentPendaftaran -->
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: TAHAP PREVIEW 2 (PLOTTING PENGUJI & SIDANG)        -->
+        <!-- ========================================================= -->
+        <div id="tabContentPreview2" class="hidden space-y-6">
+
+            <?php
+                $totalP2 = count($list_preview2 ?? []);
+                $terjadwalP2 = 0;
+                $pengujiSetP2 = 0;
+                $belumSetP2 = 0;
+
+                if(!empty($list_preview2)) {
+                    foreach($list_preview2 as $r2) {
+                        $stP2 = $r2['status_preview2'] ?? 'Belum Diplot';
+                        if($stP2 === 'Terjadwal') $terjadwalP2++;
+                        else if($stP2 === 'Penguji Ditetapkan') $pengujiSetP2++;
+                        else $belumSetP2++;
+                    }
+                }
+            ?>
+
+            <!-- Stats Overview Cards (Exact Interactive Design from Import Akun / Tab 1) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- 1. Total Mahasiswa Preview 2 (Indigo) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-indigo-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                         </div>
-                        <div onclick="selectExtraCategory(${rowId}, 'nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'nama' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>🏷️ Nama Mahasiswa</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'nama' ? '' : 'hidden'}"></i>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Total Mahasiswa Preview 2</p>
+                                <h3 id="statP2Total" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalP2; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Siap Sidang Preview 2</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                                </div>
+                            </div>
                         </div>
-                        <div onclick="selectExtraCategory(${rowId}, 'nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'nim' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>🆔 NIM Mahasiswa</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'nim' ? '' : 'hidden'}"></i>
-                        </div>
-                        <div onclick="selectExtraCategory(${rowId}, 'judul', '📖 Judul Tugas Akhir', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'judul' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>📖 Judul Tugas Akhir</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'judul' ? '' : 'hidden'}"></i>
-                        </div>
-                        <div onclick="selectExtraCategory(${rowId}, 'konsentrasi', '🎯 Bidang / Peminatan', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'konsentrasi' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>🎯 Bidang / Peminatan</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'konsentrasi' ? '' : 'hidden'}"></i>
-                        </div>
-                        <div onclick="selectExtraCategory(${rowId}, 'status', '⚡ Status Approval', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'status' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>⚡ Status Approval</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'status' ? '' : 'hidden'}"></i>
-                        </div>
-                        <div onclick="selectExtraCategory(${rowId}, 'tahap', '🔄 Tahap Saat Ini', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'tahap' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                            <span>🔄 Tahap Saat Ini</span>
-                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'tahap' ? '' : 'hidden'}"></i>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="unified-divider"></div>
+                <!-- 2. Terjadwal Lengkap Card (Emerald) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
 
-                <!-- Extra Text Input Container -->
-                <div id="extraValueContainer_${rowId}" class="${isTextCategory(defaultCrit) ? 'flex-1 flex items-center relative' : 'hidden flex-1 items-center relative'}">
-                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
-                    <input type="text" id="extraInput_${rowId}" oninput="handleUnifiedMultiSearch()" placeholder="${getPlaceholderForCategory(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Terjadwal Lengkap</p>
+                                <h3 id="statP2Terjadwal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $terjadwalP2; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalP2 > 0 ? round(($terjadwalP2/$totalP2)*100) : 0; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Penguji & Ruangan Lengkap</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Extra Custom Select Container -->
-                <div id="extraCustomSelectWrap_${rowId}" class="${!isTextCategory(defaultCrit) ? 'flex-1 relative custom-dropdown-container' : 'hidden flex-1 relative custom-dropdown-container'}">
-                    <input type="hidden" id="extraValueVal_${rowId}" value="">
-                    <button type="button" onclick="toggleCustomDropdown('extra-val-${rowId}', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
-                        <span id="label-filter-extra-val-${rowId}" class="flex items-center gap-1.5 truncate">Pilih opsi...</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-extra-val-${rowId}"></i>
-                    </button>
-                    <div id="menu-filter-extra-val-${rowId}" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
-                        <!-- Injected dynamically -->
+                <!-- 3. Penguji Ditetapkan Card (Cyan) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Penguji Ditetapkan</p>
+                                <h3 id="statP2Penguji" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pengujiSetP2; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Belum Pilih Ruangan / Waktu</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-user-group text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Belum Diplot Penguji Card (Amber) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Belum Diplot Penguji</p>
+                                <h3 id="statP2Belum" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $belumSetP2; ?> <span class="text-xs font-semibold text-amber-600 font-normal">(<?= $totalP2 > 0 ? round(($belumSetP2/$totalP2)*100) : 0; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditetapkan Penguji</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-clock text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Remove Row Button (x) -->
-            <button type="button" onclick="removeExtraFilterRow(${rowId}, event)" class="btn-remove-row" title="Hapus Baris Filter Ini">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
-        `;
+            <!-- Table Toolbar & Filters (Exact Card Container from Import Akun / Tab 1) -->
+            <div class="card-custom p-5 mb-8 space-y-4">
+                
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2.5 tracking-tight">
+                            <i class="fa-solid fa-chalkboard-user text-indigo-600 text-lg"></i> Daftar Plotting Penguji & Jadwal Sidang Preview 2
+                        </h2>
+                        <p class="text-xs text-slate-500 font-normal mt-0.5">Tetapkan Dosen Penguji 1 & 2 serta jadwalkan ruangan sidang preview 2 untuk mahasiswa.</p>
+                    </div>
+                </div>
 
-        container.appendChild(rowDiv);
-        updateExtraValueOptions(rowId, defaultCrit);
-        updateFilterBadge();
-        handleUnifiedMultiSearch();
-    }
+                <!-- Row 1: Unified Multi-Search Bar for Preview 2 -->
+                <div class="relative search-pill-container" id="p2MultiSearchWrapper">
+                    <div class="unified-search-pill">
+                        <!-- Category Selector Dropdown -->
+                        <div class="relative custom-dropdown-container">
+                            <input type="hidden" id="p2MainCategorySelect" value="query">
+                            <button type="button" onclick="toggleCustomDropdown('p2-main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-indigo-600 focus:outline-none">
+                                <span id="label-filter-p2-main-cat" class="truncate max-w-[130px]">Cari Kata Kunci</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-p2-main-cat"></i>
+                            </button>
+                            <div id="menu-filter-p2-main-cat" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                                <div onclick="selectP2MainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-indigo-50 text-indigo-600"><span>🔍 Kata Kunci (Semua)</span></div>
+                                <div onclick="selectP2MainCategory('nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>🏷️ Nama Mahasiswa</span></div>
+                                <div onclick="selectP2MainCategory('nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>🆔 NIM Mahasiswa</span></div>
+                                <div onclick="selectP2MainCategory('judul', '📖 Judul Tugas Akhir', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>📖 Judul Tugas Akhir</span></div>
+                                <div onclick="selectP2MainCategory('pembimbing', '👔 Dosen Pembimbing', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>👔 Dosen Pembimbing</span></div>
+                                <div onclick="selectP2MainCategory('penguji', '👨‍🏫 Dosen Penguji', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>👨‍🏫 Dosen Penguji</span></div>
+                                <div onclick="selectP2MainCategory('ruangan', '🏛️ Ruangan Sidang', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>🏛️ Ruangan Sidang</span></div>
+                                <div onclick="selectP2MainCategory('status', '⚡ Status Plotting', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"><span>⚡ Status Plotting</span></div>
+                            </div>
+                        </div>
 
-    function removeExtraFilterRow(rowId, e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
+                        <div class="unified-divider"></div>
 
-        const row = document.getElementById(`extraRow_${rowId}`);
-        if (row) row.remove();
+                        <!-- Input Text Value Container -->
+                        <div id="p2MainValueContainer" class="flex-1 flex items-center min-w-0">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                            <input type="text" id="p2MainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearchP2(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
+                        </div>
 
-        updateFilterBadge();
+                        <!-- Main Custom Select Dropdown Container -->
+                        <div id="p2MainCustomSelectWrap" class="hidden flex-1 relative custom-dropdown-container">
+                            <input type="hidden" id="p2MainCustomSelectVal" value="">
+                            <button type="button" onclick="toggleCustomDropdown('p2-main-select', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
+                                <span id="label-filter-p2-main-select" class="flex items-center gap-1.5 truncate">Semua Data</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-p2-main-select"></i>
+                            </button>
+                            <div id="menu-filter-p2-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                            </div>
+                        </div>
 
-        const extraRowsCount = document.querySelectorAll('.extra-filter-row').length;
-        if (extraRowsCount === 0) {
-            hideExtraCard();
-        }
+                        <!-- Tombol Cari Preview 2 -->
+                        <button type="button" onclick="handleUnifiedMultiSearchP2()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                        </button>
+                    </div>
 
-        handleUnifiedMultiSearch();
-    }
+                    <!-- Standalone Add Filter Button (+ 1/4) -->
+                    <button type="button" id="standaloneAddBtnP2" onclick="toggleOrAddFilterRowP2(event)" class="btn-standalone-add hover:border-indigo-500 hover:text-indigo-600" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span id="filterCountBadgeP2" class="badge-standalone-count bg-indigo-600">1/4</span>
+                    </button>
 
-    function selectMainCategory(cat, label, el) {
-        document.getElementById('mainCategorySelect').value = cat;
-        document.getElementById('label-filter-main-cat').innerText = label;
+                    <!-- Extra Filter Rows Card Popover -->
+                    <div id="extraRowsCardP2" class="extra-rows-card space-y-2.5">
+                        <div id="additionalFilterRowsContainerP2" class="space-y-2.5">
+                        </div>
+                        
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2 text-xs">
+                            <span class="text-slate-400 text-[11px]">Gunakan kombinasi kriteria untuk mempersempit pencarian data preview 2.</span>
+                            <button type="button" onclick="resetP2MultiSearch()" class="text-rose-600 hover:text-rose-700 font-bold transition-colors cursor-pointer">
+                                Reset All Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-        const textWrap = document.getElementById('mainValueContainer');
-        const selectWrap = document.getElementById('mainCustomSelectWrap');
-        const mainInput = document.getElementById('mainSearchInput');
+                <!-- Row 2: Page Size & Records Count -->
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-xs text-slate-500 font-medium">
+                        <span>Kelola jadwal dan plotting dosen penguji preview 2 mahasiswa secara terstruktur.</span>
+                    </div>
 
-        if (isTextCategory(cat)) {
-            textWrap.classList.remove('hidden');
-            textWrap.classList.add('flex-1', 'flex');
-            selectWrap.classList.add('hidden');
-            if (mainInput) {
-                mainInput.placeholder = getPlaceholderForCategory(cat);
-            }
-        } else {
-            textWrap.classList.add('hidden');
-            textWrap.classList.remove('flex-1', 'flex');
-            selectWrap.classList.remove('hidden');
-            updateMainSelectOptions(cat);
-        }
+                    <!-- Page Size & Counter Right -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 px-3 h-9 rounded-xl shadow-2xs">
+                            <span class="font-medium">Tampilkan</span>
+                            <select id="p2PageSizeSelect" onchange="changeP2PageSize(this.value)" class="h-6 px-1.5 text-xs font-bold bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="font-medium">data/hal</span>
+                            <span class="text-slate-300">|</span>
+                            <span>Total: <strong class="total-rows-count text-slate-900 font-bold" id="p2ToolbarTotalCount"><?= $totalP2; ?></strong></span>
+                        </div>
+                    </div>
+                </div>
 
-        closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
-    }
+            </div>
 
-    function updateMainSelectOptions(cat) {
-        const menu = document.getElementById('menu-filter-main-select');
-        const label = document.getElementById('label-filter-main-select');
-        const valInput = document.getElementById('mainCustomSelectVal');
-        valInput.value = '';
+            <!-- Table with Rotating Conic-Gradient Border (Exact Import Akun Style) -->
+            <div class="table-rotating-border-wrap">
+                <span class="table-rotating-border-spin"></span>
+                <div class="table-rotating-border-inner overflow-hidden">
+                    <table class="table-custom-rounded text-left text-xs w-full">
+                        <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
+                            <tr>
+                                <th class="w-8 py-3.5 px-3 text-center">
+                                <input type="checkbox" id="selectAllCheckboxP2" onchange="toggleSelectAllP2(this)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer" title="Pilih Semua di Halaman Ini">
+                                </th>
+                                <th class="w-24 py-3.5 px-2 font-bold">NIM</th>
+                                <th class="w-36 py-3.5 px-2 font-semibold">Nama Mahasiswa</th>
+                                <th class="py-3.5 px-2">Usulan Judul TA</th>
+                                <th class="w-36 py-3.5 px-2">Dosen Pembimbing</th>
+                                <th class="w-36 py-3.5 px-2">Dosen Penguji</th>
+                                <th class="w-28 py-3.5 px-2 text-center">Status</th>
+                                <th class="w-32 py-3.5 px-3 pr-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium bg-white" id="tableBodyP2">
+                            <!-- Injected via JS renderP2Table() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        let html = '';
-        if (cat === 'status') {
-            label.innerText = 'Semua Status';
-            html = `
-                <div onclick="selectMainSelectVal('', 'Semua Status', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600"><span>Semua Status</span><i class="fa-solid fa-check text-xs check-icon"></i></div>
-                <div onclick="selectMainSelectVal('Pending', 'Pending (Menunggu)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Pending</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Approved', 'Approved (Disetujui)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Approved</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Rejected', 'Rejected (Ditolak)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Rejected</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-            `;
-        } else if (cat === 'tahap') {
-            label.innerText = 'Semua Tahap';
-            html = `
-                <div onclick="selectMainSelectVal('', 'Semua Tahap', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600"><span>Semua Tahap</span><i class="fa-solid fa-check text-xs check-icon"></i></div>
-                <div onclick="selectMainSelectVal('Dosen Wali', 'Dosen Wali', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Dosen Wali</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Admin Layanan', 'Admin Layanan', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Admin Layanan</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Koordinator TA', 'Koordinator TA', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Koordinator TA</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Ketua KK', 'Ketua KK', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Ketua KK</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Preview 1', 'Preview 1', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Preview 1</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Preview 2', 'Preview 2', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Preview 2</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Preview 3', 'Preview 3', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Preview 3</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectMainSelectVal('Sidang TA', 'Sidang TA', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Sidang TA</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-            `;
-        }
+            <!-- Table Bottom Pagination Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
+                <div>
+                    Menampilkan data <strong id="p2PageStart" class="text-slate-800 font-bold">1</strong> - <strong id="p2PageEnd" class="text-slate-800 font-bold">10</strong> dari total <strong id="p2TotalRecords" class="text-slate-800 font-bold">0</strong> mahasiswa
+                </div>
+                <div class="pagination-controls-bottom flex items-center gap-1" id="p2PaginationNav">
+                    <!-- Pagination buttons rendered via JS -->
+                </div>
+            </div>
+            <!-- FLOATING BATCH ACTION BAR (Tab 2: Preview 2) -->
+            <div id="floatingP2BatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+                <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] aspect-square rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-600/30 shrink-0">
+                            <span id="p2SelectedCountBadge">0</span>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih untuk Penetapan Penguji Massal</h4>
+                            <div id="p2SelectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1"></div>
+                        </div>
+                    </div>
 
-        if (menu) menu.innerHTML = html;
-    }
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button type="button" onclick="event.stopPropagation(); openP2BatchModal();" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-users-gear"></i> Plot Penguji Massal
+                        </button>
+                        <button type="button" onclick="event.stopPropagation(); clearAllP2Selection();" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
+                            <i class="fa-solid fa-xmark"></i> Batal
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-    function selectMainSelectVal(val, labelText, el) {
-        document.getElementById('mainCustomSelectVal').value = val;
-        document.getElementById('label-filter-main-select').innerText = labelText;
+        </div> <!-- /#tabContentPreview2 -->
 
-        const menu = document.getElementById('menu-filter-main-select');
-        if (menu) {
-            menu.querySelectorAll('.dropdown-item').forEach(i => {
-                i.classList.remove('bg-orange-50', 'text-brand-600');
-                i.classList.add('text-slate-700');
-                const c = i.querySelector('.check-icon');
-                if (c) c.classList.add('hidden');
-            });
-        }
+        <!-- ========================================================= -->
+        <!-- TAB 3: PENJADWALAN SIDANG TA & MANAJEMEN RUANGAN DINAMIS -->
+        <!-- ========================================================= -->
+        <div id="tabContentSidang" class="hidden space-y-6">
 
-        if (el) {
-            el.classList.add('bg-orange-50', 'text-brand-600');
-            el.classList.remove('text-slate-700');
-            const c = el.querySelector('.check-icon');
-            if (c) c.classList.remove('hidden');
-        }
+            <?php
+                $totalSidang = count($list_sidang ?? []);
+                $terjadwalSidang = 0;
+                $belumSetSidang = 0;
 
-        closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
-    }
-
-    function selectExtraCategory(rowId, cat, label, el) {
-        document.getElementById(`extraCatSelect_${rowId}`).value = cat;
-        document.getElementById(`label-filter-extra-cat-${rowId}`).innerText = label;
-
-        const textWrap = document.getElementById(`extraValueContainer_${rowId}`);
-        const selectWrap = document.getElementById(`extraCustomSelectWrap_${rowId}`);
-        const inputEl = document.getElementById(`extraInput_${rowId}`);
-
-        if (isTextCategory(cat)) {
-            textWrap.classList.remove('hidden');
-            textWrap.classList.add('flex-1', 'flex');
-            selectWrap.classList.add('hidden');
-            if (inputEl) inputEl.placeholder = getPlaceholderForCategory(cat);
-        } else {
-            textWrap.classList.add('hidden');
-            textWrap.classList.remove('flex-1', 'flex');
-            selectWrap.classList.remove('hidden');
-            updateExtraValueOptions(rowId, cat);
-        }
-
-        closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
-    }
-
-    function updateExtraValueOptions(rowId, cat) {
-        const menu = document.getElementById(`menu-filter-extra-val-${rowId}`);
-        const label = document.getElementById(`label-filter-extra-val-${rowId}`);
-        const valInput = document.getElementById(`extraValueVal_${rowId}`);
-        valInput.value = '';
-
-        let html = '';
-        if (cat === 'status') {
-            label.innerText = 'Semua Status';
-            html = `
-                <div onclick="selectExtraVal(${rowId}, '', 'Semua Status', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600"><span>Semua Status</span><i class="fa-solid fa-check text-xs check-icon"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Pending', 'Pending', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Pending</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Approved', 'Approved', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Approved</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Rejected', 'Rejected', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Rejected</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-            `;
-        } else if (cat === 'tahap') {
-            label.innerText = 'Semua Tahap';
-            html = `
-                <div onclick="selectExtraVal(${rowId}, '', 'Semua Tahap', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600"><span>Semua Tahap</span><i class="fa-solid fa-check text-xs check-icon"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Dosen Wali', 'Dosen Wali', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Dosen Wali</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Admin Layanan', 'Admin Layanan', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Admin Layanan</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Koordinator TA', 'Koordinator TA', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Koordinator TA</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Ketua KK', 'Ketua KK', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Ketua KK</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Preview 1', 'Preview 1', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Preview 1</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Preview 2', 'Preview 2', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Preview 2</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Preview 3', 'Preview 3', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Preview 3</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-                <div onclick="selectExtraVal(${rowId}, 'Sidang TA', 'Sidang TA', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>Sidang TA</span><i class="fa-solid fa-check text-xs check-icon hidden"></i></div>
-            `;
-        }
-
-        if (menu) menu.innerHTML = html;
-    }
-
-    function selectExtraVal(rowId, val, labelText, el) {
-        document.getElementById(`extraValueVal_${rowId}`).value = val;
-        document.getElementById(`label-filter-extra-val-${rowId}`).innerText = labelText;
-
-        const menu = document.getElementById(`menu-filter-extra-val-${rowId}`);
-        if (menu) {
-            menu.querySelectorAll('.dropdown-item').forEach(i => {
-                i.classList.remove('bg-orange-50', 'text-brand-600');
-                i.classList.add('text-slate-700');
-                const c = i.querySelector('.check-icon');
-                if (c) c.classList.add('hidden');
-            });
-        }
-
-        if (el) {
-            el.classList.add('bg-orange-50', 'text-brand-600');
-            el.classList.remove('text-slate-700');
-            const c = el.querySelector('.check-icon');
-            if (c) c.classList.remove('hidden');
-        }
-
-        closeAllCustomDropdowns();
-        handleUnifiedMultiSearch();
-    }
-
-    function resetImportMultiSearch() {
-        document.getElementById('mainCategorySelect').value = 'query';
-        document.getElementById('label-filter-main-cat').innerText = 'Cari Kata Kunci';
-        
-        const mainInput = document.getElementById('mainSearchInput');
-        if (mainInput) {
-            mainInput.value = '';
-            mainInput.placeholder = 'Cari Nama, NIM, Judul TA, Tahap...';
-        }
-
-        const textWrap = document.getElementById('mainValueContainer');
-        const selectWrap = document.getElementById('mainCustomSelectWrap');
-        if (textWrap) {
-            textWrap.classList.remove('hidden');
-            textWrap.classList.add('flex-1', 'flex');
-        }
-        if (selectWrap) selectWrap.classList.add('hidden');
-
-        document.getElementById('mainCustomSelectVal').value = '';
-
-        const container = document.getElementById('additionalFilterRowsContainer');
-        if (container) container.innerHTML = '';
-
-        hideExtraCard();
-        updateFilterBadge();
-
-        // Reset quick filter button styles
-        document.querySelectorAll('.btn-quick-filter').forEach(b => {
-            b.className = 'btn-quick-filter px-3 py-1 rounded-xl text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        });
-        const allBtn = document.querySelector('.btn-quick-filter');
-        if (allBtn) allBtn.className = 'btn-quick-filter px-3 py-1 rounded-xl text-xs bg-slate-900 text-white font-bold transition shadow-xs';
-
-        state.currentPage = 1;
-        renderTable();
-    }
-
-    function quickFilterStatus(statusVal, btnEl) {
-        document.querySelectorAll('.btn-quick-filter').forEach(b => {
-            b.className = 'btn-quick-filter px-3 py-1 rounded-xl text-xs bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        });
-        if (btnEl) btnEl.className = 'btn-quick-filter px-3 py-1 rounded-xl text-xs bg-slate-900 text-white font-bold transition shadow-xs';
-
-        if (statusVal === 'all') {
-            document.getElementById('mainCategorySelect').value = 'query';
-            document.getElementById('mainCustomSelectVal').value = '';
-            document.getElementById('label-filter-main-cat').innerText = 'Cari Kata Kunci';
-            const textWrap = document.getElementById('mainValueContainer');
-            const selectWrap = document.getElementById('mainCustomSelectWrap');
-            if (textWrap) {
-                textWrap.classList.remove('hidden');
-                textWrap.classList.add('flex-1', 'flex');
-            }
-            if (selectWrap) selectWrap.classList.add('hidden');
-        } else {
-            document.getElementById('mainCategorySelect').value = 'status';
-            document.getElementById('mainCustomSelectVal').value = statusVal;
-            document.getElementById('label-filter-main-cat').innerText = '⚡ Status Approval';
-            document.getElementById('label-filter-main-select').innerText = statusVal;
-            
-            const textWrap = document.getElementById('mainValueContainer');
-            const selectWrap = document.getElementById('mainCustomSelectWrap');
-            if (textWrap) {
-                textWrap.classList.add('hidden');
-                textWrap.classList.remove('flex-1', 'flex');
-            }
-            if (selectWrap) selectWrap.classList.remove('hidden');
-        }
-
-        state.currentPage = 1;
-        renderTable();
-    }
-
-    function changePageSize(size) {
-        state.pageSize = parseInt(size) || 10;
-        state.currentPage = 1;
-        renderTable();
-    }
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.custom-dropdown-container') && !e.target.closest('#multiSearchWrapper')) {
-            closeAllCustomDropdowns();
-        }
-    });
-
-    // 5. GET ACTIVE CRITERIA & FILTER
-    function getActiveFilterCriteria() {
-        const criteria = [];
-
-        // 1. Main Search Bar Criteria
-        const mainCat = document.getElementById('mainCategorySelect') ? document.getElementById('mainCategorySelect').value : 'query';
-        let mainVal = '';
-        if (isTextCategory(mainCat)) {
-            mainVal = document.getElementById('mainSearchInput') ? document.getElementById('mainSearchInput').value.trim() : '';
-        } else {
-            mainVal = document.getElementById('mainCustomSelectVal') ? document.getElementById('mainCustomSelectVal').value : '';
-        }
-        if (mainVal) criteria.push({ type: mainCat, val: mainVal });
-
-        // 2. Extra Filter Rows Criteria
-        document.querySelectorAll('.extra-filter-row').forEach(row => {
-            const rowId = row.id.replace('extraRow_', '');
-            const cat = document.getElementById('extraCatSelect_' + rowId) ? document.getElementById('extraCatSelect_' + rowId).value : 'query';
-            let val = '';
-            if (isTextCategory(cat)) {
-                val = document.getElementById('extraInput_' + rowId) ? document.getElementById('extraInput_' + rowId).value.trim() : '';
-            } else {
-                val = document.getElementById('extraValueVal_' + rowId) ? document.getElementById('extraValueVal_' + rowId).value : '';
-            }
-            if (val) criteria.push({ type: cat, val: val });
-        });
-
-        return criteria;
-    }
-
-    function getFilteredMahasiswa() {
-        const activeFilters = getActiveFilterCriteria();
-
-        return state.list.filter(mhs => {
-            const nim = (mhs.nim || '').toLowerCase();
-            const nama = ((mhs.nama_depan || '') + ' ' + (mhs.nama_belakang || '')).toLowerCase();
-            const judul = (mhs.judul_1 || '').toLowerCase();
-            const status = (mhs.status_approval_koor || 'Pending').toLowerCase();
-            const stage = (mhs.current_stage || 'Koordinator TA').toLowerCase();
-            const prodi = (mhs.konsentrasi_dkv || 'Informatika').toLowerCase();
-
-            for (let filter of activeFilters) {
-                const valLower = filter.val.toLowerCase();
-                if (filter.type === 'query') {
-                    const match = nim.includes(valLower) || 
-                                  nama.includes(valLower) || 
-                                  judul.includes(valLower) || 
-                                  status.includes(valLower) || 
-                                  stage.includes(valLower) || 
-                                  prodi.includes(valLower);
-                    if (!match) return false;
-                } else if (filter.type === 'nama') {
-                    if (!nama.includes(valLower)) return false;
-                } else if (filter.type === 'nim') {
-                    if (!nim.includes(valLower)) return false;
-                } else if (filter.type === 'judul') {
-                    if (!judul.includes(valLower)) return false;
-                } else if (filter.type === 'konsentrasi') {
-                    if (!prodi.includes(valLower)) return false;
-                } else if (filter.type === 'status') {
-                    if (status !== valLower) return false;
-                } else if (filter.type === 'tahap') {
-                    if (!stage.includes(valLower)) return false;
+                if(!empty($list_sidang)) {
+                    foreach($list_sidang as $rs) {
+                        $stSd = $rs['status_sidang'] ?? 'Belum Dijadwalkan';
+                        if($stSd === 'Terjadwal') $terjadwalSidang++;
+                        else $belumSetSidang++;
+                    }
                 }
-            }
-            return true;
-        });
-    }
+                $totalRuangan = count($ruangan_list ?? []);
+            ?>
 
-    function renderAnimatedChars(text) {
-        return text.split('').map((c, i) => {
-            const display = c === ' ' ? '&nbsp;' : c;
-            return `<span data-label="${c}" style="--i: ${i + 1}">${display}</span>`;
-        }).join('');
-    }
+            <!-- Stats Overview Cards (Tahap Sidang) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                <!-- 1. Total Mahasiswa Sidang (Amber) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
 
-    function renderTable() {
-        const tbody = document.getElementById('tableBodyMhs');
-        const filtered = getFilteredMahasiswa();
-
-        const totalRecords = filtered.length;
-        const totalPages = Math.ceil(totalRecords / state.pageSize) || 1;
-        if (state.currentPage > totalPages) state.currentPage = totalPages;
-
-        const startIdx = (state.currentPage - 1) * state.pageSize;
-        const endIndex = Math.min(startIdx + state.pageSize, totalRecords);
-        const pageData = filtered.slice(startIdx, endIndex);
-
-        // Update Info Bar & Toolbar Counter
-        if (document.getElementById('pageStart')) document.getElementById('pageStart').textContent = totalRecords > 0 ? (startIdx + 1) : 0;
-        if (document.getElementById('pageEnd')) document.getElementById('pageEnd').textContent = endIndex;
-        if (document.getElementById('totalRecordsBottom')) document.getElementById('totalRecordsBottom').textContent = totalRecords;
-        if (document.getElementById('toolbarTotalCount')) document.getElementById('toolbarTotalCount').textContent = totalRecords;
-
-        if (pageData.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="p-8 text-center text-slate-400">
-                        <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300 block"></i>
-                        <p class="font-medium text-xs">Tidak ada data pengajuan yang ditemukan.</p>
-                    </td>
-                </tr>
-            `;
-            renderPagination(totalPages);
-            return;
-        }
-
-        let html = '';
-        pageData.forEach((mhs, idx) => {
-            const st = mhs.status_approval_koor || 'Pending';
-            let badgeClass = 'bg-amber-50 text-amber-700 border-amber-300';
-            if (st === 'Approved') badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-300';
-            else if (st === 'Rejected') badgeClass = 'bg-rose-50 text-rose-700 border-rose-300';
-
-            const fullName = `${mhs.nama_depan || ''} ${mhs.nama_belakang || ''}`.trim();
-            const judul = mhs.judul_1 || 'Belum Mendaftar';
-            const stage = mhs.current_stage || 'Koordinator TA';
-
-            html += `
-                <tr class="table-row-animate hover:bg-slate-50/80 transition-colors" style="--row-index: ${idx};">
-                    <td class="py-4 px-5 pl-6 font-bold text-slate-900">${mhs.nim}</td>
-                    <td class="py-4 px-5 font-semibold text-slate-800">${fullName}</td>
-                    <td class="py-4 px-5 text-slate-600 max-w-xs truncate font-normal" title="${judul}">${judul}</td>
-                    <td class="py-4 px-5 text-center">
-                        <span class="px-3 py-1 font-bold text-[11px] rounded-full border shadow-xs inline-block ${badgeClass}">${st}</span>
-                    </td>
-                    <td class="py-4 px-5 text-center">
-                        <span class="px-3 py-1 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 inline-block">${stage}</span>
-                    </td>
-                    <td class="py-4 px-5 pr-6 text-right">
-                        <a href="<?= site_url('koordinatorta/detail_mahasiswa/'); ?>${mhs.nim}" class="btn-3d-kinetic" title="Detail & Approval Mahasiswa">
-                            <div class="bg"></div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
-                                <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
-                                <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
-                                <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
-                                <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
-                                <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
-                                <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
-                            </svg>
-                            <div class="wrap">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
-                                    <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
-                                </svg>
-                                <div class="outline"></div>
-                                <div class="content">
-                                    <span class="char state-1">
-                                        ${renderAnimatedChars('Detail & Approval')}
-                                    </span>
-                                    <span class="char state-2">
-                                        ${renderAnimatedChars('Periksa Berkas')}
-                                    </span>
-                                    <i class="fa-solid fa-arrow-right icon-action"></i>
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Total Mahasiswa Sidang</p>
+                                <h3 id="statSidangTotal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Siap Dijadwalkan Sidang</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-graduation-cap text-lg"></i>
                                 </div>
                             </div>
-                        </a>
-                    </td>
-                </tr>
-            `;
-        });
+                        </div>
 
-        tbody.innerHTML = html;
-        renderPagination(totalPages);
-    }
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    function renderPagination(totalPages) {
-        const navContainer = document.getElementById('paginationNav');
-        if (!navContainer) return;
-        navContainer.innerHTML = '';
+                <!-- 2. Terjadwal Sidang (Emerald) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
 
-        if (totalPages <= 1) return;
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Sudah Terjadwal</p>
+                                <h3 id="statSidangTerjadwal" class="text-2xl font-black text-emerald-600 mt-1 tracking-tight"><?= $terjadwalSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Waktu & Ruangan Lengkap</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
 
-        // First Button
-        const btnFirst = document.createElement('button');
-        btnFirst.className = `px-2.5 py-1 rounded-lg border text-xs font-bold transition ${state.currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}`;
-        btnFirst.innerHTML = '&laquo; Awal';
-        btnFirst.disabled = (state.currentPage === 1);
-        btnFirst.addEventListener('click', () => goToPage(1));
-        navContainer.appendChild(btnFirst);
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        // Prev Button
-        const btnPrev = document.createElement('button');
-        btnPrev.className = `px-2.5 py-1 rounded-lg border text-xs font-bold transition ${state.currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}`;
-        btnPrev.innerHTML = '&lsaquo; Prev';
-        btnPrev.disabled = (state.currentPage === 1);
-        btnPrev.addEventListener('click', () => goToPage(state.currentPage - 1));
-        navContainer.appendChild(btnPrev);
+                <!-- 3. Belum Dijadwalkan (Rose/Amber) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
 
-        // Numbered Pages
-        const maxVisibleButtons = 5;
-        let startPage = Math.max(1, state.currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
-        if (endPage - startPage + 1 < maxVisibleButtons) {
-            startPage = Math.max(1, endPage - maxVisibleButtons + 1);
-        }
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Dijadwalkan</p>
+                                <h3 id="statSidangBelumSet" class="text-2xl font-black text-rose-600 mt-1 tracking-tight"><?= $belumSetSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Penentuan Jadwal</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
 
-        for (let p = startPage; p <= endPage; p++) {
-            const btnPage = document.createElement('button');
-            const isActive = (p === state.currentPage);
-            btnPage.className = `px-3 py-1 rounded-lg text-xs font-bold transition ${isActive ? 'bg-orange-600 text-white shadow-xs' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'}`;
-            btnPage.textContent = p;
-            btnPage.addEventListener('click', () => goToPage(p));
-            navContainer.appendChild(btnPage);
-        }
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        // Next Button
-        const btnNext = document.createElement('button');
-        btnNext.className = `px-2.5 py-1 rounded-lg border text-xs font-bold transition ${state.currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}`;
-        btnNext.innerHTML = 'Next &rsaquo;';
-        btnNext.disabled = (state.currentPage === totalPages);
-        btnNext.addEventListener('click', () => goToPage(state.currentPage + 1));
-        navContainer.appendChild(btnNext);
+                <!-- 4. Ruangan Sidang Aktif Dinamis (Cyan/Teal) -->
+                <div onclick="openModalKelolaRuangan()" class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
 
-        // Last Button
-        const btnLast = document.createElement('button');
-        btnLast.className = `px-2.5 py-1 rounded-lg border text-xs font-bold transition ${state.currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'}`;
-        btnLast.innerHTML = 'Akhir &raquo;';
-        btnLast.disabled = (state.currentPage === totalPages);
-        btnLast.addEventListener('click', () => goToPage(totalPages));
-        navContainer.appendChild(btnLast);
-    }
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Ruangan Sidang Aktif</p>
+                                <h3 id="statSidangRuanganCount" class="text-2xl font-black text-cyan-700 mt-1 tracking-tight"><?= $totalRuangan; ?></h3>
+                                <p class="text-xs font-medium text-cyan-600 mt-1 flex items-center gap-1 font-semibold">
+                                    <i class="fa-solid fa-sliders text-[10px]"></i> Kelola Ruangan
+                                </p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-door-open text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
 
-    function goToPage(page) {
-        if (page < 1) return;
-        state.currentPage = page;
-        renderTable();
-    }
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <span class="text-[10px] font-bold text-cyan-600 group-hover:underline">Tambah / Hapus →</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    // Initial Render
-    document.addEventListener('DOMContentLoaded', () => {
-        updateFilterBadge();
-        renderTable();
-    });
+            <!-- Table Toolbar & Filters (Exact Card Container from Tab 1 & Tab 2) -->
+            <div class="card-custom p-5 mb-8 space-y-4">
+                
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2.5 tracking-tight">
+                            <i class="fa-solid fa-calendar-check text-amber-500 text-lg"></i> Daftar Pendaftaran &amp; Penjadwalan Sidang TA
+                        </h2>
+                        <p class="text-xs text-slate-500 font-normal mt-0.5">Kelola tanggal sidang, rentang waktu, dan alokasi ruangan sidang mahasiswa secara dinamis.</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button type="button" onclick="openModalKelolaRuangan()" class="px-4 py-2.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 font-bold rounded-xl text-xs shadow-2xs transition inline-flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-door-open text-cyan-600"></i>
+                            <span>Kelola Ruangan Sidang</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Row 1: Unified Multi-Search Bar for Sidang -->
+                <div class="relative search-pill-container" id="sidangMultiSearchWrapper">
+                    <div class="unified-search-pill">
+                        <!-- Category Selector Dropdown -->
+                        <div class="relative custom-dropdown-container">
+                            <input type="hidden" id="sidangMainCategorySelect" value="query">
+                            <button type="button" onclick="toggleCustomDropdown('sidang-main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-amber-600 focus:outline-none">
+                                <span id="label-filter-sidang-main-cat" class="truncate max-w-[130px]">Cari Kata Kunci</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-sidang-main-cat"></i>
+                            </button>
+                            <div id="menu-filter-sidang-main-cat" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                                <div onclick="selectSidangMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-amber-50 text-amber-600"><span>🔍 Kata Kunci (Semua)</span></div>
+                                <div onclick="selectSidangMainCategory('nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>🏷️ Nama Mahasiswa</span></div>
+                                <div onclick="selectSidangMainCategory('nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>🆔 NIM Mahasiswa</span></div>
+                                <div onclick="selectSidangMainCategory('judul', '📖 Judul Tugas Akhir', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>📖 Judul Tugas Akhir</span></div>
+                                <div onclick="selectSidangMainCategory('pembimbing', '👔 Dosen Pembimbing', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>👔 Dosen Pembimbing</span></div>
+                                <div onclick="selectSidangMainCategory('penguji', '👨‍🏫 Dosen Penguji', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>👨‍🏫 Dosen Penguji</span></div>
+                                <div onclick="selectSidangMainCategory('ruangan', '🏛️ Ruangan Sidang', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>🏛️ Ruangan Sidang</span></div>
+                                <div onclick="selectSidangMainCategory('status', '⚡ Status Sidang', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-600"><span>⚡ Status Sidang</span></div>
+                            </div>
+                        </div>
+
+                        <div class="unified-divider"></div>
+
+                        <!-- Input Text Value Container -->
+                        <div id="sidangMainValueContainer" class="flex-1 flex items-center min-w-0">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                            <input type="text" id="sidangMainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleUnifiedMultiSearchSidang(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
+                        </div>
+
+                        <!-- Main Custom Select Dropdown Container -->
+                        <div id="sidangMainCustomSelectWrap" class="hidden flex-1 relative custom-dropdown-container">
+                            <input type="hidden" id="sidangMainCustomSelectVal" value="">
+                            <button type="button" onclick="toggleCustomDropdown('sidang-main-select', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
+                                <span id="label-filter-sidang-main-select" class="flex items-center gap-1.5 truncate">Semua Status</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-sidang-main-select"></i>
+                            </button>
+                            <div id="menu-filter-sidang-main-select" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                            </div>
+                        </div>
+
+                        <!-- Tombol Cari Sidang -->
+                        <button type="button" onclick="handleUnifiedMultiSearchSidang()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                        </button>
+                    </div>
+
+                    <!-- Standalone Add Filter Button (+ 1/4) -->
+                    <button type="button" id="standaloneAddBtnSidang" onclick="toggleOrAddFilterRowSidang(event)" class="btn-standalone-add hover:border-amber-500 hover:text-amber-600" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span id="filterCountBadgeSidang" class="badge-standalone-count bg-amber-600">1/4</span>
+                    </button>
+
+                    <!-- Extra Filter Rows Card Popover -->
+                    <div id="extraRowsCardSidang" class="extra-rows-card space-y-2.5">
+                        <div id="additionalFilterRowsContainerSidang" class="space-y-2.5">
+                        </div>
+                        
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2 text-xs">
+                            <span class="text-slate-400 text-[11px]">Gunakan kombinasi kriteria untuk mempersempit pencarian jadwal sidang.</span>
+                            <button type="button" onclick="resetSidangMultiSearch()" class="text-rose-600 hover:text-rose-700 font-bold transition-colors cursor-pointer">
+                                Reset All Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Page Size & Records Count -->
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    <div class="text-xs text-slate-500 font-medium">
+                        <span>Kelola jadwal dan ruangan sidang tugas akhir mahasiswa secara terstruktur.</span>
+                    </div>
+
+                    <!-- Page Size & Counter Right -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 px-3 h-9 rounded-xl shadow-2xs">
+                            <span class="font-medium">Tampilkan</span>
+                            <select id="sidangPageSizeSelect" onchange="changeSidangPageSize(this.value)" class="h-6 px-1.5 text-xs font-bold bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="font-medium">data/hal</span>
+                            <span class="text-slate-300">|</span>
+                            <span>Total: <strong class="total-rows-count text-slate-900 font-bold" id="sidangToolbarTotalCount"><?= $totalSidang; ?></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Table with Rotating Conic-Gradient Border (Exact Tab 1 & Tab 2 Style) -->
+            <div class="table-rotating-border-wrap">
+                <span class="table-rotating-border-spin"></span>
+                <div class="table-rotating-border-inner overflow-hidden">
+                    <table class="table-custom-rounded text-left text-xs w-full">
+                        <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
+                            <tr>
+                                <th class="w-8 py-3.5 px-3 text-center">
+                                    <input type="checkbox" id="selectAllCheckboxSidang" onchange="toggleSelectAllSidang(this)" class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 cursor-pointer" title="Pilih Semua di Halaman Ini">
+                                </th>
+                                <th class="w-24 py-3.5 px-2 font-bold">NIM</th>
+                                <th class="w-36 py-3.5 px-2 font-semibold">Nama Mahasiswa</th>
+                                <th class="py-3.5 px-2">Usulan Judul TA</th>
+                                <th class="w-36 py-3.5 px-2">Dosen Pembimbing</th>
+                                <th class="w-36 py-3.5 px-2">Dosen Penguji</th>
+                                <th class="w-32 py-3.5 px-2">Waktu Sidang</th>
+                                <th class="w-28 py-3.5 px-2">Ruangan</th>
+                                <th class="w-28 py-3.5 px-2 text-center">Status</th>
+                                <th class="w-32 py-3.5 px-3 pr-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium bg-white" id="tbodySidang">
+                            <!-- Injected via JS renderSidangTable() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table Bottom Pagination Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
+                <div>
+                    Menampilkan data <strong id="sidangPageStart" class="text-slate-800 font-bold">1</strong> - <strong id="sidangPageEnd" class="text-slate-800 font-bold">10</strong> dari total <strong id="sidangTotalRecords" class="text-slate-800 font-bold"><?= $totalSidang; ?></strong> mahasiswa
+                </div>
+                <div class="pagination-controls-bottom flex items-center gap-1" id="sidangPaginationNav">
+                    <!-- Dynamic pagination buttons -->
+                </div>
+            </div>
+
+            <!-- Floating Action Bar for Sidang Multi-Selection -->
+            <div id="floatingSidangBatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700/60 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+                <div class="flex items-center gap-2">
+                    <span id="floatingSidangCount" class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">0</span>
+                    <span class="text-xs font-bold text-slate-200">Mahasiswa Terpilih</span>
+                </div>
+                <div class="h-4 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="openModalBatchSidang()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Jadwalkan Massal (<span id="floatingSidangBatchCountText">0</span>)</span>
+                    </button>
+                    <button type="button" onclick="clearAllSidangSelection()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition cursor-pointer">
+                        Batal
+                    </button>
+                </div>
+            </div>
+
+        </div> <!-- /#tabContentSidang -->
+
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 1: MANAJEMEN RUANGAN SIDANG DINAMIS                 -->
+    <!-- ========================================================= -->
+    <div id="modalKelolaRuangan" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalKelolaRuangan()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-cyan-50/80 via-white to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-cyan-600 text-white flex items-center justify-center font-bold text-base shadow-md shadow-cyan-600/20 shrink-0">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug">Manajemen Ruangan Sidang Dinamis</h3>
+                        <p class="text-xs text-slate-500">Tambah ruangan baru atau hapus ruangan yang sudah tidak digunakan untuk sidang.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalKelolaRuangan()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 sm:p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Form Tambah Ruangan Baru -->
+                <div class="p-4 sm:p-5 bg-gradient-to-br from-cyan-50/50 to-slate-50 border border-cyan-200/70 rounded-2xl space-y-3.5">
+                    <h4 class="text-xs font-bold text-cyan-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle text-cyan-600"></i> Tambah Ruangan Sidang Baru
+                    </h4>
+                    
+                    <form id="formTambahRuangan" onsubmit="submitTambahRuangan(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Kode Ruangan <span class="text-rose-500">*</span></label>
+                            <input type="text" name="kode_ruangan" id="inputKodeRuangan" placeholder="Contoh: IK.02.04" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none uppercase shadow-2xs">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Nama Ruangan <span class="text-rose-500">*</span></label>
+                            <input type="text" name="nama_ruangan" id="inputNamaRuangan" placeholder="Contoh: Ruang Sidang 3 FIK" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none shadow-2xs">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[11px] font-bold text-slate-700">Lokasi / Gedung</label>
+                            <input type="text" name="lokasi" id="inputLokasiRuangan" placeholder="Gedung FIK Lantai 2" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none shadow-2xs">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" id="btnSubmitRuangan" class="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-md shadow-cyan-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-plus text-xs"></i> Simpan Ruangan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Table Daftar Ruangan Aktif -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Ruangan Sidang Terdaftar:</label>
+                        <span id="badgeTotalRuanganModal" class="text-[11px] font-bold text-cyan-700 bg-cyan-50 border border-cyan-200 px-2.5 py-0.5 rounded-full">0 Ruangan</span>
+                    </div>
+
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="py-2.5 px-3.5">Kode</th>
+                                    <th class="py-2.5 px-3.5">Nama Ruangan</th>
+                                    <th class="py-2.5 px-3.5">Lokasi</th>
+                                    <th class="py-2.5 px-3.5 text-center">Status</th>
+                                    <th class="py-2.5 px-3.5 text-center w-20">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyRuanganList" class="divide-y divide-slate-100">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 sm:p-5 border-t border-slate-100 flex items-center justify-end bg-slate-50/50">
+                <button type="button" onclick="closeModalKelolaRuangan()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition cursor-pointer">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 2: SET JADWAL SIDANG SINGLE MAHASISWA               -->
+    <!-- ========================================================= -->
+    <div id="modalSingleSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalSingleSidang()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/80 via-white to-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-amber-500/20 shrink-0">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Penjadwalan Sidang Tugas Akhir</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5" id="singleSidangStudentInfo">Atur tanggal, ruangan, dan jam pelaksanaan sidang.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalSingleSidang()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="formSingleSidang" onsubmit="submitSingleSidang(event)" class="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <input type="hidden" name="nim" id="singleSidangNim">
+
+                <!-- 1. TANGGAL SIDANG -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Tanggal Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="tgl_sidang" id="singleSidangTgl" required placeholder="Pilih Tanggal Sidang..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer transition">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none">
+                            <i class="fa-solid fa-calendar-day text-base"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. RUANGAN SIDANG (SEARCH AUTOCOMPLETE & DYNAMIC INPUT) -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                            Ruangan Sidang <span class="text-rose-500">*</span>
+                        </label>
+                        <button type="button" onclick="openModalKelolaRuangan()" class="text-xs text-cyan-600 hover:text-cyan-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle text-[11px]"></i> Kelola Ruangan
+                        </button>
+                    </div>
+                    <div class="relative custom-combobox-wrap" id="singleRuanganCombobox">
+                        <input type="text" 
+                               id="singleSidangRuanganInput" 
+                               placeholder="Cari ruangan atau ketik nama ruangan baru..." 
+                               autocomplete="off"
+                               class="w-full pl-11 pr-11 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs transition cursor-pointer" 
+                               oninput="filterRuanganDropdown('single', this.value)" 
+                               onfocus="openRuanganDropdown('single')"
+                               onclick="openRuanganDropdown('single')">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-600 pointer-events-none">
+                            <i class="fa-solid fa-door-open text-base"></i>
+                        </div>
+                        <button type="button" onclick="toggleRuanganDropdown('single')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                            <i class="fa-solid fa-chevron-down text-sm transition duration-200" id="singleRuanganArrow"></i>
+                        </button>
+                        <input type="hidden" name="ruangan_sidang" id="singleSidangRuangan" required>
+
+                        <!-- Dropdown Menu List -->
+                        <div id="singleRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
+                            <!-- Injected dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. WAKTU SIDANG (EXACT INTERACTIVE RADIAL CLOCK PICKER) -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Waktu Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Mulai</label>
+                            <input type="text" name="jam_mulai_sidang" id="singleSidangJamMulai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('single', 'mulai')" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Selesai</label>
+                            <input type="text" name="jam_selesai_sidang" id="singleSidangJamSelesai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('single', 'selesai')">
+                        </div>
+                    </div>
+
+                    <!-- Inline Radial Clock Picker Panel (Single) -->
+                    <div id="singleInlineClockPanel" style="display:none; margin-top: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 22px; box-shadow: 0 12px 30px rgba(0,0,0,0.04);">
+                        <div style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
+                            <!-- Kiri: Display Waktu & Quick Drag Slots -->
+                            <div style="flex: 1.15; min-width: 280px; background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div id="singleInlineTpLabel" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">PILIH JAM MULAI</div>
+                                <div style="font-size: 3rem; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em;">
+                                    <span id="singleTpDisplayHour" onclick="setSidangClockMode('single', 'hour')" style="cursor:pointer;">14</span><span style="color:#cbd5e1; margin:0 3px;">:</span><span id="singleTpDisplayMinute" onclick="setSidangClockMode('single', 'minute')" style="cursor:pointer; color:#94a3b8;">00</span>
+                                </div>
+                                <div style="display:inline-block; background:#ede9fe; color:#7c3aed; font-size:0.75rem; font-weight:700; border-radius:20px; padding:3px 12px; margin-bottom:16px;">24 Jam</div>
+
+                                <div style="font-size: 0.8rem; color: #7c3aed; font-weight: 700; margin-bottom: 12px; width:100%; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>⚡ Slot Waktu Cepat</span>
+                                    <span style="font-size:0.7rem; color:#94a3b8; font-weight:500;">(drag untuk rentang)</span>
+                                </div>
+                                <div id="singleTpTimeSlots" style="display:grid; grid-template-columns:1fr 1fr; gap:7px; user-select:none; width:100%;">
+                                    <div class="tp-slot" data-start="08:00" data-end="09:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">08:00 – 09:00</div>
+                                    <div class="tp-slot" data-start="09:00" data-end="10:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">09:00 – 10:00</div>
+                                    <div class="tp-slot" data-start="10:00" data-end="11:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">10:00 – 11:00</div>
+                                    <div class="tp-slot" data-start="11:00" data-end="12:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">11:00 – 12:00</div>
+                                    <div class="tp-slot" data-start="12:00" data-end="13:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">12:00 – 13:00</div>
+                                    <div class="tp-slot" data-start="13:00" data-end="14:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">13:00 – 14:00</div>
+                                    <div class="tp-slot" data-start="14:00" data-end="15:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">14:00 – 15:00</div>
+                                    <div class="tp-slot" data-start="15:00" data-end="16:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">15:00 – 16:00</div>
+                                    <div class="tp-slot" data-start="16:00" data-end="17:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">16:00 – 17:00</div>
+                                    <div class="tp-slot" data-start="17:00" data-end="18:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">17:00 – 18:00</div>
+                                </div>
+                            </div>
+
+                            <!-- Kanan: Radial Analog Clock -->
+                            <div style="flex: 1.25; min-width: 280px; display:flex; flex-direction:column; align-items:center; background:#ffffff; border-radius:16px; padding:22px; border:1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div class="tp-tab-wrap" style="display:flex; width:100%; border-radius:12px; background:#f1f5f9; padding:4px; margin-bottom:16px;">
+                                    <div id="singleTpTabHour" class="active" onclick="setSidangClockMode('single', 'hour')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">🕐 Jam</div>
+                                    <div id="singleTpTabMinute" onclick="setSidangClockMode('single', 'minute')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">⏱ Menit</div>
+                                </div>
+                                <div id="singleTpClockContainer" style="position:relative; width:240px; height:240px; border-radius:50%; background:#f8fafc; border:2px solid #e2e8f0; box-shadow:inset 0 2px 6px rgba(0,0,0,0.03); flex-shrink:0; margin:0 auto;">
+                                    <div id="singleTpClockHand" style="position:absolute; bottom:50%; left:50%; width:2px; height:95px; background:#7c3aed; border-radius:2px; transform-origin:bottom center; transform:translateX(-50%) rotate(0deg); transition:transform 0.15s ease; z-index:5;"></div>
+                                    <div style="position:absolute; top:50%; left:50%; width:10px; height:10px; background:#7c3aed; border-radius:50%; transform:translate(-50%,-50%); z-index:10;"></div>
+                                    <div id="singleTpClockNumbers"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid #e2e8f0;">
+                            <button type="button" onclick="closeSidangInlinePicker('single')" style="padding:10px 22px; border-radius:12px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:0.85rem; font-weight:700; cursor:pointer;">Batal</button>
+                            <button type="button" onclick="applySidangInlinePicker('single')" style="padding:10px 26px; border-radius:12px; border:none; background:#7c3aed; color:#fff; font-size:0.85rem; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.3);">✔ Terapkan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModalSingleSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitSingleSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-save text-xs sm:text-sm"></i> Simpan Jadwal Sidang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 3: BATCH PENJADWALAN SIDANG MASSAL                  -->
+    <!-- ========================================================= -->
+    <div id="modalBatchSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalBatchSidang()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="p-6 sm:p-7 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/80 via-white to-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-amber-500/20 shrink-0">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Jadwalkan Sidang Massal</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Terapkan tanggal, ruangan, dan jam sidang ke seluruh mahasiswa terpilih.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalBatchSidang()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="formBatchSidang" onsubmit="submitBatchSidang(event)" class="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Selected Students List -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                            Mahasiswa Terpilih
+                        </label>
+                        <span id="badgeBatchSidangCount" class="text-xs font-extrabold text-amber-800 bg-amber-100/80 border border-amber-300 px-3 py-1 rounded-full">0 Mahasiswa</span>
+                    </div>
+                    <div id="batchSidangSelectedList" class="max-h-36 overflow-y-auto space-y-1.5 border border-slate-200 p-3 rounded-2xl bg-slate-50/60 text-xs custom-scrollbar">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <!-- 1. TANGGAL SIDANG -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Tanggal Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" name="tgl_sidang" id="batchSidangTgl" required placeholder="Pilih Tanggal Sidang..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer transition">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none">
+                            <i class="fa-solid fa-calendar-day text-base"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. RUANGAN SIDANG (SEARCH AUTOCOMPLETE & DYNAMIC INPUT) -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                            Ruangan Sidang <span class="text-rose-500">*</span>
+                        </label>
+                        <button type="button" onclick="openModalKelolaRuangan()" class="text-xs text-cyan-600 hover:text-cyan-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle text-[11px]"></i> Kelola Ruangan
+                        </button>
+                    </div>
+                    <div class="relative custom-combobox-wrap" id="batchRuanganCombobox">
+                        <input type="text" 
+                               id="batchSidangRuanganInput" 
+                               placeholder="Cari ruangan atau ketik nama ruangan baru..." 
+                               autocomplete="off"
+                               class="w-full pl-11 pr-11 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs transition cursor-pointer" 
+                               oninput="filterRuanganDropdown('batch', this.value)" 
+                               onfocus="openRuanganDropdown('batch')"
+                               onclick="openRuanganDropdown('batch')">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-600 pointer-events-none">
+                            <i class="fa-solid fa-door-open text-base"></i>
+                        </div>
+                        <button type="button" onclick="toggleRuanganDropdown('batch')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                            <i class="fa-solid fa-chevron-down text-sm transition duration-200" id="batchRuanganArrow"></i>
+                        </button>
+                        <input type="hidden" name="ruangan_sidang" id="batchSidangRuangan" required>
+
+                        <!-- Dropdown Menu List -->
+                        <div id="batchRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
+                            <!-- Injected dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. WAKTU SIDANG (EXACT INTERACTIVE RADIAL CLOCK PICKER BATCH) -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-2">
+                        Waktu Sidang <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Mulai</label>
+                            <input type="text" name="jam_mulai_sidang" id="batchSidangJamMulai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('batch', 'mulai')" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-500 mb-1.5 block uppercase tracking-wider">Jam Selesai</label>
+                            <input type="text" name="jam_selesai_sidang" id="batchSidangJamSelesai"
+                                   placeholder="-- : --" readonly style="cursor: pointer; background: #fff;"
+                                   class="w-full px-4 py-3.5 bg-white border-2 border-slate-200 hover:border-amber-400 focus:border-amber-500 rounded-2xl text-base font-extrabold text-slate-800 text-center focus:ring-4 focus:ring-amber-500/10 outline-none shadow-2xs transition"
+                                   onclick="openSidangInlinePicker('batch', 'selesai')">
+                        </div>
+                    </div>
+
+                    <!-- Inline Radial Clock Picker Panel (Batch) -->
+                    <div id="batchInlineClockPanel" style="display:none; margin-top: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 22px; box-shadow: 0 12px 30px rgba(0,0,0,0.04);">
+                        <div style="display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap;">
+                            <!-- Kiri: Display Waktu & Quick Drag Slots -->
+                            <div style="flex: 1.15; min-width: 280px; background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div id="batchInlineTpLabel" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;">PILIH JAM MULAI</div>
+                                <div style="font-size: 3rem; font-weight: 800; color: #1e293b; line-height: 1; margin-bottom: 8px; letter-spacing: -0.02em;">
+                                    <span id="batchTpDisplayHour" onclick="setSidangClockMode('batch', 'hour')" style="cursor:pointer;">14</span><span style="color:#cbd5e1; margin:0 3px;">:</span><span id="batchTpDisplayMinute" onclick="setSidangClockMode('batch', 'minute')" style="cursor:pointer; color:#94a3b8;">00</span>
+                                </div>
+                                <div style="display:inline-block; background:#ede9fe; color:#7c3aed; font-size:0.75rem; font-weight:700; border-radius:20px; padding:3px 12px; margin-bottom:16px;">24 Jam</div>
+
+                                <div style="font-size: 0.8rem; color: #7c3aed; font-weight: 700; margin-bottom: 12px; width:100%; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>⚡ Slot Waktu Cepat</span>
+                                    <span style="font-size:0.7rem; color:#94a3b8; font-weight:500;">(drag untuk rentang)</span>
+                                </div>
+                                <div id="batchTpTimeSlots" style="display:grid; grid-template-columns:1fr 1fr; gap:7px; user-select:none; width:100%;">
+                                    <div class="tp-slot" data-start="08:00" data-end="09:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">08:00 – 09:00</div>
+                                    <div class="tp-slot" data-start="09:00" data-end="10:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">09:00 – 10:00</div>
+                                    <div class="tp-slot" data-start="10:00" data-end="11:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">10:00 – 11:00</div>
+                                    <div class="tp-slot" data-start="11:00" data-end="12:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">11:00 – 12:00</div>
+                                    <div class="tp-slot" data-start="12:00" data-end="13:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">12:00 – 13:00</div>
+                                    <div class="tp-slot" data-start="13:00" data-end="14:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">13:00 – 14:00</div>
+                                    <div class="tp-slot" data-start="14:00" data-end="15:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">14:00 – 15:00</div>
+                                    <div class="tp-slot" data-start="15:00" data-end="16:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">15:00 – 16:00</div>
+                                    <div class="tp-slot" data-start="16:00" data-end="17:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">16:00 – 17:00</div>
+                                    <div class="tp-slot" data-start="17:00" data-end="18:00" style="padding:10px 8px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:0.75rem;font-weight:700;color:#475569;text-align:center;cursor:pointer;">17:00 – 18:00</div>
+                                </div>
+                            </div>
+
+                            <!-- Kanan: Radial Analog Clock -->
+                            <div style="flex: 1.25; min-width: 280px; display:flex; flex-direction:column; align-items:center; background:#ffffff; border-radius:16px; padding:22px; border:1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div class="tp-tab-wrap" style="display:flex; width:100%; border-radius:12px; background:#f1f5f9; padding:4px; margin-bottom:16px;">
+                                    <div id="batchTpTabHour" class="active" onclick="setSidangClockMode('batch', 'hour')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">🕐 Jam</div>
+                                    <div id="batchTpTabMinute" onclick="setSidangClockMode('batch', 'minute')" style="flex:1; text-align:center; padding:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border-radius:10px;">⏱ Menit</div>
+                                </div>
+                                <div id="batchTpClockContainer" style="position:relative; width:240px; height:240px; border-radius:50%; background:#f8fafc; border:2px solid #e2e8f0; box-shadow:inset 0 2px 6px rgba(0,0,0,0.03); flex-shrink:0; margin:0 auto;">
+                                    <div id="batchTpClockHand" style="position:absolute; bottom:50%; left:50%; width:2px; height:95px; background:#7c3aed; border-radius:2px; transform-origin:bottom center; transform:translateX(-50%) rotate(0deg); transition:transform 0.15s ease; z-index:5;"></div>
+                                    <div style="position:absolute; top:50%; left:50%; width:10px; height:10px; background:#7c3aed; border-radius:50%; transform:translate(-50%,-50%); z-index:10;"></div>
+                                    <div id="batchTpClockNumbers"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid #e2e8f0;">
+                            <button type="button" onclick="closeSidangInlinePicker('batch')" style="padding:10px 22px; border-radius:12px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:0.85rem; font-weight:700; cursor:pointer;">Batal</button>
+                            <button type="button" onclick="applySidangInlinePicker('batch')" style="padding:10px 26px; border-radius:12px; border:none; background:#7c3aed; color:#fff; font-size:0.85rem; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.3);">✔ Terapkan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModalBatchSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitBatchSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-save text-xs sm:text-sm"></i> Terapkan Jadwal Massal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PREVIEW 2 PLOTTING MODAL (PER-MAHASISWA PLOTTING SAMA SEPERTI TA) -->
+    <div id="modalPreview2Plotting" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeP2Modal()">
+
+        <!-- Modal Dialog Card -->
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Modal Header (Fixed at top) -->
+            <div class="p-4 sm:p-5 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50/70 via-white to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-indigo-600/25 shrink-0">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-snug">Aksi Plotting Dosen Penguji per Mahasiswa</h3>
+                        <p class="text-xs text-slate-500">Tentukan Dosen Penguji 1 &amp; 2 untuk tiap mahasiswa terpilih (dapat berbeda-beda).</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeP2Modal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="formP2Plotting" onsubmit="submitP2Plotting(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+                <!-- Scrollable Body Content -->
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/60">
+                    <!-- Top Bar: Summary & Action -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daftar Mahasiswa &amp; Plotting Penguji:</label>
+                                <span id="p2ModalSelectedCountBadge" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Mahasiswa</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Pilih Dosen Penguji 1 &amp; 2 secara mandiri pada setiap kartu mahasiswa di bawah.</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="applyQuickFirstP2ToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen penguji dari Mahasiswa #1 ke semua mahasiswa lainnya">
+                                <i class="fa-solid fa-copy"></i> Salin Mahasiswa #1 ke Semua
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Per-Student Accordion / Card List Container -->
+                    <div id="p2ModalSelectedList" class="space-y-3.5">
+                        <!-- Rendered dynamically via JS -->
+                    </div>
+
+                    <!-- Catatan Global Koordinator TA -->
+                    <div class="pt-3 border-t border-slate-200">
+                        <label class="text-xs font-bold text-slate-700 block mb-1">Catatan Koordinator TA (Opsional untuk Seluruh Mahasiswa):</label>
+                        <textarea id="p2ModalGlobalCatatanKoor" name="catatan_koor" rows="2" placeholder="Masukkan catatan atau arahan umum (opsional)..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none shadow-2xs"></textarea>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-4 sm:px-6 border-t border-slate-200 bg-white flex items-center justify-end gap-3 shrink-0">
+                    <button type="button" onclick="closeP2Modal()" class="px-5 py-2.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="modalP2BtnSubmit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-xs rounded-xl shadow-md shadow-indigo-600/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span id="modalP2BtnSubmitText">Simpan Penetapan Dosen Penguji</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BATCH APPROVAL & DOSEN PLOTTING MODAL -->
+    <div id="batchApprovalModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeBatchModal()">
+
+        <!-- Modal Dialog Card -->
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Modal Header (Fixed at top) -->
+            <div class="p-4 sm:p-5 px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-orange-50/70 via-white to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-extrabold text-base shadow-md shadow-orange-600/25 shrink-0">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-snug">Aksi Approval &amp; Plotting Dosen per Mahasiswa</h3>
+                        <p class="text-xs text-slate-500">Tentukan Dosen Pembimbing 1 &amp; 2 untuk tiap mahasiswa terpilih (dapat berbeda-beda).</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeBatchModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form (Flex Column with scrollable middle area and fixed footer) -->
+            <form id="formBatchApproval" onsubmit="submitBatchApproval(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+                <!-- Scrollable Body Content -->
+                <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/60">
+                    <input type="hidden" id="batchStatusInput" name="status" value="Approved">
+
+                    <!-- Top Bar: Summary & Action -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daftar Mahasiswa &amp; Plotting Pembimbing:</label>
+                                <span id="modalSelectedCountBadge" class="text-[11px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">0 Mahasiswa</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Pilih Dosen Pembimbing 1 &amp; 2 secara mandiri pada setiap kartu mahasiswa di bawah.</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="applyQuickFirstToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing dari Mahasiswa #1 ke semua mahasiswa lainnya">
+                                <i class="fa-solid fa-copy"></i> Salin Mahasiswa #1 ke Semua
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Per-Student Accordion / Card List Container -->
+                    <div id="modalSelectedList" class="space-y-3.5">
+                        <!-- Rendered dynamically via JS -->
+                    </div>
+
+                    <!-- Catatan Global Koordinator TA -->
+                    <div class="pt-3 border-t border-slate-200">
+                        <label class="text-xs font-bold text-slate-700 block mb-1">Catatan Koordinator TA (Opsional untuk Seluruh Mahasiswa):</label>
+                        <textarea id="modalGlobalCatatanKoor" name="catatan_koor" rows="2" placeholder="Masukkan catatan atau arahan umum (opsional)..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl bg-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 resize-none shadow-2xs"></textarea>
+                    </div>
+                </div>
+
+                <!-- Modal Footer (Fixed at bottom) -->
+                <div class="p-4 sm:px-6 border-t border-slate-200 bg-white flex items-center justify-end gap-3 shrink-0">
+                    <button type="button" onclick="closeBatchModal()" class="px-5 py-2.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="modalBtnSubmit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-600/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span id="modalBtnSubmitText">Simpan &amp; Lanjutkan ke Ketua KK</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MULTI-STUDENT BATCH REVIEW MODAL (CEK DOKUMEN & PLOTTING INDIVIDU MASSAL) -->
+    <div id="p1BatchReviewModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto" onclick="if(event.target===this)closeP1BatchReviewModal()">
+        <div class="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+            
+            <!-- Modal Header: Multi-Student Summary & Quick Nav Anchors -->
+            <div class="bg-slate-900 text-white shrink-0 border-b border-slate-800">
+                <!-- Top Row: Title & Action -->
+                <div class="p-4 sm:p-5 px-6 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-orange-600/30 shrink-0">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <h3 class="text-base font-extrabold text-white tracking-tight leading-snug">
+                                    Peninjauan Dokumen &amp; Penetapan Pembimbing Massal
+                                </h3>
+                                <span class="bg-orange-500/90 text-white px-3 py-0.5 rounded-full text-xs font-bold whitespace-nowrap shadow-xs" id="p1ModalStudentCounter">
+                                    0 Mahasiswa Terpilih
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">Tinjau berkas persyaratan dan tetapkan Dosen Pembimbing 1 &amp; 2 per individu mahasiswa.</p>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="closeP1BatchReviewModal()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer shrink-0">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                <!-- Sub Navigation Bar: Quick Jump Toolbar with Navigation Arrows -->
+                <div class="px-4 sm:px-6 py-2.5 bg-slate-950/80 border-t border-slate-800/80 flex items-center gap-2.5 relative">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1.5 hidden sm:flex">
+                        <i class="fa-solid fa-compass text-orange-400"></i> Lompat Cepat:
+                    </span>
+
+                    <!-- Left Scroll Arrow -->
+                    <button type="button" id="btnScrollP1Left" onclick="scrollP1StudentTabs('left')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95" title="Geser ke kiri">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <!-- Scroll Container with Grab/Wheel support -->
+                    <div id="p1ModalStudentTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 min-w-0 select-none cursor-grab">
+                        <!-- Quick Jump Anchors injected dynamically via JS -->
+                    </div>
+
+                    <!-- Right Scroll Arrow -->
+                    <button type="button" id="btnScrollP1Right" onclick="scrollP1StudentTabs('right')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95 animate-pulse hover:animate-none" title="Geser ke kanan">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content Body (Stacked View for All Selected Students) -->
+            <div class="p-5 sm:p-6 overflow-y-auto space-y-8 flex-1 bg-slate-100/80 custom-scrollbar" id="p1BatchModalBody">
+                <div class="py-16 text-center text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl text-orange-500 mb-3 block"></i>
+                    Memuat data dokumen &amp; profil seluruh mahasiswa terpilih...
+                </div>
+            </div>
+
+            <!-- Modal Footer Actions Bar -->
+            <div class="p-4 px-6 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="applyFirstStudentDosenToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing yang dipilih pada Mahasiswa #1 ke seluruh mahasiswa lainnya">
+                        <i class="fa-solid fa-copy"></i> Salin Pembimbing Mahasiswa #1 ke Semua
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="closeP1BatchReviewModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button" id="btnSubmitP1BatchReview" onclick="submitP1MultiDetailPlottings()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span id="btnSubmitP1BatchReviewText">SIMPAN SEMUA PEMBIMBING &amp; SETUJUI</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- DOCUMENT PDF PREVIEW MODAL -->
+    <div id="p1PdfModal" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-2xl max-w-5xl w-full h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+            <div class="p-3.5 px-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-white flex items-center gap-2" id="p1PdfModalTitle">Pratinjau Dokumen PDF</h3>
+                        <p class="text-[10px] text-slate-400" id="p1PdfModalSubtitle">Memuat tampilan dokumen...</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeP1PdfModal()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex-1 bg-slate-100 p-2 overflow-hidden">
+                <iframe id="p1PdfModalFrame" src="about:blank" class="w-full h-full border-none rounded-xl bg-white shadow-inner"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Config for External Dashboard Script -->
+    <script>
+        window.DASHBOARD_CONFIG = {
+            list: <?= json_encode($list_mahasiswa ?? []); ?>,
+            listPreview2: <?= json_encode($list_preview2 ?? []); ?>,
+            listSidang: <?= json_encode($list_sidang ?? []); ?>,
+            dosenList: <?= json_encode($dosen_list ?? []); ?>,
+            ruanganList: <?= json_encode($ruangan_list ?? []); ?>,
+            ajaxBatchUrl: "<?= site_url('koordinatorta/ajax_batch_approval'); ?>",
+            ajaxBatchDetailsUrl: "<?= site_url('koordinatorta/ajax_get_batch_details'); ?>",
+            ajaxRealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_dashboard'); ?>",
+            ajaxPreview2UpdateUrl: "<?= site_url('koordinatorta/ajax_update_preview2_penguji'); ?>",
+            ajaxPreview2BatchUrl: "<?= site_url('koordinatorta/ajax_batch_preview2_penguji'); ?>",
+            ajaxPreview2RealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_preview2'); ?>",
+            ajaxSidangUpdateUrl: "<?= site_url('koordinatorta/ajax_update_jadwal_sidang'); ?>",
+            ajaxSidangBatchUrl: "<?= site_url('koordinatorta/ajax_batch_jadwal_sidang'); ?>",
+            ajaxSidangRealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_sidang'); ?>",
+            ajaxTambahRuanganUrl: "<?= site_url('koordinatorta/ajax_tambah_ruangan'); ?>",
+            ajaxHapusRuanganUrl: "<?= site_url('koordinatorta/ajax_hapus_ruangan'); ?>",
+            ajaxGetRuanganUrl: "<?= site_url('koordinatorta/ajax_get_ruangan_list'); ?>",
+            detailUrlPrefix: "<?= site_url('koordinatorta/detail_mahasiswa/'); ?>"
+        };
     </script>
+
+    <!-- Modular Dashboard JavaScript Engine -->
+    <script src="<?= base_url('assets/js/koordinator_ta_dashboard.js?v=' . time()); ?>"></script>
 </body>
 </html>

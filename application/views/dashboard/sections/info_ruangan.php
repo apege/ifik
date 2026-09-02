@@ -11,9 +11,47 @@
 
         <h1>INFORMASI RUANGAN</h1>
         
+        <!-- Table Column Header -->
+        <div class="room-column-header">
+            <div class="rth-col rth-room">Ruangan</div>
+            <div class="rth-col rth-user-time">Peminjam & Waktu</div>
+            <div class="rth-col rth-date">Tanggal</div>
+            <div class="rth-col rth-desc">Keterangan / Keperluan</div>
+            <div class="rth-col rth-status">Status</div>
+        </div>
+
         <div class="room-list-wrapper" id="roomListWrapper">
             
             <?php 
+                if (!function_exists('format_indo_date_php')) {
+                    function format_indo_date_php($date1, $date2 = null) {
+                        if (empty($date1)) return '-';
+                        $mNames = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                        $t1 = strtotime($date1);
+                        if (!$t1) return $date1;
+                        $d1 = date('j', $t1);
+                        $m1 = (int)date('n', $t1);
+                        $y1 = date('Y', $t1);
+
+                        if (empty($date2) || $date1 === $date2) {
+                            return "{$d1} {$mNames[$m1]} {$y1}";
+                        }
+
+                        $t2 = strtotime($date2);
+                        if (!$t2) return "{$d1} {$mNames[$m1]} {$y1}";
+                        $d2 = date('j', $t2);
+                        $m2 = (int)date('n', $t2);
+                        $y2 = date('Y', $t2);
+
+                        if ($y1 === $y2 && $m1 === $m2) {
+                            return "{$d1} - {$d2} {$mNames[$m1]} {$y1}";
+                        } elseif ($y1 === $y2) {
+                            return "{$d1} {$mNames[$m1]} - {$d2} {$mNames[$m2]} {$y1}";
+                        } else {
+                            return "{$d1} {$mNames[$m1]} {$y1} - {$d2} {$mNames[$m2]} {$y2}";
+                        }
+                    }
+                }
                 $today_date = date('Y-m-d');
                 $active_jadwal = array_filter($jadwal_peminjaman ?: [], function($j) use ($today_date) {
                     return ($j->tanggal_selesai >= $today_date);
@@ -34,35 +72,38 @@
                     $limited_jadwal = array_slice(array_values($active_jadwal), 0, 4); 
                 ?>
                 <?php foreach($limited_jadwal as $j): ?>
+                <?php 
+                    $dateStr = format_indo_date_php($j->tanggal_mulai, $j->tanggal_selesai);
+                    $timeStr = substr($j->jam_mulai, 0, 5) . ' - ' . substr($j->jam_selesai, 0, 5);
+                    $ketStr  = $j->keterangan ?: '-';
+                ?>
                 <div class="room-item" onclick="openDetailBookingModal(<?= $j->id ?>)" style="cursor: pointer;">
                     <div class="room-item-left">
                         <div class="room-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         </div>
                         <div class="room-info">
-                            <h3><?= $j->kode_ruangan ?></h3>
-                            <p><?= $j->nama_ruangan ?></p>
+                            <h3 data-text="<?= htmlspecialchars($j->kode_ruangan) ?>"><?= $j->kode_ruangan ?></h3>
+                            <p data-text="<?= htmlspecialchars($j->nama_ruangan) ?>"><?= $j->nama_ruangan ?></p>
                         </div>
                     </div>
                     
                     <div class="room-item-tags">
-                        <span class="tag">
-                            <svg style="margin-right:4px; vertical-align:text-bottom" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            <?= $j->nama_lengkap ?>
+                        <span class="tag" title="<?= htmlspecialchars($j->nama_lengkap) ?>">
+                            <svg style="margin-right:4px; vertical-align:text-bottom; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <span class="tag-user-name" data-text="<?= htmlspecialchars($j->nama_lengkap) ?>"><?= htmlspecialchars($j->nama_lengkap) ?></span>
                         </span>
-                        <span class="tag" style="background: rgba(234, 88, 12, 0.1); border-color: #ea580c; color: #ea580c;">
-                            <?= substr($j->jam_mulai, 0, 5) ?> - <?= substr($j->jam_selesai, 0, 5) ?>
+                        <span class="tag" style="border-color: #fb923c; color: #ea580c; background: #ffffff;">
+                            <span class="tag-time-text" data-text="<?= $timeStr ?>"><?= $timeStr ?></span>
                         </span>
                     </div>
 
                     <div class="room-item-date">
-                        <?php 
-                            if ($j->tanggal_mulai == $j->tanggal_selesai) {
-                                echo date('d M Y', strtotime($j->tanggal_mulai));
-                            } else {
-                                echo date('d M', strtotime($j->tanggal_mulai)) . ' - ' . date('d M Y', strtotime($j->tanggal_selesai));
-                            }
-                        ?> 
+                        <span class="room-date-text" data-text="<?= $dateStr ?>"><?= $dateStr ?></span>
+                    </div>
+
+                    <div class="room-item-desc" title="<?= htmlspecialchars($ketStr) ?>">
+                        <span class="room-desc-text" data-text="<?= htmlspecialchars($ketStr) ?>"><?= htmlspecialchars($ketStr) ?></span>
                     </div>
 
                     <div class="room-item-action">
@@ -89,9 +130,9 @@
                                 $dot = '#94a3b8'; $bg = '#f8fafc'; $color = '#475569'; $label = htmlspecialchars($s);
                             }
                         ?>
-                        <span style="display:inline-flex; align-items:center; gap:6px; background:<?= $bg ?>; color:<?= $color ?>; border-radius:999px; padding:5px 13px; font-size:0.76rem; font-weight:700; white-space:nowrap; letter-spacing:0.01em;">
+                        <span class="landing-status-badge" style="background:<?= $bg ?>; color:<?= $color ?>;">
                             <span style="width:7px;height:7px;border-radius:50%;background:<?= $dot ?>;flex-shrink:0;"></span>
-                            <?= $label ?>
+                            <span class="landing-status-label" data-text="<?= $label ?>"><?= $label ?></span>
                         </span>
                     </div>
                 </div>

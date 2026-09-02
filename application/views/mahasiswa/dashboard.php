@@ -493,20 +493,20 @@
 
                     <!-- Stage 3: Koordinator TA -->
                     <?php 
-                        $k_card_bg = $k_is_app ? 'border-emerald-300 bg-emerald-50/60' : ($k_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
-                        $k_icon_bg = $k_is_app ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 text-white' : ($k_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
+                        $k_card_bg = $k_is_app ? 'border-2 border-emerald-400 bg-emerald-50/50 shadow-md shadow-emerald-500/10' : ($k_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
+                        $k_icon_bg = $k_is_app ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-400/25' : ($k_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
                         $k_badge_cls = $k_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($k_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200');
                     ?>
                     <div class="bg-white/95 p-5 rounded-2xl border <?= $k_card_bg; ?> shadow-xs hover-card-elevate flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-3.5">
                             <span class="text-xs font-extrabold tracking-wider uppercase text-slate-400">Tahap 03</span>
                             <div class="w-9 h-9 rounded-xl <?= $k_icon_bg; ?> flex items-center justify-center text-base font-bold box-3d">
-                                <i class="bi <?= $k_is_app ? 'bi-check-lg' : ($k_is_rej ? 'bi-x-lg' : 'bi-award'); ?>"></i>
+                                <i class="bi <?= $k_is_app ? 'bi-check-lg text-lg' : ($k_is_rej ? 'bi-x-lg' : 'bi-award'); ?>"></i>
                             </div>
                         </div>
                         <div>
                             <h3 class="font-bold text-sm sm:text-base text-slate-900 mb-1">Koordinator TA</h3>
-                            <p class="text-xs text-slate-500 mb-3 font-medium">Validasi topik & kuota</p>
+                            <p class="text-xs text-slate-500 mb-3 font-medium">Penetapan Pembimbing</p>
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg border <?= $k_badge_cls; ?> badge-3d">
                                 <span class="w-2 h-2 rounded-full <?= $k_is_app ? 'bg-emerald-500' : ($k_is_rej ? 'bg-rose-500' : 'bg-slate-400'); ?>"></span>
                                 <?= $k_status; ?>
@@ -523,13 +523,13 @@
 
                     <!-- Stage 4: Ketua KK -->
                     <?php 
-                        $kk_card_bg = $kk_is_app ? 'border-emerald-300 bg-emerald-50/60' : ($kk_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
-                        $kk_icon_bg = $kk_is_app ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 text-white' : ($kk_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
+                        $kk_card_bg = $kk_is_app ? 'border-2 border-emerald-400 bg-emerald-50/50 shadow-md shadow-emerald-500/10' : ($kk_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
+                        $kk_icon_bg = $kk_is_app ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-400/25' : ($kk_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
                         $kk_badge_cls = $kk_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($kk_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200');
                     ?>
                     <div class="bg-white/95 p-5 rounded-2xl border <?= $kk_card_bg; ?> shadow-xs hover-card-elevate flex flex-col justify-between">
                         <div class="flex items-center justify-between mb-3.5">
-                            <span class="text-xs font-extrabold tracking-wider uppercase text-slate-400">Tahap 03</span>
+                            <span class="text-xs font-extrabold tracking-wider uppercase text-slate-400">Tahap 04</span>
                             <div class="w-9 h-9 rounded-xl <?= $kk_icon_bg; ?> flex items-center justify-center text-base font-bold box-3d">
                                 <i class="bi <?= $kk_is_app ? 'bi-check-lg text-lg' : ($kk_is_rej ? 'bi-x-lg' : 'bi-mortarboard'); ?>"></i>
                             </div>
@@ -548,31 +548,6 @@
                                     <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_kk']); ?>"</p>
                                 </div>
                             <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <!-- Stage 4: Koordinator TA -->
-                    <?php 
-                        $k_is_app = ($k_status === 'Approved');
-                        $k_is_rej = ($k_status === 'Rejected');
-                        $k_card_bg = $k_is_app ? 'border-2 border-emerald-400 bg-emerald-50/50 shadow-md shadow-emerald-500/10' : ($k_is_rej ? 'border-rose-300 bg-rose-50/60' : 'border-slate-200 bg-slate-50/80');
-                        $k_icon_bg = $k_is_app ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50 ring-4 ring-emerald-400/25' : ($k_is_rej ? 'bg-gradient-to-tr from-rose-600 to-red-400 text-white' : 'bg-slate-200 text-slate-500');
-                        $k_badge_cls = $k_is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($k_is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200');
-                    ?>
-                    <div class="bg-white/95 p-5 rounded-2xl border <?= $k_card_bg; ?> shadow-xs hover-card-elevate flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-3.5">
-                            <span class="text-xs font-extrabold tracking-wider uppercase text-slate-400">Tahap 04</span>
-                            <div class="w-9 h-9 rounded-xl <?= $k_icon_bg; ?> flex items-center justify-center text-base font-bold box-3d">
-                                <i class="bi <?= $k_is_app ? 'bi-check-lg text-lg' : ($k_is_rej ? 'bi-x-lg' : 'bi-award'); ?>"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm sm:text-base text-slate-900 mb-1">Koordinator TA</h3>
-                            <p class="text-xs text-slate-500 mb-3 font-medium">Penetapan Pembimbing</p>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg border <?= $k_badge_cls; ?> badge-3d">
-                                <span class="w-2 h-2 rounded-full <?= $k_is_app ? 'bg-emerald-500' : ($k_is_rej ? 'bg-rose-500' : 'bg-slate-400'); ?>"></span>
-                                <?= $k_status; ?>
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -982,6 +957,35 @@
     function closeFileBreakdownModal() {
         document.getElementById('modalFileBreakdown').classList.add('hidden');
     }
+
+    // AJAX Polling: Cek perubahan status approval pengajuan TA mahasiswa secara real-time
+    (() => {
+        let lastStatusKey = '<?= ($w_status ?? '') . "_" . ($a_status ?? '') . "_" . ($k_status ?? '') . "_" . ($kk_status ?? ''); ?>';
+
+        async function checkStudentTAStatus() {
+            try {
+                const res = await fetch('<?= site_url("mahasiswa/get_status_pendaftaran_ajax"); ?>', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) return;
+                const json = await res.json();
+                if (!json || !json.success || !json.has_ta) return;
+
+                const newStatusKey = `${json.status_wali}_${json.status_admin}_${json.status_koor}_${json.status_kk}`;
+                if (lastStatusKey && newStatusKey !== lastStatusKey) {
+                    console.log('Status TA berubah, memperbarui tampilan...');
+                    // Reload halus untuk me-render status baru, badge tahapan & bimbingan
+                    window.location.reload();
+                }
+                lastStatusKey = newStatusKey;
+            } catch (e) {
+                // Silent fail
+            }
+        }
+
+        // Jalankan polling setiap 6 detik
+        setInterval(checkStudentTAStatus, 6000);
+    })();
     </script>
     <?php $this->load->view('partials/custom_cursor'); ?>
 </body>

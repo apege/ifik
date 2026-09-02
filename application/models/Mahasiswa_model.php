@@ -9,27 +9,52 @@ class Mahasiswa_model extends CI_Model {
 
     // Get Data Mahasiswa berdasarkan NIM atau User ID
     public function get_mahasiswa($nim) {
-        if (!$this->db->table_exists('mahasiswa')) {
-            return array(
-                'nim' => $nim,
-                'nama_depan' => 'Rivan',
-                'nama_belakang' => 'Arshavin',
-                'alamat' => 'Jl. Telekomunikasi No. 1, Terusan Buah Batu, Bandung',
-                'kota' => 'Bandung',
-                'provinsi' => 'Jawa Barat',
-                'latitude' => '-6.973000',
-                'longitude' => '107.630000',
-                'konsentrasi_dkv' => 'Desain Grafis'
-            );
+        $session_name = $this->session->userdata('name');
+        $session_nim  = $this->session->userdata('nim') ?: $this->session->userdata('nidn_nim');
+        
+        // Ambil data dari tabel users jika tersedia
+        $user_row = null;
+        if (!empty($nim)) {
+            $user_row = $this->db->get_where('users', array('nidn_nim' => $nim))->row_array();
         }
-        $query = $this->db->get_where('mahasiswa', array('nim' => $nim));
-        return $query->row_array() ?: array(
-            'nim' => $nim,
-            'nama_depan' => 'Rivan',
-            'nama_belakang' => 'Arshavin',
+        if (!$user_row && $this->session->userdata('user_id')) {
+            $user_row = $this->db->get_where('users', array('id' => $this->session->userdata('user_id')))->row_array();
+        }
+
+        $full_name = !empty($user_row['name']) ? $user_row['name'] : ($session_name ?: 'Mahasiswa');
+        $name_parts = explode(' ', trim($full_name), 2);
+        $nama_depan_default = $name_parts[0] ?? 'Mahasiswa';
+        $nama_belakang_default = $name_parts[1] ?? '';
+
+        $data_mhs = null;
+        if ($this->db->table_exists('mahasiswa') && !empty($nim)) {
+            $query = $this->db->get_where('mahasiswa', array('nim' => $nim));
+            $data_mhs = $query->row_array();
+        }
+
+        if ($data_mhs) {
+            // Jika nama_depan di tabel mahasiswa kosong atau ingin diselaraskan dengan akun login
+            if (empty($data_mhs['nama_depan']) || (!empty($user_row['name']) && $user_row['name'] !== 'Rivan Arshavin')) {
+                $data_mhs['nama_depan'] = $nama_depan_default;
+                $data_mhs['nama_belakang'] = $nama_belakang_default;
+            }
+            if (empty($data_mhs['nim'])) {
+                $data_mhs['nim'] = $nim ?: $session_nim;
+            }
+            return $data_mhs;
+        }
+
+        return array(
+            'nim' => $nim ?: ($session_nim ?: '1301210001'),
+            'nama_depan' => $nama_depan_default,
+            'nama_belakang' => $nama_belakang_default,
             'alamat' => 'Jl. Telekomunikasi No. 1, Terusan Buah Batu, Bandung',
             'kota' => 'Bandung',
-            'provinsi' => 'Jawa Barat'
+            'provinsi' => 'Jawa Barat',
+            'latitude' => '-6.973000',
+            'longitude' => '107.630000',
+            'konsentrasi_dkv' => 'Desain Komunikasi Visual',
+            'prodi' => 'Desain Komunikasi Visual'
         );
     }
 
@@ -126,5 +151,79 @@ class Mahasiswa_model extends CI_Model {
         $this->db->order_by('id', 'DESC');
         $this->db->limit(1);
         return $this->db->get('bimbingan_preview')->row_array();
+    }
+
+    // Mendapatkan nama dosen pembimbing dan penguji asli
+    public function get_pembimbing_penguji($nim) {
+        $result = array(
+            'pembimbing_1' => '',
+            'pembimbing_2' => '',
+            'penguji_1' => '',
+            'penguji_2' => ''
+        );
+
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $this->db->select('pembimbing_1, pembimbing_2, penguji_1, penguji_2');
+            $this->db->where('nim', $nim);
+            $pt = $this->db->get('pendaftaran_ta')->row_array();
+
+            if ($pt) {
+                $result['pembimbing_1'] = $this->_get_dosen_name($pt['pembimbing_1']);
+                $result['pembimbing_2'] = $this->_get_dosen_name($pt['pembimbing_2']);
+                $result['penguji_1'] = $this->_get_dosen_name($pt['penguji_1']);
+                $result['penguji_2'] = $this->_get_dosen_name($pt['penguji_2']);
+            }
+        }
+        
+        return $result;
+    }
+
+    private function _get_dosen_name($nip) {
+        if (empty($nip)) return '';
+        if ($this->db->table_exists('users')) {
+            $u = $this->db->get_where('users', ['nidn_nim' => $nip])->row_array();
+            if ($u && !empty($u['name'])) return $u['name'];
+        }
+        if ($this->db->table_exists('dosen_wali')) {
+            $dw = $this->db->get_where('dosen_wali', ['nip' => $nip])->row_array();
+            if ($dw && !empty($dw['nama_dosen'])) return $dw['nama_dosen'];
+        }
+        return '';
+    }
+
+    // Mengambil daftar mahasiswa bimbingan bagi seorang Dosen
+    public function get_students_by_dosen($dosen_id, $posisi = 1) {
+        if (!$this->db->table_exists('pendaftaran_ta')) return [];
+        
+        $nip_dosen = '';
+        if ($this->db->table_exists('users')) {
+            $u = $this->db->get_where('users', ['id' => $dosen_id])->row_array();
+            if ($u) {
+                $nip_dosen = $u['nidn_nim'];
+            }
+        }
+
+        $has_konsentrasi = $this->db->field_exists('konsentrasi_dkv', 'pendaftaran_ta');
+        $select = 'pt.nim, pt.judul_1 as judul, COALESCE(u.name, pt.nim) as nama_mahasiswa';
+        if ($has_konsentrasi) {
+            $select .= ', pt.konsentrasi_dkv';
+        }
+        $this->db->select($select);
+        $this->db->from('pendaftaran_ta pt');
+        $this->db->join('users u', 'u.nidn_nim = pt.nim', 'left');
+        
+        if ($posisi == 1) {
+            $this->db->where('pt.pembimbing_1', $nip_dosen);
+        } else {
+            $this->db->where('pt.pembimbing_2', $nip_dosen);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    // Update status preview dan catatan dosen
+    public function update_review_preview($id, $data) {
+        if (!$this->db->table_exists('bimbingan_preview')) return false;
+        $this->db->where('id', $id);
+        return $this->db->update('bimbingan_preview', $data);
     }
 }

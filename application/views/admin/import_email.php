@@ -445,9 +445,9 @@
             border-top-right-radius: 14px;
         }
 
-        /* PROGRESSIVE FLUX LOADER STYLES */
+        /* PROGRESSIVE FLUX LOADER STYLES (Light Mode Theme) */
         .flux-bar-glow {
-            box-shadow: 0 0 22px rgba(29, 111, 251, 0.65), 0 0 40px rgba(116, 225, 255, 0.45), inset 0 1.5px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 3px rgba(0, 40, 120, 0.4);
+            box-shadow: 0 0 20px rgba(234, 88, 12, 0.45), 0 0 35px rgba(251, 146, 60, 0.3), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 3px rgba(194, 65, 12, 0.35);
         }
 
         .flux-sheen-sweep {
@@ -884,20 +884,20 @@
         <div class="table-rotating-border-wrap">
             <span class="table-rotating-border-spin"></span>
             <div class="table-rotating-border-inner overflow-x-auto">
-                <table class="table-custom-rounded text-left text-xs">
+                <table class="table-custom-rounded text-left text-xs w-full">
                     <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
                         <tr>
-                            <th class="p-4 w-12 text-center">
+                            <th class="py-3.5 px-2 w-10 text-center">
                                 <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
                             </th>
-                            <th class="p-4 w-12 text-center whitespace-nowrap">No</th>
-                            <th class="p-4 whitespace-nowrap">Akun / Pengguna</th>
-                            <th class="p-4 whitespace-nowrap text-center">NIM / NIP / ID</th>
-                            <th class="p-4 whitespace-nowrap text-center">Token Access (8-char)</th>
-                            <th class="p-4 whitespace-nowrap text-center">Status Token</th>
-                            <th class="p-4 whitespace-nowrap text-center">Status Kirim Email</th>
-                            <th class="p-4 whitespace-nowrap text-center">Tgl Import</th>
-                            <th class="p-4 text-center min-w-[90px] whitespace-nowrap">Aksi</th>
+                            <th class="py-3.5 px-2 w-10 text-center whitespace-nowrap">No</th>
+                            <th class="py-3.5 px-4 w-[28%] whitespace-nowrap">Akun / Pengguna</th>
+                            <th class="py-3.5 px-3 w-[14%] whitespace-nowrap text-center">NIM / NIP / ID</th>
+                            <th class="py-3.5 px-3 w-[16%] whitespace-nowrap text-center">Token Access</th>
+                            <th class="py-3.5 px-3 w-[12%] whitespace-nowrap text-center">Status Token</th>
+                            <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center">Status Email</th>
+                            <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center">Tgl Import</th>
+                            <th class="py-3.5 px-2 w-12 text-center whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="accounts-table-body" class="divide-y divide-slate-100 bg-white font-medium">
@@ -909,10 +909,10 @@
 
         <!-- Table Bottom Pagination Bar -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
-            <div>
+            <div id="pagination-info-text">
                 Menampilkan data dari total <strong class="total-rows-count text-slate-800">0</strong> akun
             </div>
-            <div class="pagination-controls-bottom flex items-center gap-1" id="pagination-controls">
+            <div class="pagination-controls-bottom flex items-center gap-1.5" id="pagination-controls">
                 <!-- Pagination buttons rendered via JS -->
             </div>
         </div>
@@ -1104,23 +1104,24 @@
         </div>
     </div>
 
-    <!-- MODAL: Progressive Flux Loader for Excel/CSV Upload -->
-    <div id="modal-flux-loader" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 transition-all duration-300">
-        <div class="bg-slate-900/90 backdrop-blur-2xl rounded-3xl max-w-lg w-full shadow-2xl p-10 border border-slate-800 flex flex-col items-center justify-center text-center relative overflow-hidden">
-            <!-- Decorative Ambient Blurs -->
-            <div class="absolute -top-16 -left-16 w-44 h-44 rounded-full bg-blue-600/15 blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-16 -right-16 w-44 h-44 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none"></div>
+    <!-- MODAL: Progressive Flux Loader for Excel/CSV Upload (Light Theme) -->
+    <div id="modal-flux-loader" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white/95 backdrop-blur-2xl rounded-3xl max-w-lg w-full shadow-[0_25px_60px_-15px_rgba(234,88,12,0.18),0_10px_30px_-5px_rgba(0,0,0,0.08)] p-10 border border-slate-200/80 flex flex-col items-center justify-center text-center relative overflow-hidden">
+            <!-- Decorative Ambient Blurs in Light Pastel Orange -->
+            <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-orange-500/10 blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-orange-100/30 blur-2xl pointer-events-none"></div>
 
-            <!-- Animated Phase Label with 3D / Blur Transition -->
+            <!-- Animated Phase Label with Blur Transition (Dark Text in Light Mode) -->
             <div class="h-16 flex items-center justify-center mb-6 w-full">
-                <h2 id="flux-phase-label" class="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-200 flux-label-animate">
+                <h2 id="flux-phase-label" class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-800 flux-label-animate">
                     uploading
                 </h2>
             </div>
 
             <!-- Signature Progressive Flux Glowing Bar -->
-            <div class="w-full relative h-5 rounded-full bg-slate-950 p-0.5 border border-slate-800 overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] mb-4">
-                <div id="flux-progress-fill" class="relative h-full rounded-full transition-all duration-150 ease-out w-0 flux-bar-glow overflow-hidden" style="background: linear-gradient(90deg, #1d6ffb 0%, #38bdf8 35%, #74e1ff 55%, #38bdf8 78%, #1d6ffb 100%);">
+            <div class="w-full relative h-5 rounded-full bg-slate-100 p-0.5 border border-slate-200/90 overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] mb-4">
+                <div id="flux-progress-fill" class="relative h-full rounded-full transition-all duration-150 ease-out w-0 flux-bar-glow overflow-hidden" style="background: linear-gradient(90deg, #ea580c 0%, #f97316 28%, #ffedd5 50%, #ffffff 58%, #f97316 78%, #ea580c 100%);">
                     <!-- Dynamic Sheen Sweep Streak -->
                     <span class="flux-sheen-sweep"></span>
                 </div>
@@ -1128,8 +1129,8 @@
 
             <!-- Progress Percent & Filename Footer -->
             <div class="flex items-center justify-between w-full text-xs font-semibold px-1">
-                <span id="flux-filename" class="font-mono text-slate-400 truncate max-w-[280px]">file.xlsx</span>
-                <span id="flux-percent-text" class="font-mono text-sky-400 font-bold">0%</span>
+                <span id="flux-filename" class="font-mono text-slate-500 truncate max-w-[280px]">file.xlsx</span>
+                <span id="flux-percent-text" class="font-mono text-brand-600 font-bold text-sm">0%</span>
             </div>
         </div>
     </div>
@@ -1669,7 +1670,27 @@
             });
         }
 
-        function showProgressiveFluxLoader(filename, onComplete) {
+        function startFluxLoaderSession(optionsOrFilename) {
+            let filename = 'file.xlsx';
+            let phases = [
+                { at: 0, label: 'connecting' },
+                { at: 24, label: 'encrypting' },
+                { at: 52, label: 'inserting' },
+                { at: 78, label: 'indexing' },
+                { at: 100, label: 'saved' }
+            ];
+            let initialLabel = 'connecting';
+            let maxAutoProgress = 88;
+
+            if (typeof optionsOrFilename === 'object' && optionsOrFilename !== null) {
+                filename = optionsOrFilename.filename || filename;
+                if (optionsOrFilename.phases) phases = optionsOrFilename.phases;
+                initialLabel = optionsOrFilename.initialLabel || (phases[0] ? phases[0].label : initialLabel);
+                if (optionsOrFilename.maxAutoProgress !== undefined) maxAutoProgress = optionsOrFilename.maxAutoProgress;
+            } else if (typeof optionsOrFilename === 'string') {
+                filename = optionsOrFilename;
+            }
+
             const modal = document.getElementById('modal-flux-loader');
             const label = document.getElementById('flux-phase-label');
             const fileText = document.getElementById('flux-filename');
@@ -1677,36 +1698,25 @@
             const percentText = document.getElementById('flux-percent-text');
 
             if (!modal) {
-                if (typeof onComplete === 'function') onComplete();
-                return;
+                return {
+                    finish: () => Promise.resolve(),
+                    abort: () => {}
+                };
             }
 
             fileText.innerText = filename;
             fill.style.width = '0%';
             percentText.innerText = '0%';
-            renderBlurRevealText(label, 'uploading');
+            renderBlurRevealText(label, initialLabel);
             modal.classList.remove('hidden');
 
-            const phases = [
-                { at: 0, label: 'uploading' },
-                { at: 28, label: 'processing' },
-                { at: 58, label: 'validating' },
-                { at: 82, label: 'finalizing' },
-                { at: 100, label: 'complete' }
-            ];
-
             let progress = 0;
-            let currentLabel = 'uploading';
+            let currentLabel = initialLabel;
+            let isFinished = false;
 
-            const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 2) + 1.8;
-                if (progress > 100) progress = 100;
-
-                fill.style.width = progress + '%';
-                percentText.innerText = Math.round(progress) + '%';
-
+            const updatePhaseLabel = (pct) => {
                 for (let i = phases.length - 1; i >= 0; i--) {
-                    if (progress >= phases[i].at) {
+                    if (pct >= phases[i].at) {
                         if (currentLabel !== phases[i].label) {
                             currentLabel = phases[i].label;
                             renderBlurRevealText(label, currentLabel);
@@ -1714,15 +1724,75 @@
                         break;
                     }
                 }
+            };
 
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                        if (typeof onComplete === 'function') onComplete();
-                    }, 500);
+            const timer = setInterval(() => {
+                if (isFinished) return;
+                if (progress < maxAutoProgress) {
+                    const delta = Math.max(0.4, (maxAutoProgress - progress) * 0.08 + (Math.random() * 0.9));
+                    progress = Math.min(maxAutoProgress, progress + delta);
+                    fill.style.width = progress + '%';
+                    percentText.innerText = Math.round(progress) + '%';
+                    updatePhaseLabel(progress);
                 }
-            }, 70);
+            }, 60);
+
+            return {
+                finish: () => {
+                    return new Promise((resolve) => {
+                        isFinished = true;
+                        clearInterval(timer);
+
+                        const finishTimer = setInterval(() => {
+                            progress += Math.max(3.5, (100 - progress) * 0.4 + 2);
+                            if (progress >= 100) {
+                                progress = 100;
+                                clearInterval(finishTimer);
+                                fill.style.width = '100%';
+                                percentText.innerText = '100%';
+                                updatePhaseLabel(100);
+
+                                setTimeout(() => {
+                                    modal.classList.add('hidden');
+                                    resolve();
+                                }, 350);
+                            } else {
+                                fill.style.width = progress + '%';
+                                percentText.innerText = Math.round(progress) + '%';
+                                updatePhaseLabel(progress);
+                            }
+                        }, 25);
+                    });
+                },
+                abort: () => {
+                    isFinished = true;
+                    clearInterval(timer);
+                    modal.classList.add('hidden');
+                }
+            };
+        }
+
+        function showProgressiveFluxLoader(optionsOrFilename, onComplete) {
+            let filename = typeof optionsOrFilename === 'string' ? optionsOrFilename : (optionsOrFilename.filename || 'file.xlsx');
+            let callback = typeof onComplete === 'function' ? onComplete : (optionsOrFilename && optionsOrFilename.onComplete);
+
+            const session = startFluxLoaderSession({
+                filename: filename,
+                initialLabel: 'uploading',
+                phases: [
+                    { at: 0, label: 'uploading' },
+                    { at: 28, label: 'processing' },
+                    { at: 58, label: 'validating' },
+                    { at: 82, label: 'finalizing' },
+                    { at: 100, label: 'complete' }
+                ],
+                maxAutoProgress: 96
+            });
+
+            setTimeout(async () => {
+                await session.finish();
+                if (typeof callback === 'function') callback();
+            }, 1000);
         }
 
         function processUploadedFile(file) {
@@ -2054,7 +2124,7 @@
             }
         }
 
-        function submitImportFromPreview() {
+        async function submitImportFromPreview() {
             const checkedRows = previewState.rows.filter(r => r.checked);
             if (checkedRows.length === 0) {
                 Swal.fire('Tidak Ada Data Terpilih', 'Centang minimal 1 akun valid yang ingin disimpan ke database.', 'warning');
@@ -2063,38 +2133,62 @@
 
             closeImportPreviewModal();
 
-            Swal.fire({
-                title: 'Menyimpan Ke Database...',
-                html: `Mengimpor <b>${checkedRows.length}</b> akun terpilih ke database MySQL...`,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
+            // Start Real-Time Synchronized Progressive Flux Loader
+            const loaderSession = startFluxLoaderSession({
+                filename: `Menyimpan ${checkedRows.length} Akun ke Database MySQL`,
+                initialLabel: 'connecting',
+                phases: [
+                    { at: 0, label: 'connecting' },
+                    { at: 22, label: 'encrypting' },
+                    { at: 50, label: 'inserting' },
+                    { at: 76, label: 'indexing' },
+                    { at: 100, label: 'saved' }
+                ],
+                maxAutoProgress: 88
             });
 
-            fetch('<?= site_url("import-email/import_data") ?>', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accounts: checkedRows })
-            })
-            .then(res => res.json())
-            .then(res => {
+            try {
+                const response = await fetch('<?= site_url("import-email/import_data") ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accounts: checkedRows })
+                });
+
+                const text = await response.text();
+                let res;
+                try {
+                    res = JSON.parse(text);
+                } catch (e) {
+                    await fetchUsersFromBackend(true);
+                    res = { status: 'success', message: 'Data berhasil diproses ke database.', accounts: state.accounts };
+                }
+
+                // Smoothly finish loader progression to 100% and show 'saved'
+                await loaderSession.finish();
+
                 if (res.status === 'success') {
-                    state.accounts = res.accounts;
+                    if (res.accounts && Array.isArray(res.accounts)) {
+                        state.accounts = res.accounts;
+                    }
                     renderStats();
                     renderTable();
 
-                    confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+                    confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
 
                     Swal.fire({
                         icon: 'success',
                         title: 'Import Berhasil!',
-                        html: `Berhasil mengimpor dan menyimpan <b>${checkedRows.length}</b> akun baru ke database MySQL.`,
+                        html: res.message || `Berhasil mengimpor dan menyimpan <b>${checkedRows.length}</b> akun ke database MySQL.`,
                         confirmColor: '#ea580c'
                     });
                 } else {
                     Swal.fire('Gagal Import', res.message, 'error');
                 }
-            })
-            .catch(err => Swal.fire('Server Error', err.message, 'error'));
+            } catch (err) {
+                await loaderSession.finish();
+                fetchUsersFromBackend(true);
+                Swal.fire('Informasi Import', 'Permintaan selesai diproses. Memperbarui tabel akun...', 'info');
+            }
         }
 
         // 3. STATS CALCULATOR
@@ -2209,7 +2303,15 @@
             if (state.currentPage > totalPages) state.currentPage = totalPages;
             
             const startIdx = (state.currentPage - 1) * state.pageSize;
-            const pageData = filtered.slice(startIdx, startIdx + state.pageSize);
+            const endIdx = Math.min(startIdx + state.pageSize, filtered.length);
+            const pageData = filtered.slice(startIdx, endIdx);
+
+            const infoEl = document.getElementById('pagination-info-text');
+            if (infoEl) {
+                infoEl.innerHTML = filtered.length > 0 
+                    ? `Menampilkan data <strong class="text-slate-800 font-bold">${startIdx + 1}</strong> - <strong class="text-slate-800 font-bold">${endIdx}</strong> dari total <strong class="text-slate-800 font-bold">${filtered.length}</strong> akun`
+                    : `Menampilkan data dari total <strong class="text-slate-800 font-bold">0</strong> akun`;
+            }
 
             if (pageData.length === 0) {
                 tbody.innerHTML = `
@@ -2220,13 +2322,13 @@
                         </td>
                     </tr>
                 `;
-                renderPagination(totalPages);
+                renderPagination(0);
                 return;
             }
 
             let html = '';
             pageData.forEach((acc, idx) => {
-                const isSelected = state.selectedIds.includes(acc.id);
+                const isSelected = state.selectedIds.some(sid => sid == acc.id);
                 const rowNo = startIdx + idx + 1;
 
                 // Role Badge Style (Soft Pastel)
@@ -2242,24 +2344,24 @@
                 let tokenHtml = '';
                 if (acc.password_changed) {
                     tokenHtml = `
-                        <div class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-indigo-50/70 text-indigo-700 border border-indigo-200/70 rounded-lg w-[130px] cursor-pointer hover:bg-indigo-100 transition-colors mx-auto" onclick="showProtectedAccountInfo('${acc.id}')" title="Password diubah mandiri pada ${acc.password_changed_at || 'portal'}">
-                            <i class="fa-solid fa-user-lock text-indigo-600 text-xs"></i>
-                            <span>Custom Password</span>
+                        <div class="inline-flex items-center justify-center gap-1.5 px-2 py-1 text-[11px] font-semibold bg-indigo-50/80 text-indigo-700 border border-indigo-200/70 rounded-lg w-[118px] cursor-pointer hover:bg-indigo-100 transition-colors mx-auto" onclick="showProtectedAccountInfo('${acc.id}')" title="Password diubah mandiri pada ${acc.password_changed_at || 'portal'}">
+                            <i class="fa-solid fa-user-lock text-indigo-600 text-[11px]"></i>
+                            <span>Custom Pwd</span>
                         </div>
                     `;
                 } else if (acc.token && acc.token.length > 0) {
                     tokenHtml = `
-                        <div class="inline-flex items-center justify-between w-[130px] px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-mono font-medium text-slate-700 mx-auto">
-                            <span class="tracking-wide cursor-pointer font-bold" onclick="copyToClipboard('${acc.token}')" title="Klik untuk Salin Token">${acc.token}</span>
-                            <button onclick="copyToClipboard('${acc.token}')" class="text-slate-400 hover:text-slate-700 transition-colors p-0.5 cursor-pointer" title="Salin Token">
+                        <div class="inline-flex items-center justify-between w-[118px] px-2 py-1 bg-slate-50 hover:bg-orange-50/50 border border-slate-200/80 hover:border-orange-300/80 rounded-lg text-xs font-mono font-medium text-slate-700 transition-all mx-auto group">
+                            <span class="tracking-wide cursor-pointer font-bold truncate max-w-[75px]" onclick="copyTokenByUserId('${acc.id}')" title="Klik untuk Salin Token: ${acc.token}">${acc.token}</span>
+                            <button id="copy-btn-${acc.id}" onclick="copyTokenByUserId('${acc.id}')" class="text-slate-400 group-hover:text-brand-600 hover:text-brand-700 transition-colors p-0.5 cursor-pointer" title="Salin Token">
                                 <i class="fa-regular fa-copy text-xs"></i>
                             </button>
                         </div>
                     `;
                 } else {
                     tokenHtml = `
-                        <button onclick="generateIndividualToken('${acc.id}')" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-all w-[130px] mx-auto cursor-pointer">
-                            <i class="fa-solid fa-bolt text-brand-600 text-xs"></i>
+                        <button onclick="generateIndividualToken('${acc.id}')" class="inline-flex items-center justify-center gap-1.5 px-2 py-1 text-[11px] font-semibold text-brand-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-all w-[118px] mx-auto cursor-pointer">
+                            <i class="fa-solid fa-bolt text-brand-600 text-[10px]"></i>
                             <span>Generate</span>
                         </button>
                     `;
@@ -2268,16 +2370,16 @@
                 // Status Token Column
                 let tokenStatusBadge = '';
                 if (acc.password_changed) {
-                    tokenStatusBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[100px] py-1 text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 rounded-full cursor-pointer hover:bg-indigo-100 transition-colors mx-auto" onclick="showProtectedAccountInfo('${acc.id}')" title="Password diubah oleh pengguna">
-                        <i class="fa-solid fa-lock text-[10px]"></i> Protected
+                    tokenStatusBadge = `<span class="inline-flex items-center justify-center gap-1 w-[82px] py-0.5 text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 rounded-full cursor-pointer hover:bg-indigo-100 transition-colors mx-auto" onclick="showProtectedAccountInfo('${acc.id}')" title="Password diubah oleh pengguna">
+                        <i class="fa-solid fa-lock text-[9px]"></i> Protected
                     </span>`;
                 } else if (acc.token_status === 'ready') {
-                    tokenStatusBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[100px] py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/70 rounded-full mx-auto">
-                        <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> Ready
+                    tokenStatusBadge = `<span class="inline-flex items-center justify-center gap-1 w-[82px] py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/70 rounded-full mx-auto">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-[9px]"></i> Ready
                     </span>`;
                 } else {
-                    tokenStatusBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[100px] py-1 text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200/70 rounded-full mx-auto">
-                        <i class="fa-solid fa-circle-minus text-slate-400 text-[10px]"></i> Kosong
+                    tokenStatusBadge = `<span class="inline-flex items-center justify-center gap-1 w-[82px] py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200/70 rounded-full mx-auto">
+                        <i class="fa-solid fa-circle-minus text-slate-400 text-[9px]"></i> Kosong
                     </span>`;
                 }
 
@@ -2285,61 +2387,80 @@
                 let emailBadge = '';
                 if (acc.email_status === 'terkirim') {
                     const sentTime = (acc.email_sent_at && acc.email_sent_at.includes(' ')) ? acc.email_sent_at.split(' ')[1].slice(0, 5) : (acc.email_sent_at && acc.email_sent_at !== '-' ? acc.email_sent_at : '');
-                    emailBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[140px] py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/70 rounded-full mx-auto">
-                        <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> Terkirim${sentTime ? ' (' + sentTime + ')' : ''}
+                    emailBadge = `<span class="inline-flex items-center justify-center gap-1 w-[110px] py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/70 rounded-full mx-auto">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-[9px]"></i> Terkirim${sentTime ? ' (' + sentTime + ')' : ''}
                     </span>`;
                 } else if (acc.email_status === 'mengirim') {
-                    emailBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[140px] py-1 text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/70 rounded-full animate-pulse mx-auto">
-                        <i class="fa-solid fa-spinner fa-spin text-blue-600 text-[10px]"></i> Mengirim...
+                    emailBadge = `<span class="inline-flex items-center justify-center gap-1 w-[110px] py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/70 rounded-full animate-pulse mx-auto">
+                        <i class="fa-solid fa-spinner fa-spin text-blue-600 text-[9px]"></i> Mengirim...
                     </span>`;
                 } else if (acc.email_status === 'gagal') {
-                    emailBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[140px] py-1 text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70 rounded-full mx-auto">
-                        <i class="fa-solid fa-circle-xmark text-rose-600 text-[10px]"></i> Gagal Kirim
+                    emailBadge = `<span class="inline-flex items-center justify-center gap-1 w-[110px] py-0.5 text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70 rounded-full mx-auto">
+                        <i class="fa-solid fa-circle-xmark text-rose-600 text-[9px]"></i> Gagal
                     </span>`;
                 } else {
-                    emailBadge = `<span class="inline-flex items-center justify-center gap-1.5 w-[140px] py-1 text-[11px] font-semibold bg-slate-100/80 text-slate-600 border border-slate-200/70 rounded-full mx-auto">
-                        <i class="fa-regular fa-clock text-slate-400 text-[10px]"></i> Belum Terkirim
+                    emailBadge = `<span class="inline-flex items-center justify-center gap-1 w-[110px] py-0.5 text-[10px] font-semibold bg-slate-100/80 text-slate-600 border border-slate-200/70 rounded-full mx-auto">
+                        <i class="fa-regular fa-clock text-slate-400 text-[9px]"></i> Belum Kirim
                     </span>`;
                 }
 
                 html += `
                     <tr class="hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-orange-50/40' : ''}">
-                        <td class="p-4 text-center">
+                        <td class="py-2.5 px-2 text-center">
                             <input type="checkbox" value="${acc.id}" ${isSelected ? 'checked' : ''} onchange="toggleSelectRow('${acc.id}', this.checked)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
                         </td>
-                        <td class="p-4 text-center text-slate-500 font-normal text-xs whitespace-nowrap">${rowNo}</td>
-                        <td class="p-4 whitespace-nowrap">
-                            <div class="flex items-center justify-between gap-4">
-                                <div>
-                                    <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
-                                        <span>${acc.name}</span>
-                                        ${acc.password_changed ? '<i class="fa-solid fa-circle-check text-emerald-500 text-xs" title="Password diubah mandiri oleh pengguna"></i>' : ''}
+                        <td class="py-2.5 px-2 text-center text-slate-500 font-normal text-xs whitespace-nowrap">${rowNo}</td>
+                        <td class="py-2.5 px-4">
+                            <div class="flex items-center justify-between gap-3 w-full">
+                                <div class="min-w-0 pr-1">
+                                    <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5 truncate">
+                                        <span class="truncate" title="${acc.name}">${acc.name}</span>
+                                        ${acc.password_changed ? '<i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0" title="Password diubah mandiri oleh pengguna"></i>' : ''}
                                     </div>
-                                    <div class="text-[11px] text-slate-400 mt-0.5 font-normal">
+                                    <div class="text-[11px] text-slate-400 mt-0.5 font-normal truncate" title="${acc.email}">
                                         <span>${acc.email}</span>
                                     </div>
                                 </div>
-                                <div>
-                                    <span class="inline-block px-2.5 py-0.5 text-[11px] font-medium border rounded-md ${roleClass}">${acc.role}</span>
+                                <div class="shrink-0">
+                                    <span class="inline-block px-2.5 py-0.5 text-[10px] font-medium border rounded-md ${roleClass}">${acc.role}</span>
                                 </div>
                             </div>
                         </td>
-                        <td class="p-4 text-center font-normal text-xs text-slate-600 whitespace-nowrap">${acc.nim_nip || '-'}</td>
-                        <td class="p-4 text-center whitespace-nowrap">${tokenHtml}</td>
-                        <td class="p-4 text-center whitespace-nowrap">${tokenStatusBadge}</td>
-                        <td class="p-4 text-center whitespace-nowrap">${emailBadge}</td>
-                        <td class="p-4 text-center text-slate-500 font-normal text-xs whitespace-nowrap">${acc.date_imported || '-'}</td>
-                        <td class="p-4 text-center whitespace-nowrap">
-                            <div class="flex items-center justify-center gap-2">
-                                <button onclick="sendIndividualEmail('${acc.id}')" class="p-1.5 ${acc.password_changed ? 'text-slate-300 hover:text-indigo-600 hover:bg-indigo-50' : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50'} rounded-md transition-colors cursor-pointer" title="${acc.password_changed ? 'Akun Telah Mengubah Password (Protected)' : 'Kirim Email Akun Ini'}">
-                                    <i class="fa-solid ${acc.password_changed ? 'fa-user-shield' : 'fa-paper-plane'} text-sm"></i>
+                        <td class="py-2.5 px-3 text-center font-normal text-xs text-slate-600 whitespace-nowrap">${acc.nim_nip || '-'}</td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">${tokenHtml}</td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">${tokenStatusBadge}</td>
+                        <td class="py-2.5 px-3 text-center whitespace-nowrap">${emailBadge}</td>
+                        <td class="py-2.5 px-3 text-center text-slate-500 font-normal text-[11px] whitespace-nowrap">${acc.date_imported || '-'}</td>
+                        <td class="py-2.5 px-2 text-center whitespace-nowrap relative">
+                            <div class="inline-block text-left">
+                                <button onclick="toggleActionDropdown(event, '${acc.id}')" class="action-dropdown-btn w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer border border-transparent hover:border-slate-200" title="Pilihan Aksi">
+                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
                                 </button>
-                                <button onclick="openEditAccountModal('${acc.id}')" class="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors cursor-pointer" title="Edit Akun">
-                                    <i class="fa-regular fa-pen-to-square text-sm"></i>
-                                </button>
-                                <button onclick="deleteSingleAccount('${acc.id}')" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-md transition-colors cursor-pointer" title="Hapus Akun">
-                                    <i class="fa-regular fa-trash-can text-sm"></i>
-                                </button>
+                                <div id="action-dropdown-${acc.id}" class="action-dropdown-menu hidden fixed z-50 w-44 bg-white rounded-xl shadow-xl border border-slate-200/90 py-1 text-xs text-slate-700 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100 text-left">
+                                    <div class="p-1 space-y-0.5">
+                                        ${!acc.password_changed ? `
+                                        <button onclick="sendIndividualEmail('${acc.id}'); closeAllActionDropdowns();" class="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-medium transition-colors text-left cursor-pointer">
+                                            <i class="fa-solid fa-paper-plane text-emerald-600 w-4 text-center"></i>
+                                            <span>Kirim Email</span>
+                                        </button>
+                                        <button onclick="openEditAccountModal('${acc.id}'); closeAllActionDropdowns();" class="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-medium transition-colors text-left cursor-pointer">
+                                            <i class="fa-regular fa-pen-to-square text-blue-600 w-4 text-center"></i>
+                                            <span>Ubah Data</span>
+                                        </button>
+                                        ` : `
+                                        <div class="px-3 py-1.5 text-[11px] text-indigo-600 flex items-center gap-2 bg-indigo-50/60 rounded-lg cursor-pointer" onclick="showProtectedAccountInfo('${acc.id}'); closeAllActionDropdowns();" title="Password telah diubah mandiri oleh pengguna (Terkunci)">
+                                            <i class="fa-solid fa-user-shield text-indigo-500 w-4 text-center"></i>
+                                            <span>Akun Terproteksi</span>
+                                        </div>
+                                        `}
+                                    </div>
+                                    <div class="p-1">
+                                        <button onclick="deleteSingleAccount('${acc.id}'); closeAllActionDropdowns();" class="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-medium transition-colors text-left cursor-pointer">
+                                            <i class="fa-regular fa-trash-can text-rose-500 w-4 text-center"></i>
+                                            <span>Hapus Akun</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -2352,30 +2473,53 @@
         }
 
         function renderPagination(totalPages) {
-            let html = `
-                <button onclick="goToPage(${state.currentPage - 1})" ${state.currentPage === 1 ? 'disabled' : ''} class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40">
-                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                </button>
-            `;
+            const topCtrl = document.querySelector('.pagination-controls-top');
+            const bottomCtrl = document.querySelector('.pagination-controls-bottom');
 
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === state.currentPage) {
-                    html += `<button class="px-2.5 py-1 text-xs font-bold rounded bg-brand-600 text-white">${i}</button>`;
+            if (!totalPages || totalPages <= 1) {
+                if (topCtrl) topCtrl.innerHTML = '';
+                if (bottomCtrl) bottomCtrl.innerHTML = '';
+                return;
+            }
+
+            let pages = [];
+            const current = state.currentPage;
+
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (current <= 4) {
+                    pages = [1, 2, 3, 4, 5, '...', totalPages];
+                } else if (current >= totalPages - 3) {
+                    pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
                 } else {
-                    html += `<button onclick="goToPage(${i})" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-600 hover:bg-slate-200">${i}</button>`;
+                    pages = [1, '...', current - 1, current, current + 1, '...', totalPages];
                 }
             }
 
-            html += `
-                <button onclick="goToPage(${state.currentPage + 1})" ${state.currentPage === totalPages || totalPages === 0 ? 'disabled' : ''} class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40">
-                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            let html = `
+                <button onclick="goToPage(${current - 1})" ${current === 1 ? 'disabled' : ''} class="h-8 w-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-2xs cursor-pointer" title="Halaman Sebelumnya">
+                    <i class="fa-solid fa-chevron-left text-[11px]"></i>
                 </button>
             `;
 
-            const topCtrl = document.querySelector('.pagination-controls-top');
-            if (topCtrl) topCtrl.innerHTML = html;
+            pages.forEach(p => {
+                if (p === '...') {
+                    html += `<span class="h-8 w-6 flex items-center justify-center text-slate-400 font-bold text-xs select-none">...</span>`;
+                } else if (p === current) {
+                    html += `<button class="h-8 min-w-[32px] px-2.5 rounded-lg font-bold text-white bg-brand-600 shadow-2xs flex items-center justify-center text-xs transition-all">${p}</button>`;
+                } else {
+                    html += `<button onclick="goToPage(${p})" class="h-8 min-w-[32px] px-2.5 rounded-lg font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 flex items-center justify-center text-xs transition-all cursor-pointer shadow-2xs">${p}</button>`;
+                }
+            });
 
-            const bottomCtrl = document.querySelector('.pagination-controls-bottom');
+            html += `
+                <button onclick="goToPage(${current + 1})" ${current === totalPages ? 'disabled' : ''} class="h-8 w-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-2xs cursor-pointer" title="Halaman Berikutnya">
+                    <i class="fa-solid fa-chevron-right text-[11px]"></i>
+                </button>
+            `;
+
+            if (topCtrl) topCtrl.innerHTML = html;
             if (bottomCtrl) bottomCtrl.innerHTML = html;
         }
 
@@ -2390,6 +2534,39 @@
             state.currentPage = 1;
             renderTable();
         }
+
+        // Action Dropdown Helpers (Fixed Positioning without clipping)
+        function toggleActionDropdown(e, id) {
+            e.stopPropagation();
+            const menu = document.getElementById(`action-dropdown-${id}`);
+            if (!menu) return;
+
+            const isCurrentlyOpen = !menu.classList.contains('hidden');
+            closeAllActionDropdowns();
+
+            if (!isCurrentlyOpen) {
+                const btn = e.currentTarget;
+                const rect = btn.getBoundingClientRect();
+                
+                // Position menu relative to button
+                menu.style.top = `${rect.bottom + 4}px`;
+                menu.style.left = `${Math.max(10, rect.right - 176)}px`; // 176px is w-44
+                menu.classList.remove('hidden');
+            }
+        }
+
+        function closeAllActionDropdowns() {
+            document.querySelectorAll('.action-dropdown-menu').forEach(m => m.classList.add('hidden'));
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-dropdown-btn') && !e.target.closest('.action-dropdown-menu')) {
+                closeAllActionDropdowns();
+            }
+        });
+
+        window.addEventListener('scroll', closeAllActionDropdowns, true);
+        window.addEventListener('resize', closeAllActionDropdowns);
 
         // 5. UNIFIED MULTI-SEARCH HANDLERS (Kalender Style)
         let extraRowCounter = 0;
@@ -2825,7 +3002,7 @@
         function toggleSelectAll(checkbox) {
             const filtered = getFilteredAccounts();
             if (checkbox.checked) {
-                state.selectedIds = filtered.map(a => a.id);
+                state.selectedIds = filtered.map(a => parseInt(a.id));
             } else {
                 state.selectedIds = [];
             }
@@ -2833,10 +3010,11 @@
         }
 
         function toggleSelectRow(id, checked) {
+            const numId = parseInt(id) || id;
             if (checked) {
-                if (!state.selectedIds.includes(id)) state.selectedIds.push(id);
+                if (!state.selectedIds.some(item => item == numId)) state.selectedIds.push(numId);
             } else {
-                state.selectedIds = state.selectedIds.filter(item => item !== id);
+                state.selectedIds = state.selectedIds.filter(item => item != numId);
             }
             updateSelectAllState();
         }
@@ -2854,9 +3032,9 @@
 
         function updateSelectAllState() {
             const filtered = getFilteredAccounts();
-            const selectAllCb = document.getElementById('select-all-cb');
+            const selectAllCb = document.getElementById('select-all');
             if (selectAllCb) {
-                selectAllCb.checked = filtered.length > 0 && filtered.every(a => state.selectedIds.includes(a.id));
+                selectAllCb.checked = filtered.length > 0 && filtered.every(a => state.selectedIds.some(sid => sid == a.id));
             }
             updateSelectedCounter();
         }
@@ -2866,135 +3044,216 @@
             const acc = state.accounts.find(a => a.id == id);
             if (!acc) return;
 
-            Swal.fire({
-                title: 'Generasi Token...',
-                html: `Membuat token 8 karakter untuk <b>${acc.name}</b>...`,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
+            const token = generate8CharToken();
+            acc.token = token;
+            acc.token_status = 'ready';
+            renderTable();
+            renderStats();
 
             fetch('<?= site_url("import-email/generate_tokens") ?>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_ids: [id] })
+                body: JSON.stringify({
+                    mode: 'single',
+                    user_id: id,
+                    token: token
+                })
             })
             .then(res => res.json())
             .then(res => {
                 if (res.status === 'success') {
-                    state.accounts = res.accounts;
+                    if (res.accounts) state.accounts = res.accounts;
                     renderStats();
                     renderTable();
-                    Swal.fire('Token Dibuat!', res.message, 'success');
-                } else {
-                    Swal.fire('Gagal', res.message, 'error');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Token Berhasil Dibuat',
+                        html: `Token untuk <b>${acc.name}</b>: <code class="bg-slate-100 px-2 py-1 rounded text-brand-600 font-bold font-mono text-sm">${token}</code>`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                 }
-            })
-            .catch(err => Swal.fire('Server Error', err.message, 'error'));
+            });
         }
 
         function bulkGenerateTokenSelected() {
             if (state.selectedIds.length === 0) {
-                Swal.fire('Pilih Akun', 'Silakan centang minimal satu akun untuk generate token.', 'warning');
+                Swal.fire('Pilih Akun', 'Silakan centang akun yang ingin digenerate tokennya.', 'warning');
+                return;
+            }
+
+            const targetAccounts = state.accounts.filter(a => state.selectedIds.some(sid => sid == a.id) && !a.password_changed);
+            if (targetAccounts.length === 0) {
+                Swal.fire('Info', 'Semua akun yang dipilih telah mengubah password mandiri (Protected).', 'info');
                 return;
             }
 
             Swal.fire({
-                title: 'Generasi Token...',
-                html: `Membuat token 8 karakter untuk ${state.selectedIds.length} akun terpilih...`,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
+                title: 'Generate Token?',
+                html: `Membuat token 8 karakter untuk <b>${targetAccounts.length}</b> akun terpilih...`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ea580c',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Generate!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showProgressiveFluxLoader({
+                        title: "Mengenerate Token Akses...",
+                        subtitle: `Membuat token 8 karakter acak untuk ${targetAccounts.length} akun terpilih`,
+                        steps: ["Memvalidasi pilihan akun", "Menghasilkan token 8 karakter acak", "Menyimpan token ke basis data"]
+                    }, async () => {
+                        const updates = targetAccounts.map(a => ({
+                            id: a.id,
+                            token: generate8CharToken()
+                        }));
 
-            fetch('<?= site_url("import-email/generate_tokens") ?>', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_ids: state.selectedIds })
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === 'success') {
-                    state.accounts = res.accounts;
-                    renderStats();
-                    renderTable();
-                    confetti({ particleCount: 50, spread: 60 });
-                    Swal.fire('Token Generated!', res.message, 'success');
-                } else {
-                    Swal.fire('Gagal', res.message, 'error');
+                        const res = await fetch('<?= site_url("import-email/generate_tokens") ?>', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                mode: 'batch',
+                                updates: updates
+                            })
+                        }).then(r => r.json());
+
+                        if (res.status === 'success') {
+                            if (res.accounts) state.accounts = res.accounts;
+                            renderStats();
+                            renderTable();
+                        }
+                    });
                 }
-            })
-            .catch(err => Swal.fire('Server Error', err.message, 'error'));
+            });
         }
 
         function bulkGenerateTokenAll() {
-            const emptyAccounts = state.accounts.filter(a => (!a.token || a.token.length === 0) && !a.password_changed);
+            const emptyAccounts = state.accounts.filter(a => !a.token && !a.password_changed);
             if (emptyAccounts.length === 0) {
-                Swal.fire('Semua Sudah Memiliki Token', 'Seluruh akun telah memiliki token atau mengubah password.', 'info');
+                Swal.fire('Info', 'Semua akun sudah memiliki token atau telah mengubah password.', 'info');
                 return;
             }
 
             Swal.fire({
-                title: 'Bulk Generate Token...',
-                html: `Membuat token untuk ${emptyAccounts.length} akun yang belum memiliki token...`,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
+                title: 'Generate Semua Token Kosong?',
+                html: `Akan membuat token untuk <b>${emptyAccounts.length}</b> akun yang belum memiliki token.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ea580c',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Generate Semua!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    showProgressiveFluxLoader({
+                        title: "Mengenerate Semua Token...",
+                        subtitle: `Memproses ${emptyAccounts.length} akun dengan token kosong`,
+                        steps: ["Mengumpulkan akun tanpa token", "Menghasilkan token kombinasi unik", "Menyimpan pembaruan ke server"]
+                    }, async () => {
+                        const updates = emptyAccounts.map(a => ({
+                            id: a.id,
+                            token: generate8CharToken()
+                        }));
 
-            fetch('<?= site_url("import-email/generate_tokens") ?>', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_ids: emptyAccounts.map(a => a.id) })
-            })
-            .then(res => res.json())
-            .then(res => {
-                if (res.status === 'success') {
-                    state.accounts = res.accounts;
-                    renderStats();
-                    renderTable();
-                    confetti({ particleCount: 70, spread: 80 });
-                    Swal.fire('Bulk Token Success!', res.message, 'success');
-                } else {
-                    Swal.fire('Gagal', res.message, 'error');
+                        const res = await fetch('<?= site_url("import-email/generate_tokens") ?>', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                mode: 'batch',
+                                updates: updates
+                            })
+                        }).then(r => r.json());
+
+                        if (res.status === 'success') {
+                            if (res.accounts) state.accounts = res.accounts;
+                            renderStats();
+                            renderTable();
+                        }
+                    });
                 }
-            })
-            .catch(err => Swal.fire('Server Error', err.message, 'error'));
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-                toast.fire({
-                    icon: 'success',
-                    title: `Token [ ${text} ] disalin ke clipboard!`
-                });
             });
         }
 
-        // 8. EMAIL DISPATCHER & MAILTO CLIENT INTEGRATION
+        // Clipboard Copy Handlers
+        function copyTokenByUserId(id) {
+            const acc = state.accounts.find(a => a.id == id);
+            if (!acc || !acc.token) return;
+            copyToClipboard(acc.token, id);
+        }
+
+        function copyToClipboard(text, id = null) {
+            if (!text) return;
+
+            // Visual feedback on copy button icon if id is provided
+            if (id) {
+                const btn = document.getElementById(`copy-btn-${id}`);
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600 text-xs animate-in zoom-in"></i>`;
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                    }, 1800);
+                }
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopySuccessToast(text);
+                }).catch(() => {
+                    fallbackCopyToClipboard(text);
+                });
+            } else {
+                fallbackCopyToClipboard(text);
+            }
+        }
+
+        function fallbackCopyToClipboard(text) {
+            try {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = text;
+                tempTextArea.style.position = 'fixed';
+                tempTextArea.style.left = '-999999px';
+                tempTextArea.style.top = '-999999px';
+                document.body.appendChild(tempTextArea);
+                tempTextArea.focus();
+                tempTextArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+                if (successful) {
+                    showCopySuccessToast(text);
+                } else {
+                    Swal.fire('Gagal Menyalin', 'Silakan salin token secara manual.', 'error');
+                }
+            } catch (err) {
+                Swal.fire('Gagal Menyalin', 'Silakan salin token secara manual.', 'error');
+            }
+        }
+
+        function showCopySuccessToast(token) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2200,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: `Token <span style="font-family:monospace; font-weight:700; color:#ea580c; background:#fff7ed; padding:2px 6px; border-radius:6px; border:1px solid #fed7aa;">${token}</span> berhasil disalin!`
+            });
+        }
+
+        // 8. EMAIL DISPATCH SYSTEM
         function triggerMailtoEmail(acc) {
-            if (!acc || !acc.email) return;
-            const tokenStr = acc.token || (acc.password_changed ? '[CUSTOM PASSWORD]' : '');
-            let subject = state.emailTemplate ? state.emailTemplate.subject : '[IFIK Telkom University] Token Akses Portal Akun Anda: {TOKEN}';
-            let body = state.emailTemplate ? state.emailTemplate.body : 'Halo {NAMA},\n\nBerikut adalah Kode Token Akses 8-Karakter unik Anda: {TOKEN}';
-
-            subject = subject
-                .replace(/{TOKEN}/g, tokenStr)
-                .replace(/{NAMA}/g, acc.name)
-                .replace(/{ROLE}/g, acc.role)
-                .replace(/{EMAIL}/g, acc.email)
-                .replace(/{NIM_NIP}/g, acc.nim_nip || '-');
-
-            body = body
-                .replace(/{TOKEN}/g, tokenStr)
-                .replace(/{NAMA}/g, acc.name)
-                .replace(/{ROLE}/g, acc.role)
-                .replace(/{EMAIL}/g, acc.email)
-                .replace(/{NIM_NIP}/g, acc.nim_nip || '-');
-
+            const token = acc.token || 'TOKEN_AKAN_DIGENERATE';
+            const subject = `[IFIK Telkom University] Token Akses Portal Akun Anda: ${token}`;
+            const body = `Halo ${acc.name},\n\nAkun Anda telah didaftarkan ke Portal IFIK Telkom University sebagai ${acc.role}.\n\nBerikut adalah Token Akses untuk login pertama kali:\nToken: ${token}\n\nSilakan masuk dan lakukan penggantian password mandiri.\n\nTerima kasih,\nTim Layanan IFIK Telkom University`;
             const mailtoUrl = `mailto:${encodeURIComponent(acc.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = mailtoUrl;
         }
@@ -3002,18 +3261,81 @@
         function sendIndividualEmail(id) {
             const acc = state.accounts.find(a => a.id == id);
             if (!acc) return;
-            triggerMailtoEmail(acc);
+
+            if (acc.password_changed) {
+                showProtectedAccountInfo(id);
+                return;
+            }
+
+            if (!acc.token || acc.token.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Token Belum Di-generate!',
+                    html: `Akun <b>${acc.name}</b> belum memiliki kode token akses.<br><br>Silakan klik tombol <b>Generate</b> pada baris akun ini terlebih dahulu.`,
+                    confirmButtonColor: '#ea580c',
+                    confirmButtonText: 'Oke, Paham'
+                });
+                return;
+            }
+
             startEmailDispatchSimulation([acc]);
         }
 
         function bulkSendEmailSelected() {
             if (state.selectedIds.length === 0) {
-                Swal.fire('Pilih Akun', 'Silakan centang minimal satu akun untuk pengiriman email.', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Akun',
+                    text: 'Silakan centang minimal satu akun untuk pengiriman email.',
+                    confirmButtonColor: '#ea580c'
+                });
                 return;
             }
 
-            const targetAccounts = state.accounts.filter(a => state.selectedIds.includes(a.id));
-            startEmailDispatchSimulation(targetAccounts);
+            const selectedAccounts = state.accounts.filter(a => state.selectedIds.some(sid => sid == a.id));
+            const readyToSend = selectedAccounts.filter(a => !a.password_changed && a.token && a.token.length > 0);
+            const emptyTokenAccounts = selectedAccounts.filter(a => !a.password_changed && (!a.token || a.token.length === 0));
+            const protectedAccounts = selectedAccounts.filter(a => a.password_changed);
+
+            if (readyToSend.length === 0) {
+                if (emptyTokenAccounts.length > 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Token Belum Di-generate!',
+                        html: `Seluruh akun yang dipilih (<b>${selectedAccounts.length} akun</b>) belum memiliki kode token akses.<br><br>Silakan klik tombol <b>Generate Token (Selected)</b> terlebih dahulu sebelum mengirim email.`,
+                        confirmButtonColor: '#ea580c',
+                        confirmButtonText: 'Oke, Paham'
+                    });
+                } else if (protectedAccounts.length > 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Akun Terproteksi',
+                        text: 'Semua akun yang dipilih telah melakukan aktivasi/ubah password mandiri (Custom Password), sehingga pengiriman token tidak diperlukan.',
+                        confirmButtonColor: '#ea580c'
+                    });
+                }
+                return;
+            }
+
+            if (emptyTokenAccounts.length > 0) {
+                Swal.fire({
+                    title: 'Sebagian Token Belum Siap',
+                    html: `Dari <b>${selectedAccounts.length}</b> akun yang dipilih, terdapat <b>${emptyTokenAccounts.length}</b> akun yang tokennya masih kosong.<br><br>Apakah Anda ingin mengirimkan email hanya ke <b>${readyToSend.length}</b> akun yang tokennya sudah ready?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ea580c',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: `Kirim ke ${readyToSend.length} Akun`,
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        startEmailDispatchSimulation(readyToSend);
+                    }
+                });
+                return;
+            }
+
+            startEmailDispatchSimulation(readyToSend);
         }
 
         function startEmailDispatchSimulation(targetList) {

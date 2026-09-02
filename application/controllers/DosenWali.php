@@ -9,9 +9,13 @@ class DosenWali extends CI_Controller {
         $this->load->helper(array('form', 'url'));
     }
 
+    private function _get_current_nip() {
+        return $this->session->userdata('nidn_nim') ?: ($this->session->userdata('nip') ?: ($this->session->userdata('nim') ?: '19850101'));
+    }
+
     // Dashboard Dosen Wali: Daftar Mahasiswa Bimbingan Akademik
     public function index() {
-        $nip_dosen = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19850101'; // Mock NIP Dosen Wali
+        $nip_dosen = $this->_get_current_nip();
         $data['title'] = 'Dashboard Dosen Wali';
         $data['dosen_info'] = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
         $data['list_mahasiswa'] = $this->DosenWali_model->get_mahasiswa_bimbingan($nip_dosen);
@@ -21,7 +25,7 @@ class DosenWali extends CI_Controller {
 
     // Detail Mahasiswa Bimbingan & Approval
     public function detail_mahasiswa($nim) {
-        $nip_dosen = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19850101';
+        $nip_dosen = $this->_get_current_nip();
         $data['title'] = 'Detail Mahasiswa & Approval Pendaftaran TA';
         $data['dosen_info'] = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
         $data['detail'] = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
@@ -150,4 +154,52 @@ class DosenWali extends CI_Controller {
             'message' => 'Status usulan judul Tugas Akhir berhasil diperbarui ke ' . $status_judul . '.'
         ));
     }
+
+    // AJAX Endpoint: Realtime fetch daftar mahasiswa bimbingan & statistik status
+    public function get_mahasiswa_ajax() {
+        $nip_dosen = $this->_get_current_nip();
+        $list = $this->DosenWali_model->get_mahasiswa_bimbingan($nip_dosen);
+
+        $totalMhs = count($list);
+        $pendingCount = 0;
+        $approvedCount = 0;
+        $rejectedCount = 0;
+
+        $formattedList = [];
+        foreach ($list as $m) {
+            $st = $m['status_approval_wali'] ?? 'Pending';
+            if ($st === 'Approved') {
+                $approvedCount++;
+            } elseif ($st === 'Rejected') {
+                $rejectedCount++;
+            } else {
+                $pendingCount++;
+            }
+
+            $nama = trim(($m['nama_depan'] ?? '') . ' ' . ($m['nama_belakang'] ?? ''));
+            $formattedList[] = [
+                'nim'                  => $m['nim'],
+                'nama'                 => $nama,
+                'judul'                => $m['judul_1'] ?? '',
+                'status_approval_wali' => $st,
+                'current_stage'        => $m['current_stage'] ?? 'Dosen Wali',
+                'detail_url'           => site_url('dosenwali/detail_mahasiswa/' . $m['nim'])
+            ];
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'success' => true,
+                'stats'   => [
+                    'total'    => $totalMhs,
+                    'pending'  => $pendingCount,
+                    'approved' => $approvedCount,
+                    'rejected' => $rejectedCount,
+                    'approved_pct' => $totalMhs > 0 ? round(($approvedCount / $totalMhs) * 100) : 0
+                ],
+                'data'    => $formattedList
+            ]));
+    }
 }
+

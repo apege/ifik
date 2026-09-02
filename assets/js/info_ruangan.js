@@ -307,9 +307,17 @@
         if (rejectBox) rejectBox.style.display = 'none';
 
         const isAuthorized = [1, 2, 3].includes(roleId);
+        const statusLower = (booking.status || '').toLowerCase();
 
-        // Hanya tampilkan tombol Setujui/Tolak jika status masih 'Pending' dan pengguna berwenang
-        if (isAuthorized && booking.status === 'Pending') {
+        // Status yang bisa diapprove:
+        // 1. Pending (untuk Admin, Laboran, Ka. Ur)
+        // 2. Disetujui Laboran (bisa di-approve / difinalisasi oleh Ka. Ur dan Admin)
+        const canApprove = (
+            statusLower === 'pending' ||
+            ((roleId === 3 || roleId === 1) && statusLower.includes('laboran'))
+        );
+
+        if (isAuthorized && canApprove) {
             let roleName = 'Admin';
             if (roleId === 3) roleName = 'Ka. Ur';
             else if (roleId === 2) roleName = 'Laboran';
@@ -546,12 +554,13 @@
         // Render Pertama
         renderRowPage(activeList, currentRotateIndex, pageSize, false);
 
-        // Putar Otomatis 4 Baris Setiap 4.5 Detik dengan Animasi Slide Smooth (Tanpa Titik / Badge)
+        // Putar Otomatis 4 Baris Setiap 9 Detik secara konsisten
+        if (rowRotateInterval) clearInterval(rowRotateInterval);
         if (totalPages > 1) {
             rowRotateInterval = setInterval(() => {
                 currentRotateIndex = (currentRotateIndex + 1) % totalPages;
                 renderRowPage(activeList, currentRotateIndex, pageSize, true);
-            }, 4500);
+            }, 9000);
         }
     }
 
@@ -568,10 +577,10 @@
             return;
         }
 
-        // ANIMASI TRANSISI ROTASI BARIS (SLIDE & FADE SMOOTH)
+        // ANIMASI TRANSISI ROTASI BARIS (SLIDE & FADE SMOOTH DAN TENANG)
         const existingRows = wrapper.querySelectorAll('.room-item');
         existingRows.forEach(row => {
-            row.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            row.style.transition = 'opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
             row.style.opacity = '0';
             row.style.transform = 'translateY(-6px)';
         });
@@ -584,62 +593,112 @@
             const newRows = wrapper.querySelectorAll('.room-item');
             newRows.forEach((row, idx) => {
                 row.style.opacity = '0';
-                row.style.transform = 'translateY(8px)';
+                row.style.transform = 'translateY(6px)';
 
                 setTimeout(() => {
-                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    row.style.transition = 'opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
                     row.style.opacity = '1';
                     row.style.transform = 'translateY(0)';
 
-                    // ANIMASI KETIK TEKS KARAKTER PER KARAKTER (TYPEWRITER EFFECT)
-                    const titleEl = row.querySelector('.room-info h3');
-                    const subEl   = row.querySelector('.room-info p');
-                    const userEl  = row.querySelector('.tag-user-name');
-
-                    if (titleEl) typeTextEffect(titleEl, 20);
-                    if (subEl)   typeTextEffect(subEl, 14);
-                    if (userEl)  typeTextEffect(userEl, 16);
-                }, idx * 60);
+                    // ANIMASI KETIK HALUS PADA TEKS DINAMIS TANPA MENGGESER LAYOUT
+                    animateAllRowElements(row);
+                }, idx * 70);
             });
-        }, 220);
+        }, 360);
+    }
+
+    function animateAllRowElements(row) {
+        if (!row) return;
+        const titleEl = row.querySelector('.room-info h3');
+        const subEl   = row.querySelector('.room-info p');
+        const userEl  = row.querySelector('.tag-user-name');
+        const descEl  = row.querySelector('.room-desc-text');
+
+        if (titleEl) typeTextEffect(titleEl, 28);
+        if (subEl)   typeTextEffect(subEl, 18);
+        if (userEl)  typeTextEffect(userEl, 20);
+        if (descEl)  typeTextEffect(descEl, 12);
     }
 
     function typeTextEffect(element, speed) {
         if (!element) return;
+        if (element._typeTimer) {
+            clearInterval(element._typeTimer);
+            element._typeTimer = null;
+        }
         const fullText = element.getAttribute('data-text') || element.innerText || '';
         if (!fullText) return;
+
         element.innerText = '';
         let i = 0;
-        let timer = setInterval(() => {
+        element._typeTimer = setInterval(() => {
             if (i < fullText.length) {
-                element.innerText += fullText.charAt(i);
+                element.innerText = fullText.slice(0, i + 1);
                 i++;
             } else {
-                clearInterval(timer);
+                clearInterval(element._typeTimer);
+                element._typeTimer = null;
             }
         }, speed || 18);
     }
 
+    const INDO_MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const INDO_MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    function formatIndoDate(dateInput, short = false) {
+        if (!dateInput) return '-';
+        const parts = String(dateInput).split('T')[0].split('-');
+        if (parts.length < 3) return dateInput;
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        if (isNaN(year) || isNaN(month) || isNaN(day) || month < 0 || month > 11) return dateInput;
+        const monthName = short ? INDO_MONTHS_SHORT[month] : INDO_MONTHS[month];
+        return `${day} ${monthName} ${year}`;
+    }
+
+    function formatIndoDateRange(startStr, endStr, short = false) {
+        if (!startStr) return '-';
+        if (!endStr || startStr === endStr) {
+            return formatIndoDate(startStr, short);
+        }
+        const p1 = String(startStr).split('-');
+        const p2 = String(endStr).split('-');
+        if (p1.length < 3 || p2.length < 3) return `${startStr} - ${endStr}`;
+        
+        const y1 = parseInt(p1[0], 10), m1 = parseInt(p1[1], 10) - 1, d1 = parseInt(p1[2], 10);
+        const y2 = parseInt(p2[0], 10), m2 = parseInt(p2[1], 10) - 1, d2 = parseInt(p2[2], 10);
+
+        const mName1 = short ? INDO_MONTHS_SHORT[m1] : INDO_MONTHS[m1];
+        const mName2 = short ? INDO_MONTHS_SHORT[m2] : INDO_MONTHS[m2];
+
+        if (y1 === y2 && m1 === m2) {
+            return `${d1} - ${d2} ${mName2} ${y2}`;
+        } else if (y1 === y2) {
+            return `${d1} ${mName1} - ${d2} ${mName2} ${y2}`;
+        } else {
+            return `${d1} ${mName1} ${y1} - ${d2} ${mName2} ${y2}`;
+        }
+    }
+
     function createRowHTML(j) {
         const st = getStatusStyle(j.status);
-
-        let dateStr = j.tanggal_mulai;
-        if (j.tanggal_selesai && j.tanggal_selesai !== j.tanggal_mulai) {
-            dateStr = j.tanggal_mulai + ' - ' + j.tanggal_selesai;
-        }
+        const dateStr = formatIndoDateRange(j.tanggal_mulai, j.tanggal_selesai);
 
         const jMulai = j.jam_mulai ? j.jam_mulai.substring(0, 5) : '00:00';
         const jSelesai = j.jam_selesai ? j.jam_selesai.substring(0, 5) : '00:00';
+        const timeStr = `${jMulai} - ${jSelesai}`;
 
         const kode = (j.kode_ruangan || '').replace(/"/g, '&quot;');
         const namaRuangan = (j.nama_ruangan || '').replace(/"/g, '&quot;');
         const namaLengkap = (j.nama_lengkap || '').replace(/"/g, '&quot;');
+        const keterangan = (j.keterangan || '-').replace(/"/g, '&quot;');
 
         return `
             <div class="room-item" onclick="openDetailBookingModal(${j.id})" style="cursor: pointer;">
                 <div class="room-item-left">
                     <div class="room-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     </div>
                     <div class="room-info">
                         <h3 data-text="${kode}">${kode}</h3>
@@ -648,21 +707,27 @@
                 </div>
                 
                 <div class="room-item-tags">
-                    <span class="tag">
-                        <svg style="margin-right:4px; vertical-align:text-bottom" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span class="tag" title="${namaLengkap}">
+                        <svg style="margin-right:4px; vertical-align:text-bottom; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         <span class="tag-user-name" data-text="${namaLengkap}">${namaLengkap}</span>
                     </span>
-                    <span class="tag" style="background: rgba(234, 88, 12, 0.1); border-color: #ea580c; color: #ea580c;">
-                        ${jMulai} - ${jSelesai}
+                    <span class="tag" style="border-color: #fb923c; color: #ea580c; background: #ffffff;">
+                        <span class="tag-time-text" data-text="${timeStr}">${timeStr}</span>
                     </span>
                 </div>
 
-                <div class="room-item-date">${dateStr}</div>
+                <div class="room-item-date">
+                    <span class="room-date-text" data-text="${dateStr}">${dateStr}</span>
+                </div>
+
+                <div class="room-item-desc" title="${keterangan}">
+                    <span class="room-desc-text" data-text="${keterangan}">${keterangan}</span>
+                </div>
 
                 <div class="room-item-action">
-                    <span style="display:inline-flex; align-items:center; gap:6px; background:${st.badgeBg}; color:${st.badgeColor}; border-radius:999px; padding:5px 13px; font-size:0.76rem; font-weight:700; white-space:nowrap;">
+                    <span class="landing-status-badge" style="background:${st.badgeBg}; color:${st.badgeColor};">
                         <span style="width:7px;height:7px;border-radius:50%;background:${st.dot};flex-shrink:0;"></span>
-                        ${st.label}
+                        <span class="landing-status-label" data-text="${st.label}">${st.label}</span>
                     </span>
                 </div>
             </div>

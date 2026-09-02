@@ -458,9 +458,29 @@
                             title: 'Berhasil Disimpan!',
                             text: data.message,
                             confirmButtonColor: '#ea580c'
-                        }).then(() => {
-                            window.location.reload();
                         });
+
+                        // Instantly update live state without page reload
+                        config.stKoor = selectedDecision;
+                        if (config.ajaxRealtimeUrl) {
+                            fetch(config.ajaxRealtimeUrl)
+                                .then(res => res.json())
+                                .then(latest => {
+                                    if (latest && latest.status) {
+                                        config.stWali = latest.status_approval_wali;
+                                        config.stAdmin = latest.status_approval_admin;
+                                        config.stKoor = latest.status_approval_koor;
+                                        config.stKk = latest.status_approval_kk;
+                                        config.activeStageNum = latest.activeStageNum;
+                                        config.tahapTerakhir = latest.tahapTerakhir;
+                                        config.isWaliApproved = (latest.status_approval_wali === 'Approved');
+                                        config.isLAAApproved = (latest.status_approval_admin === 'Approved');
+                                        config.isKoorApproved = (latest.status_approval_koor === 'Approved');
+
+                                        renderStagesGrid(latest);
+                                    }
+                                });
+                        }
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -651,6 +671,43 @@
                 // silent fallback
             });
     }
+
+    // =========================================================
+    // 5. PDF PREVIEW POPUP MODAL
+    // =========================================================
+    window.openPdfPreviewModal = function (url, title) {
+        const modal = document.getElementById('pdfPreviewModal');
+        const frame = document.getElementById('pdfModalFrame');
+        const titleEl = document.getElementById('pdfModalTitle');
+        const subEl = document.getElementById('pdfModalSubtitle');
+
+        if (frame) frame.src = url;
+        if (titleEl) titleEl.innerText = title || 'Pratinjau Dokumen PDF';
+        if (subEl) subEl.innerText = url.split('/').pop() || 'Dokumen Persyaratan';
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        }
+    };
+
+    window.closePdfPreviewModal = function () {
+        const modal = document.getElementById('pdfPreviewModal');
+        const frame = document.getElementById('pdfModalFrame');
+        if (frame) frame.src = 'about:blank';
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+    };
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closePdfPreviewModal();
+        }
+    });
 
     // =========================================================
     // INITIALIZATION ON DOM READY

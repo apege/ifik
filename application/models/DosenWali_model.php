@@ -49,14 +49,23 @@ class DosenWali_model extends CI_Model {
         return $this->db->update('pendaftaran_ta', $data);
     }
 
-    // Get List Mahasiswa Bimbingan Wali (Fetch REAL Submitted Pendaftaran TA Data ONLY)
+    // Get List Mahasiswa Bimbingan Wali (Fetch REAL Submitted Pendaftaran TA Data)
     public function get_mahasiswa_bimbingan($nip_dosen = null) {
         if (!$this->db->table_exists('pendaftaran_ta')) {
             return array();
         }
-        $this->db->select('p.*, m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, p.created_at as tgl_daftar');
+        $this->db->select('p.*, COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, p.created_at as tgl_daftar');
         $this->db->from('pendaftaran_ta p');
         $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        if (!empty($nip_dosen)) {
+            $this->db->group_start();
+            $this->db->where('m.nip_dosen_wali', $nip_dosen);
+            $this->db->or_where('p.id_dosen_wali', 1);
+            $this->db->or_where('m.nip_dosen_wali IS NULL', null, false);
+            $this->db->or_where('m.nip_dosen_wali', '');
+            $this->db->group_end();
+        }
+        $this->db->order_by('p.id', 'DESC');
         $query = $this->db->get();
         return $query->result_array();
     }

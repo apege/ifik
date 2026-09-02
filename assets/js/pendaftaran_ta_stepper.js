@@ -4,14 +4,28 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-    let currentStep = 1;
     const totalSteps = 6;
+    const userNim = window.CURRENT_USER_NIM ? window.CURRENT_USER_NIM.trim() : 'guest';
+    const STEP_KEY = 'ifik_ta_active_step_' + userNim;
+    const DRAFT_KEY = 'ifik_ta_form_draft_' + userNim;
 
-    // Direct navigation support from Dashboard redirect (e.g. ?step=3)
+    // Clean legacy un-scoped draft keys from browser
+    try {
+        localStorage.removeItem('ifik_ta_active_step');
+        localStorage.removeItem('ifik_ta_form_draft');
+    } catch(e) {}
+
+    let currentStep = 1;
+
+    // Direct navigation support from Dashboard redirect (e.g. ?step=3) or localStorage
     const urlParams = new URLSearchParams(window.location.search);
-    const initialStep = parseInt(urlParams.get('step'));
-    if (initialStep && initialStep >= 1 && initialStep <= totalSteps) {
-        currentStep = initialStep;
+    const urlStep = parseInt(urlParams.get('step'));
+    const savedStep = parseInt(localStorage.getItem(STEP_KEY));
+
+    if (urlStep && urlStep >= 1 && urlStep <= totalSteps) {
+        currentStep = urlStep;
+    } else if (savedStep && savedStep >= 1 && savedStep <= totalSteps) {
+        currentStep = savedStep;
     }
 
     const btnNext = document.getElementById('btnNext');
@@ -81,6 +95,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 const counter = stepItem.querySelector('.step-counter');
                 const title = stepItem.querySelector('.step-title');
 
+                // Step Item Clickable to navigate to visited steps
+                stepItem.style.cursor = (i <= currentStep) ? 'pointer' : 'default';
+                stepItem.onclick = () => {
+                    if (i < currentStep) {
+                        currentStep = i;
+                        updateStepUI();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+
                 if (i === currentStep) {
                     stepItem.classList.add('active');
                     stepItem.classList.remove('completed');
@@ -132,16 +156,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 return inputJ1 && inputJ1.value.trim() !== '' && inputJEn && inputJEn.value.trim() !== '';
             } else if (stepIndex === 3) {
                 const inputKsm = document.querySelector('input[name="file_ksm"]');
-                return inputKsm && inputKsm.files && inputKsm.files.length > 0;
+                const oldKsm = document.querySelector('input[name="file_ksm_old"]');
+                return (inputKsm && inputKsm.files && inputKsm.files.length > 0) || (oldKsm && oldKsm.value.trim() !== '');
             } else if (stepIndex === 4) {
                 const inputTranskrip = document.querySelector('input[name="file_transkrip"]');
-                return inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0;
+                const oldTranskrip = document.querySelector('input[name="file_transkrip_old"]');
+                return (inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0) || (oldTranskrip && oldTranskrip.value.trim() !== '');
             } else if (stepIndex === 5) {
                 const inputPernyataan = document.querySelector('input[name="file_pernyataan"]');
-                return inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0;
+                const oldPernyataan = document.querySelector('input[name="file_pernyataan_old"]');
+                return (inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0) || (oldPernyataan && oldPernyataan.value.trim() !== '');
             } else if (stepIndex === 6) {
                 const inputBebasLab = document.querySelector('input[name="file_bebas_lab"]');
-                return inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0;
+                const oldBebasLab = document.querySelector('input[name="file_bebas_lab_old"]');
+                return (inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0) || (oldBebasLab && oldBebasLab.value.trim() !== '');
             }
             return false;
         }
@@ -158,6 +186,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const isFilled = checkStepCompletionStatus(i);
             if (isFilled) filledCount++;
+
+            // Sidebar item clickable to navigate back to previous steps
+            sideItem.style.cursor = (i <= currentStep) ? 'pointer' : 'default';
+            sideItem.onclick = () => {
+                if (i < currentStep) {
+                    currentStep = i;
+                    updateStepUI();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
 
             if (i === currentStep) {
                 sideItem.classList.remove('opacity-50');
@@ -222,21 +260,19 @@ document.addEventListener('DOMContentLoaded', function () {
             btnPrev.classList.remove('hidden');
         }
 
-        const isEditing = !!(document.querySelector('input[name="file_ksm_old"]')?.value || document.querySelector('input[name="judul_1"]')?.value);
-
         if (btnNext && btnSubmit) {
             if (currentStep === totalSteps) {
                 btnNext.classList.add('hidden');
-                btnSubmit.classList.remove('hidden');
-            } else if (isEditing) {
-                // When editing/revising, show BOTH "Lanjutkan" and "Kirim Pendaftaran" buttons
-                btnNext.classList.remove('hidden');
                 btnSubmit.classList.remove('hidden');
             } else {
                 btnNext.classList.remove('hidden');
                 btnSubmit.classList.add('hidden');
             }
         }
+
+        try {
+            localStorage.setItem(STEP_KEY, currentStep);
+        } catch (e) {}
     }
 
     // Validate current step inputs
@@ -244,43 +280,87 @@ document.addEventListener('DOMContentLoaded', function () {
         const currentContainer = document.getElementById(`step-content-${step}`);
         if (!currentContainer) return true;
 
+        // If form is locked in view-only mode, allow smooth step navigation
+        if (currentContainer.closest('fieldset[disabled]')) {
+            return true;
+        }
+
         let isValid = true;
         let errorMessage = '';
         const stepAlert = currentContainer.querySelector('.step-inline-alert');
         const stepAlertText = currentContainer.querySelector('.step-inline-alert-text');
-        const requiredInputs = currentContainer.querySelectorAll('[required]');
 
-        requiredInputs.forEach(input => {
-            if (input.type === 'file') {
-                const oldFileInput = document.querySelector(`input[type="hidden"][name="${input.name}_old"]`);
-                const hasOldFile = oldFileInput && oldFileInput.value.trim() !== '';
-
-                if ((!input.files || input.files.length === 0) && !hasOldFile) {
-                    isValid = false;
-                    errorMessage = `⚠️ Mohon unggah berkas PDF pada Langkah ${step} sebelum melanjutkan!`;
-                    input.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-                } else if (input.files && input.files.length > 0) {
-                    const fileName = input.files[0].name;
-                    if (!fileName.toLowerCase().endsWith('.pdf')) {
-                        isValid = false;
-                        errorMessage = `⚠️ Berkas "${fileName}" harus berformat .PDF!`;
-                        input.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-                    } else {
-                        input.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
-                    }
-                } else {
-                    input.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
-                }
+        if (step === 1) {
+            const inputJenis = document.getElementById('inputJenisTA');
+            if (!inputJenis || !inputJenis.value.trim()) {
+                isValid = false;
+                errorMessage = '⚠️ Harap pilih Jenis Tugas Akhir pada Langkah 1 terlebih dahulu!';
+                const trigger = currentContainer.querySelector('.dropdown-trigger');
+                if (trigger) trigger.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
             } else {
-                if (!input.value.trim()) {
-                    isValid = false;
-                    errorMessage = `⚠️ Harap lengkapi semua kolom yang wajib diisi (*) pada Langkah ${step}!`;
-                    input.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
-                } else {
-                    input.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
-                }
+                const trigger = currentContainer.querySelector('.dropdown-trigger');
+                if (trigger) trigger.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
             }
-        });
+        } else if (step === 2) {
+            const inputJ1 = document.querySelector('input[name="judul_1"]');
+            const inputJEn = document.querySelector('input[name="judul_en"]');
+            if (!inputJ1 || !inputJ1.value.trim()) {
+                isValid = false;
+                errorMessage = '⚠️ Harap isi Judul Usulan 1 (Utama) pada Langkah 2!';
+                if (inputJ1) inputJ1.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+            } else if (!inputJEn || !inputJEn.value.trim()) {
+                isValid = false;
+                errorMessage = '⚠️ Harap isi Judul dalam Bahasa Inggris pada Langkah 2 (atau klik Translate Otomatis)!';
+                if (inputJEn) inputJEn.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
+            } else {
+                if (inputJ1) inputJ1.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+                if (inputJEn) inputJEn.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+            }
+        } else if (step === 3) {
+            const inputKsm = document.querySelector('input[name="file_ksm"]');
+            const oldKsm = document.querySelector('input[name="file_ksm_old"]');
+            const hasFile = (inputKsm && inputKsm.files && inputKsm.files.length > 0) || (oldKsm && oldKsm.value.trim() !== '');
+            if (!hasFile) {
+                isValid = false;
+                errorMessage = '⚠️ Mohon unggah berkas PDF KSM pada Langkah 3 sebelum melanjutkan!';
+                inputKsm?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
+            } else {
+                inputKsm?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
+            }
+        } else if (step === 4) {
+            const inputTranskrip = document.querySelector('input[name="file_transkrip"]');
+            const oldTranskrip = document.querySelector('input[name="file_transkrip_old"]');
+            const hasFile = (inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0) || (oldTranskrip && oldTranskrip.value.trim() !== '');
+            if (!hasFile) {
+                isValid = false;
+                errorMessage = '⚠️ Mohon unggah berkas PDF Transkrip Nilai pada Langkah 4 sebelum melanjutkan!';
+                inputTranskrip?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
+            } else {
+                inputTranskrip?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
+            }
+        } else if (step === 5) {
+            const inputPernyataan = document.querySelector('input[name="file_pernyataan"]');
+            const oldPernyataan = document.querySelector('input[name="file_pernyataan_old"]');
+            const hasFile = (inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0) || (oldPernyataan && oldPernyataan.value.trim() !== '');
+            if (!hasFile) {
+                isValid = false;
+                errorMessage = '⚠️ Mohon unggah berkas PDF Surat Pernyataan pada Langkah 5 sebelum melanjutkan!';
+                inputPernyataan?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
+            } else {
+                inputPernyataan?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
+            }
+        } else if (step === 6) {
+            const inputBebasLab = document.querySelector('input[name="file_bebas_lab"]');
+            const oldBebasLab = document.querySelector('input[name="file_bebas_lab_old"]');
+            const hasFile = (inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0) || (oldBebasLab && oldBebasLab.value.trim() !== '');
+            if (!hasFile) {
+                isValid = false;
+                errorMessage = '⚠️ Mohon unggah berkas PDF Surat Bebas Lab pada Langkah 6 sebelum mengirim pendaftaran!';
+                inputBebasLab?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
+            } else {
+                inputBebasLab?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
+            }
+        }
 
         if (!isValid) {
             // 1. Show High-Visibility Toast Banner (below header)
@@ -360,6 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (hiddenInput) {
                     hiddenInput.value = val;
                     trigger.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+                    saveDraft();
                 }
 
                 if (triggerLabel) {
@@ -450,6 +531,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             zone.classList.remove('border-rose-500', 'bg-rose-50');
             zone.classList.add('border-emerald-400', 'bg-emerald-50/20');
+            updateStepUI();
         }
 
         // Initialize prefilled old file card on load
@@ -527,13 +609,71 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectedContainer.style.display = 'none';
                 }
                 zone.classList.remove('border-emerald-400', 'bg-emerald-50/20');
+                updateStepUI();
             });
         }
     });
 
-    // Form submission validation
+    // --- DRAFT FORM PERSISTENCE ---
+    function saveDraft() {
+        try {
+            const draft = {
+                jenis_ta: document.getElementById('inputJenisTA')?.value || '',
+                judul_1: document.getElementById('inputJudul1')?.value || '',
+                judul_2: document.getElementById('inputJudul2')?.value || '',
+                judul_3: document.getElementById('inputJudul3')?.value || '',
+                judul_en: document.getElementById('inputJudulEn')?.value || ''
+            };
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch (e) {}
+    }
+
+    function loadDraft() {
+        try {
+            const draftStr = localStorage.getItem(DRAFT_KEY);
+            if (!draftStr) return;
+            const draft = JSON.parse(draftStr);
+
+            if (draft.jenis_ta) {
+                const inputJenis = document.getElementById('inputJenisTA');
+                if (inputJenis && !inputJenis.value) {
+                    inputJenis.value = draft.jenis_ta;
+                    const opt = document.querySelector(`.dropdown-option[data-value="${draft.jenis_ta}"]`);
+                    if (opt) opt.click();
+                }
+            }
+            if (draft.judul_1) {
+                const el = document.getElementById('inputJudul1');
+                if (el && !el.value) el.value = draft.judul_1;
+            }
+            if (draft.judul_2) {
+                const el = document.getElementById('inputJudul2');
+                if (el && !el.value) {
+                    el.value = draft.judul_2;
+                    const c2 = document.getElementById('containerJudul2');
+                    if (c2) c2.classList.remove('hidden');
+                }
+            }
+            if (draft.judul_3) {
+                const el = document.getElementById('inputJudul3');
+                if (el && !el.value) {
+                    el.value = draft.judul_3;
+                    const c3 = document.getElementById('containerJudul3');
+                    if (c3) c3.classList.remove('hidden');
+                }
+            }
+            if (draft.judul_en) {
+                const el = document.getElementById('inputJudulEn');
+                if (el && !el.value) el.value = draft.judul_en;
+            }
+        } catch (e) {}
+    }
+
+    // Form submission validation & draft listening
     const form = document.querySelector('form');
     if (form) {
+        form.addEventListener('input', saveDraft);
+
         form.addEventListener('submit', function (e) {
             for (let step = 1; step <= totalSteps; step++) {
                 if (!validateStep(step)) {
@@ -544,6 +684,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
             }
+            // Clear saved draft & step upon valid submit
+            try {
+                localStorage.removeItem(STEP_KEY);
+                localStorage.removeItem(DRAFT_KEY);
+            } catch (err) {}
         });
     }
 
@@ -633,6 +778,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     inputJudulEn.value = translatedText;
                     inputJudulEn.classList.add('bg-emerald-50', 'border-emerald-400');
                     inputJudulEn.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
+                    saveDraft();
                     setTimeout(() => {
                         inputJudulEn.classList.remove('bg-emerald-50', 'border-emerald-400');
                     }, 2000);
@@ -694,17 +840,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (target === '2' && containerJudul2 && inputJudul2) {
                 containerJudul2.classList.add('hidden');
                 inputJudul2.value = '';
+                saveDraft();
             } else if (target === '3' && containerJudul3 && inputJudul3) {
                 containerJudul3.classList.add('hidden');
                 inputJudul3.value = '';
+                saveDraft();
             }
             updateAddButtonState();
         });
     });
 
-    // Initialize UI on load
-    updateStepUI();
-});
-    // Initialize UI on load
+    // Initialize UI and load draft on load
+    loadDraft();
     updateStepUI();
 });
