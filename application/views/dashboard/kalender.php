@@ -872,25 +872,112 @@
             font-weight: 700;
             padding: 6px 14px;
             border-radius: 10px;
-            transition: all 0.15s ease;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .stat-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+        }
+        .stat-pill:active {
+            transform: translateY(0);
         }
         .stat-pill-total {
             background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            border: 1.5px solid #e2e8f0;
             color: #1e293b;
         }
+        .stat-pill-total.active {
+            background: #0f172a;
+            border-color: #0f172a;
+            color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.15);
+        }
+        .stat-pill-total.active .stat-label {
+            color: #94a3b8 !important;
+        }
+        .stat-pill-total.active .stat-val {
+            color: #ffffff !important;
+        }
+
         .stat-pill-pending {
             background: #fffbeb;
-            border: 1px solid #fef3c7;
+            border: 1.5px solid #fef3c7;
             color: #b45309;
         }
+        .stat-pill-pending.active {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22);
+        }
+
         .stat-pill-approved {
             background: #f0fdf4;
-            border: 1px solid #dcfce7;
+            border: 1.5px solid #dcfce7;
             color: #15803d;
+        }
+        .stat-pill-approved.active {
+            background: #dcfce7;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
         }
         .stat-label { font-weight: 600; }
         .stat-val { font-weight: 800; }
+
+        /* SUB-MENU DROPDOWN FOR DISETUJUI BREAKDOWN */
+        .approved-sub-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 6px;
+            box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+            z-index: 1100;
+            min-width: 220px;
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            animation: fadeInSubMenu 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeInSubMenu {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .approved-sub-menu.show {
+            display: flex;
+        }
+        .approved-sub-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 9px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .approved-sub-item:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .approved-sub-item.active {
+            background: #ecfdf5;
+            color: #15803d;
+        }
+        .approved-sub-item .sub-count {
+            font-size: 0.74rem;
+            font-weight: 800;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 2px 8px;
+            border-radius: 999px;
+            color: inherit;
+        }
 
         /* SLEEK MODERN SELECT DROPDOWNS (NOT BASIC HTML) */
         .custom-table-select {
@@ -926,7 +1013,7 @@
         /* MODERN CLEAN TABLE COLUMN HEADER */
         .table-column-header {
             display: grid;
-            grid-template-columns: 240px 170px 115px 1fr 175px;
+            grid-template-columns: 230px 170px 150px 1fr 170px;
             align-items: center;
             gap: 16px;
             padding: 10px 12px;
@@ -951,6 +1038,10 @@
             justify-content: center;
             text-align: center;
         }
+        .th-col.th-desc {
+            justify-content: flex-start;
+            padding-left: 20px;
+        }
         .th-col.th-status {
             justify-content: flex-start;
             padding-left: 14px;
@@ -964,7 +1055,7 @@
 
         .table-row-card {
             display: grid;
-            grid-template-columns: 240px 170px 115px 1fr 175px;
+            grid-template-columns: 230px 170px 150px 1fr 170px;
             align-items: center;
             background: transparent;
             border-bottom: 1px solid #e8e2d5;
@@ -983,6 +1074,7 @@
             align-items: center;
             gap: 14px;
             min-width: 0;
+            position: relative;
         }
         .tr-room-icon {
             width: 44px;
@@ -1002,6 +1094,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            position: relative;
         }
         .tr-room-code {
             font-size: 1.02rem;
@@ -1019,6 +1112,84 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        /* FLOATING RICH ROOM DETAIL TOOLTIP ON HOVER */
+        .room-hover-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 56px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(6px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 1000;
+            min-width: 220px;
+            max-width: 320px;
+            white-space: normal;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+        }
+        .room-hover-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+        .tr-room-col:hover .room-hover-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .rht-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .rht-code {
+            font-weight: 800;
+            color: #fb923c;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+        }
+        .rht-cat {
+            font-size: 0.68rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            padding: 2px 7px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        .rht-title {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .rht-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 5px;
+            margin-top: 4px;
         }
 
         /* VERTICALLY STACKED PILLS WITH UNIFORM FIXED WIDTH: USER (TOP) + TIME (BOTTOM) */
@@ -1082,10 +1253,11 @@
         /* KETERANGAN COLUMN BESIDE DATE */
         .tr-desc-col {
             min-width: 0;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             align-items: center;
-            padding: 0 8px;
+            padding: 0 8px 0 20px;
+            position: relative;
         }
         .tr-desc-text {
             font-size: 0.84rem;
@@ -1096,6 +1268,61 @@
             text-overflow: ellipsis;
             display: block;
             max-width: 100%;
+        }
+
+        /* FLOATING RICH KETERANGAN TOOLTIP ON HOVER */
+        .desc-hover-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 20px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(6px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 1000;
+            min-width: 200px;
+            max-width: 360px;
+            white-space: normal;
+            line-height: 1.45;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            word-break: break-word;
+        }
+        .desc-hover-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 24px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+        .tr-desc-col:hover .desc-hover-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dht-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #fb923c;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .dht-content {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #f8fafc;
+            line-height: 1.4;
         }
 
         /* STATUS BADGE WITH UNIFORM FIXED WIDTH */
@@ -1386,19 +1613,57 @@
             <!-- Table Quick Stats Banner -->
             <div class="table-stats-bar">
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <div class="stat-pill stat-pill-total">
+                    <div class="stat-pill stat-pill-total active" id="statPillTotal" onclick="filterByStatPill('all')" title="Klik untuk menampilkan semua data">
                         <span class="stat-label" style="color: #64748b;">Total Data:</span>
                         <span class="stat-val" id="tableStatTotal" style="color: #0f172a;">0</span>
                     </div>
-                    <div class="stat-pill stat-pill-pending">
+
+                    <div class="stat-pill stat-pill-pending" id="statPillPending" onclick="filterByStatPill('pending')" title="Klik untuk memfilter status Menunggu">
                         <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
                         <span class="stat-label">Menunggu:</span>
                         <span class="stat-val" id="tableStatPending">0</span>
                     </div>
-                    <div class="stat-pill stat-pill-approved">
-                        <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
-                        <span class="stat-label">Disetujui:</span>
-                        <span class="stat-val" id="tableStatApproved">0</span>
+
+                    <!-- Disetujui with interactive dropdown options -->
+                    <div class="stat-pill-approved-wrap" style="position: relative;">
+                        <div class="stat-pill stat-pill-approved" id="statPillApproved" onclick="toggleApprovedSubMenu(event)" title="Klik untuk memilih filter status Disetujui">
+                            <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                            <span class="stat-label" id="approvedStatLabel">Disetujui:</span>
+                            <span class="stat-val" id="tableStatApproved">0</span>
+                            <svg id="approvedStatChevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 2px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+
+                        <!-- Dropdown Sub-Menu Disetujui -->
+                        <div class="approved-sub-menu" id="approvedSubMenu">
+                            <div class="approved-sub-item active" id="subOptAllApproved" onclick="selectApprovedSub('all_approved', event)">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+                                    <span>Semua Disetujui</span>
+                                </div>
+                                <span class="sub-count" id="subCountAllApproved">0</span>
+                            </div>
+                            <div class="approved-sub-item" id="subOptLaboran" onclick="selectApprovedSub('laboran', event)">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6;"></span>
+                                    <span>Disetujui Laboran</span>
+                                </div>
+                                <span class="sub-count" id="subCountLaboran">0</span>
+                            </div>
+                            <div class="approved-sub-item" id="subOptKaur" onclick="selectApprovedSub('kaur', event)">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e;"></span>
+                                    <span>Disetujui Ka. Ur</span>
+                                </div>
+                                <span class="sub-count" id="subCountKaur">0</span>
+                            </div>
+                            <div class="approved-sub-item" id="subOptAdmin" onclick="selectApprovedSub('admin', event)">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #8b5cf6;"></span>
+                                    <span>Disetujui Admin</span>
+                                </div>
+                                <span class="sub-count" id="subCountAdmin">0</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -2340,9 +2605,141 @@
             }
         }
 
+        window.activeStatPillFilter = 'all'; // 'all', 'pending', 'all_approved', 'laboran', 'kaur', 'admin'
+
+        function filterByStatPill(type) {
+            closeApprovedSubMenu();
+            if (type === 'all') {
+                window.activeStatPillFilter = 'all';
+            } else if (type === 'pending') {
+                if (window.activeStatPillFilter === 'pending') {
+                    window.activeStatPillFilter = 'all';
+                } else {
+                    window.activeStatPillFilter = 'pending';
+                }
+            }
+            currentTablePage = 1;
+            renderTableView();
+        }
+
+        function toggleApprovedSubMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('approvedSubMenu');
+            const chev = document.getElementById('approvedStatChevron');
+            if (menu) {
+                const isShowing = menu.classList.contains('show');
+                if (isShowing) {
+                    closeApprovedSubMenu();
+                } else {
+                    menu.classList.add('show');
+                    if (chev) chev.style.transform = 'rotate(180deg)';
+                }
+            }
+        }
+
+        function closeApprovedSubMenu() {
+            const menu = document.getElementById('approvedSubMenu');
+            const chev = document.getElementById('approvedStatChevron');
+            if (menu) menu.classList.remove('show');
+            if (chev) chev.style.transform = 'rotate(0deg)';
+        }
+
+        function selectApprovedSub(subType, e) {
+            if (e) e.stopPropagation();
+            closeApprovedSubMenu();
+            window.activeStatPillFilter = subType;
+            currentTablePage = 1;
+            renderTableView();
+        }
+
+        document.addEventListener('click', function(e) {
+            const wrap = document.querySelector('.stat-pill-approved-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                closeApprovedSubMenu();
+            }
+        });
+
         function renderTableView(customData) {
-            const rawData = (typeof customData !== 'undefined') ? customData : (lastFilteredData || window.bookingData || []);
-            let data = [...rawData];
+            const rawBase = (typeof customData !== 'undefined') ? customData : (lastFilteredData || window.bookingData || []);
+
+            // 1. Calculate overall stats from rawBase
+            const totalCount = rawBase.length;
+            const pendingCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu')).length;
+            const allApprovedCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('setuju')).length;
+            const laboranCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('laboran')).length;
+            const kaurCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('ka. ur') || (b.status || '').toLowerCase().includes('kaur')).length;
+            const adminCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('admin')).length;
+
+            // Update DOM counters
+            const statTotal = document.getElementById('tableStatTotal');
+            const statPending = document.getElementById('tableStatPending');
+            const statApproved = document.getElementById('tableStatApproved');
+            if (statTotal) statTotal.innerText = totalCount;
+            if (statPending) statPending.innerText = pendingCount;
+            if (statApproved) statApproved.innerText = allApprovedCount;
+
+            const scAll = document.getElementById('subCountAllApproved');
+            const scLab = document.getElementById('subCountLaboran');
+            const scKaur = document.getElementById('subCountKaur');
+            const scAdm = document.getElementById('subCountAdmin');
+            if (scAll) scAll.innerText = allApprovedCount;
+            if (scLab) scLab.innerText = laboranCount;
+            if (scKaur) scKaur.innerText = kaurCount;
+            if (scAdm) scAdm.innerText = adminCount;
+
+            // Update Active UI States
+            const pillTot = document.getElementById('statPillTotal');
+            const pillPen = document.getElementById('statPillPending');
+            const pillApp = document.getElementById('statPillApproved');
+            const labelApp = document.getElementById('approvedStatLabel');
+
+            if (pillTot) pillTot.classList.remove('active');
+            if (pillPen) pillPen.classList.remove('active');
+            if (pillApp) pillApp.classList.remove('active');
+
+            ['subOptAllApproved', 'subOptLaboran', 'subOptKaur', 'subOptAdmin'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
+
+            // 2. Filter data by activeStatPillFilter
+            let data = [...rawBase];
+            const activeFilter = window.activeStatPillFilter || 'all';
+
+            if (activeFilter === 'pending') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu'));
+                if (pillPen) pillPen.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Disetujui:';
+            } else if (activeFilter === 'all_approved') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('setuju'));
+                if (pillApp) pillApp.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Disetujui:';
+                const el = document.getElementById('subOptAllApproved');
+                if (el) el.classList.add('active');
+            } else if (activeFilter === 'laboran') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('laboran'));
+                if (pillApp) pillApp.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Laboran:';
+                const el = document.getElementById('subOptLaboran');
+                if (el) el.classList.add('active');
+            } else if (activeFilter === 'kaur') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('ka. ur') || (b.status || '').toLowerCase().includes('kaur'));
+                if (pillApp) pillApp.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Ka. Ur:';
+                const el = document.getElementById('subOptKaur');
+                if (el) el.classList.add('active');
+            } else if (activeFilter === 'admin') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('admin'));
+                if (pillApp) pillApp.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Admin:';
+                const el = document.getElementById('subOptAdmin');
+                if (el) el.classList.add('active');
+            } else {
+                if (pillTot) pillTot.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Disetujui:';
+                const el = document.getElementById('subOptAllApproved');
+                if (el) el.classList.add('active');
+            }
 
             // Sort data according to selector
             const sortVal = document.getElementById('tableSortSelect') ? document.getElementById('tableSortSelect').value : 'date_desc';
@@ -2362,22 +2759,11 @@
                 data.sort((a, b) => (a.jam_mulai || '').localeCompare(b.jam_mulai || ''));
             }
 
-            // Stats update
-            const totalCount = data.length;
-            const pendingCount = data.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu')).length;
-            const approvedCount = data.filter(b => (b.status || '').toLowerCase().includes('setuju')).length;
-
-            const statTotal = document.getElementById('tableStatTotal');
-            const statPending = document.getElementById('tableStatPending');
-            const statApproved = document.getElementById('tableStatApproved');
-            if (statTotal) statTotal.innerText = totalCount;
-            if (statPending) statPending.innerText = pendingCount;
-            if (statApproved) statApproved.innerText = approvedCount;
-
             const cardsList = document.getElementById('tableCardsList');
             if (!cardsList) return;
 
-            if (totalCount === 0) {
+            const filteredCount = data.length;
+            if (filteredCount === 0) {
                 cardsList.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 16px; border: 1.5px solid #e2e8f0; margin-top: 16px;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin-bottom: 10px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -2394,12 +2780,12 @@
             if (pagWrap) pagWrap.style.display = 'flex';
 
             // Pagination calculation
-            const totalPages = Math.ceil(totalCount / tablePageSize);
+            const totalPages = Math.ceil(filteredCount / tablePageSize);
             if (currentTablePage > totalPages) currentTablePage = totalPages;
             if (currentTablePage < 1) currentTablePage = 1;
 
             const startIndex = (currentTablePage - 1) * tablePageSize;
-            const endIndex = Math.min(startIndex + tablePageSize, totalCount);
+            const endIndex = Math.min(startIndex + tablePageSize, filteredCount);
             const pageData = data.slice(startIndex, endIndex);
 
             // Render table rows
@@ -2408,6 +2794,19 @@
                 const st = getStatusStyle(b.status);
                 const jMulai = b.jam_mulai ? b.jam_mulai.substring(0, 5) : '00:00';
                 const jSelesai = b.jam_selesai ? b.jam_selesai.substring(0, 5) : '00:00';
+                const lokasi = (b.lokasi || '').replace(/"/g, '&quot;');
+                const kapasitas = b.kapasitas || '';
+                const namaKategori = (b.nama_kategori || 'Ruangan').replace(/"/g, '&quot;');
+
+                let metaHtml = '';
+                if (lokasi || kapasitas) {
+                    metaHtml = `
+                        <div class="rht-meta">
+                            ${lokasi ? `<span>📍 ${lokasi}</span>` : ''}
+                            ${kapasitas ? `<span>👥 ${kapasitas} Orang</span>` : ''}
+                        </div>
+                    `;
+                }
 
                 html += `
                     <div class="table-row-card" onclick="openDetailBookingModal(${b.id})" title="Klik untuk melihat detail & approval">
@@ -2415,9 +2814,19 @@
                             <div class="tr-room-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             </div>
-                            <div class="tr-room-info">
+                            <div class="tr-room-info" title="${(b.nama_ruangan || '') + ' (' + (b.kode_ruangan || '') + ')'}">
                                 <div class="tr-room-code">${b.kode_ruangan || '-'}</div>
                                 <div class="tr-room-name">${b.nama_ruangan || '-'}</div>
+                            </div>
+
+                            <!-- Floating Room Detail Tooltip on Hover (Direct child of tr-room-col) -->
+                            <div class="room-hover-tooltip">
+                                <div class="rht-header">
+                                    <span class="rht-code">${b.kode_ruangan || '-'}</span>
+                                    <span class="rht-cat">${namaKategori}</span>
+                                </div>
+                                <div class="rht-title">${b.nama_ruangan || '-'}</div>
+                                ${metaHtml}
                             </div>
                         </div>
 
@@ -2437,6 +2846,12 @@
 
                         <div class="tr-desc-col" title="${b.keterangan || '-'}">
                             <span class="tr-desc-text">${b.keterangan || '-'}</span>
+
+                            <!-- Floating Keterangan Detail Tooltip on Hover -->
+                            <div class="desc-hover-tooltip">
+                                <span class="dht-badge">📝 Keterangan / Keperluan</span>
+                                <div class="dht-content">${b.keterangan || '-'}</div>
+                            </div>
                         </div>
 
                         <div class="tr-status-col">
@@ -2454,7 +2869,7 @@
             // Render Pagination Info & Buttons
             const infoEl = document.getElementById('tablePaginationInfo');
             if (infoEl) {
-                infoEl.innerText = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${totalCount} data`;
+                infoEl.innerText = `Menampilkan ${startIndex + 1} - ${endIndex} dari ${filteredCount} data`;
             }
 
             const btnsEl = document.getElementById('tablePaginationBtns');

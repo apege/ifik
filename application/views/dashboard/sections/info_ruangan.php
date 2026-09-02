@@ -82,9 +82,28 @@
                         <div class="room-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         </div>
-                        <div class="room-info">
+                        <div class="room-info" title="<?= htmlspecialchars($j->nama_ruangan . ' (' . $j->kode_ruangan . ')') ?>">
                             <h3 data-text="<?= htmlspecialchars($j->kode_ruangan) ?>"><?= $j->kode_ruangan ?></h3>
                             <p data-text="<?= htmlspecialchars($j->nama_ruangan) ?>"><?= $j->nama_ruangan ?></p>
+                        </div>
+
+                        <!-- Floating Room Detail Tooltip on Hover (Direct child of room-item-left) -->
+                        <div class="room-hover-tooltip">
+                            <div class="rht-header">
+                                <span class="rht-code"><?= $j->kode_ruangan ?></span>
+                                <span class="rht-cat"><?= $j->nama_kategori ?: 'Ruangan' ?></span>
+                            </div>
+                            <div class="rht-title"><?= $j->nama_ruangan ?></div>
+                            <?php if (!empty($j->lokasi) || !empty($j->kapasitas)): ?>
+                            <div class="rht-meta">
+                                <?php if (!empty($j->lokasi)): ?>
+                                    <span>📍 <?= $j->lokasi ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($j->kapasitas)): ?>
+                                    <span>👥 <?= $j->kapasitas ?> Orang</span>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     
@@ -104,6 +123,12 @@
 
                     <div class="room-item-desc" title="<?= htmlspecialchars($ketStr) ?>">
                         <span class="room-desc-text" data-text="<?= htmlspecialchars($ketStr) ?>"><?= htmlspecialchars($ketStr) ?></span>
+                        
+                        <!-- Floating Keterangan Detail Tooltip on Hover -->
+                        <div class="desc-hover-tooltip">
+                            <span class="dht-badge">📝 Keterangan / Keperluan</span>
+                            <div class="dht-content"><?= htmlspecialchars($ketStr) ?></div>
+                        </div>
                     </div>
 
                     <div class="room-item-action">
