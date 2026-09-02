@@ -578,9 +578,7 @@
                     elseif ($key === 'incubator') $default_img = base_url('assets/images/incubator.jpg');
                     elseif ($key === 'mac') $default_img = base_url('assets/images/mac.jpg');
 
-                    $detail_url = in_array($key, $featured_keys) 
-                        ? site_url('dashboard/lab_detail/' . $key) 
-                        : site_url('dashboard/kalender?ruangan=' . $r->id);
+                    $detail_url = site_url('dashboard/lab_detail/' . $key);
 
                     $dyn_lab_data[$key] = [
                         'key'     => $key,

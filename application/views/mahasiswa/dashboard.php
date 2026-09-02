@@ -243,13 +243,10 @@
                         }
                     }
                 }
-                if (in_array('ksm', $raw_k)) $rev_step = 3;
-                else if (in_array('transkrip', $raw_k)) $rev_step = 4;
-                else if (in_array('pernyataan', $raw_k)) $rev_step = 5;
-                else if (in_array('bebas_lab', $raw_k)) $rev_step = 6;
+                if (!empty($raw_k)) $rev_step = 3;
                 else $rev_step = 3;
             } else if ($w_is_rej || $k_is_rej || $kk_is_rej) {
-                $rev_step = 2; // Step 2 (Judul Usulan)
+                $rev_step = 2; // Step 2 (Usulan Judul)
             }
         ?>
         <?php if($has_rejection): ?>
@@ -264,7 +261,7 @@
                                 Pengajuan TA Anda Perlu Revisi / Ditolak
                             </h3>
                             <a href="<?= site_url('mahasiswa/pendaftaran_ta?step=' . $rev_step); ?>" class="px-3.5 py-1.5 bg-white hover:bg-rose-50 text-rose-800 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
-                                <i class="bi bi-pencil-square"></i> Edit &amp; Perbarui Berkas (Form 6-Step)
+                                <i class="bi bi-pencil-square"></i> Edit &amp; Perbarui Berkas
                             </a>
                         </div>
                         <p class="text-xs text-rose-100 mb-4 font-normal">
@@ -447,9 +444,9 @@
                                 <?= $w_status; ?>
                             </span>
 
-                            <?php if(!empty($pendaftaran['catatan_wali'])): ?>
-                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $w_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
-                                    <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan:</span>
+                            <?php if($w_is_rej && !empty($pendaftaran['catatan_wali'])): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] bg-rose-50 border border-rose-200 text-rose-900">
+                                    <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan Revisi:</span>
                                     <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_wali']); ?>"</p>
                                 </div>
                             <?php endif; ?>
@@ -478,8 +475,8 @@
                                 <?= $a_status; ?>
                             </span>
 
-                            <?php if(!empty($raw_kurang) || !empty($laa_note)): ?>
-                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $a_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                            <?php if($a_is_rej && (!empty($raw_kurang) || !empty($laa_note))): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] bg-rose-50 border border-rose-200 text-rose-900">
                                     <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan LAA:</span>
                                     <?php if(!empty($laa_note)): ?>
                                         <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($laa_note); ?>"</p>
@@ -512,8 +509,8 @@
                                 <?= $k_status; ?>
                             </span>
 
-                            <?php if(!empty($pendaftaran['catatan_koor'])): ?>
-                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $k_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                            <?php if($k_is_rej && !empty($pendaftaran['catatan_koor'])): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] bg-rose-50 border border-rose-200 text-rose-900">
                                     <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan Koor:</span>
                                     <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_koor']); ?>"</p>
                                 </div>
@@ -542,8 +539,8 @@
                                 <?= $kk_status; ?>
                             </span>
 
-                            <?php if(!empty($pendaftaran['catatan_kk'])): ?>
-                                <div class="mt-2.5 p-2 rounded-lg text-[10px] <?= $kk_is_app ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'; ?>">
+                            <?php if($kk_is_rej && !empty($pendaftaran['catatan_kk'])): ?>
+                                <div class="mt-2.5 p-2 rounded-lg text-[10px] bg-rose-50 border border-rose-200 text-rose-900">
                                     <span class="font-bold block mb-0.5"><i class="bi bi-chat-text"></i> Catatan KK:</span>
                                     <p class="line-clamp-3 leading-snug">"<?= htmlspecialchars($pendaftaran['catatan_kk']); ?>"</p>
                                 </div>
@@ -663,29 +660,37 @@
                                     $s_trn = $pendaftaran['status_file_transkrip'] ?? 'Pending';
                                     $s_prn = $pendaftaran['status_file_pernyataan'] ?? 'Pending';
                                     $s_lab = $pendaftaran['status_file_bebas_lab'] ?? 'Pending';
+                                    $s_jud = $pendaftaran['status_judul'] ?? 'Pending';
+                                    $s_jen = $pendaftaran['status_jenis_ta'] ?? 'Pending';
 
-                                    $app_files = 0;
-                                    if ($s_ksm === 'Approved') $app_files++;
-                                    if ($s_trn === 'Approved') $app_files++;
-                                    if ($s_prn === 'Approved') $app_files++;
-                                    if ($s_lab === 'Approved') $app_files++;
+                                    $app_items = 0;
+                                    if ($s_ksm === 'Approved') $app_items++;
+                                    if ($s_trn === 'Approved') $app_items++;
+                                    if ($s_prn === 'Approved') $app_items++;
+                                    if ($s_lab === 'Approved') $app_items++;
+                                    if ($s_jud === 'Approved') $app_items++;
+                                    if ($s_jen === 'Approved') $app_items++;
 
-                                    $rej_files = 0;
-                                    if ($s_ksm === 'Rejected') $rej_files++;
-                                    if ($s_trn === 'Rejected') $rej_files++;
-                                    if ($s_prn === 'Rejected') $rej_files++;
-                                    if ($s_lab === 'Rejected') $rej_files++;
+                                    $rej_items = 0;
+                                    if ($s_ksm === 'Rejected') $rej_items++;
+                                    if ($s_trn === 'Rejected') $rej_items++;
+                                    if ($s_prn === 'Rejected') $rej_items++;
+                                    if ($s_lab === 'Rejected') $rej_items++;
+                                    if ($s_jud === 'Rejected') $rej_items++;
+                                    if ($s_jen === 'Rejected') $rej_items++;
 
-                                    $pen_files = 4 - $app_files - $rej_files;
+                                    $total_eval_items = 5 + ($s_jen !== 'Pending' ? 1 : 0);
+                                    $pen_items = max(0, $total_eval_items - $app_items - $rej_items);
 
-                                    if ($app_files === 4) {
+                                    $overall_status = $pendaftaran['status_approval_wali'] ?? 'Pending';
+                                    if ($overall_status === 'Approved') {
                                         $overall_badge_text = 'Disetujui';
                                         $overall_badge_cls = 'bg-emerald-100 text-emerald-800 border-emerald-300';
                                         $overall_dot_cls = 'bg-emerald-500';
-                                    } elseif ($rej_files === 4) {
-                                        $overall_badge_text = 'Ditolak';
+                                    } elseif ($overall_status === 'Rejected' || $rej_items > 0) {
+                                        $overall_badge_text = 'Perlu Revisi';
                                         $overall_badge_cls = 'bg-rose-100 text-rose-800 border-rose-300';
-                                        $overall_dot_cls = 'bg-rose-500';
+                                        $overall_dot_cls = 'bg-rose-500 animate-pulse';
                                     } else {
                                         $overall_badge_text = 'Pending';
                                         $overall_badge_cls = 'bg-amber-100 text-amber-800 border-amber-300';
@@ -702,29 +707,26 @@
 
                                 <!-- Kolom Rincian Review Berkas (Di Kanan Status) -->
                                 <td class="py-5 px-6 text-center whitespace-nowrap align-middle">
-                                    <button type="button" onclick="openFileBreakdownModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold <?= ($rej_files > 0) ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'; ?> transition shadow-2xs cursor-pointer group" title="Klik untuk melihat rincian status 4 berkas & catatan dosen">
-                                        <?php if($rej_files > 0): ?>
+                                    <button type="button" onclick="openFileBreakdownModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold <?= ($rej_items > 0) ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'; ?> transition shadow-2xs cursor-pointer group" title="Klik untuk melihat rincian status berkas & catatan dosen">
+                                        <?php if($rej_items > 0): ?>
                                             <i class="bi bi-exclamation-triangle-fill text-rose-500"></i>
-                                            <span><?= $app_files; ?> Approve, <?= $rej_files; ?> Reject</span>
-                                        <?php elseif($app_files === 4): ?>
+                                            <span><?= $rej_items; ?> Revisi</span>
+                                        <?php elseif($app_items >= 4): ?>
                                             <i class="bi bi-check-all text-emerald-600 font-bold text-sm"></i>
-                                            <span class="text-emerald-800">4 File Approve</span>
+                                            <span class="text-emerald-800">Semua Valid</span>
                                         <?php else: ?>
                                             <i class="bi bi-clock text-slate-500"></i>
-                                            <span><?= $app_files > 0 ? $app_files . ' Approve, ' : ''; ?><?= $pen_files; ?> Menunggu</span>
+                                            <span><?= $app_items > 0 ? $app_items . ' Valid, ' : ''; ?><?= $pen_items; ?> Menunggu</span>
                                         <?php endif; ?>
                                         <i class="bi bi-chevron-right text-[9px] opacity-60 group-hover:translate-x-0.5 transition-transform"></i>
                                     </button>
                                 </td>
 
-                                <!-- Kolom Aksi (Ditumpuk Vertikal) -->
+                                <!-- Kolom Aksi (Ditumpuk Vertikal - Tombol Edit Dihapus) -->
                                 <td class="py-5 px-6 text-right whitespace-nowrap align-middle">
                                     <div class="inline-flex flex-col items-end gap-1.5">
                                         <a href="<?= site_url('mahasiswa/detail_pendaftaran'); ?>" class="w-24 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-100 hover:bg-sky-200 text-sky-700 text-xs font-bold transition shadow-2xs hover:scale-105 active:scale-95" title="Lihat Detail Lengkap Pengajuan Tugas Akhir">
                                             <i class="bi bi-eye-fill text-xs"></i> Detail
-                                        </a>
-                                        <a href="<?= site_url('mahasiswa/edit_pendaftaran'); ?>" class="w-24 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition shadow-2xs hover:scale-105 active:scale-95" title="Edit Formulir Pendaftaran (1 Halaman)">
-                                            <i class="bi bi-pencil-square text-xs"></i> Edit
                                         </a>
                                         <button type="button" onclick="openResetModal()" class="w-24 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold transition cursor-pointer shadow-2xs hover:scale-105 active:scale-95" title="Reset / Batalkan Pengajuan">
                                             <i class="bi bi-arrow-counterclockwise text-xs"></i> Reset
@@ -775,6 +777,7 @@
             $files_list = [
                 [
                     'key'      => 'ksm',
+                    'field'    => 'file_ksm',
                     'title'    => 'Kartu Studi Mahasiswa (KSM)',
                     'filename' => $pendaftaran['file_ksm'] ?? '',
                     'status'   => $pendaftaran['status_file_ksm'] ?? 'Pending',
@@ -782,6 +785,7 @@
                 ],
                 [
                     'key'      => 'transkrip',
+                    'field'    => 'file_transkrip',
                     'title'    => 'Transkrip Nilai Akademik',
                     'filename' => $pendaftaran['file_transkrip'] ?? '',
                     'status'   => $pendaftaran['status_file_transkrip'] ?? 'Pending',
@@ -789,6 +793,7 @@
                 ],
                 [
                     'key'      => 'pernyataan',
+                    'field'    => 'file_pernyataan',
                     'title'    => 'Surat Pernyataan Keaslian',
                     'filename' => $pendaftaran['file_pernyataan'] ?? '',
                     'status'   => $pendaftaran['status_file_pernyataan'] ?? 'Pending',
@@ -796,6 +801,7 @@
                 ],
                 [
                     'key'      => 'bebas_lab',
+                    'field'    => 'file_bebas_lab',
                     'title'    => 'Surat Bebas Laboratorium',
                     'filename' => $pendaftaran['file_bebas_lab'] ?? '',
                     'status'   => $pendaftaran['status_file_bebas_lab'] ?? 'Pending',
@@ -804,113 +810,235 @@
             ];
         ?>
 
-        <div id="modalFileBreakdown" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-orange-100 space-y-5 my-8">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-lg box-3d">
-                            <i class="bi bi-folder-check"></i>
+        <div id="modalFileBreakdown" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 md:p-8 overflow-hidden">
+            <div class="bg-white rounded-3xl max-w-3xl lg:max-w-4xl w-full shadow-2xl border border-orange-100 max-h-[88vh] flex flex-col overflow-hidden my-auto mx-auto">
+                <form action="<?= site_url('mahasiswa/upload_revisi_berkas'); ?>" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 min-h-0">
+                    <!-- Header Modal (Fixed) -->
+                    <div class="p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl <?= ($rej_items > 0) ? 'bg-rose-100 text-rose-600' : 'bg-orange-100 text-orange-600'; ?> flex items-center justify-center font-bold text-lg box-3d">
+                                <i class="bi <?= ($rej_items > 0) ? 'bi-exclamation-octagon-fill' : 'bi-folder-check'; ?>"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900">
+                                    <?= ($rej_items > 0) ? 'Perbaikan Tugas Akhir (' . $rej_items . ' Bagian Perlu Revisi)' : 'Rincian Verifikasi Berkas & Usulan Judul'; ?>
+                                </h3>
+                                <p class="text-xs text-slate-500 font-medium">
+                                    <?= ($rej_items > 0) ? 'Silakan perbaiki usulan judul atau unggah dokumen perbaikan yang ditolak oleh Dosen Wali di bawah ini.' : 'Status persetujuan &amp; catatan perbaikan dari Dosen Wali.'; ?>
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-base font-extrabold text-slate-900">Rincian Verifikasi 4 Berkas</h3>
-                            <p class="text-xs text-slate-500 font-medium">Status persetujuan &amp; catatan perbaikan dari Dosen Wali.</p>
-                        </div>
+                        <button type="button" onclick="closeFileBreakdownModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
-                    <button type="button" onclick="closeFileBreakdownModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
 
-                <!-- Summary Chips -->
-                <div class="flex flex-wrap items-center gap-2 text-xs">
-                    <span class="px-3 py-1 bg-emerald-50 text-emerald-800 font-bold rounded-lg border border-emerald-200 flex items-center gap-1.5">
-                        <i class="bi bi-check-circle-fill text-emerald-600"></i> <?= $app_files; ?> Disetujui
-                    </span>
-                    <span class="px-3 py-1 <?= ($rej_files > 0) ? 'bg-rose-50 text-rose-800 border-rose-200 font-bold' : 'bg-slate-50 text-slate-500 border-slate-200'; ?> rounded-lg border flex items-center gap-1.5">
-                        <i class="bi <?= ($rej_files > 0) ? 'bi-x-circle-fill text-rose-600' : 'bi-dash-circle text-slate-400'; ?>"></i> <?= $rej_files; ?> Ditolak / Revisi
-                    </span>
-                    <span class="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg border border-slate-200 flex items-center gap-1.5">
-                        <i class="bi bi-clock-history text-slate-500"></i> <?= $pen_files; ?> Menunggu Review
-                    </span>
-                </div>
-
-                <!-- Usulan Judul Review Card (Jika ada keputusan atau saran dari Dosen) -->
-                <?php
-                    $st_j = $pendaftaran['status_judul'] ?? 'Pending';
-                    $note_j = $pendaftaran['catatan_judul'] ?? '';
-                ?>
-                <?php if($st_j !== 'Pending' || !empty($note_j)): ?>
-                    <div class="p-4 rounded-2xl border <?= ($st_j === 'Approved') ? 'border-emerald-300 bg-emerald-50/40' : 'border-rose-300 bg-rose-50/50'; ?> space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold uppercase tracking-wider <?= ($st_j === 'Approved') ? 'text-emerald-800' : 'text-rose-800'; ?> flex items-center gap-1.5">
-                                <i class="bi <?= ($st_j === 'Approved') ? 'bi-journal-check' : 'bi-journal-x'; ?>"></i> Status Usulan Judul TA:
+                    <!-- Scrollable Modal Body -->
+                    <div class="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                        <!-- Summary Chips -->
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <span class="px-3 py-1 bg-emerald-50 text-emerald-800 font-bold rounded-lg border border-emerald-200 flex items-center gap-1.5">
+                                <i class="bi bi-check-circle-fill text-emerald-600"></i> <?= $app_items; ?> Disetujui
                             </span>
-                            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full <?= ($st_j === 'Approved') ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'; ?>">
-                                <?= ($st_j === 'Approved') ? 'Disetujui' : 'Ditolak / Revisi'; ?>
+                            <span class="px-3 py-1 <?= ($rej_items > 0) ? 'bg-rose-50 text-rose-800 border-rose-200 font-bold' : 'bg-slate-50 text-slate-500 border-slate-200'; ?> rounded-lg border flex items-center gap-1.5">
+                                <i class="bi <?= ($rej_items > 0) ? 'bi-x-circle-fill text-rose-600' : 'bi-dash-circle text-slate-400'; ?>"></i> <?= $rej_items; ?> Ditolak / Revisi
+                            </span>
+                            <span class="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg border border-slate-200 flex items-center gap-1.5">
+                                <i class="bi bi-clock-history text-slate-500"></i> <?= $pen_items; ?> Menunggu Review
                             </span>
                         </div>
-                        <p class="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
-                            <?= htmlspecialchars($pendaftaran['judul_1'] ?? '-'); ?>
-                        </p>
-                        <?php if(!empty($note_j)): ?>
-                            <div class="p-2.5 rounded-xl bg-white/90 border border-slate-200 text-xs space-y-0.5">
-                                <span class="font-bold text-[10px] uppercase tracking-wider text-slate-600">Saran / Catatan Dosen Wali:</span>
-                                <p class="italic text-slate-800">"<?= htmlspecialchars($note_j); ?>"</p>
+
+                        <!-- Usulan Judul Review Card (Jika Ditinjau / Perlu Revisi) -->
+                        <?php
+                            $st_j = $pendaftaran['status_judul'] ?? 'Pending';
+                            $note_j = $pendaftaran['catatan_judul'] ?? '';
+                        ?>
+                        <?php if($st_j === 'Rejected'): ?>
+                            <div class="p-5 rounded-2xl border-2 border-rose-400 bg-rose-50/70 shadow-sm space-y-3.5 transition-all">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-lg font-bold shrink-0 box-3d shadow-xs">
+                                            <i class="bi bi-journal-x"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="font-black text-sm text-rose-950 truncate">
+                                                Usulan Judul Tugas Akhir (Utama)
+                                            </h4>
+                                            <p class="text-[11px] text-slate-500 font-mono truncate mt-0.5">
+                                                Judul Sebelumnya: "<?= htmlspecialchars($pendaftaran['judul_1'] ?? '-'); ?>"
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300 shrink-0">
+                                        <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                                        Perlu Revisi
+                                    </span>
+                                </div>
+
+                                <?php if(!empty($note_j)): ?>
+                                    <div class="p-3.5 rounded-xl bg-white/95 border border-rose-200 text-xs space-y-1.5 shadow-2xs">
+                                        <div class="flex items-center gap-1.5 font-black text-[11px] text-rose-700 uppercase tracking-wider">
+                                            <i class="bi bi-chat-left-dots-fill"></i> Saran / Catatan Dosen Wali:
+                                        </div>
+                                        <p class="text-xs font-medium leading-relaxed italic text-slate-800">
+                                            "<?= htmlspecialchars($note_j); ?>"
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="p-3.5 bg-white rounded-xl border border-dashed border-rose-300 space-y-2">
+                                    <label class="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                        <i class="bi bi-pencil-square text-orange-600 text-sm"></i> Perbarui Usulan Judul TA (Utama):
+                                    </label>
+                                    <input type="text" name="judul_1" value="<?= htmlspecialchars($pendaftaran['judul_1'] ?? ''); ?>" required placeholder="Ketik usulan judul perbaikan..." class="w-full px-3.5 py-2.5 text-xs font-semibold rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-slate-50">
+                                </div>
+                            </div>
+                        <?php elseif($st_j !== 'Pending' && $rej_items === 0): ?>
+                            <div class="p-4 rounded-2xl border <?= ($st_j === 'Approved') ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200 bg-white'; ?> space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                                        <i class="bi bi-journal-check"></i> Status Usulan Judul TA:
+                                    </span>
+                                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        Disetujui
+                                    </span>
+                                </div>
+                                <p class="text-xs sm:text-sm font-extrabold text-slate-900 leading-snug">
+                                    <?= htmlspecialchars($pendaftaran['judul_1'] ?? '-'); ?>
+                                </p>
                             </div>
                         <?php endif; ?>
-                    </div>
-                <?php endif; ?>
 
-                <!-- 4 File Cards -->
-                <div class="space-y-3.5 max-h-[60vh] overflow-y-auto pr-1">
-                    <?php foreach($files_list as $f): ?>
-                        <?php 
-                            $is_app = ($f['status'] === 'Approved');
-                            $is_rej = ($f['status'] === 'Rejected');
-                            $card_bg = $is_app ? 'border-emerald-300 bg-emerald-50/40' : ($is_rej ? 'border-rose-300 bg-rose-50/50 ring-1 ring-rose-200' : 'border-slate-200 bg-white');
-                            $badge_cls = $is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($is_rej ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-slate-100 text-slate-700 border-slate-200');
-                        ?>
-                        <div class="p-4 rounded-2xl border <?= $card_bg; ?> shadow-2xs space-y-2.5 transition-all">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="w-9 h-9 rounded-xl <?= $is_app ? 'bg-emerald-500 text-white' : ($is_rej ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500'); ?> flex items-center justify-center text-base font-bold shrink-0 box-3d">
-                                        <i class="bi <?= $is_app ? 'bi-check-lg' : ($is_rej ? 'bi-x-lg' : 'bi-file-earmark-pdf'); ?>"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h4 class="font-extrabold text-xs sm:text-sm text-slate-900 truncate"><?= $f['title']; ?></h4>
-                                        <p class="text-[11px] text-slate-500 font-mono truncate mt-0.5"><?= !empty($f['filename']) ? htmlspecialchars($f['filename']) : 'Belum diunggah'; ?></p>
-                                    </div>
-                                </div>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border <?= $badge_cls; ?> shrink-0">
-                                    <span class="w-1.5 h-1.5 rounded-full <?= $is_app ? 'bg-emerald-500' : ($is_rej ? 'bg-rose-500' : 'bg-slate-400'); ?>"></span>
-                                    <?= $is_app ? 'Disetujui' : ($is_rej ? 'Ditolak' : 'Menunggu'); ?>
-                                </span>
-                            </div>
+                        <!-- Daftar Berkas -->
+                        <div class="space-y-3.5">
+                            <?php if($rej_items > 0): ?>
+                                <!-- HANYA MENAMPILKAN BERKAS YANG PERLU REVISI (SALAH) -->
+                                <?php foreach($files_list as $f): ?>
+                                    <?php if($f['status'] === 'Rejected'): ?>
+                                        <div class="p-5 rounded-2xl border-2 border-rose-400 bg-rose-50/70 shadow-sm space-y-3.5 transition-all">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="flex items-center gap-3 min-w-0">
+                                                    <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-lg font-bold shrink-0 box-3d shadow-xs">
+                                                        <i class="bi bi-file-earmark-x-fill"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <h4 class="font-black text-sm text-rose-950 truncate">
+                                                            <?= $f['title']; ?>
+                                                        </h4>
+                                                        <p class="text-[11px] text-slate-500 font-mono truncate mt-0.5">
+                                                            File Sebelumnya: <?= !empty($f['filename']) ? htmlspecialchars($f['filename']) : 'Belum diunggah'; ?>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300 shrink-0">
+                                                    <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                                                    Perlu Revisi
+                                                </span>
+                                            </div>
 
-                            <!-- Notes from Lecturer jika ada catatan atau jika ditolak -->
-                            <?php if(!empty($f['note']) || $is_rej): ?>
-                                <div class="p-3 rounded-xl <?= $is_rej ? 'bg-rose-100/70 border border-rose-200 text-rose-900' : 'bg-amber-50 border border-amber-200 text-amber-900'; ?> text-xs space-y-1">
-                                    <div class="flex items-center gap-1.5 font-bold text-[11px] <?= $is_rej ? 'text-rose-700' : 'text-amber-700'; ?> uppercase tracking-wider">
-                                        <i class="bi bi-chat-left-dots-fill"></i> Catatan Dosen Wali:
+                                            <!-- Catatan Perbaikan dari Dosen Wali -->
+                                            <div class="p-3.5 rounded-xl bg-white/95 border border-rose-200 text-xs space-y-1.5 shadow-2xs">
+                                                <div class="flex items-center gap-1.5 font-black text-[11px] text-rose-700 uppercase tracking-wider">
+                                                    <i class="bi bi-chat-left-dots-fill"></i> Catatan Perbaikan Dosen Wali:
+                                                </div>
+                                                <p class="text-xs font-medium leading-relaxed italic text-slate-800">
+                                                    "<?= !empty($f['note']) ? htmlspecialchars($f['note']) : 'Berkas belum sesuai ketentuan, silakan unggah ulang file PDF perbaikan.'; ?>"
+                                                </p>
+                                            </div>
+
+                                            <!-- Form Upload File Pengganti -->
+                                            <div class="p-3.5 bg-white rounded-xl border border-dashed border-rose-300 space-y-2">
+                                                <label class="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                                    <i class="bi bi-cloud-arrow-up-fill text-orange-600 text-sm"></i> Unggah File PDF Pengganti:
+                                                </label>
+                                                <input type="file" name="<?= $f['field']; ?>" accept=".pdf" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-wider file:bg-orange-600 file:text-white hover:file:bg-orange-700 cursor-pointer border border-slate-200 rounded-xl p-1 bg-slate-50">
+                                                <p class="text-[10px] text-slate-400">Format: PDF (Ukuran Maksimal 5MB)</p>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+
+                                <?php if($app_items > 0): ?>
+                                    <!-- Accordion Bagian / Berkas Yang Sudah Valid / Disetujui -->
+                                    <div class="pt-2">
+                                        <button type="button" onclick="document.getElementById('accordionApprovedDocs').classList.toggle('hidden')" class="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 py-1.5 cursor-pointer transition">
+                                            <i class="bi bi-check-circle-fill text-emerald-600"></i> Lihat Bagian Lainnya yang Sudah Valid (<?= $app_items; ?> Bagian) <i class="bi bi-chevron-down text-[10px]"></i>
+                                        </button>
+                                        <div id="accordionApprovedDocs" class="hidden mt-2 space-y-2 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                                            <?php if($st_j === 'Approved'): ?>
+                                                <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 text-xs">
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="bi bi-check-circle-fill text-emerald-600 text-sm"></i>
+                                                        <span class="font-bold text-slate-800">Usulan Judul TA (Utama)</span>
+                                                    </div>
+                                                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-bold">Disetujui</span>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php foreach($files_list as $f): ?>
+                                                <?php if($f['status'] === 'Approved'): ?>
+                                                    <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 text-xs">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="bi bi-check-circle-fill text-emerald-600 text-sm"></i>
+                                                            <span class="font-bold text-slate-800"><?= $f['title']; ?></span>
+                                                        </div>
+                                                        <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-bold">Disetujui</span>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </div>
                                     </div>
-                                    <p class="text-xs font-medium leading-relaxed italic">
-                                        "<?= !empty($f['note']) ? htmlspecialchars($f['note']) : 'Berkas ini belum sesuai ketentuan, silakan perbaiki dan upload ulang.'; ?>"
-                                    </p>
-                                </div>
+                                <?php endif; ?>
+
+                            <?php else: ?>
+                                <!-- TAMPILKAN SEMUA BERKAS JIKA TIDAK ADA REVISI (STATUS PENINJAUAN ATAU SEMUA VALID) -->
+                                <?php foreach($files_list as $f): ?>
+                                    <?php 
+                                        $is_app = ($f['status'] === 'Approved');
+                                        $card_bg = $is_app ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200 bg-white';
+                                        $badge_cls = $is_app ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-700 border-slate-200';
+                                    ?>
+                                    <div class="p-4 rounded-2xl border <?= $card_bg; ?> shadow-2xs space-y-2.5 transition-all">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <div class="w-9 h-9 rounded-xl <?= $is_app ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'; ?> flex items-center justify-center text-base font-bold shrink-0 box-3d">
+                                                    <i class="bi <?= $is_app ? 'bi-check-lg' : 'bi-file-earmark-pdf'; ?>"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <h4 class="font-extrabold text-xs sm:text-sm text-slate-900 truncate"><?= $f['title']; ?></h4>
+                                                    <p class="text-[11px] text-slate-500 font-mono truncate mt-0.5"><?= !empty($f['filename']) ? htmlspecialchars($f['filename']) : 'Belum diunggah'; ?></p>
+                                                </div>
+                                            </div>
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border <?= $badge_cls; ?> shrink-0">
+                                                <span class="w-1.5 h-1.5 rounded-full <?= $is_app ? 'bg-emerald-500' : 'bg-slate-400'; ?>"></span>
+                                                <?= $is_app ? 'Disetujui' : 'Menunggu Review'; ?>
+                                            </span>
+                                        </div>
+
+                                        <?php if(!empty($f['note'])): ?>
+                                            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
+                                                <div class="flex items-center gap-1.5 font-bold text-[11px] text-amber-700 uppercase tracking-wider">
+                                                    <i class="bi bi-chat-left-dots-fill"></i> Catatan Dosen:
+                                                </div>
+                                                <p class="text-xs font-medium leading-relaxed italic">"<?= htmlspecialchars($f['note']); ?>"</p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                    </div>
 
-                <!-- Modal Footer -->
-                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                    <button type="button" onclick="closeFileBreakdownModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition cursor-pointer">
-                        Tutup
-                    </button>
-                    <a href="<?= site_url('mahasiswa/edit_pendaftaran'); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs shadow-md hover:from-orange-700 hover:to-amber-700 transition box-3d">
-                        <i class="bi bi-pencil-square"></i> Perbaiki Berkas di Form Edit
-                    </a>
-                </div>
+                    <!-- Footer Modal (Fixed) -->
+                    <div class="p-4 px-6 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                        <button type="button" onclick="closeFileBreakdownModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition cursor-pointer">
+                            Tutup
+                        </button>
+                        <?php if($rej_items > 0): ?>
+                            <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black uppercase tracking-wider text-xs shadow-md transition box-3d hover:scale-105 active:scale-95 cursor-pointer">
+                                <i class="bi bi-cloud-arrow-up-fill text-sm"></i> Simpan &amp; Kirim Perbaikan (<?= $rej_items; ?> Revisi)
+                            </button>
+                        <?php endif; ?>
+                </form>
             </div>
         </div>
 
@@ -938,24 +1066,23 @@
         </div>
     <?php endif; ?>
 
-    <!-- Footer -->
-    <footer class="bg-white/90 border-t border-orange-100 py-5 text-center text-xs text-slate-400 font-medium">
-        &copy; <?= date('Y'); ?> IFIK Portal — Fakultas Industri Kreatif, Telkom University
-    </footer>
-
     <script src="<?= base_url('assets/js/navbar_animated.js'); ?>?v=<?= time(); ?>"></script>
     <script>
     function openResetModal() {
         document.getElementById('modalResetTA').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
     function closeResetModal() {
         document.getElementById('modalResetTA').classList.add('hidden');
+        document.body.style.overflow = '';
     }
     function openFileBreakdownModal() {
         document.getElementById('modalFileBreakdown').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
     function closeFileBreakdownModal() {
         document.getElementById('modalFileBreakdown').classList.add('hidden');
+        document.body.style.overflow = '';
     }
 
     // AJAX Polling: Cek perubahan status approval pengajuan TA mahasiswa secara real-time

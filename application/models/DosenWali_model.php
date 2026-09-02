@@ -57,6 +57,7 @@ class DosenWali_model extends CI_Model {
         $this->db->select('p.*, COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, p.created_at as tgl_daftar');
         $this->db->from('pendaftaran_ta p');
         $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->where('p.is_submitted', 1);
         if (!empty($nip_dosen)) {
             $this->db->group_start();
             $this->db->where('m.nip_dosen_wali', $nip_dosen);
@@ -234,14 +235,176 @@ class DosenWali_model extends CI_Model {
             'updated_at'           => date('Y-m-d H:i:s')
         );
 
-        // Jika disetujui, lanjut ke status berikutnya (Admin Layanan)
+        // Jika disetujui, lanjut ke status berikutnya (Admin Layanan) dan hapus catatan revisi lama
         if ($status === 'Approved') {
-            $data['current_stage'] = 'Admin Layanan';
+            $data['current_stage']          = 'Admin Layanan';
+            $data['status_file_ksm']        = 'Approved';
+            $data['status_file_transkrip']  = 'Approved';
+            $data['status_file_pernyataan'] = 'Approved';
+            $data['status_file_bebas_lab']  = 'Approved';
+            $data['status_judul']           = 'Approved';
+            $data['status_jenis_ta']        = 'Approved';
+            $data['catatan_wali']           = '';
+            $data['catatan_judul']          = '';
+            $data['catatan_jenis_ta']       = '';
+            $data['catatan_file_ksm']       = '';
+            $data['catatan_file_transkrip'] = '';
+            $data['catatan_file_pernyataan']= '';
+            $data['catatan_file_bebas_lab'] = '';
+            $data['review_file_ksm']        = 1;
+            $data['review_file_transkrip']  = 1;
+            $data['review_file_pernyataan'] = 1;
+            $data['review_file_bebas_lab']  = 1;
         } else if ($status === 'Rejected') {
             $data['current_stage'] = 'Dosen Wali (Revisi)';
         }
 
         $this->db->where('nim', $nim);
         return $this->db->update('pendaftaran_ta', $data);
+    }
+
+    // Ambil detail pendaftaran banyak mahasiswa sekaligus untuk Cek Masal (Batch Modal)
+    public function get_batch_details_by_nims($nims = array()) {
+        if (!$this->db->table_exists('pendaftaran_ta') || empty($nims)) {
+            return array();
+        }
+
+        $has_mhs = $this->db->table_exists('mahasiswa');
+        $has_kk  = $this->db->table_exists('kelompok_keahlian') && $this->db->field_exists('id_kk', 'pendaftaran_ta');
+
+        $select = 'p.*';
+        if ($has_mhs) $select .= ', COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.prodi, m.konsentrasi_dkv as mhs_konsentrasi, m.email, m.no_hp';
+        if ($has_kk)  $select .= ', kk.nama_kk, kk.kode_kk';
+
+        $this->db->select($select);
+        $this->db->from('pendaftaran_ta p');
+        if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        if ($has_kk)  $this->db->join('kelompok_keahlian kk', 'kk.id = p.id_kk', 'left');
+
+        $this->db->where_in('p.nim', $nims);
+        $this->db->where('p.is_submitted', 1);
+        $this->db->order_by('p.id', 'DESC');
+
+        $query = $this->db->get();
+        return $query ? $query->result_array() : array();
+    }
+
+    // Update status approval Jenis TA oleh Dosen Wali
+    public function approve_jenis_ta($nim, $status, $catatan = '') {
+        if (!$this->db->table_exists('pendaftaran_ta')) return false;
+
+        $data = array(
+            'status_jenis_ta'  => $status,
+            'catatan_jenis_ta' => ($status === 'Approved') ? '' : $catatan,
+            'updated_at'       => date('Y-m-d H:i:s')
+        );
+
+        $this->db->where('nim', $nim);
+        return $this->db->update('pendaftaran_ta', $data);
+    }
+
+    // Direct Batch Approve Dosen Wali untuk beberapa NIM sekaligus
+    public function batch_approve_wali($nims = array()) {
+        if (!$this->db->table_exists('pendaftaran_ta') || empty($nims)) {
+            return 0;
+        }
+
+        $data = array(
+            'status_approval_wali'    => 'Approved',
+            'status_jenis_ta'        => 'Approved',
+            'status_judul'           => 'Approved',
+            'status_file_ksm'        => 'Approved',
+            'status_file_transkrip'  => 'Approved',
+            'status_file_pernyataan' => 'Approved',
+            'status_file_bebas_lab'   => 'Approved',
+            'catatan_wali'           => '',
+            'catatan_judul'          => '',
+            'catatan_jenis_ta'       => '',
+            'catatan_file_ksm'       => '',
+            'catatan_file_transkrip' => '',
+            'catatan_file_pernyataan'=> '',
+            'catatan_file_bebas_lab' => '',
+            'review_file_ksm'        => 1,
+            'review_file_transkrip'  => 1,
+            'review_file_pernyataan' => 1,
+            'review_file_bebas_lab'   => 1,
+            'current_stage'          => 'Admin Layanan',
+            'updated_at'             => date('Y-m-d H:i:s')
+        );
+
+        $this->db->where_in('nim', $nims);
+        $this->db->where('is_submitted', 1);
+        $this->db->update('pendaftaran_ta', $data);
+
+        return $this->db->affected_rows();
+    }
+
+    // Simpan keputusan massal detail per section dari popup review
+    public function update_batch_decisions($decisions = array()) {
+        if (!$this->db->table_exists('pendaftaran_ta') || empty($decisions)) {
+            return array('approved' => 0, 'rejected' => 0);
+        }
+
+        $appCount = 0;
+        $rejCount = 0;
+
+        foreach ($decisions as $d) {
+            $nim = $d['nim'] ?? '';
+            if (empty($nim)) continue;
+
+            $action  = $d['action'] ?? 'approve';
+            $catatan = trim($d['catatan_wali'] ?? '');
+
+            $updateData = array(
+                'updated_at' => date('Y-m-d H:i:s')
+            );
+
+            // 1. Section Jenis TA
+            $updateData['status_jenis_ta'] = (isset($d['status_jenis_ta']) && $d['status_jenis_ta'] === 'Rejected') ? 'Rejected' : 'Approved';
+            $updateData['catatan_jenis_ta'] = ($updateData['status_jenis_ta'] === 'Rejected') ? ($d['catatan_jenis_ta'] ?? '') : '';
+
+            // 2. Section Usulan Judul TA
+            $updateData['status_judul'] = (isset($d['status_judul']) && $d['status_judul'] === 'Rejected') ? 'Rejected' : 'Approved';
+            $updateData['catatan_judul'] = ($updateData['status_judul'] === 'Rejected') ? ($d['catatan_judul'] ?? '') : '';
+
+            // 3. Section 4 Berkas Dokumen Persyaratan
+            $file_keys = array('ksm', 'transkrip', 'pernyataan', 'bebas_lab');
+            $hasAnyFileReject = false;
+
+            foreach ($file_keys as $fk) {
+                $fStatus = (isset($d['status_file_' . $fk]) && $d['status_file_' . $fk] === 'Rejected') ? 'Rejected' : 'Approved';
+                $updateData['status_file_' . $fk] = $fStatus;
+                $updateData['catatan_file_' . $fk] = ($fStatus === 'Rejected') ? ($d['catatan_file_' . $fk] ?? '') : '';
+                $updateData['review_file_' . $fk]  = 1;
+
+                if ($fStatus === 'Rejected') {
+                    $hasAnyFileReject = true;
+                }
+            }
+
+            // Tentukan status keseluruhan pendaftaran
+            if ($action === 'reject' || $updateData['status_jenis_ta'] === 'Rejected' || $updateData['status_judul'] === 'Rejected' || $hasAnyFileReject) {
+                $updateData['status_approval_wali'] = 'Rejected';
+                $updateData['current_stage'] = 'Dosen Wali (Revisi)';
+                $updateData['catatan_wali'] = $catatan;
+                $rejCount++;
+            } else {
+                $updateData['status_approval_wali'] = 'Approved';
+                $updateData['current_stage'] = 'Admin Layanan';
+                $updateData['catatan_wali'] = '';
+                $updateData['catatan_judul'] = '';
+                $updateData['catatan_jenis_ta'] = '';
+                $updateData['catatan_file_ksm'] = '';
+                $updateData['catatan_file_transkrip'] = '';
+                $updateData['catatan_file_pernyataan'] = '';
+                $updateData['catatan_file_bebas_lab'] = '';
+                $appCount++;
+            }
+
+            $this->db->where('nim', $nim);
+            $this->db->update('pendaftaran_ta', $updateData);
+        }
+
+        return array('approved' => $appCount, 'rejected' => $rejCount);
     }
 }

@@ -74,57 +74,64 @@
     <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow space-y-6">
         
         <!-- Section Title & Step Counter -->
-        <div class="flex items-end justify-between mb-6">
+        <div class="flex items-end justify-between mb-6 flex-wrap gap-3">
             <div>
                 <span class="text-xs font-bold uppercase tracking-wider text-orange-600 block mb-1">FORMULIR PENDAFTARAN</span>
                 <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Selesaikan data Anda</h2>
             </div>
-            <span class="text-xs font-bold tracking-wider text-orange-700 uppercase bg-orange-100/90 px-4 py-1.5 rounded-full border border-orange-300 badge-3d" id="stepCounterText">LANGKAH 1 / 6</span>
+            <div class="flex items-center gap-2.5">
+                <span id="autoSaveIndicator" class="text-[11px] font-bold text-emerald-700 bg-emerald-100/90 border border-emerald-300 px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs transition-all">
+                    <i class="bi bi-cloud-check-fill text-emerald-600"></i>
+                    <span id="autoSaveText">Tersimpan di Server</span>
+                </span>
+                <span class="text-xs font-bold tracking-wider text-orange-700 uppercase bg-orange-100/90 px-4 py-1.5 rounded-full border border-orange-300 badge-3d" id="stepCounterText">LANGKAH 1 / 6</span>
+            </div>
         </div>
 
-        <!-- Horizontal Stepper Progress Bar -->
+        <!-- Horizontal Stepper Progress Bar (6 Steps) -->
         <div class="card-3d-warm rounded-2xl p-6 sm:p-7 mb-8 relative">
-            <div class="relative px-6 sm:px-12 py-1">
-                <div class="absolute top-[22px] left-12 right-12 h-[3px] bg-orange-200/60 -translate-y-1/2 z-0 rounded-full"></div>
-                <div class="absolute top-[22px] left-12 right-12 h-[3px] -translate-y-1/2 z-0 overflow-hidden pointer-events-none rounded-full">
-                    <div class="h-full bg-gradient-to-r from-orange-600 to-amber-500 transition-all duration-300 rounded-full shadow-xs" id="stepperProgressLine" style="width: 0%;"></div>
-                </div>
+            <div class="relative max-w-3xl mx-auto px-2 sm:px-6">
+                <div class="grid grid-cols-6 relative">
+                    <!-- Background Connector Track Line (Starts at center of Col 1 and ends at center of Col 6) -->
+                    <div class="absolute top-[22px] left-[8.333%] right-[8.333%] h-[3px] bg-orange-200/70 -translate-y-1/2 z-0 rounded-full"></div>
+                    <div class="absolute top-[22px] left-[8.333%] right-[8.333%] h-[3px] -translate-y-1/2 z-0 overflow-hidden pointer-events-none rounded-full">
+                        <div class="h-full bg-gradient-to-r from-orange-600 to-amber-500 transition-all duration-300 rounded-full shadow-xs" id="stepperProgressLine" style="width: 0%;"></div>
+                    </div>
 
-                <div class="relative z-10 flex justify-between items-center">
                     <!-- Step 1 -->
-                    <div class="step-item active flex flex-col items-center" id="step-item-1">
-                        <div class="step-counter w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-bold flex items-center justify-center text-sm box-3d ring-4 ring-orange-200/80 transition-all duration-300 z-10">1</div>
-                        <span class="step-title font-bold text-xs sm:text-sm text-orange-600 mt-2 text-center transition-all duration-300">Jenis TA</span>
+                    <div class="step-item active flex flex-col items-center cursor-pointer z-10" id="step-item-1">
+                        <div class="step-counter w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-bold flex items-center justify-center text-sm box-3d ring-4 ring-orange-200/80 transition-all duration-300">1</div>
+                        <span class="step-title font-bold text-xs sm:text-sm text-orange-600 mt-2 text-center transition-all duration-300 px-1">Jenis TA</span>
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="step-item flex flex-col items-center" id="step-item-2">
-                        <div class="step-counter w-10 h-10 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-xs transition-all duration-300 z-10">2</div>
-                        <span class="step-title font-medium text-xs text-slate-400 mt-2 text-center transition-all duration-300">Judul</span>
+                    <div class="step-item flex flex-col items-center cursor-pointer z-10" id="step-item-2">
+                        <div class="step-counter w-11 h-11 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-sm transition-all duration-300">2</div>
+                        <span class="step-title font-medium text-xs sm:text-sm text-slate-400 mt-2 text-center transition-all duration-300 px-1">Usulan Judul</span>
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="step-item flex flex-col items-center" id="step-item-3">
-                        <div class="step-counter w-10 h-10 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-xs transition-all duration-300 z-10">3</div>
-                        <span class="step-title font-medium text-xs text-slate-400 mt-2 text-center transition-all duration-300">KSM</span>
+                    <div class="step-item flex flex-col items-center cursor-pointer z-10" id="step-item-3">
+                        <div class="step-counter w-11 h-11 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-sm transition-all duration-300">3</div>
+                        <span class="step-title font-medium text-xs sm:text-sm text-slate-400 mt-2 text-center transition-all duration-300 px-1">KSM</span>
                     </div>
 
                     <!-- Step 4 -->
-                    <div class="step-item flex flex-col items-center" id="step-item-4">
-                        <div class="step-counter w-10 h-10 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-xs transition-all duration-300 z-10">4</div>
-                        <span class="step-title font-medium text-xs text-slate-400 mt-2 text-center transition-all duration-300">Transkrip</span>
+                    <div class="step-item flex flex-col items-center cursor-pointer z-10" id="step-item-4">
+                        <div class="step-counter w-11 h-11 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-sm transition-all duration-300">4</div>
+                        <span class="step-title font-medium text-xs sm:text-sm text-slate-400 mt-2 text-center transition-all duration-300 px-1">Transkrip</span>
                     </div>
 
                     <!-- Step 5 -->
-                    <div class="step-item flex flex-col items-center" id="step-item-5">
-                        <div class="step-counter w-10 h-10 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-xs transition-all duration-300 z-10">5</div>
-                        <span class="step-title font-medium text-xs text-slate-400 mt-2 text-center transition-all duration-300">Pernyataan</span>
+                    <div class="step-item flex flex-col items-center cursor-pointer z-10" id="step-item-5">
+                        <div class="step-counter w-11 h-11 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-sm transition-all duration-300">5</div>
+                        <span class="step-title font-medium text-xs sm:text-sm text-slate-400 mt-2 text-center transition-all duration-300 px-1">Pernyataan</span>
                     </div>
 
                     <!-- Step 6 -->
-                    <div class="step-item flex flex-col items-center" id="step-item-6">
-                        <div class="step-counter w-10 h-10 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-xs transition-all duration-300 z-10">6</div>
-                        <span class="step-title font-medium text-xs text-slate-400 mt-2 text-center transition-all duration-300">Bebas Lab</span>
+                    <div class="step-item flex flex-col items-center cursor-pointer z-10" id="step-item-6">
+                        <div class="step-counter w-11 h-11 rounded-full bg-white text-slate-400 font-semibold border border-orange-200 flex items-center justify-center text-sm transition-all duration-300">6</div>
+                        <span class="step-title font-medium text-xs sm:text-sm text-slate-400 mt-2 text-center transition-all duration-300 px-1">Bebas Lab</span>
                     </div>
                 </div>
             </div>
@@ -212,40 +219,46 @@
                                     <input type="hidden" name="file_pernyataan_old" value="<?= htmlspecialchars($pendaftaran['file_pernyataan'] ?? ''); ?>">
                                     <input type="hidden" name="file_bebas_lab_old" value="<?= htmlspecialchars($pendaftaran['file_bebas_lab'] ?? ''); ?>">
 
+                                    <?php 
+                                        $current_jenis = $pendaftaran['jenis_ta'] ?? '';
+                                        $label_text = !empty($current_jenis) ? $current_jenis : '-- Pilih Jenis TA --';
+                                        $label_style = !empty($current_jenis) ? 'text-slate-900 font-semibold' : 'text-slate-400 font-normal';
+                                    ?>
                                     <button type="button" class="dropdown-trigger w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 hover:border-orange-400 focus:ring-4 focus:ring-orange-500/10 outline-none text-slate-800 font-semibold text-xs flex items-center justify-between transition shadow-xs">
-                                        <span class="trigger-label text-slate-400 font-normal">-- Pilih Jenis TA --</span>
+                                        <span class="trigger-label <?= $label_style; ?>"><?= htmlspecialchars($label_text); ?></span>
                                         <i class="bi bi-chevron-down text-orange-500 font-bold text-xs transition-transform duration-200 chevron-icon"></i>
                                     </button>
 
                                     <div class="dropdown-menu hidden absolute left-0 right-0 top-full mt-2 bg-white backdrop-blur-xl border border-orange-200/90 rounded-2xl p-2 shadow-2xl z-[100] space-y-1">
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Proyek Akhir">
-                                            <span>Proyek Akhir</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
+                                        <?php
+                                            $jenis_options = [
+                                                'Proyek Akhir',
+                                                'Tugas Akhir Reguler',
+                                                'Tugas Akhir jalur Magang (MBKM)',
+                                                'Tugas Akhir jalur Prestasi / Lomba'
+                                            ];
+                                            foreach($jenis_options as $opt):
+                                                 $isSelected = ($current_jenis === $opt);
+                                                $optClass = $isSelected ? 'bg-orange-100/80 text-orange-700 font-bold' : 'text-slate-700 hover:bg-orange-50 hover:text-orange-600';
+                                                $checkClass = $isSelected ? '' : 'hidden';
+                                        ?>
+                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold <?= $optClass; ?> transition flex items-center justify-between cursor-pointer" data-value="<?= htmlspecialchars($opt); ?>">
+                                            <span><?= htmlspecialchars($opt); ?></span>
+                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm <?= $checkClass; ?> check-icon"></i>
                                         </div>
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Tugas Akhir Reguler">
-                                            <span>Tugas Akhir Reguler</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
-                                        </div>
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Tugas Akhir jalur Magang (MBKM)">
-                                            <span>Tugas Akhir jalur Magang (MBKM)</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
-                                        </div>
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Tugas Akhir jalur Prestasi / Lomba">
-                                            <span>Tugas Akhir jalur Prestasi / Lomba</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
-                                        </div>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Preview Choice Badge Card -->
-                            <div class="hidden p-4 rounded-xl bg-orange-100/60 border border-orange-200 flex items-center gap-3 transition-all duration-200" id="previewJenisTA">
+                            <div class="<?= empty($current_jenis) ? 'hidden' : ''; ?> p-4 rounded-xl bg-orange-100/60 border border-orange-200 flex items-center gap-3 transition-all duration-200" id="previewJenisTA">
                                 <div class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs font-bold shrink-0 box-3d">
                                     <i class="bi bi-check-lg"></i>
                                 </div>
                                 <div>
                                     <span class="text-[9px] font-bold uppercase tracking-wider text-orange-700 block">JENIS TUGAS AKHIR DIPILIH</span>
-                                    <span class="text-xs font-bold text-slate-900" id="previewTextJenisTA">Proyek Akhir</span>
+                                    <span class="text-xs font-bold text-slate-900" id="previewTextJenisTA"><?= htmlspecialchars($current_jenis ?: 'Proyek Akhir'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -344,7 +357,7 @@
                         </div>
                     </div>
 
-                    <!-- STEP 3 -->
+                    <!-- STEP 3: KSM -->
                     <div id="step-content-3" class="step-content space-y-6 hidden">
                         <!-- Inline Validation Alert Box -->
                         <div class="step-inline-alert hidden p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl flex items-center gap-3">
@@ -358,17 +371,18 @@
                             </div>
                             <div>
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-orange-600 block">TA REGISTRATION</span>
-                                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Unggah KSM</h3>
+                                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Kartu Studi Mahasiswa (KSM)</h3>
                             </div>
                         </div>
 
                         <p class="text-xs text-slate-600 leading-relaxed font-normal">
-                            Unggah berkas Kartu Studi Mahasiswa (KSM) terkini berformat PDF.
+                            Unggah berkas Kartu Studi Mahasiswa (KSM) semester berjalan yang memuat mata kuliah Tugas Akhir (PDF).
                         </p>
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_ksm" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_ksm_old" id="file_ksm_old" value="<?= htmlspecialchars($pendaftaran['file_ksm'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -376,7 +390,7 @@
                                     <i class="bi bi-cloud-arrow-up"></i>
                                 </div>
                                 <h3 class="font-bold text-slate-800 text-xs">Drag & Drop file PDF KSM di sini</h3>
-                                <p class="text-[11px] text-slate-400 mt-1 font-normal">atau klik untuk memilih file dari komputer (Hanya .PDF)</p>
+                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF (Maks 5MB)</p>
                             </div>
 
                             <!-- Selected File Card (Integrated inside box) -->
@@ -406,7 +420,7 @@
                         </div>
                     </div>
 
-                    <!-- STEP 4 -->
+                    <!-- STEP 4: TRANSKRIP -->
                     <div id="step-content-4" class="step-content space-y-6 hidden">
                         <!-- Inline Validation Alert Box -->
                         <div class="step-inline-alert hidden p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl flex items-center gap-3">
@@ -425,20 +439,21 @@
                         </div>
 
                         <p class="text-xs text-slate-600 leading-relaxed font-normal">
-                            Unggah berkas Transkrip Nilai terakhir berformat PDF.
+                            Unggah berkas Transkrip Nilai Akademik kumulatif terbaru yang telah disetujui (PDF).
                         </p>
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_transkrip" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_transkrip_old" id="file_transkrip_old" value="<?= htmlspecialchars($pendaftaran['file_transkrip'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
                                 <div class="w-14 h-14 bg-rose-500/10 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 box-3d group-hover:scale-105 transition-transform">
                                     <i class="bi bi-file-earmark-pdf"></i>
                                 </div>
-                                <h3 class="font-bold text-slate-800 text-xs">Drag & Drop file PDF Transkrip di sini</h3>
-                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF</p>
+                                <h3 class="font-bold text-slate-800 text-xs">Drag & Drop file PDF Transkrip Nilai di sini</h3>
+                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF (Maks 5MB)</p>
                             </div>
 
                             <!-- Selected File Card (Integrated inside box) -->
@@ -468,7 +483,7 @@
                         </div>
                     </div>
 
-                    <!-- STEP 5 -->
+                    <!-- STEP 5: PERNYATAAN -->
                     <div id="step-content-5" class="step-content space-y-6 hidden">
                         <!-- Inline Validation Alert Box -->
                         <div class="step-inline-alert hidden p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl flex items-center gap-3">
@@ -487,12 +502,13 @@
                         </div>
 
                         <p class="text-xs text-slate-600 leading-relaxed font-normal">
-                            Unggah berkas Surat Pernyataan Keaslian & Orisinalitas Judul (PDF).
+                            Unggah berkas Surat Pernyataan Keaslian Karya & Integritas Akademik bermaterai (PDF).
                         </p>
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_pernyataan" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_pernyataan_old" id="file_pernyataan_old" value="<?= htmlspecialchars($pendaftaran['file_pernyataan'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -500,7 +516,7 @@
                                     <i class="bi bi-shield-lock"></i>
                                 </div>
                                 <h3 class="font-bold text-slate-800 text-xs">Drag & Drop file PDF Surat Pernyataan di sini</h3>
-                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF</p>
+                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF (Maks 5MB)</p>
                             </div>
 
                             <!-- Selected File Card (Integrated inside box) -->
@@ -530,7 +546,7 @@
                         </div>
                     </div>
 
-                    <!-- STEP 6 -->
+                    <!-- STEP 6: BEBAS LAB -->
                     <div id="step-content-6" class="step-content space-y-6 hidden">
                         <!-- Inline Validation Alert Box -->
                         <div class="step-inline-alert hidden p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl flex items-center gap-3">
@@ -544,17 +560,18 @@
                             </div>
                             <div>
                                 <span class="text-[10px] font-bold uppercase tracking-wider text-orange-600 block">TA REGISTRATION</span>
-                                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Bebas Lab</h3>
+                                <h3 class="text-xl font-bold text-slate-900 tracking-tight">Surat Bebas Lab</h3>
                             </div>
                         </div>
 
                         <p class="text-xs text-slate-600 leading-relaxed font-normal">
-                            Unggah berkas Surat Bebas Tanggungan Laboratorium (PDF).
+                            Unggah berkas Surat Keterangan Bebas Tanggungan Laboratorium & Perpustakaan (PDF).
                         </p>
 
                         <!-- Drop Zone Container -->
                         <div class="drop-zone border-2 border-dashed border-orange-300 rounded-2xl p-8 text-center bg-orange-50/40 hover:bg-orange-100/50 transition-all duration-300 cursor-pointer group relative">
                             <input type="file" name="file_bebas_lab" class="hidden" accept=".pdf">
+                            <input type="hidden" name="file_bebas_lab_old" id="file_bebas_lab_old" value="<?= htmlspecialchars($pendaftaran['file_bebas_lab'] ?? ''); ?>">
 
                             <!-- Unselected Default Prompt -->
                             <div class="drop-zone-prompt">
@@ -562,7 +579,7 @@
                                     <i class="bi bi-journal-check"></i>
                                 </div>
                                 <h3 class="font-bold text-slate-800 text-xs">Drag & Drop file PDF Surat Bebas Lab di sini</h3>
-                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF</p>
+                                <p class="text-[11px] text-slate-400 mt-1 font-normal">Hanya file berformat PDF (Maks 5MB)</p>
                             </div>
 
                             <!-- Selected File Card (Integrated inside box) -->
@@ -629,8 +646,30 @@
         &copy; <?= date('Y'); ?> IFIK Portal — Fakultas Industri Kreatif, Telkom University
     </footer>
 
+    <?php
+        $server_draft_step = !empty($pendaftaran['draft_step']) ? (int)$pendaftaran['draft_step'] : 1;
+        if ($server_draft_step > 6) $server_draft_step = 6;
+        if ($server_draft_step <= 1) {
+            if (!empty($pendaftaran['file_bebas_lab'])) {
+                $server_draft_step = 6;
+            } elseif (!empty($pendaftaran['file_pernyataan'])) {
+                $server_draft_step = 5;
+            } elseif (!empty($pendaftaran['file_transkrip'])) {
+                $server_draft_step = 4;
+            } elseif (!empty($pendaftaran['file_ksm'])) {
+                $server_draft_step = 3;
+            } elseif (!empty($pendaftaran['judul_1'])) {
+                $server_draft_step = 2;
+            } elseif (!empty($pendaftaran['jenis_ta'])) {
+                $server_draft_step = 2;
+            }
+        }
+    ?>
     <script>
-        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ''); ?>";
+        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ($this->session->userdata('nim') ?: ($this->session->userdata('nidn_nim') ?: ''))); ?>";
+        window.UPLOAD_AJAX_URL = "<?= site_url('mahasiswa/ajax_upload_file_ta'); ?>";
+        window.SAVE_DRAFT_AJAX_URL = "<?= site_url('mahasiswa/ajax_save_draft_ta'); ?>";
+        window.SERVER_DRAFT_STEP = <?= $server_draft_step; ?>;
     </script>
     <script src="<?= base_url('assets/js/navbar_animated.js'); ?>?v=<?= time(); ?>"></script>
     <script src="<?= base_url('assets/js/pendaftaran_ta_stepper.js'); ?>?v=<?= time(); ?>"></script>

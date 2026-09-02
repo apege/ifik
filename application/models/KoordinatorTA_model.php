@@ -86,6 +86,7 @@ class KoordinatorTA_model extends CI_Model {
         $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
         $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
         $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->where('p.is_submitted', 1);
         $this->db->order_by('p.created_at', 'DESC');
         $query = $this->db->get();
 

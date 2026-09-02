@@ -708,11 +708,6 @@
                                 <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
                                     <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </button>
-                                <?php if ($this->session->userdata('role_id') == 1): ?>
-                                    <a href="<?= base_url('kelolaruangan') ?>" class="lab-add-room-btn" title="Kelola Ruangan">
-                                        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                                    </a>
-                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="dot-track-continuous" id="labIndicatorsFull">
@@ -913,7 +908,7 @@
         // Click on dots
         dots.forEach((dot) => {
             dot.addEventListener('click', (e) => {
-                if (e.target.closest('#labAutoPlayBtn') || e.target.closest('.lab-add-room-btn') || e.target.closest('.dot-track-continuous')) return;
+                if (e.target.closest('#labAutoPlayBtn') || e.target.closest('.dot-track-continuous')) return;
 
                 const slideIndex = parseInt(dot.getAttribute('data-index') || '0');
                 goToSlide(slideIndex);

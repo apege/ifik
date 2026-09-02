@@ -28,6 +28,7 @@ class KetuaKK_model extends CI_Model {
 
         $this->db->from('pendaftaran_ta p');
         $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->where('p.is_submitted', 1);
 
         if ($id_kk && $id_kk !== 'all') {
             $this->db->where('p.id_kk', (int)$id_kk);
@@ -67,6 +68,7 @@ class KetuaKK_model extends CI_Model {
 
         $this->db->from('pendaftaran_ta p');
         $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->where('p.is_submitted', 1);
         
         if ($has_kk_table) {
             $this->db->join('kelompok_keahlian kk', 'kk.id = p.id_kk', 'left');
