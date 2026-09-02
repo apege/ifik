@@ -5,9 +5,30 @@
         z-index: 2147483600 !important;
     }
 
-    /* Hide default laptop/OS cursor on ALL elements globally */
-    *, *::before, *::after, html, body, a, button, input, select, textarea, label, [role="button"], tr, td, th {
-        cursor: none !important;
+    /* Hide default laptop/OS cursor on ALL elements globally ONLY on Desktop */
+    @media (min-width: 901px) and (pointer: fine) {
+        *, *::before, *::after, html, body, a, button, input, select, textarea, label, [role="button"], tr, td, th {
+            cursor: none !important;
+        }
+    }
+
+    /* Di Responsif Layar HP: Kembalikan kursor standar & sembunyikan bulatan custom kursor */
+    @media (max-width: 900px), (pointer: coarse) {
+        *, *::before, *::after, html, body, a, button, input, select, textarea, label, [role="button"], tr, td, th {
+            cursor: auto !important;
+        }
+        a, button, [role="button"], [onclick], select, summary {
+            cursor: pointer !important;
+        }
+        input[type="text"], input[type="password"], input[type="email"], textarea {
+            cursor: text !important;
+        }
+        #customCursorCircle {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
     }
 
     #customCursorCircle {
@@ -63,6 +84,12 @@
 <script>
 (function() {
     function setupCursor() {
+        if (window.innerWidth <= 900 || window.matchMedia('(pointer: coarse)').matches) {
+            const el = document.getElementById('customCursorCircle');
+            if (el) el.style.display = 'none';
+            return;
+        }
+
         let circle = document.getElementById('customCursorCircle');
         const rootContainer = document.documentElement || document.body;
 

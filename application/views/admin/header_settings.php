@@ -715,43 +715,63 @@
 
                 <div class="flex flex-col gap-4">
                     <?php if(!empty($slides)): foreach($slides as $slide): ?>
-                    <div class="flex flex-col p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <?php 
+                        $is_fasilitas = (strtolower(trim($slide->label)) === 'fasilitas' || $slide->id == 2);
+                    ?>
+                    <div class="flex flex-col p-4 bg-white border border-gray-200 rounded-xl shadow-xs hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                                <?php 
-                                    $is_multi = false;
-                                    $first_img = '';
-                                    $media_type = $slide->media_type;
-                                    
-                                    if (!empty($slide->media_path) && strpos($slide->media_path, '[') === 0) {
-                                        $decoded = json_decode($slide->media_path, true);
-                                        if (is_array($decoded) && count($decoded) > 0) {
-                                            $is_multi = true;
-                                            $first_img = $decoded[0]['file'] ?? '';
-                                        }
-                                    } else {
-                                        $first_img = $slide->media_path;
-                                    }
-                                ?>
-                                <?php if($media_type == 'video'): ?>
-                                    <div class="w-16 h-12 bg-gray-900 rounded flex items-center justify-center text-white text-xs font-bold overflow-hidden">VIDEO</div>
+                                <?php if($is_fasilitas): ?>
+                                    <img src="<?= base_url('assets/images/multimedia.jpg') ?>" class="w-16 h-12 object-cover rounded border border-gray-100">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800"><?= htmlspecialchars($slide->label) ?></h4>
+                                        <p class="text-xs text-gray-400 uppercase tracking-wide"><?= count($ruangan ?? []) ?> RUANGAN</p>
+                                    </div>
                                 <?php else: ?>
-                                    <img src="<?= base_url('assets/images/' . $first_img) ?>" class="w-16 h-12 object-cover rounded border border-gray-100">
+                                    <?php 
+                                        $is_multi = false;
+                                        $first_img = '';
+                                        $media_type = $slide->media_type;
+                                        
+                                        if (!empty($slide->media_path) && strpos($slide->media_path, '[') === 0) {
+                                            $decoded = json_decode($slide->media_path, true);
+                                            if (is_array($decoded) && count($decoded) > 0) {
+                                                $is_multi = true;
+                                                $first_img = $decoded[0]['file'] ?? '';
+                                            }
+                                        } else {
+                                            $first_img = $slide->media_path;
+                                        }
+                                    ?>
+                                    <?php if($media_type == 'video'): ?>
+                                        <div class="w-16 h-12 bg-gray-900 rounded flex items-center justify-center text-white text-xs font-bold overflow-hidden">VIDEO</div>
+                                    <?php else: ?>
+                                        <img src="<?= base_url('assets/images/' . $first_img) ?>" class="w-16 h-12 object-cover rounded border border-gray-100">
+                                    <?php endif; ?>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800"><?= htmlspecialchars($slide->label) ?></h4>
+                                        <p class="text-xs text-gray-400 uppercase tracking-wide">
+                                            <?= $is_multi ? 'Multi-Image' : $media_type ?>
+                                        </p>
+                                    </div>
                                 <?php endif; ?>
-                                <div>
-                                    <h4 class="font-bold text-gray-800"><?= htmlspecialchars($slide->label) ?></h4>
-                                    <p class="text-xs text-gray-400 uppercase tracking-wide">
-                                        <?= $is_multi ? 'Multi-Image' : $media_type ?>
-                                    </p>
-                                </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="openEditSlideModal(<?= $slide->id ?>, '<?= htmlspecialchars($slide->label, ENT_QUOTES) ?>', <?= $slide->duration ?>)" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-colors" title="Edit Slide">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <a href="<?= base_url('adminheader/delete_slide/'.$slide->id) ?>" onclick="return confirm('Yakin ingin menghapus slide ini?')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors" title="Hapus Slide">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </a>
+                                <?php if($is_fasilitas): ?>
+                                    <button type="button" onclick="switchAdminTab('fasilitas')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-colors" title="Kelola 21 Ruangan & Fasilitas">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <span class="w-8 h-8 rounded-full bg-gray-50 text-gray-300 flex items-center justify-center cursor-not-allowed" title="Slide Utama Sistem">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </span>
+                                <?php else: ?>
+                                    <button type="button" onclick="openEditSlideModal(<?= $slide->id ?>, '<?= htmlspecialchars($slide->label, ENT_QUOTES) ?>', <?= $slide->duration ?>)" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-colors" title="Edit Slide">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <a href="<?= base_url('adminheader/delete_slide/'.$slide->id) ?>" onclick="return confirm('Yakin ingin menghapus slide ini?')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors" title="Hapus Slide">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

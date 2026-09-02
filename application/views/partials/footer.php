@@ -334,7 +334,7 @@
     }
 
     /* Custom Orange Circle Cursor System */
-    @media (pointer: fine) {
+    @media (pointer: fine) and (min-width: 901px) {
         *,
         *::before,
         *::after,
