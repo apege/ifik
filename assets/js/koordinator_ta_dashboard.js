@@ -106,22 +106,7 @@
                     .then(data => {
                         if (data && data.data) {
                             state.p2List = data.data;
-                            if (data.stats) {
-                                const t = document.getElementById('statP2Total');
-                                const tr = document.getElementById('statP2Terjadwal');
-                                const ps = document.getElementById('statP2Penguji');
-                                const bl = document.getElementById('statP2Belum');
-                                if (t) t.textContent = data.stats.total;
-                                if (tr) {
-                                    const pct = data.stats.total > 0 ? Math.round((data.stats.terjadwal / data.stats.total) * 100) : 0;
-                                    tr.innerHTML = `${data.stats.terjadwal} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
-                                }
-                                if (ps) ps.textContent = data.stats.penguji_set;
-                                if (bl) {
-                                    const pct = data.stats.total > 0 ? Math.round((data.stats.belum_set / data.stats.total) * 100) : 0;
-                                    bl.innerHTML = `${data.stats.belum_set} <span class="text-xs font-semibold text-amber-600 font-normal">(${pct}%)</span>`;
-                                }
-                            }
+                            updateP2StatsUI(data.data, data.stats);
                             renderP2Table();
                         }
                     })
@@ -768,13 +753,16 @@
         // Initialize state.quickBatchStudents
         state.quickBatchStudents = [];
         state.selectedStudents.forEach(st => {
+            const currentMhs = state.list.find(x => String(x.nim) === String(st.nim)) || {};
             state.quickBatchStudents.push({
                 nim: st.nim,
-                name: st.name || ('Mahasiswa ' + st.nim),
-                stage: st.stage || 'Koordinator TA',
-                pembimbing_1: '',
-                pembimbing_2: '',
-                catatan_koor: '',
+                name: st.name || `${currentMhs.nama_depan || ''} ${currentMhs.nama_belakang || ''}`.trim() || ('Mahasiswa ' + st.nim),
+                stage: st.stage || currentMhs.current_stage || 'Koordinator TA',
+                old_pembimbing_1: currentMhs.pembimbing_1 || '',
+                old_pembimbing_2: currentMhs.pembimbing_2 || '',
+                pembimbing_1: currentMhs.pembimbing_1 || '',
+                pembimbing_2: currentMhs.pembimbing_2 || '',
+                catatan_koor: currentMhs.catatan_koor || '',
                 isExpanded: true
             });
         });
@@ -946,6 +934,98 @@
         });
 
         listEl.innerHTML = html;
+
+        // Quick Jump Nav Chips (Lompat Cepat)
+        const navContainer = document.getElementById('quickModalStudentTabs');
+        if (navContainer) {
+            let navHtml = '';
+            state.quickBatchStudents.forEach((st, idx) => {
+                const isComplete = (st.pembimbing_1 && st.pembimbing_2);
+                navHtml += `
+                    <button type="button" onclick="jumpToQuickStudent(${idx})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-orange-600 border border-slate-700/80 hover:border-orange-500 text-slate-200 hover:text-white transition-all shadow-xs whitespace-nowrap flex items-center gap-2 shrink-0 active:scale-95 cursor-pointer">
+                        <span class="w-5 h-5 rounded-lg ${isComplete ? 'bg-emerald-600' : 'bg-orange-500'} text-white flex items-center justify-center text-[10px] font-black shadow-xs">${idx + 1}</span>
+                        <span>${escapeHtml((st.name || '').split(' ')[0])}</span>
+                    </button>
+                `;
+            });
+            navContainer.innerHTML = navHtml;
+            initQuickTabsDragAndWheel();
+        }
+    }
+
+    window.jumpToQuickStudent = function (idx) {
+        const card = document.getElementById(`quick_card_${idx}`);
+        if (!card) return;
+
+        if (state.quickBatchStudents[idx] && !state.quickBatchStudents[idx].isExpanded) {
+            state.quickBatchStudents[idx].isExpanded = true;
+            const bodyEl = document.getElementById(`quick_card_body_${idx}`);
+            const arrowEl = document.getElementById(`quick_card_arrow_${idx}`);
+            if (bodyEl) bodyEl.classList.remove('hidden');
+            if (arrowEl) arrowEl.classList.add('rotate-180');
+        }
+
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('ring-2', 'ring-orange-500');
+        setTimeout(() => card.classList.remove('ring-2', 'ring-orange-500'), 1500);
+    };
+
+    window.scrollQuickStudentTabs = function (direction) {
+        const container = document.getElementById('quickModalStudentTabs');
+        if (!container) return;
+        const scrollAmount = 260;
+        if (direction === 'left') {
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        } else {
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    };
+
+    function initQuickTabsDragAndWheel() {
+        const container = document.getElementById('quickModalStudentTabs');
+        if (!container || container.dataset.initEvents) return;
+        container.dataset.initEvents = 'true';
+
+        // Mouse Wheel Horizontal Scroll
+        container.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                container.scrollLeft += e.deltaY * 0.8;
+            }
+        }, { passive: false });
+
+        // Mouse Drag to Scroll
+        let isDown = false;
+        let startX;
+        let scrollLeftPos;
+
+        container.addEventListener('mousedown', (e) => {
+            isDown = true;
+            container.classList.add('cursor-grabbing');
+            container.classList.remove('cursor-grab');
+            startX = e.pageX - container.offsetLeft;
+            scrollLeftPos = container.scrollLeft;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDown = false;
+            container.classList.remove('cursor-grabbing');
+            container.classList.add('cursor-grab');
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDown = false;
+            container.classList.remove('cursor-grabbing');
+            container.classList.add('cursor-grab');
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            container.scrollLeft = scrollLeftPos - walk;
+        });
     }
 
     window.toggleQuickStudentCard = function (stIdx) {
@@ -1108,6 +1188,87 @@
         });
     };
 
+    function buildConfirmationSummaryHtml(students, globalCatatan) {
+        let rowsHtml = '';
+        students.forEach((st, i) => {
+            const p1 = getDosenByNip(st.pembimbing_1);
+            const p2 = getDosenByNip(st.pembimbing_2);
+            const oldP1 = getDosenByNip(st.old_pembimbing_1);
+            const oldP2 = getDosenByNip(st.old_pembimbing_2);
+            const isP1Changed = Boolean(st.old_pembimbing_1 && (st.pembimbing_1 !== st.old_pembimbing_1));
+            const isP2Changed = Boolean(st.old_pembimbing_2 && (st.pembimbing_2 !== st.old_pembimbing_2));
+            const hasOld = Boolean(st.old_pembimbing_1 || st.old_pembimbing_2);
+            const isAnyChanged = isP1Changed || isP2Changed;
+
+            let badgeStatus = '';
+            if (!hasOld) {
+                badgeStatus = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10px]"><i class="fa-solid fa-plus mr-1"></i> Penetapan Baru</span>';
+            } else if (isAnyChanged) {
+                badgeStatus = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold text-[10px]"><i class="fa-solid fa-pen mr-1"></i> Ada Perubahan</span>';
+            } else {
+                badgeStatus = '<span class="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-medium text-[10px]">Tetap / Tidak Berubah</span>';
+            }
+
+            rowsHtml += `
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-left">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-200/70 pb-2">
+                        <div class="font-bold text-slate-900 text-xs flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-md bg-orange-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">${i + 1}</span>
+                            <span class="truncate max-w-[200px] sm:max-w-xs">${escapeHtml(st.name || st.nama)}</span>
+                            <span class="text-[10px] font-mono text-slate-500 font-semibold bg-white px-1.5 py-0.5 rounded border border-slate-200">${st.nim}</span>
+                        </div>
+                        <div class="shrink-0">${badgeStatus}</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        <div class="p-2 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                            <span class="text-slate-500 font-semibold block text-[10px] uppercase tracking-wider">Pembimbing 1 (Utama):</span>
+                            <span class="font-bold text-slate-900 block mt-0.5">${escapeHtml(p1 ? p1.nama_dosen : (st.pembimbing_1 || '-'))}</span>
+                            ${isP1Changed ? `
+                                <span class="block text-[10px] text-rose-600 line-through mt-0.5">Semula: ${escapeHtml(oldP1 ? oldP1.nama_dosen : st.old_pembimbing_1)}</span>
+                            ` : ''}
+                        </div>
+                        <div class="p-2 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                            <span class="text-slate-500 font-semibold block text-[10px] uppercase tracking-wider">Pembimbing 2 (Pendamping):</span>
+                            <span class="font-bold text-slate-900 block mt-0.5">${escapeHtml(p2 ? p2.nama_dosen : (st.pembimbing_2 || '-'))}</span>
+                            ${isP2Changed ? `
+                                <span class="block text-[10px] text-rose-600 line-through mt-0.5">Semula: ${escapeHtml(oldP2 ? oldP2.nama_dosen : st.old_pembimbing_2)}</span>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${st.catatan_koor ? `
+                        <div class="text-[10px] text-slate-600 bg-amber-50/70 p-2 rounded-lg border border-amber-200/60">
+                            <i class="fa-solid fa-note-sticky text-amber-600 mr-1"></i> <strong>Catatan Khusus:</strong> ${escapeHtml(st.catatan_koor)}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+
+        return `
+            <div class="text-left text-xs text-slate-700 space-y-3 max-h-[55vh] overflow-y-auto custom-scrollbar p-1">
+                <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-info text-blue-600 text-sm mt-0.5 shrink-0"></i>
+                    <div>
+                        <strong>Periksa Ringkasan Penetapan Pembimbing:</strong>
+                        <p class="text-[11px] text-blue-800 mt-0.5">Data pembimbing untuk <strong>${students.length} mahasiswa</strong> di bawah ini akan disimpan ke database dan status dilanjutkan ke Ketua KK.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5">
+                    ${rowsHtml}
+                </div>
+
+                ${globalCatatan ? `
+                    <div class="p-3 bg-orange-50 border border-orange-200 rounded-xl text-[11px] text-orange-950">
+                        <i class="fa-solid fa-comment-dots text-orange-600 mr-1"></i> <strong>Catatan Global Koordinator TA:</strong> ${escapeHtml(globalCatatan)}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
     window.submitBatchApproval = function (e) {
         e.preventDefault();
         const students = state.quickBatchStudents;
@@ -1154,14 +1315,17 @@
         const globalCatatan = (document.getElementById('modalGlobalCatatanKoor')?.value || '').trim();
 
         Swal.fire({
-            title: `Simpan & Setujui ${students.length} Mahasiswa?`,
-            text: `Dosen pembimbing untuk ${students.length} mahasiswa akan disimpan dan pendaftaran dilanjutkan ke Ketua KK.`,
-            icon: 'question',
+            title: 'Ringkasan Konfirmasi Penetapan Pembimbing',
+            html: buildConfirmationSummaryHtml(students, globalCatatan),
+            width: '680px',
             showCancelButton: true,
             confirmButtonColor: '#059669',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'Ya, Simpan & Setujui Semua',
-            cancelButtonText: 'Batal'
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fa-solid fa-check mr-1.5"></i> Ya, Simpan ke Database',
+            cancelButtonText: 'Periksa Kembali',
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200'
+            }
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
@@ -1212,16 +1376,24 @@
                                             const totalEl = document.getElementById('statTotalCount');
                                             const pendEl = document.getElementById('statPendingCount');
                                             const appEl = document.getElementById('statApprovedCount');
+                                            const kkEl = document.getElementById('statKkCount');
                                             const rejEl = document.getElementById('statRejectedCount');
+
+                                            const siapCount = res.stats.siap_diplot ?? res.stats.pending ?? 0;
+                                            const kkCount = res.stats.kk_approved ?? 0;
 
                                             if (totalEl) totalEl.textContent = res.stats.total;
                                             if (pendEl) {
-                                                const pct = res.stats.total > 0 ? Math.round((res.stats.pending / res.stats.total) * 100) : 0;
-                                                pendEl.innerHTML = `${res.stats.pending} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
+                                                const pct = res.stats.total > 0 ? Math.round((siapCount / res.stats.total) * 100) : 0;
+                                                pendEl.innerHTML = `${siapCount} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
                                             }
                                             if (appEl) {
                                                 const pct = res.stats.total > 0 ? Math.round((res.stats.approved / res.stats.total) * 100) : 0;
                                                 appEl.innerHTML = `${res.stats.approved} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
+                                            }
+                                            if (kkEl) {
+                                                const pct = res.stats.total > 0 ? Math.round((kkCount / res.stats.total) * 100) : 0;
+                                                kkEl.innerHTML = `${kkCount} <span class="text-xs font-semibold text-indigo-600 font-normal">(${pct}%)</span>`;
                                             }
                                             if (rejEl) rejEl.textContent = res.stats.rejected;
                                         }
@@ -1834,14 +2006,17 @@
         }
 
         Swal.fire({
-            title: `Simpan & Setujui ${students.length} Mahasiswa?`,
-            text: `Dosen pembimbing untuk ${students.length} mahasiswa akan disimpan dan status pendaftaran akan dilanjutkan ke Ketua KK.`,
-            icon: 'question',
+            title: 'Ringkasan Konfirmasi Penetapan Pembimbing',
+            html: buildConfirmationSummaryHtml(students, ''),
+            width: '680px',
             showCancelButton: true,
             confirmButtonColor: '#059669',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'Ya, Simpan & Setujui',
-            cancelButtonText: 'Batal'
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fa-solid fa-check mr-1.5"></i> Ya, Simpan ke Database',
+            cancelButtonText: 'Periksa Kembali',
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200'
+            }
         }).then(res => {
             if (res.isConfirmed) {
                 const btn = document.getElementById('btnSubmitP1BatchReview');
@@ -1889,15 +2064,24 @@
                                             const totalEl = document.getElementById('statTotalCount');
                                             const pendEl = document.getElementById('statPendingCount');
                                             const appEl = document.getElementById('statApprovedCount');
+                                            const kkEl = document.getElementById('statKkCount');
                                             const rejEl = document.getElementById('statRejectedCount');
+
+                                            const siapCount = res.stats.siap_diplot ?? res.stats.pending ?? 0;
+                                            const kkCount = res.stats.kk_approved ?? 0;
+
                                             if (totalEl) totalEl.textContent = res.stats.total;
                                             if (pendEl) {
-                                                const pct = res.stats.total > 0 ? Math.round((res.stats.pending / res.stats.total) * 100) : 0;
-                                                pendEl.innerHTML = `${res.stats.pending} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
+                                                const pct = res.stats.total > 0 ? Math.round((siapCount / res.stats.total) * 100) : 0;
+                                                pendEl.innerHTML = `${siapCount} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
                                             }
                                             if (appEl) {
                                                 const pct = res.stats.total > 0 ? Math.round((res.stats.approved / res.stats.total) * 100) : 0;
                                                 appEl.innerHTML = `${res.stats.approved} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
+                                            }
+                                            if (kkEl) {
+                                                const pct = res.stats.total > 0 ? Math.round((kkCount / res.stats.total) * 100) : 0;
+                                                kkEl.innerHTML = `${kkCount} <span class="text-xs font-semibold text-indigo-600 font-normal">(${pct}%)</span>`;
                                             }
                                             if (rejEl) rejEl.textContent = res.stats.rejected;
                                         }
@@ -1998,17 +2182,16 @@
             const isWaliApproved = (stWali.toLowerCase() === 'approved');
             const isAdminApproved = (stAdmin.toLowerCase() === 'approved');
             const isKoorPending = (stKoor.toLowerCase() === 'pending');
+            const isKoorApproved = (stKoor.toLowerCase() === 'approved');
 
-            // Koordinator TA hanya bisa memilih/menyetujui mahasiswa yang:
-            // 1. Status Koordinator masih Pending
-            // 2. Dosen Wali sudah Approved
-            // 3. Admin Layanan sudah Approved
-            const isEligibleForKoor = isKoorPending && isWaliApproved && isAdminApproved;
+            // Koordinator TA dapat memilih & mengedit mahasiswa yang:
+            // 1. Dosen Wali sudah Approved
+            // 2. Admin Layanan sudah Approved
+            // 3. Status Koordinator: Pending atau sudah Disetujui (Approved) untuk dapat diedit ulang
+            const isEligibleForKoor = (isKoorPending || isKoorApproved) && isWaliApproved && isAdminApproved;
 
             let disabledTitle = '';
-            if (stKoor === 'Approved') {
-                disabledTitle = `Tidak dapat dipilih: Sudah disetujui Koordinator TA (Tahap saat ini: ${stage})`;
-            } else if (stKoor === 'Rejected') {
+            if (stKoor === 'Rejected') {
                 disabledTitle = `Tidak dapat dipilih: Status pendaftaran Ditolak / Perlu Revisi`;
             } else if (!isWaliApproved) {
                 disabledTitle = `Belum dapat diproses Koordinator: Menunggu persetujuan Dosen Wali`;
@@ -2078,7 +2261,27 @@
                     </td>
                     <td class="py-4 px-4 font-bold text-slate-900">${mhs.nim}</td>
                     <td class="py-4 px-4 font-semibold text-slate-800">${escapeHtml(fullName)}</td>
-                    <td class="py-4 px-4 text-slate-600 max-w-xs truncate font-normal" title="${escapeHtml(judul)}">${escapeHtml(judul)}</td>
+                    <td class="py-4 px-4 text-slate-600 max-w-xs font-normal">
+                        <div class="inline-flex items-center gap-1.5 cursor-pointer group/title max-w-full"
+                            data-tooltip-type="pendaftaran"
+                            data-nim="${escapeHtml(mhs.nim)}"
+                            data-name="${escapeHtml(fullName)}"
+                            data-judul1="${escapeHtml(judul)}"
+                            data-judul2="${escapeHtml(mhs.judul_2 || '')}"
+                            data-bidang="${escapeHtml(mhs.konsentrasi_dkv || mhs.prodi_mhs || '')}"
+                            data-wali="${escapeHtml(mhs.nama_wali || '')}"
+                            data-pemb1="${escapeHtml(mhs.nama_pembimbing_1 || mhs.pembimbing_1 || '')}"
+                            data-pemb2="${escapeHtml(mhs.nama_pembimbing_2 || mhs.pembimbing_2 || '')}"
+                            data-stage="${escapeHtml(stage)}"
+                            data-status="${escapeHtml(stKoor)}"
+                            onmouseenter="handleJudulTooltipEnter(this, event)"
+                            onmouseleave="handleJudulTooltipLeave(this)">
+                            <span class="truncate block text-slate-700 font-medium group-hover/title:text-orange-600 transition-colors">
+                                ${escapeHtml(judul)}
+                            </span>
+                            <i class="fa-solid fa-circle-info text-[11px] text-slate-400 group-hover/title:text-orange-500 shrink-0 opacity-0 group-hover/title:opacity-100 transition-opacity"></i>
+                        </div>
+                    </td>
                     <td class="py-4 px-4 text-center">
                         ${statusBadgeHtml}
                     </td>
@@ -2086,34 +2289,39 @@
                         ${stageBadgeHtml}
                     </td>
                     <td class="py-4 px-4 pr-6 text-right">
-                        <a href="${cfg.detailUrlPrefix}${mhs.nim}" class="btn-3d-kinetic" title="Detail & Approval Mahasiswa">
-                            <div class="bg"></div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
-                                <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
-                                <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
-                                <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
-                                <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
-                                <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
-                                <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
-                            </svg>
-                            <div class="wrap">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
-                                    <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
+                        <div class="flex items-center justify-end gap-1.5 ml-auto">
+                            <button type="button" onclick="openHistoryPlottingModal('Pembimbing', '${mhs.nim}')" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-50 hover:text-orange-600 text-slate-500 border border-slate-200/80 flex items-center justify-center text-xs transition cursor-pointer shrink-0 shadow-2xs" title="Lihat Riwayat Histori Pembimbing Mahasiswa Ini">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </button>
+                            <a href="${cfg.detailUrlPrefix}${mhs.nim}" class="btn-3d-kinetic" title="Detail & Approval Mahasiswa">
+                                <div class="bg"></div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
+                                    <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
                                 </svg>
-                                <div class="outline"></div>
-                                <div class="content">
-                                    <span class="char state-1">${renderAnimatedChars('Detail & Approval')}</span>
-                                    <span class="char state-2">${renderAnimatedChars('Periksa Berkas')}</span>
-                                    <i class="fa-solid fa-arrow-right icon-action"></i>
+                                <div class="wrap">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
+                                        <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
+                                    </svg>
+                                    <div class="outline"></div>
+                                    <div class="content">
+                                        <span class="char state-1">${renderAnimatedChars('Detail & Approval')}</span>
+                                        <span class="char state-2">${renderAnimatedChars('Periksa Berkas')}</span>
+                                        <i class="fa-solid fa-arrow-right icon-action"></i>
+                                    </div>
                                 </div>
-                            </div>
-                        </a>
+                            </a>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -2699,7 +2907,23 @@
                         <span class="truncate block max-w-[130px]" title="${escapeHtml(fullName)}">${escapeHtml(fullName)}</span>
                     </td>
                     <td class="py-3 px-2 text-slate-600 font-normal">
-                        <p class="line-clamp-2 max-w-[200px] text-[11px] leading-snug" title="${escapeHtml(judul)}">${escapeHtml(judul)}</p>
+                        <div class="inline-flex items-center gap-1.5 cursor-pointer group/title max-w-[200px]"
+                            data-tooltip-type="preview2"
+                            data-nim="${escapeHtml(mhs.nim)}"
+                            data-name="${escapeHtml(fullName)}"
+                            data-judul1="${escapeHtml(judul)}"
+                            data-pemb1="${escapeHtml(pemb1)}"
+                            data-pemb2="${escapeHtml(pemb2)}"
+                            data-peng1="${escapeHtml(peng1)}"
+                            data-peng2="${escapeHtml(peng2)}"
+                            data-status="${escapeHtml(statusP2)}"
+                            onmouseenter="handleJudulTooltipEnter(this, event)"
+                            onmouseleave="handleJudulTooltipLeave(this)">
+                            <p class="line-clamp-2 text-[11px] leading-snug text-slate-700 font-medium group-hover/title:text-indigo-600 transition-colors">
+                                ${escapeHtml(judul)}
+                            </p>
+                            <i class="fa-solid fa-circle-info text-[10px] text-slate-400 group-hover/title:text-indigo-500 shrink-0 opacity-0 group-hover/title:opacity-100 transition-opacity"></i>
+                        </div>
                     </td>
                     <td class="w-36 py-3 px-2">${pembimbingHtml}</td>
                     <td class="w-36 py-3 px-2">${pengujiHtml}</td>
@@ -2714,34 +2938,39 @@
                             const btnTitle = isReady ? 'Ubah Dosen Penguji' : 'Plot Dosen Penguji';
 
                             return `
-                                <button type="button" onclick="openP2SingleModal('${mhs.nim}')" class="btn-3d-kinetic ${btnColor} btn-compact ml-auto cursor-pointer" title="${btnTitle}">
-                                    <div class="bg"></div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
-                                        <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
-                                        <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
-                                        <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
-                                        <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
-                                        <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
-                                        <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
-                                        <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
-                                        <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
-                                        <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
-                                        <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
-                                        <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
-                                        <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
-                                    </svg>
-                                    <div class="wrap">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
-                                            <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
+                                <div class="flex items-center justify-end gap-1.5 ml-auto">
+                                    <button type="button" onclick="openHistoryPengujiModal('${mhs.nim}')" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-500 border border-slate-200/80 flex items-center justify-center text-xs transition cursor-pointer shrink-0 shadow-2xs" title="Lihat Riwayat Histori Perubahan Penguji Mahasiswa Ini">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                    </button>
+                                    <button type="button" onclick="openP2SingleModal('${mhs.nim}')" class="btn-3d-kinetic ${btnColor} btn-compact cursor-pointer" title="${btnTitle}">
+                                        <div class="bg"></div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
+                                            <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
+                                            <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
+                                            <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
+                                            <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
+                                            <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
+                                            <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
+                                            <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
+                                            <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
+                                            <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
+                                            <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
+                                            <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
+                                            <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
                                         </svg>
-                                        <div class="outline"></div>
-                                        <div class="content">
-                                            <span class="char state-1">${renderAnimatedChars(label1)}</span>
-                                            <span class="char state-2">${renderAnimatedChars(label2)}</span>
-                                            <i class="fa-solid ${iconClass} icon-action"></i>
+                                        <div class="wrap">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
+                                                <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
+                                            </svg>
+                                            <div class="outline"></div>
+                                            <div class="content">
+                                                <span class="char state-1">${renderAnimatedChars(label1)}</span>
+                                                <span class="char state-2">${renderAnimatedChars(label2)}</span>
+                                                <i class="fa-solid ${iconClass} icon-action"></i>
+                                            </div>
                                         </div>
-                                    </div>
-                                </button>
+                                    </button>
+                                </div>
                             `;
                         })()}
                     </td>
@@ -2810,6 +3039,47 @@
         btnLast.disabled = (state.p2CurrentPage === totalPages);
         btnLast.addEventListener('click', () => goToP2Page(totalPages));
         navContainer.appendChild(btnLast);
+    }
+
+    function updateP2StatsUI(list, stats) {
+        const dataList = list || state.p2List || [];
+        let total = dataList.length;
+        let lengkap = 0;
+        let belum = 0;
+
+        if (stats && typeof stats.total !== 'undefined') {
+            total = stats.total;
+            lengkap = stats.terjadwal ?? 0;
+            belum = stats.belum_set ?? 0;
+        } else {
+            dataList.forEach(r => {
+                const hasP1 = Boolean(r.penguji_1);
+                const hasP2 = Boolean(r.penguji_2);
+                if (hasP1 && hasP2) lengkap++;
+                else belum++;
+            });
+        }
+
+        const pctLengkap = total > 0 ? Math.round((lengkap / total) * 100) : 0;
+        const pctBelum   = total > 0 ? Math.round((belum / total) * 100) : 0;
+
+        const elTotal   = document.getElementById('statP2Total');
+        const elLengkap = document.getElementById('statP2Terjadwal');
+        const elBelum   = document.getElementById('statP2Belum');
+        const elProgPct = document.getElementById('statP2ProgressPct');
+        const elProgSub = document.getElementById('statP2ProgressSub');
+        const elProgBar = document.getElementById('statP2ProgressBar');
+
+        if (elTotal) elTotal.textContent = total;
+        if (elLengkap) {
+            elLengkap.innerHTML = `${lengkap} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pctLengkap}%)</span>`;
+        }
+        if (elBelum) {
+            elBelum.innerHTML = `${belum} <span class="text-xs font-semibold text-rose-600 font-normal">(${pctBelum}%)</span>`;
+        }
+        if (elProgPct) elProgPct.textContent = `${pctLengkap}%`;
+        if (elProgSub) elProgSub.textContent = `${lengkap} dari ${total} sudah diplot`;
+        if (elProgBar) elProgBar.style.width = `${pctLengkap}%`;
     }
 
     window.goToP2Page = function (page) {
@@ -2979,8 +3249,12 @@
 
     window.openP2SingleModal = function (nim) {
         state.p2TargetNim = nim;
-        const mhs = state.p2List.find(m => m.nim === nim);
-        if (!mhs) return;
+        const mhs = (state.p2List && state.p2List.find(m => String(m.nim) === String(nim))) ||
+                    (cfg.listPreview2 && cfg.listPreview2.find(m => String(m.nim) === String(nim)));
+        if (!mhs) {
+            console.warn('Mahasiswa tidak ditemukan untuk nim:', nim);
+            return;
+        }
 
         const fullName = `${mhs.nama_depan || ''} ${mhs.nama_belakang || ''}`.trim() || mhs.nama_lengkap || ('Mahasiswa ' + nim);
         const pemb1 = mhs.pembimbing_1 || '';
@@ -3003,7 +3277,11 @@
         }];
 
         const modal = document.getElementById('modalPreview2Plotting');
-        if (modal) modal.classList.remove('hidden');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.style.display = 'flex';
+        }
         document.body.classList.add('overflow-hidden');
 
         renderP2QuickBatchCards();
@@ -3222,6 +3500,104 @@
         });
 
         listEl.innerHTML = html;
+
+        // Quick Jump Nav Chips for Preview 2 (Lompat Cepat)
+        const navContainer = document.getElementById('p2QuickModalStudentTabs');
+        if (navContainer) {
+            let navHtml = '';
+            state.p2QuickBatchStudents.forEach((st, idx) => {
+                const isConflictPemb = (
+                    (st.penguji_1 && (st.penguji_1 === st.pemb1_nip || st.penguji_1 === st.pemb2_nip)) ||
+                    (st.penguji_2 && (st.penguji_2 === st.pemb1_nip || st.penguji_2 === st.pemb2_nip))
+                );
+                const isSameDosen = (st.penguji_1 && st.penguji_2 && st.penguji_1 === st.penguji_2);
+                const isComplete = (st.penguji_1 && st.penguji_2 && !isSameDosen && !isConflictPemb);
+
+                navHtml += `
+                    <button type="button" onclick="jumpToP2QuickStudent(${idx})" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-indigo-600 border border-slate-700/80 hover:border-indigo-500 text-slate-200 hover:text-white transition-all shadow-xs whitespace-nowrap flex items-center gap-2 shrink-0 active:scale-95 cursor-pointer">
+                        <span class="w-5 h-5 rounded-lg ${isComplete ? 'bg-emerald-600' : 'bg-indigo-600'} text-white flex items-center justify-center text-[10px] font-black shadow-xs">${idx + 1}</span>
+                        <span>${escapeHtml((st.name || '').split(' ')[0])}</span>
+                    </button>
+                `;
+            });
+            navContainer.innerHTML = navHtml;
+            initP2QuickTabsDragAndWheel();
+        }
+    }
+
+    window.jumpToP2QuickStudent = function (idx) {
+        const card = document.getElementById(`p2_quick_card_${idx}`);
+        if (!card) return;
+
+        if (state.p2QuickBatchStudents[idx] && !state.p2QuickBatchStudents[idx].isExpanded) {
+            state.p2QuickBatchStudents[idx].isExpanded = true;
+            const bodyEl = document.getElementById(`p2_quick_card_body_${idx}`);
+            const arrowEl = document.getElementById(`p2_quick_card_arrow_${idx}`);
+            if (bodyEl) bodyEl.classList.remove('hidden');
+            if (arrowEl) arrowEl.classList.add('rotate-180');
+        }
+
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('ring-2', 'ring-indigo-500');
+        setTimeout(() => card.classList.remove('ring-2', 'ring-indigo-500'), 1500);
+    };
+
+    window.scrollP2QuickStudentTabs = function (direction) {
+        const container = document.getElementById('p2QuickModalStudentTabs');
+        if (!container) return;
+        const scrollAmount = 260;
+        if (direction === 'left') {
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        } else {
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    };
+
+    function initP2QuickTabsDragAndWheel() {
+        const container = document.getElementById('p2QuickModalStudentTabs');
+        if (!container || container.dataset.initEvents) return;
+        container.dataset.initEvents = 'true';
+
+        // Mouse Wheel Horizontal Scroll
+        container.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                container.scrollLeft += e.deltaY * 0.8;
+            }
+        }, { passive: false });
+
+        // Mouse Drag to Scroll
+        let isDown = false;
+        let startX;
+        let scrollLeftPos;
+
+        container.addEventListener('mousedown', (e) => {
+            isDown = true;
+            container.classList.add('cursor-grabbing');
+            container.classList.remove('cursor-grab');
+            startX = e.pageX - container.offsetLeft;
+            scrollLeftPos = container.scrollLeft;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDown = false;
+            container.classList.remove('cursor-grabbing');
+            container.classList.add('cursor-grab');
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDown = false;
+            container.classList.remove('cursor-grabbing');
+            container.classList.add('cursor-grab');
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            container.scrollLeft = scrollLeftPos - walk;
+        });
     }
 
     window.toggleP2QuickStudentCard = function (stIdx) {
@@ -3450,8 +3826,87 @@
         }
     };
 
+    function buildP2ConfirmationSummaryHtml(students, globalCatatan = '') {
+        if (!students || students.length === 0) return '';
+
+        let itemsHtml = '';
+        students.forEach((st, idx) => {
+            const originalMhs = state.p2List.find(m => m.nim === st.nim) || {};
+            const oldP1 = originalMhs.penguji_1 || '';
+            const oldP2 = originalMhs.penguji_2 || '';
+            const newP1 = st.penguji_1 || '';
+            const newP2 = st.penguji_2 || '';
+
+            const isP1Changed = Boolean(oldP1 && String(newP1) !== String(oldP1));
+            const isP2Changed = Boolean(oldP2 && String(newP2) !== String(oldP2));
+            const hasOld = Boolean(oldP1 || oldP2);
+
+            let statusBadge = '';
+            if (!hasOld) {
+                statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10px]"><i class="fa-solid fa-plus mr-1"></i> Penetapan Baru</span>';
+            } else if (isP1Changed || isP2Changed) {
+                statusBadge = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold text-[10px]"><i class="fa-solid fa-pen mr-1"></i> Ada Perubahan</span>';
+            } else {
+                statusBadge = '<span class="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-medium text-[10px]">Tetap / Tidak Berubah</span>';
+            }
+
+            const p1Dosen = getDosenByNip(newP1);
+            const p2Dosen = getDosenByNip(newP2);
+            const oldP1Dosen = getDosenByNip(oldP1);
+            const oldP2Dosen = getDosenByNip(oldP2);
+
+            itemsHtml += `
+                <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-2xs space-y-2 text-left">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0">${idx + 1}</span>
+                            <span class="font-bold text-slate-900 truncate">${escapeHtml(st.name || st.nama || originalMhs.nama || st.nim)}</span>
+                            <span class="text-[10px] font-mono text-slate-500 font-semibold shrink-0">${st.nim}</span>
+                        </div>
+                        <div class="shrink-0">${statusBadge}</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        <div class="p-2 bg-slate-50/80 rounded-lg border border-slate-100">
+                            <span class="text-slate-400 font-semibold block text-[10px] uppercase">Penguji 1:</span>
+                            <span class="font-bold text-slate-800 block truncate">${escapeHtml(p1Dosen ? p1Dosen.nama_dosen : (newP1 || '-'))}</span>
+                            ${isP1Changed ? `<span class="block text-[10px] text-rose-600 line-through truncate">Semula: ${escapeHtml(oldP1Dosen ? oldP1Dosen.nama_dosen : oldP1)}</span>` : ''}
+                        </div>
+                        <div class="p-2 bg-slate-50/80 rounded-lg border border-slate-100">
+                            <span class="text-slate-400 font-semibold block text-[10px] uppercase">Penguji 2:</span>
+                            <span class="font-bold text-slate-800 block truncate">${escapeHtml(p2Dosen ? p2Dosen.nama_dosen : (newP2 || '-'))}</span>
+                            ${isP2Changed ? `<span class="block text-[10px] text-rose-600 line-through truncate">Semula: ${escapeHtml(oldP2Dosen ? oldP2Dosen.nama_dosen : oldP2)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        return `
+            <div class="text-left text-xs text-slate-700 space-y-3 max-h-[55vh] overflow-y-auto custom-scrollbar p-1">
+                <div class="p-3 bg-indigo-50/80 border border-indigo-200 rounded-xl text-xs text-indigo-900 flex items-start gap-2.5">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600 text-sm mt-0.5 shrink-0"></i>
+                    <div>
+                        <strong>Konfirmasi Penetapan & Rekam Histori Penguji:</strong>
+                        <p class="text-[11px] text-indigo-800 mt-0.5">Penetapan dan perubahan dosen penguji berikut akan <strong>otomatis dicatat ke dalam audit log histori</strong>:</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    ${itemsHtml}
+                </div>
+
+                ${globalCatatan ? `
+                    <div class="p-2.5 bg-amber-50/80 border border-amber-200 rounded-xl text-[11px] text-amber-900">
+                        <i class="fa-solid fa-note-sticky text-amber-600 mr-1"></i> <strong>Catatan Koordinator:</strong> ${escapeHtml(globalCatatan)}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
     window.submitP2Plotting = function (e) {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
 
         if (state.p2QuickBatchStudents.length === 0) {
             Swal.fire({ icon: 'warning', title: 'Data Kosong', text: 'Tidak ada mahasiswa yang dipilih.' });
@@ -3492,84 +3947,100 @@
             }
         }
 
-        const btnSubmit = document.getElementById('modalP2BtnSubmit');
-        const btnText = document.getElementById('modalP2BtnSubmitText');
-
-        if (btnSubmit) btnSubmit.disabled = true;
-        if (btnText) btnText.textContent = 'Menyimpan...';
-
-        const nims = state.p2QuickBatchStudents.map(s => s.nim);
-        const plottings = state.p2QuickBatchStudents.map(s => ({
-            nim: s.nim,
-            penguji_1: s.penguji_1,
-            penguji_2: s.penguji_2,
-            catatan_koor: s.catatan_koor || ''
-        }));
-
         const globalCatatan = document.getElementById('p2ModalGlobalCatatanKoor') ? document.getElementById('p2ModalGlobalCatatanKoor').value : '';
 
-        const formData = new FormData();
-        formData.append('nims', JSON.stringify(nims));
-        formData.append('plottings', JSON.stringify(plottings));
-        formData.append('catatan_koor', globalCatatan);
+        // Tampilkan Modal Ringkasan Konfirmasi Perubahan Penguji
+        const summaryHtml = buildP2ConfirmationSummaryHtml(state.p2QuickBatchStudents, globalCatatan);
 
-        fetch(cfg.ajaxPreview2BatchUrl, {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res && res.status) {
+        Swal.fire({
+            title: 'Ringkasan Konfirmasi Penguji',
+            html: summaryHtml,
+            width: '620px',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fa-solid fa-check mr-1.5"></i> Ya, Simpan & Catat Histori',
+            cancelButtonText: 'Periksa Kembali',
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const btnSubmit = document.getElementById('modalP2BtnSubmit');
+                const btnText = document.getElementById('modalP2BtnSubmitText');
+
+                if (btnSubmit) btnSubmit.disabled = true;
+                if (btnText) btnText.textContent = 'Menyimpan...';
+
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: res.message || 'Penetapan Dosen Penguji Preview 2 berhasil disimpan!',
-                    confirmButtonColor: '#4f46e5'
+                    title: 'Memproses...',
+                    text: 'Menyimpan plotting dosen penguji & mencatat histori...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
                 });
-                closeP2Modal();
 
-                if (cfg.ajaxPreview2RealtimeUrl) {
-                    fetch(cfg.ajaxPreview2RealtimeUrl)
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data && data.data) {
-                                state.p2List = data.data;
-                                if (data.stats) {
-                                    const t = document.getElementById('statP2Total');
-                                    const tr = document.getElementById('statP2Terjadwal');
-                                    const ps = document.getElementById('statP2Penguji');
-                                    const bl = document.getElementById('statP2Belum');
-                                    if (t) t.textContent = data.stats.total;
-                                    if (tr) {
-                                        const pct = data.stats.total > 0 ? Math.round((data.stats.terjadwal / data.stats.total) * 100) : 0;
-                                        tr.innerHTML = `${data.stats.terjadwal} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
-                                    }
-                                    if (ps) ps.textContent = data.stats.penguji_set;
-                                    if (bl) {
-                                        const pct = data.stats.total > 0 ? Math.round((data.stats.belum_set / data.stats.total) * 100) : 0;
-                                        bl.innerHTML = `${data.stats.belum_set} <span class="text-xs font-semibold text-amber-600 font-normal">(${pct}%)</span>`;
-                                    }
-                                }
-                                clearAllP2Selection();
-                                renderP2Table();
-                            }
+                const nims = state.p2QuickBatchStudents.map(s => s.nim);
+                const plottings = state.p2QuickBatchStudents.map(s => ({
+                    nim: s.nim,
+                    penguji_1: s.penguji_1,
+                    penguji_2: s.penguji_2,
+                    catatan_koor: s.catatan_koor || ''
+                }));
+
+                const formData = new FormData();
+                formData.append('nims', JSON.stringify(nims));
+                formData.append('plottings', JSON.stringify(plottings));
+                formData.append('catatan_koor', globalCatatan);
+
+                fetch(cfg.ajaxPreview2BatchUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res && res.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.message || 'Penetapan Dosen Penguji Preview 2 berhasil disimpan!',
+                            confirmButtonColor: '#4f46e5'
                         });
-                }
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan',
-                    text: res.message || 'Terjadi kesalahan saat menyimpan data.',
-                    confirmButtonColor: '#4f46e5'
+                        closeP2Modal();
+
+                        if (cfg.ajaxPreview2RealtimeUrl) {
+                            fetch(cfg.ajaxPreview2RealtimeUrl)
+                                .then(r => r.json())
+                                .then(data => {
+                                    if (data && data.data) {
+                                        state.p2List = data.data;
+                                        updateP2StatsUI(data.data, data.stats);
+                                        clearAllP2Selection();
+                                        renderP2Table();
+                                    }
+                                });
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Menyimpan',
+                            text: res.message || 'Terjadi kesalahan saat menyimpan ke database.',
+                            confirmButtonColor: '#4f46e5'
+                        });
+                    }
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Jaringan',
+                        text: 'Gagal terhubung ke server.',
+                        confirmButtonColor: '#4f46e5'
+                    });
+                })
+                .finally(() => {
+                    if (btnSubmit) btnSubmit.disabled = false;
+                    if (btnText) btnText.textContent = 'Simpan & Plot Penguji';
                 });
             }
-        })
-        .catch(err => {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', confirmButtonColor: '#4f46e5' });
-        })
-        .finally(() => {
-            if (btnSubmit) btnSubmit.disabled = false;
-            if (btnText) btnText.textContent = 'Simpan Penetapan Dosen Penguji';
         });
     };
 
@@ -4383,162 +4854,267 @@
         if (dropdown) dropdown.classList.add('hidden');
     };
 
-    window.submitP2Plotting = function (e) {
-        e.preventDefault();
+    // =========================================================
+    // MODAL RIWAYAT HISTORI PLOTTING TERPADU (PEMBIMBING & PENGUJI)
+    // =========================================================
+    let cachedHistoryLogs = [];
+    let currentHistoryCategory = 'All';
 
-        const p1 = document.getElementById('p2ModalInputPenguji1') ? document.getElementById('p2ModalInputPenguji1').value : '';
-        const p2 = document.getElementById('p2ModalInputPenguji2') ? document.getElementById('p2ModalInputPenguji2').value : '';
+    window.openHistoryPlottingModal = function(category = 'All', filterNim = null) {
+        const modal = document.getElementById('modalHistoryPlotting') || document.getElementById('modalHistoryPenguji');
+        if (!modal) return;
 
-        if (!p1 || !p2) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Dosen Penguji Belum Lengkap',
-                text: 'Dosen Penguji 1 dan Dosen Penguji 2 wajib dipilih!',
-                confirmButtonColor: '#4f46e5'
-            });
-            return;
+        currentHistoryCategory = category || 'All';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+
+        // Update tab buttons UI
+        updateHistoryCategoryTabsUI(currentHistoryCategory);
+
+        const container = document.getElementById('historyPlottingTimelineContainer') || document.getElementById('historyPengujiTimelineContainer');
+        const countEl = document.getElementById('historyRecordCount');
+        const searchInput = document.getElementById('inputSearchHistoryPlotting') || document.getElementById('inputSearchHistoryPenguji');
+        if (searchInput) searchInput.value = filterNim || '';
+
+        if (container) {
+            container.innerHTML = `
+                <div class="py-12 text-center text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i>
+                    <p class="text-xs">Memuat data riwayat histori perubahan dosen...</p>
+                </div>
+            `;
         }
 
-        if (p1 === p2) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Dosen Penguji Sama',
-                text: 'Dosen Penguji 1 dan Dosen Penguji 2 tidak boleh orang yang sama!',
-                confirmButtonColor: '#4f46e5'
-            });
-            return;
+        const url = cfg.ajaxHistoryTaUrl || cfg.ajaxHistoryPengujiUrl || 'koordinatorta/ajax_get_history_ta';
+        let params = new URLSearchParams();
+        if (currentHistoryCategory && currentHistoryCategory !== 'All') {
+            params.append('kategori', currentHistoryCategory);
         }
+        if (filterNim) {
+            params.append('nim', filterNim);
+        }
+        params.append('limit', '100');
 
-        // Supervisor conflict validation on submit
-        if (state.p2TargetNim) {
-            const mhs = state.p2List.find(m => m.nim === state.p2TargetNim);
-            if (mhs) {
-                if (p1 === mhs.pembimbing_1 || p1 === mhs.pembimbing_2) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Konflik Dosen Pembimbing',
-                        text: 'Dosen Penguji 1 tidak boleh sama dengan Dosen Pembimbing mahasiswa!',
-                        confirmButtonColor: '#4f46e5'
-                    });
-                    return;
-                }
-                if (p2 === mhs.pembimbing_1 || p2 === mhs.pembimbing_2) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Konflik Dosen Pembimbing',
-                        text: 'Dosen Penguji 2 tidak boleh sama dengan Dosen Pembimbing mahasiswa!',
-                        confirmButtonColor: '#4f46e5'
-                    });
-                    return;
-                }
-            }
-        } else {
-            // Batch mode check
-            for (let s of state.p2SelectedStudents.values()) {
-                const mhs = state.p2List.find(m => m.nim === s.nim);
-                if (mhs) {
-                    if (p1 === mhs.pembimbing_1 || p1 === mhs.pembimbing_2) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Konflik Dosen Pembimbing',
-                            text: `Dosen Penguji 1 bertindak sebagai Dosen Pembimbing untuk mahasiswa ${s.name} (${s.nim}). Dosen Pembimbing tidak boleh menjadi Penguji!`,
-                            confirmButtonColor: '#4f46e5'
-                        });
-                        return;
+        const fetchUrl = `${url}?${params.toString()}`;
+
+        fetch(fetchUrl)
+            .then(res => res.json())
+            .then(res => {
+                if (res && res.status && Array.isArray(res.data)) {
+                    cachedHistoryLogs = res.data;
+                    renderHistoryPlottingTimeline(cachedHistoryLogs);
+                } else {
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="py-12 text-center text-slate-400">
+                                <i class="fa-solid fa-clock-rotate-left text-3xl mb-2 text-slate-300"></i>
+                                <p class="text-xs font-semibold text-slate-600">Belum ada riwayat histori plotting dosen.</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Setiap perubahan atau penetapan Dosen Pembimbing & Penguji akan otomatis tercatat di sini.</p>
+                            </div>
+                        `;
                     }
-                    if (p2 === mhs.pembimbing_1 || p2 === mhs.pembimbing_2) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Konflik Dosen Pembimbing',
-                            text: `Dosen Penguji 2 bertindak sebagai Dosen Pembimbing untuk mahasiswa ${s.name} (${s.nim}). Dosen Pembimbing tidak boleh menjadi Penguji!`,
-                            confirmButtonColor: '#4f46e5'
-                        });
-                        return;
-                    }
+                    if (countEl) countEl.textContent = '0 Catatan';
                 }
-            }
-        }
-
-        const isSingle = (state.p2TargetNim !== null);
-        const url = isSingle ? cfg.ajaxPreview2UpdateUrl : cfg.ajaxPreview2BatchUrl;
-        const btnSubmit = document.getElementById('modalP2BtnSubmit');
-        const btnText = document.getElementById('modalP2BtnSubmitText');
-
-        if (btnSubmit) btnSubmit.disabled = true;
-        if (btnText) btnText.textContent = 'Menyimpan...';
-
-        const formData = new FormData();
-        if (isSingle) {
-            formData.append('nim', state.p2TargetNim);
-        } else {
-            formData.append('nims', JSON.stringify(Array.from(state.p2SelectedStudents.keys())));
-        }
-        formData.append('penguji_1', p1);
-        formData.append('penguji_2', p2);
-
-        fetch(url, {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res && res.status) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: res.message || 'Penetapan Dosen Penguji berhasil disimpan!',
-                    confirmButtonColor: '#4f46e5'
-                });
-                closeP2Modal();
-
-                if (cfg.ajaxPreview2RealtimeUrl) {
-                    fetch(cfg.ajaxPreview2RealtimeUrl)
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data && data.data) {
-                                state.p2List = data.data;
-                                if (data.stats) {
-                                    const t = document.getElementById('statP2Total');
-                                    const tr = document.getElementById('statP2Terjadwal');
-                                    const ps = document.getElementById('statP2Penguji');
-                                    const bl = document.getElementById('statP2Belum');
-                                    if (t) t.textContent = data.stats.total;
-                                    if (tr) {
-                                        const pct = data.stats.total > 0 ? Math.round((data.stats.terjadwal / data.stats.total) * 100) : 0;
-                                        tr.innerHTML = `${data.stats.terjadwal} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
-                                    }
-                                    if (ps) ps.textContent = data.stats.penguji_set;
-                                    if (bl) {
-                                        const pct = data.stats.total > 0 ? Math.round((data.stats.belum_set / data.stats.total) * 100) : 0;
-                                        bl.innerHTML = `${data.stats.belum_set} <span class="text-xs font-semibold text-amber-600 font-normal">(${pct}%)</span>`;
-                                    }
-                                }
-                                clearAllP2Selection();
-                                renderP2Table();
-                            }
-                        });
+            })
+            .catch(() => {
+                if (container) {
+                    container.innerHTML = `
+                        <div class="py-12 text-center text-rose-500">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
+                            <p class="text-xs font-bold">Gagal memuat data histori dari server.</p>
+                        </div>
+                    `;
                 }
+            });
+    };
+
+    window.closeHistoryPlottingModal = function() {
+        const modal = document.getElementById('modalHistoryPlotting') || document.getElementById('modalHistoryPenguji');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+    };
+
+    // Backward compatible aliases
+    window.openHistoryPengujiModal = function(filterNim = null) {
+        window.openHistoryPlottingModal('Penguji', filterNim);
+    };
+    window.closeHistoryPengujiModal = function() {
+        window.closeHistoryPlottingModal();
+    };
+
+    function updateHistoryCategoryTabsUI(cat) {
+        const tabAll = document.getElementById('tabHistoryFilterAll');
+        const tabPemb = document.getElementById('tabHistoryFilterPembimbing');
+        const tabPeng = document.getElementById('tabHistoryFilterPenguji');
+
+        const resetTab = (el, active) => {
+            if (!el) return;
+            if (active) {
+                el.className = 'px-3 py-1.5 rounded-lg transition cursor-pointer bg-white text-slate-900 shadow-2xs font-bold';
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan',
-                    text: res.message || 'Terjadi kesalahan saat menyimpan ke database.',
-                    confirmButtonColor: '#4f46e5'
-                });
+                el.className = 'px-3 py-1.5 rounded-lg transition cursor-pointer text-slate-600 hover:text-slate-900 font-medium';
             }
-        })
-        .catch(err => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error Jaringan',
-                text: 'Terjadi kegagalan komunikasi ke server.',
-                confirmButtonColor: '#4f46e5'
-            });
-        })
-        .finally(() => {
-            if (btnSubmit) btnSubmit.disabled = false;
-            if (btnText) btnText.textContent = 'Simpan Penetapan Penguji & Jadwal';
+        };
+
+        resetTab(tabAll, cat === 'All');
+        resetTab(tabPemb, cat === 'Pembimbing');
+        resetTab(tabPeng, cat === 'Penguji');
+    }
+
+    window.switchHistoryCategoryTab = function(category) {
+        currentHistoryCategory = category;
+        updateHistoryCategoryTabsUI(category);
+
+        const searchInput = document.getElementById('inputSearchHistoryPlotting') || document.getElementById('inputSearchHistoryPenguji');
+        const nimVal = searchInput ? searchInput.value.trim() : null;
+
+        // Fetch fresh filtered data
+        window.openHistoryPlottingModal(category, nimVal);
+    };
+
+    function renderHistoryPlottingTimeline(logs) {
+        const container = document.getElementById('historyPlottingTimelineContainer') || document.getElementById('historyPengujiTimelineContainer');
+        const countEl = document.getElementById('historyRecordCount');
+        if (!container) return;
+
+        if (countEl) countEl.textContent = `${logs.length} Catatan`;
+
+        if (logs.length === 0) {
+            container.innerHTML = `
+                <div class="py-12 text-center text-slate-400">
+                    <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-300"></i>
+                    <p class="text-xs font-semibold text-slate-600">Tidak ada data histori yang sesuai.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        logs.forEach(log => {
+            const isPembimbing = (log.kategori === 'Pembimbing');
+            const katBadgeClass = isPembimbing 
+                ? 'bg-orange-100 text-orange-800 border-orange-200' 
+                : 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            const katIcon = isPembimbing ? 'fa-user-tie' : 'fa-chalkboard-user';
+            const katLabel = isPembimbing ? 'Dosen Pembimbing' : 'Dosen Penguji';
+
+            const d1Label = isPembimbing ? 'Dosen Pembimbing 1' : 'Dosen Penguji 1';
+            const d2Label = isPembimbing ? 'Dosen Pembimbing 2' : 'Dosen Penguji 2';
+
+            const isInitial = (log.aksi && log.aksi.toLowerCase().includes('awal')) || (!log.dosen_1_lama && !log.dosen_2_lama);
+            const aksiBadgeClass = isInitial ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-800 border-slate-300';
+            const aksiIcon = isInitial ? 'fa-plus' : 'fa-pen-to-square';
+
+            const d1Lama = log.nama_dosen_1_lama || log.dosen_1_lama || log.nama_penguji_1_lama || log.penguji_1_lama;
+            const d2Lama = log.nama_dosen_2_lama || log.dosen_2_lama || log.nama_penguji_2_lama || log.penguji_2_lama;
+            const d1Baru = log.nama_dosen_1_baru || log.dosen_1_baru || log.nama_penguji_1_baru || log.penguji_1_baru;
+            const d2Baru = log.nama_dosen_2_baru || log.dosen_2_baru || log.nama_penguji_2_baru || log.penguji_2_baru;
+
+            const isD1Changed = Boolean(d1Lama && String(d1Lama) !== String(d1Baru));
+            const isD2Changed = Boolean(d2Lama && String(d2Lama) !== String(d2Baru));
+
+            html += `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 transition-all hover:shadow-md hover:border-indigo-300 space-y-3 text-left">
+                    <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl ${isPembimbing ? 'bg-orange-50 text-orange-600 border border-orange-200' : 'bg-indigo-50 text-indigo-600 border border-indigo-200'} flex items-center justify-center text-xs font-bold shrink-0">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-900">${escapeHtml(log.nama_mahasiswa || ('Mahasiswa NIM ' + log.nim))}</h4>
+                                <span class="text-[10px] font-mono text-slate-500 font-bold">${log.nim}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[10px] font-bold ${katBadgeClass}">
+                                    <i class="fa-solid ${katIcon} text-[9px]"></i>
+                                    <span>${katLabel}</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${aksiBadgeClass}">
+                                    <i class="fa-solid ${aksiIcon} text-[9px]"></i>
+                                    <span>${escapeHtml(log.aksi || 'Perubahan Data')}</span>
+                                </span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-calendar-day text-[9px]"></i>
+                                ${escapeHtml(log.created_at || '-')}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <!-- Slot 1 -->
+                        <div class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-100 space-y-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">${d1Label}:</span>
+                            <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                                <span class="w-4 h-4 rounded ${isPembimbing ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center text-[9px] font-bold shrink-0">1</span>
+                                <span class="truncate">${escapeHtml(d1Baru || '-')}</span>
+                            </div>
+                            ${isD1Changed ? `
+                                <div class="text-[10px] text-rose-600 line-through truncate pl-5.5">
+                                    Semula: ${escapeHtml(d1Lama)}
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Slot 2 -->
+                        <div class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-100 space-y-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">${d2Label}:</span>
+                            <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                                <span class="w-4 h-4 rounded ${isPembimbing ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center text-[9px] font-bold shrink-0">2</span>
+                                <span class="truncate">${escapeHtml(d2Baru || '-')}</span>
+                            </div>
+                            ${isD2Changed ? `
+                                <div class="text-[10px] text-rose-600 line-through truncate pl-5.5">
+                                    Semula: ${escapeHtml(d2Lama)}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${log.keterangan ? `
+                        <div class="text-[11px] text-slate-600 bg-amber-50/80 border border-amber-200/80 p-2.5 rounded-xl flex items-start gap-2">
+                            <i class="fa-solid fa-note-sticky text-amber-600 mt-0.5 shrink-0 text-xs"></i>
+                            <div>
+                                <strong>Catatan:</strong> ${escapeHtml(log.keterangan)}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
         });
+
+        container.innerHTML = html;
+    }
+
+    window.filterHistoryPlottingRows = function(query) {
+        const q = (query || '').toLowerCase().trim();
+        if (!q) {
+            renderHistoryPlottingTimeline(cachedHistoryLogs);
+            return;
+        }
+
+        const filtered = cachedHistoryLogs.filter(log => {
+            const nim = (log.nim || '').toLowerCase();
+            const mhs = (log.nama_mahasiswa || '').toLowerCase();
+            const d1 = (log.nama_dosen_1_baru || log.dosen_1_baru || log.nama_penguji_1_baru || log.penguji_1_baru || '').toLowerCase();
+            const d2 = (log.nama_dosen_2_baru || log.dosen_2_baru || log.nama_penguji_2_baru || log.penguji_2_baru || '').toLowerCase();
+            const kat = (log.kategori || '').toLowerCase();
+            const aksi = (log.aksi || '').toLowerCase();
+            return nim.includes(q) || mhs.includes(q) || d1.includes(q) || d2.includes(q) || kat.includes(q) || aksi.includes(q);
+        });
+
+        renderHistoryPlottingTimeline(filtered);
+    };
+
+    window.filterHistoryPengujiRows = function(query) {
+        window.filterHistoryPlottingRows(query);
     };
 
     document.addEventListener('click', (e) => {
@@ -4614,16 +5190,24 @@
                                     const totalEl = document.getElementById('statTotalCount');
                                     const pendEl = document.getElementById('statPendingCount');
                                     const appEl = document.getElementById('statApprovedCount');
+                                    const kkEl = document.getElementById('statKkCount');
                                     const rejEl = document.getElementById('statRejectedCount');
+
+                                    const siapCount = res.stats.siap_diplot ?? res.stats.pending ?? 0;
+                                    const kkCount = res.stats.kk_approved ?? 0;
 
                                     if (totalEl) totalEl.textContent = res.stats.total;
                                     if (pendEl) {
-                                        const pct = res.stats.total > 0 ? Math.round((res.stats.pending / res.stats.total) * 100) : 0;
-                                        pendEl.innerHTML = `${res.stats.pending} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
+                                        const pct = res.stats.total > 0 ? Math.round((siapCount / res.stats.total) * 100) : 0;
+                                        pendEl.innerHTML = `${siapCount} <span class="text-xs font-semibold text-cyan-600 font-normal">(${pct}%)</span>`;
                                     }
                                     if (appEl) {
                                         const pct = res.stats.total > 0 ? Math.round((res.stats.approved / res.stats.total) * 100) : 0;
                                         appEl.innerHTML = `${res.stats.approved} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
+                                    }
+                                    if (kkEl) {
+                                        const pct = res.stats.total > 0 ? Math.round((kkCount / res.stats.total) * 100) : 0;
+                                        kkEl.innerHTML = `${kkCount} <span class="text-xs font-semibold text-indigo-600 font-normal">(${pct}%)</span>`;
                                     }
                                     if (rejEl) rejEl.textContent = res.stats.rejected;
                                 }
@@ -4646,25 +5230,7 @@
 
                             if (oldJson !== newJson) {
                                 state.p2List = res.data;
-
-                                if (res.stats) {
-                                    const t = document.getElementById('statP2Total');
-                                    const tr = document.getElementById('statP2Terjadwal');
-                                    const ps = document.getElementById('statP2Penguji');
-                                    const bl = document.getElementById('statP2Belum');
-
-                                    if (t) t.textContent = res.stats.total;
-                                    if (tr) {
-                                        const pct = res.stats.total > 0 ? Math.round((res.stats.terjadwal / res.stats.total) * 100) : 0;
-                                        tr.innerHTML = `${res.stats.terjadwal} <span class="text-xs font-semibold text-emerald-600 font-normal">(${pct}%)</span>`;
-                                    }
-                                    if (ps) ps.textContent = res.stats.penguji_set;
-                                    if (bl) {
-                                        const pct = res.stats.total > 0 ? Math.round((res.stats.belum_set / res.stats.total) * 100) : 0;
-                                        bl.innerHTML = `${res.stats.belum_set} <span class="text-xs font-semibold text-amber-600 font-normal">(${pct}%)</span>`;
-                                    }
-                                }
-
+                                updateP2StatsUI(res.data, res.stats);
                                 renderP2Table();
                             }
                         }
@@ -5187,7 +5753,23 @@
                         <span class="truncate block max-w-[130px] cursor-pointer hover:text-amber-600 transition" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" title="${escapeHtml(fullName)}">${escapeHtml(fullName)}</span>
                     </td>
                     <td class="py-3 px-2 text-slate-600 font-normal">
-                        <p class="line-clamp-2 max-w-[200px] text-[11px] leading-snug" title="${escapeHtml(judul)}">${escapeHtml(judul)}</p>
+                        <div class="inline-flex items-center gap-1.5 cursor-pointer group/title max-w-[200px]"
+                            data-tooltip-type="sidang"
+                            data-nim="${escapeHtml(row.nim)}"
+                            data-name="${escapeHtml(fullName)}"
+                            data-judul1="${escapeHtml(judul)}"
+                            data-pemb1="${escapeHtml(pb1Name)}"
+                            data-pemb2="${escapeHtml(pb2Name)}"
+                            data-peng1="${escapeHtml(pg1Name)}"
+                            data-peng2="${escapeHtml(pg2Name)}"
+                            data-status="${escapeHtml(isTerjadwal ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan')}"
+                            onmouseenter="handleJudulTooltipEnter(this, event)"
+                            onmouseleave="handleJudulTooltipLeave(this)">
+                            <p class="line-clamp-2 text-[11px] leading-snug text-slate-700 font-medium group-hover/title:text-amber-600 transition-colors">
+                                ${escapeHtml(judul)}
+                            </p>
+                            <i class="fa-solid fa-circle-info text-[10px] text-slate-400 group-hover/title:text-amber-500 shrink-0 opacity-0 group-hover/title:opacity-100 transition-opacity"></i>
+                        </div>
                     </td>
                     <td class="w-36 py-3 px-2">${pembimbingHtml}</td>
                     <td class="w-36 py-3 px-2">${pengujiHtml}</td>
@@ -6433,6 +7015,105 @@
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.' });
             });
         });
+    };
+    // =========================================================
+    // HOVER TOOLTIP POPUP FOR USULAN JUDUL TA & LONG TEXT
+    // =========================================================
+    let activeTooltipTimer = null;
+
+    function getGlobalTooltipEl() {
+        let el = document.getElementById('globalTableHoverTooltip');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'globalTableHoverTooltip';
+            el.className = 'fixed pointer-events-none z-[99999] opacity-0 invisible transition-all duration-150 ease-out max-w-sm sm:max-w-md bg-slate-900/95 backdrop-blur-md text-white p-3 rounded-xl shadow-xl border border-slate-700/80 text-xs text-left';
+            document.body.appendChild(el);
+        }
+        return el;
+    }
+
+    window.handleJudulTooltipEnter = function(triggerEl, event) {
+        if (activeTooltipTimer) clearTimeout(activeTooltipTimer);
+
+        activeTooltipTimer = setTimeout(() => {
+            const tooltip = getGlobalTooltipEl();
+            const nim = triggerEl.getAttribute('data-nim') || '';
+            const name = triggerEl.getAttribute('data-name') || '';
+            const judul1 = triggerEl.getAttribute('data-judul1') || '';
+            const judul2 = triggerEl.getAttribute('data-judul2') || '';
+            const bidang = triggerEl.getAttribute('data-bidang') || '';
+            const wali = triggerEl.getAttribute('data-wali') || '';
+            const pemb1 = triggerEl.getAttribute('data-pemb1') || '';
+            const pemb2 = triggerEl.getAttribute('data-pemb2') || '';
+            const peng1 = triggerEl.getAttribute('data-peng1') || '';
+            const peng2 = triggerEl.getAttribute('data-peng2') || '';
+            const stage = triggerEl.getAttribute('data-stage') || '';
+            const status = triggerEl.getAttribute('data-status') || '';
+            const tooltipType = triggerEl.getAttribute('data-tooltip-type') || 'pendaftaran';
+
+            let extraJudulHtml = '';
+            if (judul2 && judul2.trim() !== '' && judul2.trim() !== judul1.trim()) {
+                extraJudulHtml = `
+                    <div class="mt-2 pt-2 border-t border-slate-700/60">
+                        <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider block mb-0.5">
+                            Judul Cadangan:
+                        </span>
+                        <p class="text-xs text-slate-300 leading-relaxed italic">
+                            ${escapeHtml(judul2)}
+                        </p>
+                    </div>
+                `;
+            }
+
+            tooltip.innerHTML = `
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-1.5 text-orange-400 font-bold text-[10px] uppercase tracking-wider border-b border-slate-800 pb-1.5">
+                        <i class="fa-solid fa-book-bookmark text-xs"></i>
+                        <span>Usulan Judul Lengkap</span>
+                    </div>
+                    <p class="text-xs font-semibold text-white leading-relaxed">
+                        ${escapeHtml(judul1)}
+                    </p>
+                    ${extraJudulHtml}
+                </div>
+            `;
+
+            // Position calculation
+            const rect = triggerEl.getBoundingClientRect();
+            tooltip.style.left = '0px';
+            tooltip.style.top = '0px';
+            tooltip.classList.remove('opacity-0', 'invisible');
+            tooltip.classList.add('opacity-100', 'visible');
+
+            const tooltipRect = tooltip.getBoundingClientRect();
+            let left = rect.left;
+            let top = rect.top - tooltipRect.height - 10; // Default: above
+
+            // Boundary checks
+            if (left + tooltipRect.width > window.innerWidth - 16) {
+                left = window.innerWidth - tooltipRect.width - 16;
+            }
+            if (left < 16) {
+                left = 16;
+            }
+
+            // If not enough room on top, position below
+            if (top < 16) {
+                top = rect.bottom + 10;
+            }
+
+            tooltip.style.left = `${Math.round(left)}px`;
+            tooltip.style.top = `${Math.round(top)}px`;
+        }, 100);
+    };
+
+    window.handleJudulTooltipLeave = function(triggerEl) {
+        if (activeTooltipTimer) clearTimeout(activeTooltipTimer);
+        const tooltip = document.getElementById('globalTableHoverTooltip');
+        if (tooltip) {
+            tooltip.classList.remove('opacity-100', 'visible');
+            tooltip.classList.add('opacity-0', 'invisible');
+        }
     };
 
     document.addEventListener('DOMContentLoaded', () => {

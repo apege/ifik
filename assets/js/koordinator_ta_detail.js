@@ -424,24 +424,14 @@
             return;
         }
 
-        // 4. Konfirmasi Eksekusi
+        // 4. Konfirmasi Eksekusi dengan Ringkasan Perubahan
         const isApprove = (status === 'Approved');
-        Swal.fire({
-            title: isApprove ? 'Konfirmasi Approval' : 'Konfirmasi Penolakan',
-            text: isApprove 
-                ? 'Apakah Anda yakin ingin MENYETUJUI usulan judul ini dan menetapkan Dosen Pembimbing?'
-                : 'Apakah Anda yakin ingin MENOLAK pendaftaran ini dan mengirim catatan revisi?',
-            icon: isApprove ? 'question' : 'warning',
-            showCancelButton: true,
-            confirmButtonColor: isApprove ? '#059669' : '#e11d48',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: isApprove ? 'Ya, Setujui Sekarang' : 'Ya, Tolak Pendaftaran',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
+
+        function processApproval(result) {
             if (result.isConfirmed) {
                 Swal.fire({
                     title: 'Memproses...',
-                    text: 'Menyimpan keputusan approval ke database...',
+                    text: 'Menyimpan keputusan ke database...',
                     allowOutsideClick: false,
                     didOpen: () => Swal.showLoading()
                 });
@@ -461,7 +451,9 @@
                         });
 
                         // Instantly update live state without page reload
-                        config.stKoor = selectedDecision;
+                        config.initialP1 = p1;
+                        config.initialP2 = p2;
+                        config.stKoor = status;
                         if (config.ajaxRealtimeUrl) {
                             fetch(config.ajaxRealtimeUrl)
                                 .then(res => res.json())
@@ -473,33 +465,109 @@
                                         config.stKk = latest.status_approval_kk;
                                         config.activeStageNum = latest.activeStageNum;
                                         config.tahapTerakhir = latest.tahapTerakhir;
-                                        config.isWaliApproved = (latest.status_approval_wali === 'Approved');
-                                        config.isLAAApproved = (latest.status_approval_admin === 'Approved');
-                                        config.isKoorApproved = (latest.status_approval_koor === 'Approved');
-
-                                        renderStagesGrid(latest);
                                     }
-                                });
+                                    setTimeout(() => location.reload(), 1200);
+                                })
+                                .catch(() => setTimeout(() => location.reload(), 1200));
+                        } else {
+                            setTimeout(() => location.reload(), 1200);
                         }
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Gagal Menyimpan',
-                            text: data.message || 'Terjadi kesalahan sistem.',
+                            title: 'Gagal Memproses',
+                            text: data.message || 'Terjadi kesalahan pada sistem.',
                             confirmButtonColor: '#ea580c'
                         });
                     }
                 })
-                .catch(err => {
+                .catch(() => {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Kesalahan Jaringan',
-                        text: 'Gagal terhubung ke server. Silakan coba lagi.',
+                        title: 'Gangguan Server',
+                        text: 'Tidak dapat terhubung ke server. Silakan coba beberapa saat lagi.',
                         confirmButtonColor: '#ea580c'
                     });
                 });
             }
-        });
+        }
+
+        if (isApprove) {
+            const p1Dosen = getDosenByNip(p1);
+            const p2Dosen = getDosenByNip(p2);
+            const oldP1Dosen = getDosenByNip(config.initialP1);
+            const oldP2Dosen = getDosenByNip(config.initialP2);
+            const isP1Changed = Boolean(config.initialP1 && String(p1) !== String(config.initialP1));
+            const isP2Changed = Boolean(config.initialP2 && String(p2) !== String(config.initialP2));
+            const hasOld = Boolean(config.initialP1 || config.initialP2);
+
+            const summaryHtml = `
+                <div class="text-left text-xs text-slate-700 space-y-3 max-h-[55vh] overflow-y-auto custom-scrollbar p-1">
+                    <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
+                        <i class="fa-solid fa-circle-info text-blue-600 text-sm mt-0.5 shrink-0"></i>
+                        <div>
+                            <strong>Konfirmasi Penetapan Dosen Pembimbing:</strong>
+                            <p class="text-[11px] text-blue-800 mt-0.5">Berikut data pembimbing yang akan disimpan untuk mahasiswa NIM <strong>${config.nim}</strong>:</p>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                            <span class="font-bold text-slate-900">Mahasiswa NIM ${config.nim}</span>
+                            ${!hasOld 
+                                ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10px]"><i class="fa-solid fa-plus mr-1"></i> Penetapan Baru</span>'
+                                : (isP1Changed || isP2Changed 
+                                    ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold text-[10px]"><i class="fa-solid fa-pen mr-1"></i> Ada Perubahan</span>'
+                                    : '<span class="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-medium text-[10px]">Tetap / Tidak Berubah</span>')}
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                                <span class="text-slate-500 font-semibold block text-[10px] uppercase tracking-wider">Pembimbing 1 (Utama):</span>
+                                <span class="font-bold text-slate-900 block mt-0.5">${escapeHtml(p1Dosen ? p1Dosen.nama_dosen : p1)}</span>
+                                ${isP1Changed ? `<span class="block text-[10px] text-rose-600 line-through mt-0.5">Semula: ${escapeHtml(oldP1Dosen ? oldP1Dosen.nama_dosen : config.initialP1)}</span>` : ''}
+                            </div>
+                            <div class="p-2.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                                <span class="text-slate-500 font-semibold block text-[10px] uppercase tracking-wider">Pembimbing 2 (Pendamping):</span>
+                                <span class="font-bold text-slate-900 block mt-0.5">${escapeHtml(p2Dosen ? p2Dosen.nama_dosen : p2)}</span>
+                                ${isP2Changed ? `<span class="block text-[10px] text-rose-600 line-through mt-0.5">Semula: ${escapeHtml(oldP2Dosen ? oldP2Dosen.nama_dosen : config.initialP2)}</span>` : ''}
+                            </div>
+                        </div>
+
+                        ${catatan ? `
+                            <div class="text-[10px] text-slate-600 bg-amber-50/70 p-2 rounded-lg border border-amber-200/60">
+                                <i class="fa-solid fa-note-sticky text-amber-600 mr-1"></i> <strong>Catatan Koordinator:</strong> ${escapeHtml(catatan)}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Ringkasan Konfirmasi Pembimbing',
+                html: summaryHtml,
+                width: '600px',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fa-solid fa-check mr-1.5"></i> Ya, Simpan ke Database',
+                cancelButtonText: 'Periksa Kembali',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border border-slate-200'
+                }
+            }).then(processApproval);
+        } else {
+            Swal.fire({
+                title: 'Konfirmasi Penolakan',
+                text: 'Apakah Anda yakin ingin MENOLAK pendaftaran ini dan mengirim catatan revisi?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Tolak Pendaftaran',
+                cancelButtonText: 'Batal'
+            }).then(processApproval);
+        }
     };
 
     // =========================================================
