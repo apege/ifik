@@ -1,12 +1,10 @@
 <style>
-    /* Global Universal Cursor Override */
     @media (pointer: fine) {
         *, *::before, *::after, html, body, a, button, input, select, textarea, label, summary, model-viewer, model-viewer::part(default-canvas), [role="button"], [onclick] {
             cursor: none !important;
         }
     }
 
-    /* Topbar Container - Normal Navbar */
     .dashboard-topbar {
         position: fixed;
         top: 0;
@@ -17,32 +15,31 @@
         z-index: 100;
         display: flex;
         align-items: center;
-        justify-content: center; /* Menu ada di tengah */
-        background: rgba(255, 255, 255, 0.95); /* Putih solid tapi sedikit kaca */
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border-bottom: 2px solid #ea580c; /* Highlight oranye jelas tapi simple */
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Soft shadow */
+        border-bottom: 2px solid #ea580c;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
-        padding: 0 16px;
+        padding: 0 90px 0 16px;   /* ruang kanan disisakan untuk tombol login yang dipindah */
         box-sizing: border-box;
     }
 
+    /* ===== JARAK ANTAR MENU DIPERBESAR ===== */
     .nav-list {
         display: flex;
-        flex-direction: row; /* horizontal layout */
-        flex-wrap: wrap; /* allow wrapping after 3 items */
+        flex-direction: row;
+        flex-wrap: wrap;
         align-items: center;
         list-style: none;
         margin: 0;
         padding: 0;
         max-width: 100%;
+        gap: 34px;
     }
 
-    .nav-item {
-        position: relative;
-        flex-shrink: 0;
-    }
+    .nav-item { position: relative; flex-shrink: 0; }
 
     .nav-link {
         color: #1e293b;
@@ -61,44 +58,31 @@
         white-space: nowrap;
     }
 
-    /* Orange line from left to right on hover */
     .nav-link::after {
         content: '';
         position: absolute;
-        bottom: 2px;
-        left: 0;
-        width: 0%;
-        height: 2px;
+        bottom: 2px; left: 0; width: 0%; height: 2px;
         background: #ea580c;
         transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
+    .nav-link:hover { color: #ea580c; }
+    .nav-link:hover::after { width: 100%; }
 
-    .nav-link:hover {
-        color: #ea580c;
-    }
-
-    .nav-link:hover::after {
-        width: 100%;
-    }
-
-    /* Minimalist btn-box for transparent links */
     .nav-link .btn-box {
-        width: 24px;
-        height: 24px;
-        background: transparent;
-        color: inherit;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.3s ease;
+        width: 24px; height: 24px; background: transparent; color: inherit;
+        display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease;
     }
+    .nav-link:hover .btn-box { transform: scale(1.1); }
 
-    .nav-link:hover .btn-box {
-        transform: scale(1.1);
+    /* ===== LOGIN DIPINDAH KE PALING KANAN TOPBAR ===== */
+    .nav-item:has(.nav-link-login) {
+        position: static;   /* keluarkan li dari alur flex nav-list */
     }
-
-    /* Nav Link Login (Preserve Old Orange Pill Style) */
     .nav-link-login {
+        position: absolute;
+        top: 50%;
+        right: 24px;                 /* padding dari tepi kanan navbar */
+        transform: translateY(-50%);
         color: #ffffff;
         background: linear-gradient(90deg, #ea580c 0%, #ff7f50 50%, #ea580c 100%);
         background-size: 200% 100%;
@@ -113,42 +97,23 @@
         gap: 8px;
         border-radius: 999px;
         box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
-        transform-origin: center;
         animation: shine 3s linear infinite;
     }
 
-    @keyframes shine {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-    }
-    
-    .nav-link-login:hover {
-        background: #c2410c;
-        color: #ffffff;
-    }
+    @keyframes shine { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    .nav-link-login:hover { background: #c2410c; color: #ffffff; }
 
     .nav-link-login .btn-box {
-        width: 24px;
-        height: 24px;
-        background: #ffffff;
-        color: #ea580c;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 24px; height: 24px; background: #ffffff; color: #ea580c;
+        border-radius: 6px; display: flex; align-items: center; justify-content: center;
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     }
+    .nav-link-login:hover .btn-box { transform: scale(1.22) rotate(18deg); }
 
-    .nav-link-login:hover .btn-box {
-        transform: scale(1.22) rotate(18deg);
-    }
-
-    /* Dropdown Menjadi Pop-down Horizontal */
     .nav-dropdown {
-        position: absolute;
-        top: 100%;
-        left: 50%;
+        position: absolute; top: 100%; left: 50%;
         transform: translateX(-50%) translateY(15px);
         margin-top: 10px;
         background: rgba(255, 255, 255, 0.95);
@@ -156,127 +121,64 @@
         border: 1px solid rgba(234, 88, 12, 0.2);
         border-radius: 20px;
         box-shadow: 0 15px 35px rgba(234, 88, 12, 0.15);
-        opacity: 0;
-        visibility: hidden;
+        opacity: 0; visibility: hidden;
         transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        padding: 20px;
-        z-index: 1000;
-        pointer-events: none;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        white-space: nowrap;
+        padding: 20px; z-index: 1000; pointer-events: none;
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; white-space: nowrap;
     }
+    .user-dropdown a { min-width: 130px; }
+    .nav-dropdown::before { content: ''; position: absolute; top: -15px; left: 0; width: 100%; height: 15px; }
 
-    .user-dropdown a {
-        min-width: 130px;
-    }
+    .nav-dropdown--right { left: auto; right: 0; transform: translateX(0) translateY(15px); }
+    .nav-item:hover .nav-dropdown--right { transform: translateX(0) translateY(0) !important; }
+    .nav-item:hover .nav-dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 
-    .nav-dropdown::before {
-        content: '';
-        position: absolute;
-        top: -15px;
-        left: 0;
-        width: 100%;
-        height: 15px;
-    }
-
-    /* Right-aligned dropdown (untuk item di ujung kanan navbar) */
-    .nav-dropdown--right {
-        left: auto;
-        right: 0;
-        transform: translateX(0) translateY(15px);
-    }
-
-    .nav-item:hover .nav-dropdown--right {
-        transform: translateX(0) translateY(0) !important;
-    }
-
-    .nav-item:hover .nav-dropdown {
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(-50%) translateY(0);
-        pointer-events: auto;
-    }
-
-    /* Dropdown Items (Card Style) */
     .nav-dropdown a {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        padding: 15px 25px;
-        background: #ffffff;
-        border: 1px solid rgba(234, 88, 12, 0.1);
-        border-radius: 12px;
-        color: #475569;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 700;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 12px; padding: 15px 25px; background: #ffffff;
+        border: 1px solid rgba(234, 88, 12, 0.1); border-radius: 12px;
+        color: #475569; text-decoration: none; font-size: 0.85rem; font-weight: 700;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        text-transform: capitalize;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        text-transform: capitalize; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     }
-
-    .nav-dropdown a:hover {
-        background: #ea580c;
-        color: #ffffff;
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(234, 88, 12, 0.2);
-    }
-
+    .nav-dropdown a:hover { background: #ea580c; color: #ffffff; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(234, 88, 12, 0.2); }
     .nav-dropdown a .btn-box {
-        width: 38px;
-        height: 38px;
-        background: #fff7ed; /* orange-50 */
-        color: #ea580c;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 38px; height: 38px; background: #fff7ed; color: #ea580c; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .nav-dropdown a:hover .btn-box { background: #ffffff; color: #ea580c; transform: scale(1.15) rotate(10deg); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-    .nav-dropdown a:hover .btn-box {
-        background: #ffffff;
-        color: #ea580c;
-        transform: scale(1.15) rotate(10deg);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    /* Responsiveness */
     @media (max-width: 1400px) {
-        .nav-list { gap: 7px; }
+        .nav-list { gap: 22px; }
         .nav-link { font-size: 0.74rem; letter-spacing: 0.2px; padding: 6px 3px; gap: 4px; }
         .nav-link-login { font-size: 0.75rem; padding: 6px 12px 6px 8px; }
     }
 
     @media (max-width: 1200px) {
-        .nav-list { gap: 5px; }
+        .nav-list { gap: 16px; }
         .nav-link { font-size: 0.70rem; letter-spacing: 0px; padding: 5px 2px; gap: 3px; }
-        .nav-link .btn-box { display: none; } /* Hide small icons to guarantee zero clipping */
+        .nav-link .btn-box { display: none; }
         .nav-link-login { font-size: 0.72rem; padding: 6px 10px 6px 6px; }
         .nav-dropdown { padding: 12px; gap: 8px; }
         .nav-dropdown a { padding: 8px 12px; }
     }
 
     @media (max-width: 992px) {
-        .nav-list { gap: 4px; }
+        .dashboard-topbar { padding: 0 60px 0 16px; }
+        .nav-list { gap: 10px; }
         .nav-link { font-size: 0.68rem; gap: 2px; }
-        
-        .nav-link-login span:last-child { display: none; } /* Hide "Login" text */
-        .nav-link-login { padding: 6px; }
+
+        .nav-link-login { right: 12px; padding: 6px; }
+        .nav-link-login span:last-child { display: none; }
         .nav-link-login .btn-box { margin: 0; }
-        
+
         .nav-dropdown {
-            grid-template-columns: 1fr; /* 1 kolom penuh */
+            grid-template-columns: 1fr;
             left: 0;
             transform: translateX(-20px) translateY(15px);
         }
-        .nav-item:hover .nav-dropdown {
-            transform: translateX(-20px) translateY(0);
-        }
+        .nav-item:hover .nav-dropdown { transform: translateX(-20px) translateY(0); }
     }
 </style>
 

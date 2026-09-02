@@ -155,6 +155,40 @@ class AdminHeader extends CI_Controller {
         redirect('adminheader');
     }
 
+    /**
+     * Edit Slide — versi AJAX (tanpa reload)
+     * Menerima POST: id, label, overlay_title, overlay_description
+     */
+    public function edit_slide_ajax()
+    {
+        $id = $this->input->post('id');
+        $slide = $this->Header_model->get_slide($id);
+        if (!$slide) {
+            echo json_encode(['status' => 'error', 'message' => 'Slide tidak ditemukan.']);
+            return;
+        }
+
+        $label               = $this->input->post('label', true);
+        $overlay_title       = $this->input->post('overlay_title', true);
+        $overlay_description = $this->input->post('overlay_description');
+
+        $update_data = [
+            'label'               => $label,
+            'overlay_title'       => $overlay_title,
+            'overlay_description' => $overlay_description,
+        ];
+
+        $this->db->where('id', $id);
+        if ($this->db->update('header_slides', $update_data)) {
+            echo json_encode(['status' => 'success', 'message' => 'Slide berhasil diperbarui.']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui slide.']);
+        }
+    }
+
+    /**
+     * Edit Slide — versi lama (fallback, tidak dipakai oleh AJAX)
+     */
     public function edit_slide($id)
     {
         $slide = $this->Header_model->get_slide($id);
@@ -164,61 +198,15 @@ class AdminHeader extends CI_Controller {
             return;
         }
 
-        $label = $this->input->post('label', true);
-        $duration = (int)$this->input->post('duration');
-        if ($duration < 1) $duration = 4;
-        
-        $update_data = ['label' => $label, 'duration' => $duration];
-        $media_type = $slide->media_type;
+        $label               = $this->input->post('label', true);
+        $overlay_title       = $this->input->post('overlay_title', true);
+        $overlay_description = $this->input->post('overlay_description');
 
-        // Jika upload file baru video, abaikan duration
-        if (!empty($_FILES['media_file']['name'])) {
-            $file_ext = strtolower(pathinfo($_FILES['media_file']['name'], PATHINFO_EXTENSION));
-            if (in_array($file_ext, ['mp4', 'webm', 'ogg'])) {
-                $update_data['duration'] = 4;
-            }
-        } else {
-             if ($slide->media_type == 'video') {
-                 $update_data['duration'] = 4;
-             }
-        }
-
-        // Cek file type otomatis
-        if (!empty($_FILES['media_file']['name'])) {
-            $file_ext = strtolower(pathinfo($_FILES['media_file']['name'], PATHINFO_EXTENSION));
-            if (in_array($file_ext, ['mp4', 'webm', 'ogg'])) {
-                $media_type = 'video';
-                $config['upload_path']   = './assets/vids/';
-                $config['allowed_types'] = 'mp4|webm|ogg';
-                $config['max_size']      = 20000;
-            } else {
-                $media_type = 'image';
-                $config['upload_path']   = './assets/images/';
-                $config['allowed_types'] = 'gif|jpg|jpeg|png|webp';
-                $config['max_size']      = 5048;
-            }
-            $config['file_name'] = 'slide_' . time();
-            
-            $this->load->library('upload');
-            $this->upload->initialize($config);
-
-            if ($this->upload->do_upload('media_file')) {
-                $uploadData = $this->upload->data();
-                $update_data['media_path'] = $uploadData['file_name'];
-                $update_data['media_type'] = $media_type;
-
-                // Delete old file if not default
-                $old_path = ($slide->media_type == 'video') ? './assets/vids/' : './assets/images/';
-                $old_file = $old_path . $slide->media_path;
-                if (!in_array($slide->media_path, ['Fakultas.jpg', 'vidtelkom.mp4', 'background.png']) && file_exists($old_file)) {
-                    unlink($old_file);
-                }
-            } else {
-                $this->session->set_flashdata('error', $this->upload->display_errors('', ''));
-                redirect('adminheader');
-                return;
-            }
-        }
+        $update_data = [
+            'label'               => $label,
+            'overlay_title'       => $overlay_title,
+            'overlay_description' => $overlay_description,
+        ];
 
         $this->db->where('id', $id);
         if ($this->db->update('header_slides', $update_data)) {
