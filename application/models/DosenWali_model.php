@@ -150,16 +150,8 @@ class DosenWali_model extends CI_Model {
             $data['review_file_' . $file_type] = 1;
         }
 
-        // Selalu perbarui catatan berkas sesuai input dosen wali
+        // Selalu perbarui catatan berkas sesuai input dosen wali (hanya ke kolom catatan_file_*)
         $data['catatan_file_' . $file_type] = $comment;
-
-        if (!empty($comment)) {
-            $current = $this->db->get_where('pendaftaran_ta', array('nim' => $nim))->row_array();
-            $existing_notes = $current['catatan_wali'] ?? '';
-            $prefix = "[" . strtoupper($file_type) . " - " . $status . "]: " . $comment;
-            $new_notes = !empty($existing_notes) ? $existing_notes . "\n" . $prefix : $prefix;
-            $data['catatan_wali'] = $new_notes;
-        }
 
         $this->db->where('nim', $nim);
         $this->db->update('pendaftaran_ta', $data);

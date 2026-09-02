@@ -114,6 +114,22 @@ class Mahasiswa_model extends CI_Model {
     // Reset atau Hapus Pendaftaran TA
     public function reset_pendaftaran_ta($nim) {
         if (!$this->db->table_exists('pendaftaran_ta')) return true;
+
+        // Bersihkan berkas fisik yang pernah diunggah jika ada
+        $existing = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+        if ($existing) {
+            $files_to_delete = ['file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'];
+            $upload_path = FCPATH . 'uploads/persyaratan_ta/';
+            foreach ($files_to_delete as $field) {
+                if (!empty($existing[$field])) {
+                    $filepath = $upload_path . $existing[$field];
+                    if (file_exists($filepath) && is_file($filepath)) {
+                        @unlink($filepath);
+                    }
+                }
+            }
+        }
+
         $this->db->where('nim', $nim);
         return $this->db->delete('pendaftaran_ta');
     }

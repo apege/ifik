@@ -6,6 +6,8 @@
     <title><?= $title; ?> - IFIK</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="<?= base_url('assets/css/style.css'); ?>" rel="stylesheet">
 </head>
@@ -63,6 +65,12 @@
             </div>
         <?php endif; ?>
 
+        <?php
+            $current_stage = $detail['current_stage'] ?? 'Dosen Wali';
+            $status_wali = $detail['status_approval_wali'] ?? 'Pending';
+            $isLocked = ($status_wali === 'Approved' || in_array($current_stage, array('Admin Layanan', 'Koordinator TA', 'Ketua KK', 'Selesai Approval')));
+        ?>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- Sidebar Profile Card -->
@@ -88,6 +96,26 @@
             <!-- Main Content Area -->
             <div class="lg:col-span-2 space-y-8">
                 
+                <?php if($isLocked): ?>
+                    <!-- Banner Status Terkunci (Read-Only) -->
+                    <div class="bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-500/10 border-2 border-blue-500/30 rounded-2xl p-4 sm:p-5 flex items-start gap-4 shadow-sm backdrop-blur-xs">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg font-bold shrink-0 box-3d shadow-md shadow-blue-500/20">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="text-sm font-bold text-slate-900">Mode Pratinjau (Read-Only)</h4>
+                                <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold rounded-full border border-blue-200 uppercase tracking-wide">
+                                    Tahap: <?= htmlspecialchars($current_stage); ?>
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-600 font-medium leading-relaxed mt-1">
+                                Pendaftaran Tugas Akhir mahasiswa ini telah <strong>disetujui oleh Dosen Wali</strong> dan saat ini sedang dalam proses verifikasi di tahap <strong><?= htmlspecialchars($current_stage); ?></strong>. Data, berkas, dan keputusan telah dikunci dan tidak dapat diubah lagi.
+                            </p>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Jenis TA Review & Keputusan Card -->
                 <?php
                     $st_jenis = $detail['status_jenis_ta'] ?? 'Pending';
@@ -134,40 +162,47 @@
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                 <span>Catatan / Komentar untuk Jenis TA:</span>
-                                <span id="comment-status-jenis" class="text-[10px] <?= $isJenisDecided ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
-                                    <?= $isJenisDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'; ?>
+                                <span id="comment-status-jenis" class="text-[10px] <?= ($isLocked || $isJenisDecided) ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
+                                    <?= $isLocked ? '(Terkunci - Read Only)' : ($isJenisDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'); ?>
                                 </span>
                             </label>
-                            <textarea id="catatan_jenis_ta" rows="2" placeholder="Tuliskan catatan atau masukan terkait jenis tugas akhir..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isJenisDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isJenisDecided ? 'readonly' : ''; ?>><?= htmlspecialchars($note_jenis); ?></textarea>
+                            <textarea id="catatan_jenis_ta" rows="2" placeholder="Tuliskan catatan atau masukan terkait jenis tugas akhir..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= ($isLocked || $isJenisDecided) ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= ($isLocked || $isJenisDecided) ? 'readonly' : ''; ?>><?= htmlspecialchars($note_jenis); ?></textarea>
                         </div>
 
                         <div class="flex items-center justify-end gap-2.5" id="action-buttons-jenis">
-                            <!-- Reset Button -->
-                            <button type="button" id="btn-reset-jenis" onclick="resetJenisDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
-                                <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
-                            </button>
-
-                            <?php if($st_jenis === 'Approved'): ?>
-                                <button type="button" id="btn-approve-jenis" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
-                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
-                                </button>
-                                <button type="button" id="btn-reject-jenis" onclick="handleResetFirstWarningJenis('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
-                                    <i class="bi bi-x-circle text-sm"></i> Denied
-                                </button>
-                            <?php elseif($st_jenis === 'Rejected'): ?>
-                                <button type="button" id="btn-approve-jenis" onclick="handleResetFirstWarningJenis('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
-                                    <i class="bi bi-check-circle text-sm"></i> Approve
-                                </button>
-                                <button type="button" id="btn-reject-jenis" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
-                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
-                                </button>
+                            <?php if($isLocked): ?>
+                                <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-200">
+                                    <i class="bi bi-shield-check text-sm text-emerald-600"></i>
+                                    <span>Jenis TA Telah Disetujui (Terkunci)</span>
+                                </div>
                             <?php else: ?>
-                                <button type="button" id="btn-approve-jenis" onclick="decideJenis('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                <!-- Reset Button -->
+                                <button type="button" id="btn-reset-jenis" onclick="resetJenisDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                                    <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
                                 </button>
-                                <button type="button" id="btn-reject-jenis" onclick="decideJenis('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
-                                </button>
+
+                                <?php if($st_jenis === 'Approved'): ?>
+                                    <button type="button" id="btn-approve-jenis" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                    </button>
+                                    <button type="button" id="btn-reject-jenis" onclick="handleResetFirstWarningJenis('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                                        <i class="bi bi-x-circle text-sm"></i> Denied
+                                    </button>
+                                <?php elseif($st_jenis === 'Rejected'): ?>
+                                    <button type="button" id="btn-approve-jenis" onclick="handleResetFirstWarningJenis('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                                        <i class="bi bi-check-circle text-sm"></i> Approve
+                                    </button>
+                                    <button type="button" id="btn-reject-jenis" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" id="btn-approve-jenis" onclick="decideJenis('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                    </button>
+                                    <button type="button" id="btn-reject-jenis" onclick="decideJenis('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                    </button>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -243,40 +278,47 @@
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                 <span>Saran / Catatan untuk Judul TA:</span>
-                                <span id="comment-status-judul" class="text-[10px] <?= $isJudulDecided ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
-                                    <?= $isJudulDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'; ?>
+                                <span id="comment-status-judul" class="text-[10px] <?= ($isLocked || $isJudulDecided) ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
+                                    <?= $isLocked ? '(Terkunci - Read Only)' : ($isJudulDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'); ?>
                                 </span>
                             </label>
-                            <textarea id="catatan_judul" rows="2" placeholder="Tuliskan saran atau catatan revisi untuk judul tugas akhir..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isJudulDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isJudulDecided ? 'readonly' : ''; ?>><?= htmlspecialchars($note_judul); ?></textarea>
+                            <textarea id="catatan_judul" rows="2" placeholder="Tuliskan saran atau catatan revisi untuk judul tugas akhir..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= ($isLocked || $isJudulDecided) ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= ($isLocked || $isJudulDecided) ? 'readonly' : ''; ?>><?= htmlspecialchars($note_judul); ?></textarea>
                         </div>
 
                         <div class="flex items-center justify-end gap-2.5" id="action-buttons-judul">
-                            <!-- Reset Button -->
-                            <button type="button" id="btn-reset-judul" onclick="resetJudulDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
-                                <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
-                            </button>
-
-                            <?php if($st_judul === 'Approved'): ?>
-                                <button type="button" id="btn-approve-judul" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
-                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
-                                </button>
-                                <button type="button" id="btn-reject-judul" onclick="handleResetFirstWarningJudul('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
-                                    <i class="bi bi-x-circle text-sm"></i> Denied
-                                </button>
-                            <?php elseif($st_judul === 'Rejected'): ?>
-                                <button type="button" id="btn-approve-judul" onclick="handleResetFirstWarningJudul('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
-                                    <i class="bi bi-check-circle text-sm"></i> Approve
-                                </button>
-                                <button type="button" id="btn-reject-judul" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
-                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
-                                </button>
+                            <?php if($isLocked): ?>
+                                <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-200">
+                                    <i class="bi bi-shield-check text-sm text-emerald-600"></i>
+                                    <span>Usulan Judul Telah Disetujui (Terkunci)</span>
+                                </div>
                             <?php else: ?>
-                                <button type="button" id="btn-approve-judul" onclick="decideJudul('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                <!-- Reset Button -->
+                                <button type="button" id="btn-reset-judul" onclick="resetJudulDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                                    <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
                                 </button>
-                                <button type="button" id="btn-reject-judul" onclick="decideJudul('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
-                                </button>
+
+                                <?php if($st_judul === 'Approved'): ?>
+                                    <button type="button" id="btn-approve-judul" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                    </button>
+                                    <button type="button" id="btn-reject-judul" onclick="handleResetFirstWarningJudul('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                                        <i class="bi bi-x-circle text-sm"></i> Denied
+                                    </button>
+                                <?php elseif($st_judul === 'Rejected'): ?>
+                                    <button type="button" id="btn-approve-judul" onclick="handleResetFirstWarningJudul('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                                        <i class="bi bi-check-circle text-sm"></i> Approve
+                                    </button>
+                                    <button type="button" id="btn-reject-judul" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" id="btn-approve-judul" onclick="decideJudul('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                    </button>
+                                    <button type="button" id="btn-reject-judul" onclick="decideJudul('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                    </button>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -364,53 +406,60 @@
                                             <div>
                                                 <label class="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                                                     <span>Komentar / Catatan untuk Berkas Ini:</span>
-                                                    <span id="comment-status-<?= $key; ?>" class="text-[10px] <?= $isDecided ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
-                                                        <?= $isDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'; ?>
+                                                    <span id="comment-status-<?= $key; ?>" class="text-[10px] <?= ($isLocked || $isDecided) ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
+                                                        <?= $isLocked ? '(Terkunci - Read Only)' : ($isDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'); ?>
                                                     </span>
                                                 </label>
-                                                <textarea id="comment-<?= $key; ?>" rows="2" placeholder="Tambahkan catatan atau revisi untuk berkas <?= $item['short']; ?>..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isDecided ? 'readonly' : ''; ?>><?= htmlspecialchars($comment_val); ?></textarea>
+                                                <textarea id="comment-<?= $key; ?>" rows="2" placeholder="Tambahkan catatan atau revisi untuk berkas <?= $item['short']; ?>..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= ($isLocked || $isDecided) ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= ($isLocked || $isDecided) ? 'readonly' : ''; ?>><?= htmlspecialchars($comment_val); ?></textarea>
                                             </div>
 
                                             <!-- Tombol Reset, Approve & Denied di kanan bawah -->
                                             <div class="flex items-center justify-end gap-2.5" id="action-buttons-<?= $key; ?>">
-                                                <!-- Tombol Reset di sebelah kiri Approve (Selalu langsung aktif) -->
-                                                <button type="button" id="btn-reset-<?= $key; ?>" onclick="resetSingleFile('<?= $key; ?>')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / komentar">
-                                                    <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
-                                                </button>
-
-                                                <!-- Tombol Approve & Denied -->
-                                                <?php if(!$isRev): ?>
-                                                    <!-- Belum direview: kedua tombol terkunci (klik akan membuka review modal) -->
-                                                    <button type="button" id="btn-approve-<?= $key; ?>" onclick="handleLockedClick('<?= $key; ?>', '<?= addslashes($item['title']); ?>', '<?= addslashes($item['file']); ?>', '<?= $fileUrl; ?>')" class="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-pointer flex items-center gap-1.5 opacity-70 hover:opacity-100 hover:bg-slate-200 transition" title="Klik untuk Buka PDF & Buka Kunci Approve">
-                                                        <i class="bi bi-lock-fill text-xs"></i> Approve
-                                                    </button>
-                                                    <button type="button" id="btn-reject-<?= $key; ?>" onclick="handleLockedClick('<?= $key; ?>', '<?= addslashes($item['title']); ?>', '<?= addslashes($item['file']); ?>', '<?= $fileUrl; ?>')" class="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-pointer flex items-center gap-1.5 opacity-70 hover:opacity-100 hover:bg-slate-200 transition" title="Klik untuk Buka PDF & Buka Kunci Denied">
-                                                        <i class="bi bi-lock-fill text-xs"></i> Denied
-                                                    </button>
-                                                <?php elseif($st === 'Approved'): ?>
-                                                    <!-- Sudah Approve: Approve hijau, Denied abu-abu (wajib reset untuk ubah) -->
-                                                    <button type="button" id="btn-approve-<?= $key; ?>" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
-                                                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
-                                                    </button>
-                                                    <button type="button" id="btn-reject-<?= $key; ?>" onclick="handleResetFirstWarning('<?= $key; ?>', 'Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
-                                                        <i class="bi bi-x-circle text-sm"></i> Denied
-                                                    </button>
-                                                <?php elseif($st === 'Rejected'): ?>
-                                                    <!-- Sudah Denied: Approve abu-abu (wajib reset untuk ubah), Denied merah -->
-                                                    <button type="button" id="btn-approve-<?= $key; ?>" onclick="handleResetFirstWarning('<?= $key; ?>', 'Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
-                                                        <i class="bi bi-check-circle text-sm"></i> Approve
-                                                    </button>
-                                                    <button type="button" id="btn-reject-<?= $key; ?>" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
-                                                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
-                                                    </button>
+                                                <?php if($isLocked): ?>
+                                                    <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200">
+                                                        <i class="bi bi-shield-check text-sm text-emerald-600"></i>
+                                                        <span>Berkas <?= $item['short']; ?> Disetujui (Terkunci)</span>
+                                                    </div>
                                                 <?php else: ?>
-                                                    <!-- Pending (Sudah direview): Kedua tombol aktif hijau & merah -->
-                                                    <button type="button" id="btn-approve-<?= $key; ?>" onclick="approveSingleFile('<?= $key; ?>', 'Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                                    <!-- Tombol Reset di sebelah kiri Approve (Selalu langsung aktif) -->
+                                                    <button type="button" id="btn-reset-<?= $key; ?>" onclick="resetSingleFile('<?= $key; ?>')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / komentar">
+                                                        <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
                                                     </button>
-                                                    <button type="button" id="btn-reject-<?= $key; ?>" onclick="approveSingleFile('<?= $key; ?>', 'Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
-                                                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
-                                                    </button>
+
+                                                    <!-- Tombol Approve & Denied -->
+                                                    <?php if(!$isRev): ?>
+                                                        <!-- Belum direview: kedua tombol terkunci (klik akan membuka review modal) -->
+                                                        <button type="button" id="btn-approve-<?= $key; ?>" onclick="handleLockedClick('<?= $key; ?>', '<?= addslashes($item['title']); ?>', '<?= addslashes($item['file']); ?>', '<?= $fileUrl; ?>')" class="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-pointer flex items-center gap-1.5 opacity-70 hover:opacity-100 hover:bg-slate-200 transition" title="Klik untuk Buka PDF & Buka Kunci Approve">
+                                                            <i class="bi bi-lock-fill text-xs"></i> Approve
+                                                        </button>
+                                                        <button type="button" id="btn-reject-<?= $key; ?>" onclick="handleLockedClick('<?= $key; ?>', '<?= addslashes($item['title']); ?>', '<?= addslashes($item['file']); ?>', '<?= $fileUrl; ?>')" class="px-4 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-pointer flex items-center gap-1.5 opacity-70 hover:opacity-100 hover:bg-slate-200 transition" title="Klik untuk Buka PDF & Buka Kunci Denied">
+                                                            <i class="bi bi-lock-fill text-xs"></i> Denied
+                                                        </button>
+                                                    <?php elseif($st === 'Approved'): ?>
+                                                        <!-- Sudah Approve: Approve hijau, Denied abu-abu (wajib reset untuk ubah) -->
+                                                        <button type="button" id="btn-approve-<?= $key; ?>" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                                            <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                                        </button>
+                                                        <button type="button" id="btn-reject-<?= $key; ?>" onclick="handleResetFirstWarning('<?= $key; ?>', 'Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                                                            <i class="bi bi-x-circle text-sm"></i> Denied
+                                                        </button>
+                                                    <?php elseif($st === 'Rejected'): ?>
+                                                        <!-- Sudah Denied: Approve abu-abu (wajib reset untuk ubah), Denied merah -->
+                                                        <button type="button" id="btn-approve-<?= $key; ?>" onclick="handleResetFirstWarning('<?= $key; ?>', 'Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                                                            <i class="bi bi-check-circle text-sm"></i> Approve
+                                                        </button>
+                                                        <button type="button" id="btn-reject-<?= $key; ?>" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <!-- Pending (Sudah direview): Kedua tombol aktif hijau & merah -->
+                                                        <button type="button" id="btn-approve-<?= $key; ?>" onclick="approveSingleFile('<?= $key; ?>', 'Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                                            <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                                        </button>
+                                                        <button type="button" id="btn-reject-<?= $key; ?>" onclick="approveSingleFile('<?= $key; ?>', 'Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                                        </button>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -424,50 +473,52 @@
                             $allRejected = ($detail['status_file_ksm'] ?? '') === 'Rejected' && ($detail['status_file_transkrip'] ?? '') === 'Rejected' && ($detail['status_file_pernyataan'] ?? '') === 'Rejected' && ($detail['status_file_bebas_lab'] ?? '') === 'Rejected';
                             ?>
 
-                            <!-- Bulk Actions Bar -->
-                            <div class="mt-5 pt-4 border-t border-orange-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 bg-orange-50/50 rounded-2xl p-4">
-                                <div class="text-xs text-slate-500 flex items-center gap-2">
-                                    <i class="bi bi-lightning-charge-fill text-orange-400"></i>
-                                    <span>Aksi Masal: Reset, Setujui, atau Tolak semua berkas sekaligus.</span>
-                                </div>
-                                <div class="flex items-center gap-2.5 shrink-0" id="bulk-action-buttons">
-                                    <!-- Reset Semua: SELALU BISA DIPENCET KAPAN SAJA -->
-                                    <button type="button" onclick="resetAllFiles()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-xs" title="Reset semua berkas ke Menunggu">
-                                        <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset Semua
-                                    </button>
+                            <?php if(!$isLocked): ?>
+                                <!-- Bulk Actions Bar -->
+                                <div class="mt-5 pt-4 border-t border-orange-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 bg-orange-50/50 rounded-2xl p-4">
+                                    <div class="text-xs text-slate-500 flex items-center gap-2">
+                                        <i class="bi bi-lightning-charge-fill text-orange-400"></i>
+                                        <span>Aksi Masal: Reset, Setujui, atau Tolak semua berkas sekaligus.</span>
+                                    </div>
+                                    <div class="flex items-center gap-2.5 shrink-0" id="bulk-action-buttons">
+                                        <!-- Reset Semua: SELALU BISA DIPENCET KAPAN SAJA -->
+                                        <button type="button" onclick="resetAllFiles()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-xs" title="Reset semua berkas ke Menunggu">
+                                            <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset Semua
+                                        </button>
 
-                                    <!-- Approve Semua & Denied Semua -->
-                                    <?php if(!$allReviewed): ?>
-                                        <button type="button" id="btn-bulk-approve" onclick="handleBulkLockedClick()" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60" title="Wajib buka dan review semua berkas terlebih dahulu">
-                                            <i class="bi bi-lock-fill text-xs"></i> Approve Semua
-                                        </button>
-                                        <button type="button" id="btn-bulk-reject" onclick="handleBulkLockedClick()" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60" title="Wajib buka dan review semua berkas terlebih dahulu">
-                                            <i class="bi bi-lock-fill text-xs"></i> Denied Semua
-                                        </button>
-                                    <?php elseif($allApproved): ?>
-                                        <button type="button" id="btn-bulk-approve" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs" title="Semua berkas telah disetujui">
-                                            <i class="bi bi-check-all text-base"></i> Approve Semua
-                                        </button>
-                                        <button type="button" id="btn-bulk-reject" onclick="handleResetFirstWarning('semua berkas', 'Denied Semua')" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Semua berkas sudah di-Approve. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Denied Semua">
-                                            <i class="bi bi-x-circle text-sm"></i> Denied Semua
-                                        </button>
-                                    <?php elseif($allRejected): ?>
-                                        <button type="button" id="btn-bulk-approve" onclick="handleResetFirstWarning('semua berkas', 'Approve Semua')" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Semua berkas sudah di-Denied. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Approve Semua">
-                                            <i class="bi bi-check-all text-base"></i> Approve Semua
-                                        </button>
-                                        <button type="button" id="btn-bulk-reject" class="px-4 py-2 bg-rose-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs" title="Semua berkas telah ditolak">
-                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" id="btn-bulk-approve" onclick="approveAllFiles('Approved')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs" title="Approve semua berkas sekaligus">
-                                            <i class="bi bi-check-all text-base"></i> Approve Semua
-                                        </button>
-                                        <button type="button" id="btn-bulk-reject" onclick="approveAllFiles('Rejected')" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs" title="Denied semua berkas sekaligus">
-                                            <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
-                                        </button>
-                                    <?php endif; ?>
+                                        <!-- Approve Semua & Denied Semua -->
+                                        <?php if(!$allReviewed): ?>
+                                            <button type="button" id="btn-bulk-approve" onclick="handleBulkLockedClick()" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60" title="Wajib buka dan review semua berkas terlebih dahulu">
+                                                <i class="bi bi-lock-fill text-xs"></i> Approve Semua
+                                            </button>
+                                            <button type="button" id="btn-bulk-reject" onclick="handleBulkLockedClick()" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed flex items-center gap-2 opacity-60" title="Wajib buka dan review semua berkas terlebih dahulu">
+                                                <i class="bi bi-lock-fill text-xs"></i> Denied Semua
+                                            </button>
+                                        <?php elseif($allApproved): ?>
+                                            <button type="button" id="btn-bulk-approve" class="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs" title="Semua berkas telah disetujui">
+                                                <i class="bi bi-check-all text-base"></i> Approve Semua
+                                            </button>
+                                            <button type="button" id="btn-bulk-reject" onclick="handleResetFirstWarning('semua berkas', 'Denied Semua')" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Semua berkas sudah di-Approve. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Denied Semua">
+                                                <i class="bi bi-x-circle text-sm"></i> Denied Semua
+                                            </button>
+                                        <?php elseif($allRejected): ?>
+                                            <button type="button" id="btn-bulk-approve" onclick="handleResetFirstWarning('semua berkas', 'Approve Semua')" class="px-4 py-2 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Semua berkas sudah di-Denied. Klik Reset Semua terlebih dahulu jika ingin mengganti ke Approve Semua">
+                                                <i class="bi bi-check-all text-base"></i> Approve Semua
+                                            </button>
+                                            <button type="button" id="btn-bulk-reject" class="px-4 py-2 bg-rose-500 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-default shadow-xs" title="Semua berkas telah ditolak">
+                                                <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" id="btn-bulk-approve" onclick="approveAllFiles('Approved')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs" title="Approve semua berkas sekaligus">
+                                                <i class="bi bi-check-all text-base"></i> Approve Semua
+                                            </button>
+                                            <button type="button" id="btn-bulk-reject" onclick="approveAllFiles('Rejected')" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs" title="Denied semua berkas sekaligus">
+                                                <i class="bi bi-x-circle-fill text-sm"></i> Denied Semua
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
             </div>
@@ -509,18 +560,30 @@
 
             <!-- Modal Footer -->
             <div class="px-6 py-3.5 border-t border-orange-100 bg-white flex items-center justify-between gap-3 shrink-0">
-                <div class="hidden sm:flex items-center gap-2 text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                    <i class="bi bi-shield-check text-sm"></i>
-                    <span>Peninjauan berkas akan membuka tombol Approve & Denied secara instan</span>
-                </div>
-                <div class="flex items-center gap-3 ml-auto">
-                    <button type="button" onclick="closePdfReviewModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition cursor-pointer">
-                        Tutup
-                    </button>
-                    <button type="button" id="btnConfirmReviewed" onclick="confirmPdfReviewed()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-2 cursor-pointer">
-                        <i class="bi bi-check-lg text-base"></i> Konfirmasi Selesai Review & Buka Kunci ACC
-                    </button>
-                </div>
+                <?php if($isLocked): ?>
+                    <div class="hidden sm:flex items-center gap-2 text-xs text-blue-700 font-semibold bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200">
+                        <i class="bi bi-info-circle text-sm"></i>
+                        <span>Pratinjau Arsip Berkas Mahasiswa (Mode Read-Only)</span>
+                    </div>
+                    <div class="flex items-center gap-3 ml-auto">
+                        <button type="button" onclick="closePdfReviewModal()" class="px-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition cursor-pointer shadow-xs">
+                            Tutup Pratinjau
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <div class="hidden sm:flex items-center gap-2 text-xs text-emerald-700 font-semibold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                        <i class="bi bi-shield-check text-sm"></i>
+                        <span>Peninjauan berkas akan membuka tombol Approve & Denied secara instan</span>
+                    </div>
+                    <div class="flex items-center gap-3 ml-auto">
+                        <button type="button" onclick="closePdfReviewModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 transition cursor-pointer">
+                            Tutup
+                        </button>
+                        <button type="button" id="btnConfirmReviewed" onclick="confirmPdfReviewed()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-2 cursor-pointer">
+                            <i class="bi bi-check-lg text-base"></i> Konfirmasi Selesai Review & Buka Kunci ACC
+                        </button>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -895,6 +958,61 @@
             return;
         }
 
+        const fileNames = {
+            ksm: 'KSM (Kartu Studi Mahasiswa)',
+            transkrip: 'Transkrip Nilai Akademik',
+            pernyataan: 'Surat Pernyataan Mahasiswa',
+            bebas_lab: 'Surat Bebas Lab & Perpustakaan'
+        };
+        const docName = fileNames[key] || key.toUpperCase();
+        const isApp = (status === 'Approved');
+        const commentArea = document.getElementById(`comment-${key}`);
+        const commentVal = commentArea ? commentArea.value.trim() : '';
+
+        if (!isApp && !commentVal) {
+            Swal.fire({
+                title: 'Catatan Revisi Diperlukan',
+                text: `Harap isi catatan perbaikan/alasan penolakan pada kolom komentar berkas ${docName} sebelum menolak.`,
+                icon: 'warning',
+                iconColor: '#e11d48',
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Baik, Saya Isi',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border border-rose-200',
+                    confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs'
+                }
+            }).then(() => {
+                if (commentArea) commentArea.focus();
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: isApp ? `Setujui Berkas ${key.toUpperCase()}?` : `Tolak Berkas ${key.toUpperCase()}?`,
+            html: isApp 
+                ? `<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin berkas <strong>${docName}</strong> sudah valid dan sesuai?</p>`
+                : `<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin menolak berkas <strong>${docName}</strong> dengan catatan: <em>"${commentVal}"</em>?</p>`,
+            icon: isApp ? 'question' : 'warning',
+            iconColor: isApp ? '#10b981' : '#e11d48',
+            showCancelButton: true,
+            confirmButtonColor: isApp ? '#059669' : '#e11d48',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: isApp ? '<i class="bi bi-check-circle-fill"></i> Ya, Setujui' : '<i class="bi bi-x-circle-fill"></i> Ya, Tolak Berkas',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200',
+                confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs shadow-md cursor-pointer',
+                cancelButton: 'rounded-xl font-semibold px-4 py-2.5 text-xs cursor-pointer'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeApproveSingleFile(key, status);
+            }
+        });
+    }
+
+    function executeApproveSingleFile(key, status) {
         // Update state
         fileCurrentStatus[key] = status;
 
@@ -1072,6 +1190,33 @@
             return;
         }
 
+        const isApp = (status === 'Approved');
+        Swal.fire({
+            title: isApp ? 'Setujui Seluruh Berkas?' : 'Tolak Seluruh Berkas?',
+            html: isApp 
+                ? '<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin <strong>menyetujui (Approve) seluruh 4 berkas</strong> persyaratan mahasiswa ini?</p>'
+                : '<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin <strong>menolak (Denied) seluruh 4 berkas</strong> persyaratan mahasiswa ini?</p>',
+            icon: isApp ? 'question' : 'warning',
+            iconColor: isApp ? '#10b981' : '#e11d48',
+            showCancelButton: true,
+            confirmButtonColor: isApp ? '#059669' : '#e11d48',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: isApp ? '<i class="bi bi-check-all"></i> Ya, Setujui Semua' : '<i class="bi bi-x-circle-fill"></i> Ya, Tolak Semua',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200',
+                confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs shadow-md cursor-pointer',
+                cancelButton: 'rounded-xl font-semibold px-4 py-2.5 text-xs cursor-pointer'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeApproveAllFiles(status);
+            }
+        });
+    }
+
+    function executeApproveAllFiles(status) {
         const keys = ['ksm', 'transkrip', 'pernyataan', 'bebas_lab'];
         
         keys.forEach(k => {
@@ -1212,6 +1357,54 @@
     }
 
     function decideJudul(status) {
+        const isApp = (status === 'Approved');
+        const commentArea = document.getElementById('catatan_judul');
+        const commentVal = commentArea ? commentArea.value.trim() : '';
+
+        if (!isApp && !commentVal) {
+            Swal.fire({
+                title: 'Catatan Revisi Judul Diperlukan',
+                text: 'Harap isi catatan perbaikan/saran revisi judul sebelum menolak.',
+                icon: 'warning',
+                iconColor: '#e11d48',
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Baik, Saya Isi',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border border-rose-200',
+                    confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs'
+                }
+            }).then(() => {
+                if (commentArea) commentArea.focus();
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: isApp ? 'Setujui Usulan Judul TA?' : 'Tolak Usulan Judul TA?',
+            html: isApp 
+                ? '<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin <strong>menyetujui usulan topik &amp; judul Tugas Akhir</strong> mahasiswa ini?</p>'
+                : `<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin menolak usulan judul dengan catatan: <em>"${commentVal}"</em>?</p>`,
+            icon: isApp ? 'question' : 'warning',
+            iconColor: isApp ? '#10b981' : '#e11d48',
+            showCancelButton: true,
+            confirmButtonColor: isApp ? '#059669' : '#e11d48',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: isApp ? '<i class="bi bi-check-circle-fill"></i> Ya, Setujui Judul' : '<i class="bi bi-x-circle-fill"></i> Ya, Tolak Judul',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200',
+                confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs shadow-md cursor-pointer',
+                cancelButton: 'rounded-xl font-semibold px-4 py-2.5 text-xs cursor-pointer'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeDecideJudul(status);
+            }
+        });
+    }
+
+    function executeDecideJudul(status) {
         const commentArea = document.getElementById('catatan_judul');
         const commentVal = commentArea ? commentArea.value.trim() : '';
 
@@ -1341,6 +1534,54 @@
     }
 
     function decideJenis(status) {
+        const isApp = (status === 'Approved');
+        const commentArea = document.getElementById('catatan_jenis_ta');
+        const commentVal = commentArea ? commentArea.value.trim() : '';
+
+        if (!isApp && !commentVal) {
+            Swal.fire({
+                title: 'Catatan Revisi Jenis TA Diperlukan',
+                text: 'Harap isi catatan perbaikan/alasan penolakan jenis TA sebelum menolak.',
+                icon: 'warning',
+                iconColor: '#e11d48',
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Baik, Saya Isi',
+                customClass: {
+                    popup: 'rounded-3xl shadow-2xl border border-rose-200',
+                    confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs'
+                }
+            }).then(() => {
+                if (commentArea) commentArea.focus();
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: isApp ? 'Setujui Jenis & Skema TA?' : 'Tolak Jenis & Skema TA?',
+            html: isApp 
+                ? '<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin <strong>menyetujui jenis &amp; skema TA</strong> serta kelompok keahlian mahasiswa ini?</p>'
+                : `<p class="text-xs text-slate-600 leading-relaxed">Apakah Anda yakin ingin menolak jenis &amp; skema TA dengan catatan: <em>"${commentVal}"</em>?</p>`,
+            icon: isApp ? 'question' : 'warning',
+            iconColor: isApp ? '#10b981' : '#e11d48',
+            showCancelButton: true,
+            confirmButtonColor: isApp ? '#059669' : '#e11d48',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: isApp ? '<i class="bi bi-check-circle-fill"></i> Ya, Setujui' : '<i class="bi bi-x-circle-fill"></i> Ya, Tolak',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-slate-200',
+                confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs shadow-md cursor-pointer',
+                cancelButton: 'rounded-xl font-semibold px-4 py-2.5 text-xs cursor-pointer'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeDecideJenis(status);
+            }
+        });
+    }
+
+    function executeDecideJenis(status) {
         const commentArea = document.getElementById('catatan_jenis_ta');
         const commentVal = commentArea ? commentArea.value.trim() : '';
 

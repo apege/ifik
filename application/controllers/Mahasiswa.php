@@ -173,6 +173,12 @@ class Mahasiswa extends CI_Controller {
             $updated_data['catatan_judul'] = '';
         }
 
+        if ($this->input->post('jenis_ta')) {
+            $updated_data['jenis_ta'] = $this->input->post('jenis_ta');
+            $updated_data['status_jenis_ta'] = 'Pending';
+            $updated_data['catatan_jenis_ta'] = '';
+        }
+
         if (!empty($updated_data)) {
             $updated_data['status_approval_wali'] = 'Pending';
             $updated_data['status_approval_admin'] = 'Pending';
@@ -243,13 +249,39 @@ class Mahasiswa extends CI_Controller {
             $is_locked = !$has_revisi;
         }
 
-        $has_ta = !empty($pendaftaran['judul_1']);
+        $has_ta = !empty($pendaftaran['jenis_ta']) || !empty($pendaftaran['judul_1']) || !empty($pendaftaran['file_ksm']);
+
+        // Hitung server_draft_step secara cerdas & presisi berdasarkan riwayat pengisian mahasiswa
+        $server_draft_step = 1;
+        if (!empty($pendaftaran)) {
+            $highest_step = 1;
+            if (!empty($pendaftaran['file_bebas_lab'])) {
+                $highest_step = 6;
+            } elseif (!empty($pendaftaran['file_pernyataan'])) {
+                $highest_step = 6;
+            } elseif (!empty($pendaftaran['file_transkrip'])) {
+                $highest_step = 5;
+            } elseif (!empty($pendaftaran['file_ksm'])) {
+                $highest_step = 4;
+            } elseif (!empty($pendaftaran['judul_1']) && !empty($pendaftaran['judul_en'])) {
+                $highest_step = 3;
+            } elseif (!empty($pendaftaran['jenis_ta'])) {
+                $highest_step = 2;
+            }
+
+            $saved_step = !empty($pendaftaran['draft_step']) ? (int)$pendaftaran['draft_step'] : 1;
+            $server_draft_step = max($saved_step, $highest_step);
+            if ($server_draft_step < 1) $server_draft_step = 1;
+            if ($server_draft_step > 6) $server_draft_step = 6;
+        }
+
         $data['title'] = $is_locked ? 'Pendaftaran Tugas Akhir (Sedang Ditinjau)' : 'Pendaftaran Tugas Akhir (6 Step)';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $pendaftaran;
         $data['is_locked'] = $is_locked;
         $data['has_revisi'] = $has_revisi;
         $data['has_ta'] = $has_ta;
+        $data['server_draft_step'] = $server_draft_step;
 
         if ($this->input->post()) {
             // Konfigurasi Upload File PDF
@@ -618,6 +650,13 @@ class Mahasiswa extends CI_Controller {
                 'status_admin'   => $a_status,
                 'status_koor'    => $k_status,
                 'status_kk'      => $kk_status,
+                'status_jenis_ta' => $pendaftaran['status_jenis_ta'] ?? 'Pending',
+                'status_judul'    => $pendaftaran['status_judul'] ?? 'Pending',
+                'status_file_ksm' => $pendaftaran['status_file_ksm'] ?? 'Pending',
+                'status_file_transkrip' => $pendaftaran['status_file_transkrip'] ?? 'Pending',
+                'status_file_pernyataan' => $pendaftaran['status_file_pernyataan'] ?? 'Pending',
+                'status_file_bebas_lab' => $pendaftaran['status_file_bebas_lab'] ?? 'Pending',
+                'updated_at'     => $pendaftaran['updated_at'] ?? '',
                 'approved_count' => $approved_count,
                 'progress_pct'   => $progress_pct,
                 'judul_1'        => $pendaftaran['judul_1'] ?? ''
@@ -658,12 +697,23 @@ class Mahasiswa extends CI_Controller {
             $mhs_konsentrasi = !empty($mhs['konsentrasi_dkv']) ? $mhs['konsentrasi_dkv'] : 'Desain Komunikasi Visual';
             $mhs_id_kk = !empty($mhs['id_kk']) ? $mhs['id_kk'] : 1;
 
+            // Map upload field name to corresponding wizard step
+            $step_map = [
+                'file_ksm'        => 3,
+                'file_transkrip'  => 4,
+                'file_pernyataan' => 5,
+                'file_bebas_lab'  => 6
+            ];
+            $step_for_file = $step_map[$field_name] ?? 3;
+
             // Simpan / update ke database sebagai draft
             $existing_ta = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
             if ($existing_ta) {
                 $upData = [$field_name => $file_name];
                 if (empty($existing_ta['konsentrasi_dkv'])) $upData['konsentrasi_dkv'] = $mhs_konsentrasi;
                 if (empty($existing_ta['id_kk'])) $upData['id_kk'] = $mhs_id_kk;
+                $current_db_step = !empty($existing_ta['draft_step']) ? (int)$existing_ta['draft_step'] : 1;
+                $upData['draft_step'] = max($current_db_step, $step_for_file);
                 $this->db->where('nim', $nim)->update('pendaftaran_ta', $upData);
             } else {
                 $this->db->insert('pendaftaran_ta', [
@@ -673,6 +723,7 @@ class Mahasiswa extends CI_Controller {
                     'is_submitted'         => 0,
                     'status_approval_wali' => 'Draft',
                     'current_stage'        => 'Draft',
+                    'draft_step'           => $step_for_file,
                     $field_name            => $file_name,
                     'created_at'           => date('Y-m-d H:i:s')
                 ]);
@@ -730,15 +781,18 @@ class Mahasiswa extends CI_Controller {
         if ($existing) {
             $this->db->where('nim', $nim)->update('pendaftaran_ta', $data_update);
         } else {
-            $data_update['nim'] = $nim;
-            $data_update['created_at'] = date('Y-m-d H:i:s');
-            $data_update['is_submitted'] = 0;
-            $data_update['status_approval_wali'] = 'Draft';
-            $data_update['status_approval_admin'] = 'Pending';
-            $data_update['status_approval_koor'] = 'Pending';
-            $data_update['status_approval_kk'] = 'Pending';
-            $data_update['current_stage'] = 'Draft';
-            $this->db->insert('pendaftaran_ta', $data_update);
+            // Cegah membuat baris baru jika form masih kosong
+            if (!empty($jenis_ta) || !empty($judul_1)) {
+                $data_update['nim'] = $nim;
+                $data_update['created_at'] = date('Y-m-d H:i:s');
+                $data_update['is_submitted'] = 0;
+                $data_update['status_approval_wali'] = 'Draft';
+                $data_update['status_approval_admin'] = 'Pending';
+                $data_update['status_approval_koor'] = 'Pending';
+                $data_update['status_approval_kk'] = 'Pending';
+                $data_update['current_stage'] = 'Draft';
+                $this->db->insert('pendaftaran_ta', $data_update);
+            }
         }
 
         $this->output

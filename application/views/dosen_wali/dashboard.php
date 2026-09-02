@@ -26,7 +26,8 @@
     </script>
     <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="<?= base_url('assets/css/style.css'); ?>" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-amber-100/80 via-orange-50 to-amber-100/90 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-orange-500 selection:text-white relative">
@@ -522,13 +523,18 @@
             </div>
 
             <!-- Modal Footer Actions Bar -->
-            <div class="p-4 px-6 bg-white border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
-                <button type="button" onclick="closeBatchModalDW()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer">
-                    BATAL
+            <div class="p-4 px-6 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <button type="button" onclick="markAllBatchDWApproved()" class="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs">
+                    <i class="fa-solid fa-check-double"></i> TANDAI SEMUA VALID (APPROVE ALL)
                 </button>
-                <button type="button" onclick="submitFinalBatchApprovalDW()" class="px-6 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-orange-600/20 flex items-center gap-2 transition-all cursor-pointer">
-                    <i class="fa-solid fa-paper-plane"></i> SIMPAN &amp; PROSES SEMUA VERIFIKASI MASSAL
-                </button>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="closeBatchModalDW()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer">
+                        BATAL
+                    </button>
+                    <button type="button" onclick="submitFinalBatchApprovalDW()" class="px-6 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-xl text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-orange-600/20 flex items-center gap-2 transition-all cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i> SIMPAN &amp; PROSES SEMUA VERIFIKASI MASSAL
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -894,6 +900,13 @@
                         const judulShort = mhs.judul ? (mhs.judul.length > 50 ? mhs.judul.substring(0, 50) + '...' : mhs.judul) : '<span class="text-slate-400 italic font-normal">Belum Mendaftar</span>';
                         const isChecked = currentlyChecked.includes(mhs.nim) ? 'checked' : '';
 
+                        const ksmClass = (mhs.status_file_ksm === 'Approved') ? 'text-emerald-600 font-extrabold' : ((mhs.status_file_ksm === 'Rejected') ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+                        const trsClass = (mhs.status_file_transkrip === 'Approved') ? 'text-emerald-600 font-extrabold' : ((mhs.status_file_transkrip === 'Rejected') ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+                        const srtClass = (mhs.status_file_pernyataan === 'Approved') ? 'text-emerald-600 font-extrabold' : ((mhs.status_file_pernyataan === 'Rejected') ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+                        const labClass = (mhs.status_file_bebas_lab === 'Approved') ? 'text-emerald-600 font-extrabold' : ((mhs.status_file_bebas_lab === 'Rejected') ? 'text-rose-600 font-extrabold' : 'text-slate-400');
+
+                        const prodiHtml = mhs.konsentrasi ? `<span>•</span><span class="text-orange-600 font-medium">${mhs.konsentrasi}</span>` : '';
+
                         return `
                             <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="${st}" data-nim="${(mhs.nim || '').toLowerCase()}" data-nama="${(mhs.nama || '').toLowerCase()}" data-judul="${(mhs.judul || '').toLowerCase()}" data-stage="${(mhs.current_stage || 'draft').toLowerCase()}">
                                 <td class="py-4 px-3 text-center whitespace-nowrap">
@@ -908,6 +921,7 @@
                                             <div class="font-bold text-slate-900 text-xs mhs-nama">${mhs.nama}</div>
                                             <div class="text-[10px] text-slate-400 font-mono flex items-center gap-1">
                                                 <span class="mhs-nim">${mhs.nim}</span>
+                                                ${prodiHtml}
                                             </div>
                                         </div>
                                     </div>
@@ -915,10 +929,10 @@
                                 <td class="py-4 px-4 text-slate-700 max-w-xs leading-relaxed text-xs">${judulShort}</td>
                                 <td class="py-4 px-4 text-center whitespace-nowrap">
                                     <div class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[9px] font-mono shadow-2xs">
-                                        <span class="text-slate-400 font-extrabold">KSM</span><span class="text-slate-300">·</span>
-                                        <span class="text-slate-400 font-extrabold">TRS</span><span class="text-slate-300">·</span>
-                                        <span class="text-slate-400 font-extrabold">SRT</span><span class="text-slate-300">·</span>
-                                        <span class="text-slate-400 font-extrabold">LAB</span>
+                                        <span class="${ksmClass}">KSM</span><span class="text-slate-300">·</span>
+                                        <span class="${trsClass}">TRS</span><span class="text-slate-300">·</span>
+                                        <span class="${srtClass}">SRT</span><span class="text-slate-300">·</span>
+                                        <span class="${labClass}">LAB</span>
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 text-center whitespace-nowrap">
@@ -1037,37 +1051,51 @@
         .then(res => {
             if (res.success && res.data.length > 0) {
                 window.batchStudentsDW = res.data.map(st => {
-                    const isRejected = (st.status_approval_wali === 'Rejected');
-                    const isJenisRej = (st.status_jenis_ta === 'Rejected');
-                    const isJudulRej = (st.status_judul === 'Rejected');
+                    const getInitStatus = (val) => {
+                        if (val === 'Approved' || val === 'Rejected') return val;
+                        return 'Pending';
+                    };
+
+                    const rawJenis = getInitStatus(st.status_jenis_ta);
+                    const rawJudul = getInitStatus(st.status_judul);
+
+                    const fileKsmStatus = getInitStatus(st.files?.ksm?.status);
+                    const fileTrnStatus = getInitStatus(st.files?.transkrip?.status);
+                    const filePrnStatus = getInitStatus(st.files?.pernyataan?.status);
+                    const fileLabStatus = getInitStatus(st.files?.bebas_lab?.status);
+
+                    const allStatuses = [rawJenis, rawJudul, fileKsmStatus, fileTrnStatus, filePrnStatus, fileLabStatus];
+                    const hasRej = allStatuses.some(s => s === 'Rejected');
+                    const allApp = allStatuses.every(s => s === 'Approved');
+                    const initAction = hasRej ? 'reject' : (allApp ? 'approve' : 'pending');
 
                     return {
                         ...st,
-                        action: isRejected ? 'reject' : 'approve',
-                        status_jenis_ta: st.status_jenis_ta || (isRejected ? 'Rejected' : 'Approved'),
+                        action: initAction,
+                        status_jenis_ta: rawJenis,
                         catatan_jenis_ta: st.catatan_jenis_ta || '',
-                        status_judul: st.status_judul || (isRejected ? 'Rejected' : 'Approved'),
+                        status_judul: rawJudul,
                         catatan_judul: st.catatan_judul || '',
                         catatan_wali: st.catatan_wali || '',
                         files: {
                             ksm: {
                                 ...st.files.ksm,
-                                status: st.files.ksm.status || (isRejected ? 'Rejected' : 'Approved'),
+                                status: fileKsmStatus,
                                 note: st.files.ksm.note || ''
                             },
                             transkrip: {
                                 ...st.files.transkrip,
-                                status: st.files.transkrip.status || (isRejected ? 'Rejected' : 'Approved'),
+                                status: fileTrnStatus,
                                 note: st.files.transkrip.note || ''
                             },
                             pernyataan: {
                                 ...st.files.pernyataan,
-                                status: st.files.pernyataan.status || (isRejected ? 'Rejected' : 'Approved'),
+                                status: filePrnStatus,
                                 note: st.files.pernyataan.note || ''
                             },
                             bebas_lab: {
                                 ...st.files.bebas_lab,
-                                status: st.files.bebas_lab.status || (isRejected ? 'Rejected' : 'Approved'),
+                                status: fileLabStatus,
                                 note: st.files.bebas_lab.note || ''
                             }
                         }
@@ -1102,13 +1130,25 @@
         // Render Quick Anchor Tabs
         if (tabsContainer) {
             tabsContainer.innerHTML = window.batchStudentsDW.map((st, idx) => {
-                const hasRej = (st.status_jenis_ta === 'Rejected') || (st.status_judul === 'Rejected') || (st.files && Object.values(st.files).some(f => f.status === 'Rejected'));
-                const isApp = (st.action === 'approve') && !hasRej;
+                const items = [st.status_jenis_ta, st.status_judul, ...Object.values(st.files).map(f => f.status)];
+                const hasRej = items.some(s => s === 'Rejected');
+                const allApp = items.every(s => s === 'Approved');
+
+                let tabClass = 'bg-slate-800 text-slate-300 border-slate-700';
+                let iconClass = 'fa-clock text-amber-400';
+                if (hasRej) {
+                    tabClass = 'bg-rose-600/30 text-rose-300 border-rose-500/40';
+                    iconClass = 'fa-xmark text-rose-400';
+                } else if (allApp) {
+                    tabClass = 'bg-emerald-600/30 text-emerald-300 border-emerald-500/40';
+                    iconClass = 'fa-check text-emerald-400';
+                }
+
                 return `
-                    <a href="#batch_card_${st.nim}" class="px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${isApp ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40' : 'bg-rose-600/30 text-rose-300 border border-rose-500/40'}">
+                    <a href="#batch_card_${st.nim}" class="px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${tabClass} border">
                         <span>${idx + 1}.</span>
                         <span>${st.nama.split(' ')[0]}</span>
-                        <i class="fa-solid ${isApp ? 'fa-check' : 'fa-xmark'} text-[9px]"></i>
+                        <i class="fa-solid ${iconClass} text-[9px]"></i>
                     </a>
                 `;
             }).join('');
@@ -1140,22 +1180,33 @@
         // Render Student Review Cards
         let html = '';
         window.batchStudentsDW.forEach((st, idx) => {
-            const hasReject = (st.status_jenis_ta === 'Rejected') || 
-                              (st.status_judul === 'Rejected') || 
-                              (st.files && Object.values(st.files).some(f => f.status === 'Rejected'));
-            const isOverallApprove = (st.action === 'approve') && !hasReject;
+            const studentItems = [st.status_jenis_ta, st.status_judul, ...Object.values(st.files).map(f => f.status)];
+            const hasReject = studentItems.some(s => s === 'Rejected');
+            const isAllApprove = studentItems.every(s => s === 'Approved');
+
             const isJenisApprove = (st.status_jenis_ta === 'Approved');
+            const isJenisReject  = (st.status_jenis_ta === 'Rejected');
+
             const isJudulApprove = (st.status_judul === 'Approved');
+            const isJudulReject  = (st.status_judul === 'Rejected');
 
             // Generate 4 live embedded document cards with bottom checkboxes & conditional comment box
             let docsHtml = '';
             Object.keys(docNames).forEach(key => {
                 const info = docNames[key];
-                const fileObj = (st.files && st.files[key]) ? st.files[key] : { name: 'Belum diunggah', url: '', status: 'Approved', note: '' };
+                const fileObj = (st.files && st.files[key]) ? st.files[key] : { name: 'Belum diunggah', url: '', status: 'Pending', note: '' };
                 const isDocApprove = (fileObj.status === 'Approved');
+                const isDocReject  = (fileObj.status === 'Rejected');
+
+                let badgeHtml = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200"><i class="fa-solid fa-clock text-[9px] mr-1 text-slate-400"></i>Belum Ditinjau</span>';
+                if (isDocApprove) {
+                    badgeHtml = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check text-[9px] mr-1 text-emerald-600"></i>Valid</span>';
+                } else if (isDocReject) {
+                    badgeHtml = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-xmark text-[9px] mr-1 text-rose-600"></i>Kurang/Revisi</span>';
+                }
 
                 docsHtml += `
-                    <div class="bg-white rounded-2xl p-4 sm:p-5 border ${isDocApprove ? 'border-slate-200' : 'border-rose-300 bg-rose-50/10'} shadow-xs flex flex-col justify-between space-y-4">
+                    <div class="bg-white rounded-2xl p-4 sm:p-5 border ${isDocReject ? 'border-rose-300 bg-rose-50/10' : (isDocApprove ? 'border-emerald-200' : 'border-slate-200')} shadow-xs flex flex-col justify-between space-y-4">
                         <div>
                             <!-- Header Doc with Status in Top Right -->
                             <div class="flex items-center justify-between mb-1.5">
@@ -1165,9 +1216,7 @@
                                     </div>
                                     <span class="font-bold text-slate-800 text-xs sm:text-sm">${info.title}</span>
                                 </div>
-                                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold ${isDocApprove ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
-                                    ${isDocApprove ? 'Valid' : 'Kurang/Revisi'}
-                                </span>
+                                ${badgeHtml}
                             </div>
                             <p class="text-[11px] font-mono text-slate-400 truncate mb-2" title="${fileObj.name}">${fileObj.name}</p>
 
@@ -1184,30 +1233,34 @@
                         </div>
 
                         <!-- Bottom Controls: Valid vs Kurang/Revisi Checkboxes & Conditional Revision Box -->
-                        <div class="space-y-3">
+                        <div class="space-y-3" id="batch_sec_file_${key}_${st.nim}">
                             <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isDocApprove ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isDocApprove ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
                                     <input type="checkbox" onchange="setFileDecisionDW('${st.nim}', '${key}', 'approve')" ${isDocApprove ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
                                     <span>Valid</span>
                                 </label>
-                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${!isDocApprove ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
-                                    <input type="checkbox" onchange="setFileDecisionDW('${st.nim}', '${key}', 'reject')" ${!isDocApprove ? 'checked' : ''} class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
+                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isDocReject ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                                    <input type="checkbox" onchange="setFileDecisionDW('${st.nim}', '${key}', 'reject')" ${isDocReject ? 'checked' : ''} class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
                                     <span>Kurang / Revisi</span>
                                 </label>
                             </div>
 
                             <!-- Per-Document Comment (HANYA MUNCUL KETIKA DI-REJECT) -->
-                            ${!isDocApprove ? `
+                            ${isDocReject ? `
                                 <div class="pt-3 border-t border-rose-200 space-y-1.5 transition-all">
                                     <label class="text-[11px] font-bold text-rose-700 uppercase flex items-center gap-1.5">
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         <span>CATATAN REVISI KHUSUS ${info.title.split('.')[1] ? info.title.split('.')[1].trim().toUpperCase() : info.title.toUpperCase()}:</span>
                                     </label>
                                     <input type="text" 
+                                           id="batch_note_file_${key}_${st.nim}"
                                            value="${fileObj.note || ''}" 
                                            oninput="updateFileNoteDW('${st.nim}', '${key}', this.value)" 
                                            placeholder="Tuliskan catatan perbaikan spesifik berkas ini..." 
                                            class="w-full px-4 py-2.5 bg-white border border-rose-300 rounded-xl text-xs font-medium text-slate-800 placeholder-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 shadow-2xs">
+                                    <p id="batch_err_file_${key}_${st.nim}" class="text-[11px] font-bold text-rose-600 flex items-center gap-1 hidden">
+                                        <i class="fa-solid fa-circle-exclamation"></i> <span>Catatan belum ditambahkan. Wajib diisi alasan revisi berkas ini.</span>
+                                    </p>
                                 </div>
                             ` : ''}
                         </div>
@@ -1215,6 +1268,29 @@
                 `;
             });
             
+            let jenisBadgeHtml = '<span class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200"><i class="fa-solid fa-clock text-slate-400 mr-1 text-[10px]"></i>Belum Ditinjau</span>';
+            if (isJenisApprove) {
+                jenisBadgeHtml = '<span class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-check text-emerald-600 mr-1 text-[10px]"></i>Valid / Disetujui</span>';
+            } else if (isJenisReject) {
+                jenisBadgeHtml = '<span class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-xmark text-rose-600 mr-1 text-[10px]"></i>Kurang / Revisi</span>';
+            }
+
+            let judulBadgeHtml = '<span class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200"><i class="fa-solid fa-clock text-slate-400 mr-1 text-[10px]"></i>Belum Ditinjau</span>';
+            if (isJudulApprove) {
+                judulBadgeHtml = '<span class="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-check text-emerald-600 mr-1 text-[10px]"></i>Valid / Disetujui</span>';
+            } else if (isJudulReject) {
+                judulBadgeHtml = '<span class="px-3 py-1 rounded-lg text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-xmark text-rose-600 mr-1 text-[10px]"></i>Kurang / Revisi</span>';
+            }
+
+            let overallBadgeHtml = '';
+            if (hasReject) {
+                overallBadgeHtml = '<span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs bg-rose-500 text-white"><i class="fa-solid fa-circle-xmark text-xs"></i> Ada Revisi</span>';
+            } else if (isAllApprove) {
+                overallBadgeHtml = '<span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs bg-emerald-500 text-white"><i class="fa-solid fa-circle-check text-xs"></i> Valid / Approved</span>';
+            } else {
+                overallBadgeHtml = '<span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs bg-amber-500/90 text-white"><i class="fa-solid fa-clock text-xs"></i> Menunggu Keputusan</span>';
+            }
+
             html += `
                 <div id="batch_card_${st.nim}" class="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 transition-all space-y-8">
                     <!-- Student Header Summary -->
@@ -1240,14 +1316,12 @@
 
                         <!-- Status Badge in Top-Right Corner of Header -->
                         <div class="flex items-center gap-3">
-                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-xs ${isOverallApprove ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">
-                                ${isOverallApprove ? '<i class="fa-solid fa-circle text-[9px] text-emerald-200 animate-pulse"></i> Valid / Approved' : '<i class="fa-solid fa-circle text-[9px] text-rose-200"></i> Ada Revisi'}
-                            </span>
+                            ${overallBadgeHtml}
                         </div>
                     </div>
 
                     <!-- SECTION 1: JENIS TUGAS AKHIR -->
-                    <div class="rounded-2xl border ${isJenisApprove ? 'border-slate-200 bg-slate-50/50' : 'border-rose-300 bg-rose-50/30'} p-5 sm:p-6 space-y-4 transition-all shadow-xs">
+                    <div class="rounded-2xl border ${isJenisReject ? 'border-rose-300 bg-rose-50/30' : (isJenisApprove ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200 bg-slate-50/50')} p-5 sm:p-6 space-y-4 transition-all shadow-xs" id="batch_sec_jenis_${st.nim}">
                         <!-- Top Header with Status Badge in Right Corner -->
                         <div class="flex items-center justify-between pb-3.5 border-b border-orange-200/60 gap-3">
                             <div class="flex items-center gap-3">
@@ -1259,9 +1333,7 @@
                                     <p class="text-xs text-slate-500 mt-0.5">Tinjau kesesuaian jenis TA dan konsentrasi keilmuan mahasiswa</p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 rounded-lg text-xs font-bold ${isJenisApprove ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
-                                ${isJenisApprove ? 'Valid / Disetujui' : 'Kurang/Revisi'}
-                            </span>
+                            ${jenisBadgeHtml}
                         </div>
 
                         <div class="p-4 bg-white rounded-xl border border-slate-200/80 shadow-2xs flex flex-wrap items-center gap-3">
@@ -1275,35 +1347,39 @@
                         <!-- Bottom Controls: Checkboxes & Conditional Comment Box -->
                         <div class="space-y-4 pt-3 border-t border-slate-200/80">
                             <div class="flex items-center justify-between text-xs">
-                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isJenisApprove ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isJenisApprove ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
                                     <input type="checkbox" onchange="setJenisDecisionDW('${st.nim}', 'approve')" ${isJenisApprove ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
                                     <span>Valid / Disetujui</span>
                                 </label>
-                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${!isJenisApprove ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
-                                    <input type="checkbox" onchange="setJenisDecisionDW('${st.nim}', 'reject')" ${!isJenisApprove ? 'checked' : ''} class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
+                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isJenisReject ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                                    <input type="checkbox" onchange="setJenisDecisionDW('${st.nim}', 'reject')" ${isJenisReject ? 'checked' : ''} class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
                                     <span>Kurang / Revisi</span>
                                 </label>
                             </div>
 
                             <!-- Comment (HANYA MUNCUL KETIKA DI-REJECT) -->
-                            ${!isJenisApprove ? `
+                            ${isJenisReject ? `
                                 <div class="pt-3 border-t border-rose-200 space-y-2 transition-all">
                                     <label class="text-[11px] font-bold text-rose-700 uppercase flex items-center gap-1.5">
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         <span>CATATAN REVISI KHUSUS JENIS &amp; SKEMA TA:</span>
                                     </label>
                                     <input type="text" 
+                                           id="batch_note_jenis_${st.nim}"
                                            value="${st.catatan_jenis_ta || ''}" 
                                            oninput="updateJenisNoteDW('${st.nim}', this.value)" 
                                            placeholder="Tuliskan catatan perbaikan atau alasan penolakan jenis TA..." 
                                            class="w-full px-4 py-2.5 bg-white border border-rose-300 rounded-xl text-xs font-medium text-slate-800 placeholder-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 shadow-2xs">
+                                    <p id="batch_err_jenis_${st.nim}" class="text-[11px] font-bold text-rose-600 flex items-center gap-1 hidden">
+                                        <i class="fa-solid fa-circle-exclamation"></i> <span>Catatan belum ditambahkan. Wajib diisi alasan penolakan jenis TA.</span>
+                                    </p>
                                 </div>
                             ` : ''}
                         </div>
                     </div>
 
                     <!-- SECTION 2: USULAN JUDUL TUGAS AKHIR -->
-                    <div class="rounded-2xl border ${isJudulApprove ? 'border-slate-200 bg-slate-50/50' : 'border-rose-300 bg-rose-50/30'} p-5 sm:p-6 space-y-4 transition-all shadow-xs">
+                    <div class="rounded-2xl border ${isJudulReject ? 'border-rose-300 bg-rose-50/30' : (isJudulApprove ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200 bg-slate-50/50')} p-5 sm:p-6 space-y-4 transition-all shadow-xs" id="batch_sec_judul_${st.nim}">
                         <!-- Top Header with Status Badge in Right Corner -->
                         <div class="flex items-center justify-between pb-3.5 border-b border-orange-200/60 gap-3">
                             <div class="flex items-center gap-3">
@@ -1315,9 +1391,7 @@
                                     <p class="text-xs text-slate-500 mt-0.5">Tinjau topik judul tugas akhir mahasiswa dan berikan persetujuan</p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 rounded-lg text-xs font-bold ${isJudulApprove ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-rose-100 text-rose-800 border border-rose-300'}">
-                                ${isJudulApprove ? 'Valid / Disetujui' : 'Kurang/Revisi'}
-                            </span>
+                            ${judulBadgeHtml}
                         </div>
 
                         <div class="p-4 sm:p-5 rounded-xl bg-white border border-slate-200/80 shadow-2xs space-y-3">
@@ -1344,28 +1418,32 @@
                         <!-- Bottom Controls: Checkboxes & Conditional Comment Box -->
                         <div class="space-y-4 pt-3 border-t border-slate-200/80">
                             <div class="flex items-center justify-between text-xs">
-                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isJudulApprove ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isJudulApprove ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
                                     <input type="checkbox" onchange="setJudulDecisionDW('${st.nim}', 'approve')" ${isJudulApprove ? 'checked' : ''} class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
                                     <span>Valid / Disetujui</span>
                                 </label>
-                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${!isJudulApprove ? 'bg-rose-50 text-rose-700 border-rose-300' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
-                                    <input type="checkbox" onchange="setJudulDecisionDW('${st.nim}', 'reject')" ${!isJudulApprove ? 'checked' : ''} class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
+                                <label class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border font-bold cursor-pointer transition-all ${isJudulReject ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}">
+                                    <input type="checkbox" onchange="setJudulDecisionDW('${st.nim}', 'reject')" ${isJudulReject ? 'checked' : ''} class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
                                     <span>Kurang / Revisi</span>
                                 </label>
                             </div>
 
                             <!-- Comment (HANYA MUNCUL KETIKA DI-REJECT) -->
-                            ${!isJudulApprove ? `
+                            ${isJudulReject ? `
                                 <div class="pt-3 border-t border-rose-200 space-y-2 transition-all">
                                     <label class="text-[11px] font-bold text-rose-700 uppercase flex items-center gap-1.5">
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         <span>CATATAN REVISI KHUSUS USULAN JUDUL TA:</span>
                                     </label>
                                     <input type="text" 
+                                           id="batch_note_judul_${st.nim}"
                                            value="${st.catatan_judul || ''}" 
                                            oninput="updateJudulNoteDW('${st.nim}', this.value)" 
                                            placeholder="Tuliskan saran revisi atau alasan penolakan judul TA..." 
                                            class="w-full px-4 py-2.5 bg-white border border-rose-300 rounded-xl text-xs font-medium text-slate-800 placeholder-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 shadow-2xs">
+                                    <p id="batch_err_judul_${st.nim}" class="text-[11px] font-bold text-rose-600 flex items-center gap-1 hidden">
+                                        <i class="fa-solid fa-circle-exclamation"></i> <span>Catatan belum ditambahkan. Wajib diisi saran/alasan revisi judul TA.</span>
+                                    </p>
                                 </div>
                             ` : ''}
                         </div>
@@ -1429,9 +1507,13 @@
     function setJenisDecisionDW(nim, decision) {
         const student = window.batchStudentsDW.find(s => s.nim === nim);
         if (student) {
-            student.status_jenis_ta = (decision === 'approve') ? 'Approved' : 'Rejected';
             if (decision === 'approve') {
-                student.catatan_jenis_ta = '';
+                student.status_jenis_ta = (student.status_jenis_ta === 'Approved') ? 'Pending' : 'Approved';
+                if (student.status_jenis_ta === 'Approved') {
+                    student.catatan_jenis_ta = '';
+                }
+            } else if (decision === 'reject') {
+                student.status_jenis_ta = (student.status_jenis_ta === 'Rejected') ? 'Pending' : 'Rejected';
             }
             checkStudentOverallStatusDW(student);
             renderAllBatchStudentsContentDW();
@@ -1463,9 +1545,13 @@
     function setJudulDecisionDW(nim, decision) {
         const student = window.batchStudentsDW.find(s => s.nim === nim);
         if (student) {
-            student.status_judul = (decision === 'approve') ? 'Approved' : 'Rejected';
             if (decision === 'approve') {
-                student.catatan_judul = '';
+                student.status_judul = (student.status_judul === 'Approved') ? 'Pending' : 'Approved';
+                if (student.status_judul === 'Approved') {
+                    student.catatan_judul = '';
+                }
+            } else if (decision === 'reject') {
+                student.status_judul = (student.status_judul === 'Rejected') ? 'Pending' : 'Rejected';
             }
             checkStudentOverallStatusDW(student);
             renderAllBatchStudentsContentDW();
@@ -1497,9 +1583,13 @@
     function setFileDecisionDW(nim, fileKey, decision) {
         const student = window.batchStudentsDW.find(s => s.nim === nim);
         if (student && student.files && student.files[fileKey]) {
-            student.files[fileKey].status = (decision === 'approve') ? 'Approved' : 'Rejected';
             if (decision === 'approve') {
-                student.files[fileKey].note = '';
+                student.files[fileKey].status = (student.files[fileKey].status === 'Approved') ? 'Pending' : 'Approved';
+                if (student.files[fileKey].status === 'Approved') {
+                    student.files[fileKey].note = '';
+                }
+            } else if (decision === 'reject') {
+                student.files[fileKey].status = (student.files[fileKey].status === 'Rejected') ? 'Pending' : 'Rejected';
             }
             checkStudentOverallStatusDW(student);
             renderAllBatchStudentsContentDW();
@@ -1529,28 +1619,22 @@
     }
 
     function checkStudentOverallStatusDW(st) {
-        const hasReject = (st.status_jenis_ta === 'Rejected') || 
-                          (st.status_judul === 'Rejected') || 
-                          Object.values(st.files).some(f => f.status === 'Rejected');
-        st.action = hasReject ? 'reject' : 'approve';
+        const items = [st.status_jenis_ta, st.status_judul, ...Object.values(st.files).map(f => f.status)];
+        const hasReject = items.some(s => s === 'Rejected');
+        const allApproved = items.every(s => s === 'Approved');
+
+        if (hasReject) {
+            st.action = 'reject';
+        } else if (allApproved) {
+            st.action = 'approve';
+        } else {
+            st.action = 'pending';
+        }
         syncStudentCatatanWaliDW(st);
     }
 
     function syncStudentCatatanWaliDW(st) {
-        let compiled = [];
-        if (st.status_jenis_ta === 'Rejected' && st.catatan_jenis_ta && st.catatan_jenis_ta.trim()) {
-            compiled.push(`[Jenis TA]: ${st.catatan_jenis_ta.trim()}`);
-        }
-        if (st.status_judul === 'Rejected' && st.catatan_judul && st.catatan_judul.trim()) {
-            compiled.push(`[Judul TA]: ${st.catatan_judul.trim()}`);
-        }
-        const docLabels = { 'ksm': 'KSM', 'transkrip': 'Transkrip', 'pernyataan': 'Surat Pernyataan', 'bebas_lab': 'Bebas Lab' };
-        Object.keys(st.files).forEach(k => {
-            if (st.files[k].status === 'Rejected' && st.files[k].note && st.files[k].note.trim()) {
-                compiled.push(`[${docLabels[k] || k}]: ${st.files[k].note.trim()}`);
-            }
-        });
-        st.catatan_wali = compiled.join('\n');
+        // Catatan umum terpisah murni dari catatan spesifik berkas / judul / jenis TA
     }
 
     function updateStudentNoteDW(nim, note) {
@@ -1566,9 +1650,13 @@
             st.action = 'approve';
             st.status_jenis_ta = 'Approved';
             st.status_judul = 'Approved';
+            st.catatan_jenis_ta = '';
+            st.catatan_judul = '';
             Object.keys(st.files).forEach(k => {
                 st.files[k].status = 'Approved';
+                st.files[k].note = '';
             });
+            syncStudentCatatanWaliDW(st);
         });
         renderAllBatchStudentsContentDW();
         showDWToast('Semua bagian mahasiswa terpilih telah ditandai Disetujui (Approve).');
@@ -1577,67 +1665,172 @@
     function submitFinalBatchApprovalDW() {
         if (!window.batchStudentsDW || window.batchStudentsDW.length === 0) return;
 
-        // Validasi jika ada bagian yang reject tapi catatannya kosong
+        function highlightBatchErrorField(inputEl, errEl, msg) {
+            if (inputEl) {
+                inputEl.classList.remove('border-rose-300');
+                inputEl.classList.add('border-rose-600', 'ring-4', 'ring-rose-500/30', 'bg-rose-50/80');
+                inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => inputEl.focus(), 300);
+                
+                inputEl.addEventListener('input', function onInputClear() {
+                    inputEl.classList.remove('ring-4', 'ring-rose-500/30', 'bg-rose-50/80', 'border-rose-600');
+                    inputEl.classList.add('border-rose-300');
+                    if (errEl) errEl.classList.add('hidden');
+                    inputEl.removeEventListener('input', onInputClear);
+                });
+            }
+            if (errEl) {
+                if (msg) {
+                    const spanEl = errEl.querySelector('span');
+                    if (spanEl) spanEl.textContent = msg;
+                }
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        // Validasi jika ada bagian yang belum diputuskan atau catatan revisi belum diisi
         for (const st of window.batchStudentsDW) {
+            const items = [
+                { name: 'Jenis & Skema TA', status: st.status_jenis_ta, secId: `batch_sec_jenis_${st.nim}` },
+                { name: 'Usulan Judul TA', status: st.status_judul, secId: `batch_sec_judul_${st.nim}` },
+                { name: 'KSM', status: st.files.ksm.status, secId: `batch_sec_file_ksm_${st.nim}` },
+                { name: 'Transkrip', status: st.files.transkrip.status, secId: `batch_sec_file_transkrip_${st.nim}` },
+                { name: 'Surat Pernyataan', status: st.files.pernyataan.status, secId: `batch_sec_file_pernyataan_${st.nim}` },
+                { name: 'Bebas Lab', status: st.files.bebas_lab.status, secId: `batch_sec_file_bebas_lab_${st.nim}` }
+            ];
+            const pendingItems = items.filter(i => i.status !== 'Approved' && i.status !== 'Rejected');
+            if (pendingItems.length > 0) {
+                const firstPending = pendingItems[0];
+                const secEl = document.getElementById(firstPending.secId) || document.getElementById(`batch_card_${st.nim}`);
+                if (secEl) {
+                    secEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    secEl.classList.add('ring-4', 'ring-amber-500/40');
+                    setTimeout(() => secEl.classList.remove('ring-4', 'ring-amber-500/40'), 3000);
+                }
+                showDWToast(`⚠️ Mahasiswa ${st.nama}: Bagian ${firstPending.name} belum diputuskan (Valid / Kurang).`, false);
+                return;
+            }
+
             if (st.status_jenis_ta === 'Rejected' && !st.catatan_jenis_ta.trim()) {
-                alert(`Mahasiswa ${st.nama} (${st.nim}) ditolak pada bagian Jenis TA, namun belum ada catatan revisi.\n\nHarap isi catatan revisi Jenis TA.`);
-                const card = document.getElementById(`batch_card_${st.nim}`);
-                if (card) card.scrollIntoView({ behavior: 'smooth' });
+                const inputEl = document.getElementById(`batch_note_jenis_${st.nim}`);
+                const errEl = document.getElementById(`batch_err_jenis_${st.nim}`);
+                highlightBatchErrorField(inputEl, errEl, `Catatan revisi Jenis TA untuk ${st.nama} belum ditambahkan.`);
+                showDWToast(`⚠️ Catatan belum ditambahkan! Harap isi catatan revisi Jenis TA (${st.nama}).`, false);
                 return;
             }
             if (st.status_judul === 'Rejected' && !st.catatan_judul.trim()) {
-                alert(`Mahasiswa ${st.nama} (${st.nim}) ditolak pada bagian Judul TA, namun belum ada catatan revisi.\n\nHarap isi catatan revisi Judul TA.`);
-                const card = document.getElementById(`batch_card_${st.nim}`);
-                if (card) card.scrollIntoView({ behavior: 'smooth' });
+                const inputEl = document.getElementById(`batch_note_judul_${st.nim}`);
+                const errEl = document.getElementById(`batch_err_judul_${st.nim}`);
+                highlightBatchErrorField(inputEl, errEl, `Catatan revisi Usulan Judul TA untuk ${st.nama} belum ditambahkan.`);
+                showDWToast(`⚠️ Catatan belum ditambahkan! Harap isi saran/catatan revisi Judul TA (${st.nama}).`, false);
                 return;
             }
-            const docLabels = { 'ksm': 'KSM', 'transkrip': 'Transkrip', 'pernyataan': 'Surat Pernyataan', 'bebas_lab': 'Bebas Lab' };
+            const docLabels = { 'ksm': 'KSM', 'transkrip': 'Transkrip Nilai', 'pernyataan': 'Surat Pernyataan', 'bebas_lab': 'Bebas Lab' };
             for (const [k, f] of Object.entries(st.files)) {
                 if (f.status === 'Rejected' && !f.note.trim()) {
-                    alert(`Mahasiswa ${st.nama} (${st.nim}) ditolak pada berkas ${docLabels[k] || k}, namun belum ada catatan revisi.\n\nHarap isi catatan revisi berkas tersebut.`);
-                    const card = document.getElementById(`batch_card_${st.nim}`);
-                    if (card) card.scrollIntoView({ behavior: 'smooth' });
+                    const inputEl = document.getElementById(`batch_note_file_${k}_${st.nim}`);
+                    const errEl = document.getElementById(`batch_err_file_${k}_${st.nim}`);
+                    const labelName = docLabels[k] || k.toUpperCase();
+                    highlightBatchErrorField(inputEl, errEl, `Catatan revisi berkas ${labelName} untuk ${st.nama} belum ditambahkan.`);
+                    showDWToast(`⚠️ Catatan belum ditambahkan! Harap isi catatan revisi berkas ${labelName} (${st.nama}).`, false);
                     return;
                 }
             }
         }
 
-        const formData = new FormData();
-        formData.append('action', 'batch_update');
-        formData.append('decisions_json', JSON.stringify(window.batchStudentsDW.map(st => ({
-            nim: st.nim,
-            action: st.action,
-            status_jenis_ta: st.status_jenis_ta,
-            catatan_jenis_ta: st.catatan_jenis_ta,
-            status_judul: st.status_judul,
-            catatan_judul: st.catatan_judul,
-            status_file_ksm: st.files.ksm.status,
-            catatan_file_ksm: st.files.ksm.note,
-            status_file_transkrip: st.files.transkrip.status,
-            catatan_file_transkrip: st.files.transkrip.note,
-            status_file_pernyataan: st.files.pernyataan.status,
-            catatan_file_pernyataan: st.files.pernyataan.note,
-            status_file_bebas_lab: st.files.bebas_lab.status,
-            catatan_file_bebas_lab: st.files.bebas_lab.note,
-            catatan_wali: st.catatan_wali
-        }))));
-        window.batchStudentsDW.forEach(st => formData.append('nims[]', st.nim));
+        const totalCount = window.batchStudentsDW.length;
+        const approveCount = window.batchStudentsDW.filter(s => s.action === 'approve').length;
+        const rejectCount = window.batchStudentsDW.filter(s => s.action === 'reject').length;
 
-        fetch('<?= site_url("dosenwali/submit_batch_approval"); ?>', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(res => {
-            closeBatchModalDW();
-            unselectAllStudentsDW();
-            showDWToast(res.message || 'Persetujuan massal berhasil diproses!');
-            setTimeout(() => location.reload(), 1200);
-        })
-        .catch(err => {
-            console.error('Submit final batch error:', err);
-            location.reload();
+        Swal.fire({
+            title: 'Konfirmasi Verifikasi',
+            html: `
+                <div class="text-xs text-slate-600 text-left space-y-2.5 mt-2">
+                    <p class="leading-relaxed">Apakah Anda yakin ingin memproses verifikasi untuk <strong>${totalCount} mahasiswa</strong> ini?</p>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 font-medium">
+                        <div class="flex items-center justify-between text-emerald-700">
+                            <span><i class="fa-solid fa-circle-check mr-1.5"></i> Disetujui (Lanjut ke Admin LAA):</span>
+                            <span class="font-bold">${approveCount} Mahasiswa</span>
+                        </div>
+                        <div class="flex items-center justify-between text-rose-700">
+                            <span><i class="fa-solid fa-circle-xmark mr-1.5"></i> Ditolak / Perlu Revisi:</span>
+                            <span class="font-bold">${rejectCount} Mahasiswa</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 italic">Pastikan seluruh keputusan telah sesuai sebelum menyimpan.</p>
+                </div>
+            `,
+            icon: 'question',
+            iconColor: '#f97316',
+            showCancelButton: true,
+            confirmButtonColor: '#ea580c',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1.5"></i> Ya, Simpan &amp; Proses',
+            cancelButtonText: 'Periksa Kembali',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl border border-orange-100',
+                confirmButton: 'rounded-xl font-bold px-4 py-2.5 text-xs shadow-md cursor-pointer',
+                cancelButton: 'rounded-xl font-semibold px-4 py-2.5 text-xs cursor-pointer'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tampilkan loading swal
+                Swal.fire({
+                    title: 'Memproses Verifikasi...',
+                    text: 'Mohon tunggu sebentar, sistem sedang menyimpan data...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const formData = new FormData();
+                formData.append('action', 'batch_update');
+                formData.append('decisions_json', JSON.stringify(window.batchStudentsDW.map(st => ({
+                    nim: st.nim,
+                    action: st.action,
+                    status_jenis_ta: st.status_jenis_ta,
+                    catatan_jenis_ta: st.catatan_jenis_ta,
+                    status_judul: st.status_judul,
+                    catatan_judul: st.catatan_judul,
+                    status_file_ksm: st.files.ksm.status,
+                    catatan_file_ksm: st.files.ksm.note,
+                    status_file_transkrip: st.files.transkrip.status,
+                    catatan_file_transkrip: st.files.transkrip.note,
+                    status_file_pernyataan: st.files.pernyataan.status,
+                    catatan_file_pernyataan: st.files.pernyataan.note,
+                    status_file_bebas_lab: st.files.bebas_lab.status,
+                    catatan_file_bebas_lab: st.files.bebas_lab.note,
+                    catatan_wali: st.catatan_wali
+                }))));
+                window.batchStudentsDW.forEach(st => formData.append('nims[]', st.nim));
+
+                fetch('<?= site_url("dosenwali/submit_batch_approval"); ?>', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(res => {
+                    closeBatchModalDW();
+                    unselectAllStudentsDW();
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: res.message || 'Persetujuan massal berhasil diproses!',
+                        icon: 'success',
+                        iconColor: '#10b981',
+                        confirmButtonColor: '#10b981',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    setTimeout(() => location.reload(), 1200);
+                })
+                .catch(err => {
+                    console.error('Submit final batch error:', err);
+                    location.reload();
+                });
+            }
         });
     }
 
