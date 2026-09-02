@@ -284,21 +284,22 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 5; /* Di atas slide sesi 1 (z-index 2), tapi di bawah card/tabel spesifik (z-index 10) */
+            z-index: 9999; /* Frontmost */
             width: 65px;
             height: 65px;
             border-radius: 50%;
-            background: rgba(234, 88, 12, 0.95);
+            background: transparent; /* Transparent background */
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: 2px solid rgba(255,255,255,0.3);
-            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5);
+            border: 2px solid #ea580c; /* Orange outer border */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
             padding: 0;
             backdrop-filter: blur(4px);
+            pointer-events: auto;
         }
         .global-scroll-btn:hover {
             background: #ea580c;
