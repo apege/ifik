@@ -36,6 +36,46 @@
     .carousel-slide.slide-1 {
         background-image: url('<?= base_url("assets/images/Fakultas.jpg") ?>');
     }
+    /* CSS untuk Pop-up / Modal "Baca Selengkapnya" */
+    .read-more-modal {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+        z-index: 9999; display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .read-more-modal.active { opacity: 1; pointer-events: auto; }
+    .read-more-modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(234, 88, 12, 0.3);
+        padding: 40px; border-radius: 20px;
+        max-width: 650px; width: 90%; max-height: 80vh; overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative;
+        transform: translateY(20px); transition: transform 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+    .read-more-modal.active .read-more-modal-content { transform: translateY(0); }
+    .read-more-close {
+        position: absolute; top: 20px; right: 20px;
+        width: 36px; height: 36px; border-radius: 50%;
+        background: #f1f5f9; border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.3s;
+    }
+    .read-more-close:hover { background: #e2e8f0; }
+    .read-more-close svg { width: 20px; height: 20px; stroke: #475569; stroke-width: 2; fill: none; }
+    #readMoreTitle { font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-bottom: 20px; line-height: 1.3; }
+    #readMoreDesc { font-size: 1.05rem; color: #334155; line-height: 1.7; text-align: justify; }
+    
+    .multi-bg-fade { transition: background-image 1s ease-in-out; }
+
+    /* Dashboard Header Styles */
+    .dashboard-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
 
     /* Background Video Fullscreen */
     .background-video {
@@ -76,6 +116,7 @@
         justify-content: center;
         gap: 0;
         z-index: 30;
+        pointer-events: none;
     }
     
     .dots-half {
@@ -105,7 +146,7 @@
     .carousel-indicators .dot {
         flex: 1 1 0;
         max-width: 250px;
-        min-width: 100px;
+        min-width: fit-content;
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -118,6 +159,7 @@
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         border: 1px solid rgba(255, 255, 255, 0.15);
+        pointer-events: auto;
     }
 
     /* Ketika sayap kanan hanya memiliki 1 item (Prestasi), buat lebarnya proporsional mengimbangi 2 item di sayap kiri */
@@ -144,6 +186,18 @@
         height: 18px;
         display: flex;
         align-items: center;
+        white-space: nowrap;
+    }
+    
+    .carousel-indicators .dot .dot-label::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: #ea580c;
+        border-radius: 50%;
+        margin-right: 8px;
+        flex-shrink: 0;
     }
     
     .carousel-indicators .dot .dot-track {
@@ -413,6 +467,7 @@
         pointer-events: auto;
         width: 100%;
         box-sizing: border-box;
+        position: relative;
     }
     .dekanat-img-right {
         position: absolute;
@@ -424,32 +479,30 @@
     }
     
     /* ===== BACA SELENGKAPNYA BUTTON ===== */
+    .read-more-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+    }
     .read-more-btn {
         display: flex;
         align-items: center;
         gap: 8px;
         pointer-events: auto;
-        margin-top: 8px;
-        padding: 9px 20px;
-        background: #ea580c;
-        color: #fff;
-        border: none;
+        padding: 7px 18px;
+        background: transparent;
+        color: #ea580c;
+        border: 2px solid #ea580c;
         border-radius: 10px;
         font-weight: 800;
         font-size: 0.82rem;
         cursor: pointer;
         text-decoration: none;
         letter-spacing: 0.5px;
-        box-shadow: 0 4px 14px rgba(234,88,12,0.35);
         transition: all 0.25s ease;
-        width: 100%;
-        justify-content: center;
-        white-space: normal;
-        word-break: break-word;
-        text-align: center;
     }
     .read-more-btn:hover {
-        background: #c2410c;
+        background: #ea580c;
         transform: translateY(-2px);
         box-shadow: 0 6px 18px rgba(234,88,12,0.45);
         color: #fff;
@@ -540,13 +593,17 @@
                                 echo htmlspecialchars($plain_desc);
                             }
                         ?>
+                        <?php
+                            $modalTitle1 = htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif', ENT_QUOTES);
+                            $modalDesc1 = htmlspecialchars(json_encode($header_settings->description ?? ''), ENT_QUOTES);
+                        ?>
+                        <div class="read-more-container">
+                            <button class="read-more-btn" onclick='openReadMoreModal("<?= $modalTitle1 ?>", <?= $modalDesc1 ?>)'>
+                                Baca Selengkapnya
+                                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </button>
+                        </div>
                     </div>
-                    <?php if (mb_strlen(strip_tags($header_settings->description ?? '')) > 280): ?>
-                    <a href="<?= base_url('dashboard/about') ?>" class="read-more-btn">
-                        Baca Selengkapnya
-                        <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                    </a>
-                    <?php endif; ?>
                 </div>
             </div>
             
@@ -577,59 +634,70 @@
         <!-- Custom Slides dari Database (Slide 4, 5, 6, dst) -->
         <?php if (!empty($header_slides) && count($header_slides) > 3): ?>
             <?php for ($i = 3; $i < count($header_slides); $i++): ?>
-                <?php $s = $header_slides[$i]; ?>
-                <div class="carousel-slide slide-custom slide-<?= $i + 1 ?>" style="position: relative; width: 100vw; height: 100%; <?= $s->media_type === 'image' && !empty($s->media_path) ? 'background-image: url(' . base_url('assets/images/' . $s->media_path) . '); background-size: cover; background-position: center;' : '' ?>">
-                    <?php if ($s->media_type === 'video' && !empty($s->media_path)): ?>
-                        <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
-                            <source src="<?= base_url('assets/videos/' . $s->media_path) ?>" type="video/mp4">
+                <?php 
+                    $s = $header_slides[$i];
+                    $media_json = json_decode($s->media_path, true);
+                    $is_multi = (is_array($media_json) && isset($media_json[0]['file']));
+                    $first_image = $is_multi ? $media_json[0]['file'] : $s->media_path;
+                    $multi_data = $is_multi ? htmlspecialchars(json_encode($media_json)) : '[]';
+                ?>
+                <div class="carousel-slide slide-custom slide-<?= $i + 1 ?>" id="customSlide_<?= $i ?>" data-multi="<?= $multi_data ?>" style="position: relative; width: 100vw; height: 100%; <?= ($s->media_type === 'image' || $s->media_type === 'multi') && !empty($first_image) ? 'background-image: url(' . base_url('assets/images/' . $first_image) . '); background-size: cover; background-position: center;' : '' ?>">
+                    <?php if ($s->media_type === 'video' && !empty($s->media_path) && !$is_multi): ?>
+                        <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+                            <source src="<?= base_url('assets/vids/' . $s->media_path) ?>" type="video/mp4">
                         </video>
                     <?php endif; ?>
                     <div class="slide1-layout">
                         <div class="slide1-text-container">
-                            <?php if (!empty($s->show_text) && $s->show_text == 1): ?>
-                                <!-- Toggle ON: Tampilkan judul & deskripsi kustom dari TinyMCE -->
-                                <?php if (!empty($s->overlay_title)): ?>
-                                <div class="slide1-title-box">
-                                    <h1><?= htmlspecialchars($s->overlay_title) ?></h1>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (!empty($s->overlay_description)): ?>
-                                <div class="slide1-content-box">
-                                    <?= $s->overlay_description /* HTML dari TinyMCE */ ?>
-                                </div>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <!-- Toggle OFF: Gunakan judul & deskripsi default dari header_settings -->
-                                <div class="slide1-title-box">
-                                    <h1><?= htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif') ?></h1>
-                                </div>
-                                <div class="slide1-content-box">
+                            <?php 
+                                $used_title = !empty($s->overlay_title) ? $s->overlay_title : ($header_settings->title ?? 'Fakultas Industri Kreatif');
+                                $used_desc = !empty($s->overlay_description) ? $s->overlay_description : ($header_settings->description ?? '');
+                            ?>
+                            <div class="slide1-title-box">
+                                <h1><?= htmlspecialchars($used_title) ?></h1>
+                            </div>
+                            <div class="slide1-content-box">
+                                <?php
+                                    $def_plain = strip_tags($used_desc);
+                                    $def_limit = 280;
+                                    if (mb_strlen($def_plain) > $def_limit) {
+                                        $def_cut   = mb_substr($def_plain, 0, $def_limit);
+                                        $def_space = mb_strrpos($def_cut, ' ');
+                                        echo htmlspecialchars($def_space ? mb_substr($def_cut, 0, $def_space) : $def_cut) . '...';
+                                    } else {
+                                        echo htmlspecialchars($def_plain);
+                                    }
+                                ?>
+                                <?php if (mb_strlen($def_plain) > 280): ?>
+                                <div class="read-more-container">
                                     <?php
-                                        $def_desc  = $header_settings->description ?? '';
-                                        $def_plain = strip_tags($def_desc);
-                                        $def_limit = 280;
-                                        if (mb_strlen($def_plain) > $def_limit) {
-                                            $def_cut   = mb_substr($def_plain, 0, $def_limit);
-                                            $def_space = mb_strrpos($def_cut, ' ');
-                                            echo htmlspecialchars($def_space ? mb_substr($def_cut, 0, $def_space) : $def_cut) . '...';
-                                        } else {
-                                            echo htmlspecialchars($def_plain);
-                                        }
+                                        $modalTitle = htmlspecialchars($used_title, ENT_QUOTES);
+                                        $modalDesc = htmlspecialchars(json_encode($used_desc), ENT_QUOTES);
                                     ?>
+                                    <button class="read-more-btn" onclick='openReadMoreModal("<?= $modalTitle ?>", <?= $modalDesc ?>)'>
+                                        Baca Selengkapnya
+                                        <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                    </button>
                                 </div>
-                                <?php if (mb_strlen(strip_tags($header_settings->description ?? '')) > 280): ?>
-                                <a href="<?= base_url('dashboard/about') ?>" class="read-more-btn">
-                                    Baca Selengkapnya
-                                    <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                                </a>
                                 <?php endif; ?>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                     <img src="<?= base_url('assets/images/' . $dekanat_img) ?>" alt="Dekanat" class="dekanat-img-right">
                 </div>
             <?php endfor; ?>
         <?php endif; ?>
+    </div>
+    
+    <!-- Modal BACA SELENGKAPNYA -->
+    <div class="read-more-modal" id="readMoreModal">
+        <div class="read-more-modal-content">
+            <button class="read-more-close" onclick="closeReadMoreModal()">
+                <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <h2 id="readMoreTitle"></h2>
+            <div id="readMoreDesc"></div>
+        </div>
     </div>
     
     <!-- Indikator Dots Terbagi Kiri & Kanan (Simetris Mengelilingi Tombol Tengah) -->
@@ -788,11 +856,7 @@
                 if (prog) {
                     prog.style.animation = 'none';
                     prog.offsetHeight;
-                    if (dotIdx < index) {
-                        prog.style.width = '100%';
-                    } else {
-                        prog.style.width = '0%';
-                    }
+                    prog.style.width = '0%';
                 }
             });
 
@@ -846,7 +910,7 @@
                 const overviewProg = dotOverview ? dotOverview.querySelector('.dot-track > .progress') : null;
                 if (overviewProg) {
                     overviewProg.style.animation = 'none';
-                    overviewProg.style.width = '100%';
+                    overviewProg.style.width = '0%';
                 }
 
                 if (typeof window.startLabSequence === 'function') {
@@ -860,14 +924,14 @@
                 const overviewProg = dotOverview ? dotOverview.querySelector('.dot-track > .progress') : null;
                 if (overviewProg) {
                     overviewProg.style.animation = 'none';
-                    overviewProg.style.width = '100%';
+                    overviewProg.style.width = '0%';
                 }
 
                 // Completed state for Fasilitas continuous thumbs
                 document.querySelectorAll('.dot-track-continuous .thumb').forEach(thumb => {
                     thumb.style.opacity = '0.35';
                     const p = thumb.querySelector('.progress');
-                    if (p) { p.style.animation = 'none'; p.style.width = '100%'; }
+                    if (p) { p.style.animation = 'none'; p.style.width = '0%'; }
                 });
 
                 if (typeof pauseAutoPlay === 'function') pauseAutoPlay();
@@ -875,12 +939,53 @@
                 const curDot = document.querySelector(`#carouselDots .dot[data-index="${index}"]`);
                 if (curDot) curDot.classList.add('active');
                 const curProg = curDot ? curDot.querySelector('.dot-track > .progress') : null;
+                
+                // MULTI-IMAGE LOGIC
+                let totalDuration = 6.5; // default 6.5s
+                const slideEl = document.querySelector(`#customSlide_${index}`);
+                let slideTimeouts = [];
+                
+                if (slideEl) {
+                    const multiData = slideEl.getAttribute('data-multi');
+                    if (multiData && multiData !== '[]') {
+                        const items = JSON.parse(multiData);
+                        if (items.length > 1) {
+                            totalDuration = 0;
+                            items.forEach(item => totalDuration += (item.duration || 3));
+                            
+                            // Queue image swaps
+                            let accumulatedTime = 0;
+                            slideEl.classList.add('multi-bg-fade');
+                            items.forEach((item, idx) => {
+                                if (idx > 0) {
+                                    const t = setTimeout(() => {
+                                        const ext = item.file.split('.').pop().toLowerCase();
+                                        if (['mp4','webm','ogg'].includes(ext)) {
+                                            slideEl.innerHTML = `<video autoplay muted playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;"><source src="<?= base_url('assets/vids/') ?>${item.file}" type="video/mp4"></video>` + slideEl.innerHTML.replace(/<video.*?<\/video>/s, '');
+                                        } else {
+                                            slideEl.style.backgroundImage = `url('<?= base_url('assets/images/') ?>${item.file}')`;
+                                        }
+                                    }, accumulatedTime * 1000);
+                                    slideTimeouts.push(t);
+                                } else {
+                                    // Set first instantly
+                                    const ext = item.file.split('.').pop().toLowerCase();
+                                    if (!['mp4','webm','ogg'].includes(ext)) {
+                                        slideEl.style.backgroundImage = `url('<?= base_url('assets/images/') ?>${item.file}')`;
+                                    }
+                                }
+                                accumulatedTime += (item.duration || 3);
+                            });
+                        }
+                    }
+                }
+                
                 if (curProg) {
                     if (activeProgEndListener) {
                         curProg.removeEventListener('animationend', activeProgEndListener);
                     }
                     void curProg.offsetWidth;
-                    curProg.style.animation = 'slideProgress 6.5s linear forwards';
+                    curProg.style.animation = `slideProgress ${totalDuration}s linear forwards`;
                     curProg.style.animationPlayState = 'running';
                     
                     activeProgEndListener = () => {
@@ -1006,4 +1111,27 @@
             window.addEventListener('resize', updateNav);
         });
     })();
+</script>
+
+<!-- Modal Baca Selengkapnya -->
+<div id="readMoreModal" class="read-more-modal">
+    <div class="read-more-modal-content">
+        <button class="read-more-close" onclick="closeReadMoreModal()">
+            <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <h2 id="readMoreTitle">Judul Slide</h2>
+        <div id="readMoreDesc">Isi deskripsi...</div>
+    </div>
+</div>
+
+<script>
+    function openReadMoreModal(title, descHtml) {
+        document.getElementById('readMoreTitle').innerText = title;
+        document.getElementById('readMoreDesc').innerHTML = descHtml;
+        document.getElementById('readMoreModal').classList.add('active');
+    }
+    
+    function closeReadMoreModal() {
+        document.getElementById('readMoreModal').classList.remove('active');
+    }
 </script>
