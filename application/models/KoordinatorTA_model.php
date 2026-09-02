@@ -29,6 +29,60 @@ class KoordinatorTA_model extends CI_Model {
                 $this->db->query("ALTER TABLE `pendaftaran_ta` ADD COLUMN `{$col}` {$type}");
             }
         }
+
+        // Buat tabel history log plotting penguji jika belum ada
+        if (!$this->db->table_exists('history_plotting_penguji')) {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `history_plotting_penguji` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `nim` VARCHAR(50) NOT NULL,
+                    `nama_mahasiswa` VARCHAR(150) NULL,
+                    `penguji_1_lama` VARCHAR(50) NULL,
+                    `penguji_2_lama` VARCHAR(50) NULL,
+                    `nama_penguji_1_lama` VARCHAR(150) NULL,
+                    `nama_penguji_2_lama` VARCHAR(150) NULL,
+                    `penguji_1_baru` VARCHAR(50) NOT NULL,
+                    `penguji_2_baru` VARCHAR(50) NOT NULL,
+                    `nama_penguji_1_baru` VARCHAR(150) NULL,
+                    `nama_penguji_2_baru` VARCHAR(150) NULL,
+                    `aksi` VARCHAR(50) NOT NULL DEFAULT 'Penetapan Penguji',
+                    `keterangan` TEXT NULL,
+                    `actor_nip` VARCHAR(50) NULL,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_nim` (`nim`),
+                    KEY `idx_created_at` (`created_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+        }
+
+        // Buat tabel history log plotting TA (Pembimbing & Penguji terpadu) jika belum ada
+        if (!$this->db->table_exists('history_plotting_ta')) {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `history_plotting_ta` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `kategori` ENUM('Pembimbing', 'Penguji') NOT NULL DEFAULT 'Pembimbing',
+                    `nim` VARCHAR(50) NOT NULL,
+                    `nama_mahasiswa` VARCHAR(150) NULL,
+                    `dosen_1_lama` VARCHAR(50) NULL,
+                    `dosen_2_lama` VARCHAR(50) NULL,
+                    `nama_dosen_1_lama` VARCHAR(150) NULL,
+                    `nama_dosen_2_lama` VARCHAR(150) NULL,
+                    `dosen_1_baru` VARCHAR(50) NULL,
+                    `dosen_2_baru` VARCHAR(50) NULL,
+                    `nama_dosen_1_baru` VARCHAR(150) NULL,
+                    `nama_dosen_2_baru` VARCHAR(150) NULL,
+                    `aksi` VARCHAR(50) NOT NULL DEFAULT 'Penetapan Dosen',
+                    `keterangan` TEXT NULL,
+                    `actor_nip` VARCHAR(50) NULL,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_nim` (`nim`),
+                    KEY `idx_kategori` (`kategori`),
+                    KEY `idx_created_at` (`created_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+        }
     }
 
     // Ambil list semua dosen pembimbing dari database (role: dosen)
@@ -209,6 +263,11 @@ class KoordinatorTA_model extends CI_Model {
             );
         }
 
+        $p1_lama = $curr['pembimbing_1'] ?? null;
+        $p2_lama = $curr['pembimbing_2'] ?? null;
+        $is_changed = (string)$p1_lama !== (string)$pembimbing_1 || (string)$p2_lama !== (string)$pembimbing_2;
+        $aksi = (empty($p1_lama) && empty($p2_lama)) ? 'Penetapan Awal Pembimbing' : 'Perubahan Pembimbing';
+
         $data = array(
             'status_approval_koor' => $status, // 'Approved' / 'Rejected'
             'catatan_koor'         => trim($catatan),
@@ -227,6 +286,11 @@ class KoordinatorTA_model extends CI_Model {
         $update = $this->db->update('pendaftaran_ta', $data);
 
         if ($update) {
+            // Rekam ke history log jika disetujui atau terjadi perubahan pembimbing
+            if ($status === 'Approved' && $is_changed) {
+                $this->record_history_ta('Pembimbing', $nim, $p1_lama, $p2_lama, $pembimbing_1, $pembimbing_2, $aksi, $catatan);
+            }
+
             return array(
                 'status'  => true, 
                 'message' => ($status === 'Approved') ? 'Pendaftaran TA berhasil disetujui dan Dosen Pembimbing telah ditetapkan!' : 'Pendaftaran TA berhasil ditolak dengan catatan revisi.'
@@ -329,6 +393,11 @@ class KoordinatorTA_model extends CI_Model {
                 }
             }
 
+            $p1_lama = $curr['pembimbing_1'] ?? null;
+            $p2_lama = $curr['pembimbing_2'] ?? null;
+            $is_changed = (string)$p1_lama !== (string)$p1 || (string)$p2_lama !== (string)$p2;
+            $aksi = (empty($p1_lama) && empty($p2_lama)) ? 'Penetapan Awal Pembimbing' : 'Perubahan Pembimbing';
+
             $data = array(
                 'status_approval_koor' => $status,
                 'catatan_koor'         => trim($cat),
@@ -348,6 +417,10 @@ class KoordinatorTA_model extends CI_Model {
             $this->db->where('nim', $nimStr);
             if ($this->db->update('pendaftaran_ta', $data)) {
                 $successCount++;
+                // Rekam ke history log jika ada penetapan / perubahan
+                if ($status === 'Approved' && $is_changed) {
+                    $this->record_history_ta('Pembimbing', $nimStr, $p1_lama, $p2_lama, $p1, $p2, $aksi, $cat);
+                }
             } else {
                 $failedList[] = "NIM {$nimStr} (Gagal update database)";
             }
@@ -490,6 +563,11 @@ class KoordinatorTA_model extends CI_Model {
             return array('status' => false, 'message' => 'Dosen Penguji tidak boleh sama dengan Dosen Pembimbing mahasiswa!');
         }
 
+        $p1_lama = $curr['penguji_1'] ?? null;
+        $p2_lama = $curr['penguji_2'] ?? null;
+        $is_changed = (string)$p1_lama !== (string)$penguji_1 || (string)$p2_lama !== (string)$penguji_2;
+        $aksi = (empty($p1_lama) && empty($p2_lama)) ? 'Penetapan Awal' : 'Perubahan Penguji';
+
         $data = array(
             'penguji_1'          => $penguji_1,
             'penguji_2'          => $penguji_2,
@@ -504,6 +582,11 @@ class KoordinatorTA_model extends CI_Model {
         $update = $this->db->update('pendaftaran_ta', $data);
 
         if ($update) {
+            // Rekam ke tabel history_plotting_penguji jika terjadi penetapan/perubahan
+            if ($is_changed) {
+                $this->record_history_penguji($nim, $p1_lama, $p2_lama, $penguji_1, $penguji_2, $aksi, $catatan);
+            }
+
             // Update / Insert ke ta_penguji jika tabel ada
             if ($this->db->table_exists('ta_penguji')) {
                 $this->db->where('nim', $nim);
@@ -544,10 +627,114 @@ class KoordinatorTA_model extends CI_Model {
                 }
             }
 
-            return array('status' => true, 'message' => 'Dosen Penguji & Jadwal Sidang Preview 2 berhasil ditetapkan!');
+            return array('status' => true, 'message' => 'Dosen Penguji & Jadwal Sidang Preview 2 berhasil disimpan!');
         } else {
             return array('status' => false, 'message' => 'Gagal memperbarui database.');
         }
+    }
+
+    // Rekam Log Histori Plotting Terpadu (Pembimbing / Penguji)
+    public function record_history_ta($kategori, $nim, $d1_lama, $d2_lama, $d1_baru, $d2_baru, $aksi = 'Penetapan Dosen', $keterangan = '', $actor_nip = null) {
+        if (!$this->db->table_exists('history_plotting_ta')) {
+            $this->_ensure_columns_exist();
+        }
+
+        if (empty($actor_nip)) {
+            $actor_nip = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19800202002';
+        }
+
+        // Ambil nama mahasiswa
+        $nama_mhs = '';
+        if ($this->db->table_exists('mahasiswa')) {
+            $mhs = $this->db->where('nim', $nim)->get('mahasiswa')->row_array();
+            if ($mhs) {
+                $nama_mhs = trim(($mhs['nama_depan'] ?? '') . ' ' . ($mhs['nama_belakang'] ?? ''));
+            }
+        }
+
+        // Helper nama dosen
+        $dosen_list = $this->get_dosen_list();
+        $get_dosen_name = function($nip) use ($dosen_list) {
+            if (empty($nip)) return null;
+            return $dosen_list[$nip]['nama_dosen'] ?? $nip;
+        };
+
+        $nama_d1_lama = $get_dosen_name($d1_lama);
+        $nama_d2_lama = $get_dosen_name($d2_lama);
+        $nama_d1_baru = $get_dosen_name($d1_baru);
+        $nama_d2_baru = $get_dosen_name($d2_baru);
+
+        $logData = array(
+            'kategori'          => $kategori, // 'Pembimbing' / 'Penguji'
+            'nim'               => $nim,
+            'nama_mahasiswa'    => $nama_mhs,
+            'dosen_1_lama'      => $d1_lama,
+            'dosen_2_lama'      => $d2_lama,
+            'nama_dosen_1_lama' => $nama_d1_lama,
+            'nama_dosen_2_lama' => $nama_d2_lama,
+            'dosen_1_baru'      => $d1_baru,
+            'dosen_2_baru'      => $d2_baru,
+            'nama_dosen_1_baru' => $nama_d1_baru,
+            'nama_dosen_2_baru' => $nama_d2_baru,
+            'aksi'              => $aksi,
+            'keterangan'        => $keterangan,
+            'actor_nip'         => $actor_nip,
+            'created_at'        => date('Y-m-d H:i:s')
+        );
+
+        $this->db->insert('history_plotting_ta', $logData);
+
+        // Kompatibilitas tabel history_plotting_penguji
+        if ($kategori === 'Penguji' && $this->db->table_exists('history_plotting_penguji')) {
+            $this->db->insert('history_plotting_penguji', array(
+                'nim'                 => $nim,
+                'nama_mahasiswa'      => $nama_mhs,
+                'penguji_1_lama'      => $d1_lama,
+                'penguji_2_lama'      => $d2_lama,
+                'nama_penguji_1_lama' => $nama_d1_lama,
+                'nama_penguji_2_lama' => $nama_d2_lama,
+                'penguji_1_baru'      => $d1_baru,
+                'penguji_2_baru'      => $d2_baru,
+                'nama_penguji_1_baru' => $nama_d1_baru,
+                'nama_penguji_2_baru' => $nama_d2_baru,
+                'aksi'                => $aksi,
+                'keterangan'          => $keterangan,
+                'actor_nip'           => $actor_nip,
+                'created_at'          => date('Y-m-d H:i:s')
+            ));
+        }
+
+        return true;
+    }
+
+    // Ambil Data Histori Log Perubahan TA (Pembimbing & Penguji)
+    public function get_history_ta($kategori = null, $nim = null, $limit = 100) {
+        if (!$this->db->table_exists('history_plotting_ta')) {
+            $this->_ensure_columns_exist();
+        }
+
+        $this->db->from('history_plotting_ta');
+        if (!empty($kategori) && in_array($kategori, array('Pembimbing', 'Penguji'))) {
+            $this->db->where('kategori', $kategori);
+        }
+        if (!empty($nim)) {
+            $this->db->where('nim', $nim);
+        }
+        $this->db->order_by('created_at', 'DESC');
+        if ($limit > 0) {
+            $this->db->limit($limit);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    // Rekam Log Histori Plotting Penguji (Wrapper Backward Compatible)
+    public function record_history_penguji($nim, $p1_lama, $p2_lama, $p1_baru, $p2_baru, $aksi = 'Penetapan Penguji', $keterangan = '', $actor_nip = null) {
+        return $this->record_history_ta('Penguji', $nim, $p1_lama, $p2_lama, $p1_baru, $p2_baru, $aksi, $keterangan, $actor_nip);
+    }
+
+    // Ambil Data Histori Log Perubahan Penguji (Wrapper Backward Compatible)
+    public function get_history_penguji($nim = null, $limit = 50) {
+        return $this->get_history_ta('Penguji', $nim, $limit);
     }
 
     // Batch Plotting Penguji Preview 2 Massal (Mendukung Per-Mahasiswa Plotting)

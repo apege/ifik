@@ -695,16 +695,34 @@
 
         <?php
             $totalMhs = count($list_mahasiswa ?? []);
-            $pendingCount = 0;
+            $siapDiplotCount = 0;
             $approvedCount = 0;
             $rejectedCount = 0;
+            $kkApprovedCount = 0;
 
             if(!empty($list_mahasiswa)) {
                 foreach($list_mahasiswa as $row) {
-                    $st = $row['status_approval_koor'] ?? 'Pending';
-                    if($st === 'Approved') $approvedCount++;
-                    else if($st === 'Rejected') $rejectedCount++;
-                    else $pendingCount++;
+                    $stKoor = $row['status_approval_koor'] ?? 'Pending';
+                    $stWali = $row['status_approval_wali'] ?? 'Pending';
+                    $stAdmin = $row['status_approval_admin'] ?? 'Pending';
+                    $stKk = $row['status_approval_kk'] ?? 'Pending';
+
+                    $isWaliApproved = (strcasecmp($stWali, 'Approved') === 0);
+                    $isAdminApproved = (strcasecmp($stAdmin, 'Approved') === 0);
+
+                    if (strcasecmp($stKoor, 'Approved') === 0) {
+                        $approvedCount++;
+                    } else if (strcasecmp($stKoor, 'Rejected') === 0) {
+                        $rejectedCount++;
+                    } else {
+                        if ($isWaliApproved && $isAdminApproved) {
+                            $siapDiplotCount++;
+                        }
+                    }
+
+                    if (strcasecmp($stKk, 'Approved') === 0) {
+                        $kkApprovedCount++;
+                    }
                 }
             }
         ?>
@@ -747,7 +765,7 @@
                 </div>
             </div>
 
-            <!-- 2. Menunggu Approval Card (Cyan) -->
+            <!-- 2. Siap Diplot Pembimbing Card (Cyan) -->
             <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                 <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -759,15 +777,15 @@
 
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Menunggu Approval</p>
-                            <h3 id="statPendingCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditolak / Disetujui</p>
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Siap Diplot Pembimbing</p>
+                            <h3 id="statPendingCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $siapDiplotCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($siapDiplotCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lolos Wali &amp; Admin Layanan</p>
                         </div>
                         
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
                             <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-clock text-lg"></i>
+                                <i class="fa-solid fa-user-plus text-lg"></i>
                             </div>
                         </div>
                     </div>
@@ -795,7 +813,7 @@
 
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui</p>
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui Koordinator</p>
                             <h3 id="statApprovedCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Ketua KK</p>
                         </div>
@@ -819,37 +837,37 @@
                 </div>
             </div>
 
-            <!-- 4. Perlu Revisi Card (Amber) -->
+            <!-- 4. Persetujuan Ketua KK Card (Indigo / Amber) -->
             <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5">
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                        <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-indigo-500/10 blur-lg"></div>
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                     </div>
 
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Perlu Revisi</p>
-                            <h3 id="statRejectedCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $rejectedCount; ?></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Telah Ditolak / Perlu Revisi</p>
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Persetujuan Ketua KK</p>
+                            <h3 id="statKkCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $kkApprovedCount; ?> <span class="text-xs font-semibold text-indigo-600 font-normal">(<?= $totalMhs > 0 ? round(($kkApprovedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Disetujui Final oleh KK</p>
                         </div>
                         
                         <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-circle-xmark text-lg"></i>
+                            <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
+                            <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-user-shield text-lg"></i>
                             </div>
                         </div>
                     </div>
 
                     <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
                         <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                         </div>
                     </div>
                 </div>
@@ -866,6 +884,12 @@
                     </h2>
                     <p class="text-xs text-slate-500 font-normal mt-0.5">Pilih mahasiswa untuk meninjau berkas dan melakukan persetujuan Koordinator TA.</p>
                 </div>
+
+                <!-- Tombol Riwayat Histori Pembimbing -->
+                <button type="button" onclick="openHistoryPlottingModal('Pembimbing')" class="px-4 py-2 bg-gradient-to-r from-slate-800 to-orange-950 hover:from-slate-700 hover:to-orange-900 text-white font-bold rounded-xl text-xs shadow-md border border-orange-900/50 flex items-center gap-2 transition cursor-pointer self-start lg:self-center active:scale-95">
+                    <i class="fa-solid fa-clock-rotate-left text-orange-400"></i>
+                    <span>Riwayat Histori Pembimbing</span>
+                </button>
             </div>
 
             <!-- Row 1: Unified Multi-Search Bar (Exact Import Akun Style) -->
@@ -1034,23 +1058,29 @@
         <div id="tabContentPreview2" class="hidden space-y-6">
 
             <?php
-                $totalP2 = count($list_preview2 ?? []);
-                $terjadwalP2 = 0;
-                $pengujiSetP2 = 0;
-                $belumSetP2 = 0;
+                $totalP2        = count($list_preview2 ?? []);
+                $pengujiLengkap = 0; // P1 & P2 sudah ditetapkan
+                $belumPenguji   = 0; // Belum ada penguji sama sekali
 
-                if(!empty($list_preview2)) {
-                    foreach($list_preview2 as $r2) {
-                        $stP2 = $r2['status_preview2'] ?? 'Belum Diplot';
-                        if($stP2 === 'Terjadwal') $terjadwalP2++;
-                        else if($stP2 === 'Penguji Ditetapkan') $pengujiSetP2++;
-                        else $belumSetP2++;
+                if (!empty($list_preview2)) {
+                    foreach ($list_preview2 as $r2) {
+                        $hasP1 = !empty($r2['penguji_1']);
+                        $hasP2 = !empty($r2['penguji_2']);
+                        if ($hasP1 && $hasP2) {
+                            $pengujiLengkap++;
+                        } else {
+                            $belumPenguji++;
+                        }
                     }
                 }
+
+                $pctLengkap = $totalP2 > 0 ? round(($pengujiLengkap / $totalP2) * 100) : 0;
+                $pctBelum   = $totalP2 > 0 ? round(($belumPenguji   / $totalP2) * 100) : 0;
             ?>
 
-            <!-- Stats Overview Cards (Exact Interactive Design from Import Akun / Tab 1) -->
+            <!-- Stats Overview Cards (Tab 2 — Penguji & Jadwal Preview 2) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+
                 <!-- 1. Total Mahasiswa Preview 2 (Indigo) -->
                 <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                     <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5">
@@ -1063,15 +1093,15 @@
 
                         <div class="relative z-10 flex items-start justify-between gap-3">
                             <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Total Mahasiswa Preview 2</p>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Total Mahasiswa Siap Plot</p>
                                 <h3 id="statP2Total" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalP2; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Siap Sidang Preview 2</p>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Masuk antrian plotting penguji</p>
                             </div>
-                            
+
                             <div class="relative shrink-0">
                                 <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
                                 <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                                    <i class="fa-solid fa-users text-lg"></i>
                                 </div>
                             </div>
                         </div>
@@ -1087,7 +1117,7 @@
                     </div>
                 </div>
 
-                <!-- 2. Terjadwal Lengkap Card (Emerald) -->
+                <!-- 2. Penguji Lengkap Card (Emerald) -->
                 <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                     <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
                         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -1099,15 +1129,15 @@
 
                         <div class="relative z-10 flex items-start justify-between gap-3">
                             <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Terjadwal Lengkap</p>
-                                <h3 id="statP2Terjadwal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $terjadwalP2; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalP2 > 0 ? round(($terjadwalP2/$totalP2)*100) : 0; ?>%)</span></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Penguji & Ruangan Lengkap</p>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Penguji Lengkap</p>
+                                <h3 id="statP2Terjadwal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pengujiLengkap; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $pctLengkap; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Penguji 1 &amp; 2 sudah ditetapkan ✓</p>
                             </div>
-                            
+
                             <div class="relative shrink-0">
                                 <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
                                 <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                                    <i class="fa-solid fa-circle-check text-lg"></i>
                                 </div>
                             </div>
                         </div>
@@ -1123,77 +1153,83 @@
                     </div>
                 </div>
 
-                <!-- 3. Penguji Ditetapkan Card (Cyan) -->
+                <!-- 3. Belum Diplot Penguji Card (Rose) -->
                 <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5">
                         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
                             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                         </div>
 
                         <div class="relative z-10 flex items-start justify-between gap-3">
                             <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Penguji Ditetapkan</p>
-                                <h3 id="statP2Penguji" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pengujiSetP2; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Belum Pilih Ruangan / Waktu</p>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Diplot Penguji</p>
+                                <h3 id="statP2Belum" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $belumPenguji; ?> <span class="text-xs font-semibold text-rose-600 font-normal">(<?= $pctBelum; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu segera ditetapkan penguji</p>
                             </div>
-                            
+
                             <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-user-group text-lg"></i>
+                                <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-user-xmark text-lg"></i>
                                 </div>
                             </div>
                         </div>
 
                         <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
                             <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. Belum Diplot Penguji Card (Amber) -->
+                <!-- 4. Progress Plotting Card (Violet) -->
                 <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 p-5">
                         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-violet-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-violet-500/10 blur-lg"></div>
                             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                         </div>
 
                         <div class="relative z-10 flex items-start justify-between gap-3">
                             <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Belum Diplot Penguji</p>
-                                <h3 id="statP2Belum" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $belumSetP2; ?> <span class="text-xs font-semibold text-amber-600 font-normal">(<?= $totalP2 > 0 ? round(($belumSetP2/$totalP2)*100) : 0; ?>%)</span></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditetapkan Penguji</p>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-violet-600 transition-colors">Progress Plotting</p>
+                                <h3 id="statP2ProgressPct" class="text-2xl font-black text-violet-700 mt-1 tracking-tight"><?= $pctLengkap; ?>%</h3>
+                                <p id="statP2ProgressSub" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1"><?= $pengujiLengkap; ?> dari <?= $totalP2; ?> sudah diplot</p>
                             </div>
-                            
+
                             <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-clock text-lg"></i>
+                                <div class="absolute inset-0 rounded-2xl bg-violet-500/20 blur-md group-hover:blur-lg group-hover:bg-violet-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-violet-100/70 shadow-md text-violet-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-chart-pie text-lg"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="relative z-10 mt-3 pt-2 border-t border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                    <div id="statP2ProgressBar" class="h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-violet-400 transition-all duration-700"
+                                         style="width: <?= $pctLengkap; ?>%"></div>
+                                </div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300 shrink-0">
+                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <!-- Table Toolbar & Filters (Exact Card Container from Import Akun / Tab 1) -->
@@ -1206,6 +1242,12 @@
                         </h2>
                         <p class="text-xs text-slate-500 font-normal mt-0.5">Tetapkan Dosen Penguji 1 & 2 serta jadwalkan ruangan sidang preview 2 untuk mahasiswa.</p>
                     </div>
+
+                    <!-- Tombol Riwayat Histori Penguji -->
+                    <button type="button" onclick="openHistoryPengujiModal()" class="px-4 py-2 bg-gradient-to-r from-slate-800 to-indigo-950 hover:from-slate-700 hover:to-indigo-900 text-white font-bold rounded-xl text-xs shadow-md border border-indigo-900/50 flex items-center gap-2 transition cursor-pointer self-start lg:self-center active:scale-95">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-400"></i>
+                        <span>Riwayat Histori Penguji</span>
+                    </button>
                 </div>
 
                 <!-- Row 1: Unified Multi-Search Bar for Preview 2 -->
@@ -2130,6 +2172,28 @@
                 </button>
             </div>
 
+            <!-- Sub Navigation Bar: Quick Jump Toolbar for Preview 2 (Lompat Cepat) -->
+            <div class="px-4 sm:px-6 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center gap-2.5 relative shrink-0">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1.5 hidden sm:flex">
+                    <i class="fa-solid fa-compass text-indigo-400"></i> Lompat Cepat:
+                </span>
+
+                <!-- Left Scroll Arrow -->
+                <button type="button" id="btnScrollP2QuickLeft" onclick="scrollP2QuickStudentTabs('left')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95" title="Geser ke kiri">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <!-- Scroll Container with Grab/Wheel support -->
+                <div id="p2QuickModalStudentTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 min-w-0 select-none cursor-grab">
+                    <!-- Quick Jump Anchors injected dynamically via JS -->
+                </div>
+
+                <!-- Right Scroll Arrow -->
+                <button type="button" id="btnScrollP2QuickRight" onclick="scrollP2QuickStudentTabs('right')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95 animate-pulse hover:animate-none" title="Geser ke kanan">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
             <!-- Modal Form -->
             <form id="formP2Plotting" onsubmit="submitP2Plotting(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
                 <!-- Scrollable Body Content -->
@@ -2195,6 +2259,28 @@
                 </div>
                 <button type="button" onclick="closeBatchModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
                     <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Sub Navigation Bar: Quick Jump Toolbar with Navigation Arrows (Lompat Cepat) -->
+            <div class="px-4 sm:px-6 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center gap-2.5 relative shrink-0">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1.5 hidden sm:flex">
+                    <i class="fa-solid fa-compass text-orange-400"></i> Lompat Cepat:
+                </span>
+
+                <!-- Left Scroll Arrow -->
+                <button type="button" id="btnScrollQuickLeft" onclick="scrollQuickStudentTabs('left')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95" title="Geser ke kiri">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <!-- Scroll Container with Grab/Wheel support -->
+                <div id="quickModalStudentTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 min-w-0 select-none cursor-grab">
+                    <!-- Quick Jump Anchors injected dynamically via JS -->
+                </div>
+
+                <!-- Right Scroll Arrow -->
+                <button type="button" id="btnScrollQuickRight" onclick="scrollQuickStudentTabs('right')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95 animate-pulse hover:animate-none" title="Geser ke kanan">
+                    <i class="fa-solid fa-chevron-right"></i>
                 </button>
             </div>
 
@@ -2353,6 +2439,68 @@
         </div>
     </div>
 
+    <!-- MODAL RIWAYAT HISTORI PLOTTING TERPADU (PEMBIMBING & PENGUJI) -->
+    <div id="modalHistoryPlotting" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-5">
+        <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="p-4 px-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-slate-700/60">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center font-bold text-base shadow-inner">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2" id="historyModalTitle">
+                            Riwayat Histori Plotting &amp; Perubahan Dosen
+                        </h3>
+                        <p class="text-[11px] text-slate-300 font-medium">Audit log setiap penetapan dan perubahan Dosen Pembimbing &amp; Penguji Tugas Akhir</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeHistoryPlottingModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Category Filter & Search Bar -->
+            <div class="p-3.5 px-6 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+                <!-- Category Tabs -->
+                <div class="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1 text-xs font-bold text-slate-600">
+                    <button type="button" id="tabHistoryFilterAll" onclick="switchHistoryCategoryTab('All')" class="px-3 py-1.5 rounded-lg transition cursor-pointer bg-white text-slate-900 shadow-2xs">
+                        Semua
+                    </button>
+                    <button type="button" id="tabHistoryFilterPembimbing" onclick="switchHistoryCategoryTab('Pembimbing')" class="px-3 py-1.5 rounded-lg transition cursor-pointer hover:text-orange-600 text-slate-600">
+                        👨‍🏫 Pembimbing (TA)
+                    </button>
+                    <button type="button" id="tabHistoryFilterPenguji" onclick="switchHistoryCategoryTab('Penguji')" class="px-3 py-1.5 rounded-lg transition cursor-pointer hover:text-indigo-600 text-slate-600">
+                        👔 Penguji (Preview 2)
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3 flex-1 max-w-sm">
+                    <div class="flex items-center gap-2 flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-2xs">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
+                        <input type="text" id="inputSearchHistoryPlotting" oninput="filterHistoryPlottingRows(this.value)" placeholder="Cari nama, NIM, atau dosen..." class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
+                    </div>
+                    <span id="historyRecordCount" class="text-xs font-bold text-slate-500 font-mono shrink-0">0 Catatan</span>
+                </div>
+            </div>
+
+            <!-- Modal Body (Timeline List) -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-3.5 custom-scrollbar bg-slate-50/50" id="historyPlottingTimelineContainer">
+                <div class="py-12 text-center text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i>
+                    <p class="text-xs">Memuat data histori...</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3.5 px-6 bg-white border-t border-slate-200 flex items-center justify-end shrink-0">
+                <button type="button" onclick="closeHistoryPlottingModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Config for External Dashboard Script -->
     <script>
         window.DASHBOARD_CONFIG = {
@@ -2367,6 +2515,8 @@
             ajaxPreview2UpdateUrl: "<?= site_url('koordinatorta/ajax_update_preview2_penguji'); ?>",
             ajaxPreview2BatchUrl: "<?= site_url('koordinatorta/ajax_batch_preview2_penguji'); ?>",
             ajaxPreview2RealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_preview2'); ?>",
+            ajaxHistoryTaUrl: "<?= site_url('koordinatorta/ajax_get_history_ta'); ?>",
+            ajaxHistoryPengujiUrl: "<?= site_url('koordinatorta/ajax_get_history_penguji'); ?>",
             ajaxSidangUpdateUrl: "<?= site_url('koordinatorta/ajax_update_jadwal_sidang'); ?>",
             ajaxSidangBatchUrl: "<?= site_url('koordinatorta/ajax_batch_jadwal_sidang'); ?>",
             ajaxSidangRealtimeUrl: "<?= site_url('koordinatorta/ajax_realtime_sidang'); ?>",
