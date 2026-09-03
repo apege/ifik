@@ -687,12 +687,19 @@
 
         const jMulai = j.jam_mulai ? j.jam_mulai.substring(0, 5) : '00:00';
         const jSelesai = j.jam_selesai ? j.jam_selesai.substring(0, 5) : '00:00';
-        const timeStr = `${jMulai} - ${jSelesai}`;
+        const lokasi = (j.lokasi || '').replace(/"/g, '&quot;');
+        const kapasitas = j.kapasitas || '';
+        const namaKategori = (j.nama_kategori || 'Ruangan').replace(/"/g, '&quot;');
 
-        const kode = (j.kode_ruangan || '').replace(/"/g, '&quot;');
-        const namaRuangan = (j.nama_ruangan || '').replace(/"/g, '&quot;');
-        const namaLengkap = (j.nama_lengkap || '').replace(/"/g, '&quot;');
-        const keterangan = (j.keterangan || '-').replace(/"/g, '&quot;');
+        let metaHtml = '';
+        if (lokasi || kapasitas) {
+            metaHtml = `
+                <div class="rht-meta">
+                    ${lokasi ? `<span>📍 ${lokasi}</span>` : ''}
+                    ${kapasitas ? `<span>👥 ${kapasitas} Orang</span>` : ''}
+                </div>
+            `;
+        }
 
         return `
             <div class="room-item" onclick="openDetailBookingModal(${j.id})" style="cursor: pointer;">
@@ -700,9 +707,19 @@
                     <div class="room-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     </div>
-                    <div class="room-info">
+                    <div class="room-info" title="${namaRuangan} (${kode})">
                         <h3 data-text="${kode}">${kode}</h3>
                         <p data-text="${namaRuangan}">${namaRuangan}</p>
+                    </div>
+
+                    <!-- Floating Room Detail Tooltip on Hover (Direct child of room-item-left) -->
+                    <div class="room-hover-tooltip">
+                        <div class="rht-header">
+                            <span class="rht-code">${kode}</span>
+                            <span class="rht-cat">${namaKategori}</span>
+                        </div>
+                        <div class="rht-title">${namaRuangan}</div>
+                        ${metaHtml}
                     </div>
                 </div>
                 
@@ -722,6 +739,12 @@
 
                 <div class="room-item-desc" title="${keterangan}">
                     <span class="room-desc-text" data-text="${keterangan}">${keterangan}</span>
+                    
+                    <!-- Floating Keterangan Detail Tooltip on Hover -->
+                    <div class="desc-hover-tooltip">
+                        <span class="dht-badge">📝 Keterangan / Keperluan</span>
+                        <div class="dht-content">${keterangan}</div>
+                    </div>
                 </div>
 
                 <div class="room-item-action">

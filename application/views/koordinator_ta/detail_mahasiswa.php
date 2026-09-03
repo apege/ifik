@@ -517,96 +517,27 @@
                     </div>
 
                     <?php if ($isAlreadyApproved): ?>
-                        <!-- READ-ONLY STATE: SUDAH DISETUJUI & PLOTTING TERKUNCI -->
-                        <div class="space-y-6">
-                            <!-- Alert Info Banner -->
-                            <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
-                                <div class="flex items-center gap-3.5">
-                                    <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-                                        <i class="fa-solid fa-lock"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-xs font-bold text-emerald-950 uppercase tracking-wide">Pendaftaran Telah Disetujui &amp; Dosen Pembimbing Ditetapkan</h4>
-                                        <p class="text-[11px] text-emerald-800 mt-0.5">Penetapan dosen pembimbing telah disimpan dan proses pendaftaran telah diteruskan ke Ketua KK.</p>
-                                    </div>
+                        <!-- INFO BANNER: SUDAH DISETUJUI TAPI TETAP BISA DIEDIT -->
+                        <div class="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                                    <i class="fa-solid fa-circle-check"></i>
                                 </div>
-                                <span class="px-3 py-1 bg-white text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold shrink-0 shadow-2xs">
-                                    <i class="fa-solid fa-check-double mr-1 text-emerald-600"></i> Terkunci (Read-Only)
-                                </span>
-                            </div>
-
-                            <!-- Plotting Summary Cards (Readonly) -->
-                            <div class="space-y-3">
-                                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-chalkboard-user text-orange-600 text-sm"></i> Dosen Pembimbing Terpilih:
-                                </span>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <!-- Pembimbing 1 -->
-                                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-2xs space-y-2">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-xs font-bold text-slate-700">Dosen Pembimbing 1 (Utama)</span>
-                                            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
-                                        </div>
-                                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
-                                            <div class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-                                                1
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="text-xs font-bold text-slate-900 truncate"><?= htmlspecialchars($p1Dosen['nama_dosen'] ?? ($detail['pembimbing_1'] ?? '-')); ?></p>
-                                                <p class="text-[10px] text-slate-500 font-mono mt-0.5">NIP: <?= htmlspecialchars($p1Dosen['nip'] ?? ($detail['pembimbing_1'] ?? '-')); ?></p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Pembimbing 2 -->
-                                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-2xs space-y-2">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-xs font-bold text-slate-700">Dosen Pembimbing 2 (Pendamping)</span>
-                                            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-md">Terpilih</span>
-                                        </div>
-                                        <div class="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
-                                            <div class="w-9 h-9 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-                                                2
-                                            </div>
-                                            <div class="min-w-0">
-                                                <p class="text-xs font-bold text-slate-900 truncate"><?= htmlspecialchars($p2Dosen['nama_dosen'] ?? ($detail['pembimbing_2'] ?? '-')); ?></p>
-                                                <p class="text-[10px] text-slate-500 font-mono mt-0.5">NIP: <?= htmlspecialchars($p2Dosen['nip'] ?? ($detail['pembimbing_2'] ?? '-')); ?></p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-emerald-950 uppercase tracking-wide">Pendaftaran Telah Disetujui (Tahap: <?= htmlspecialchars($detail['current_stage'] ?? 'Ketua KK'); ?>)</h4>
+                                    <p class="text-[11px] text-emerald-800 mt-0.5">Dosen pembimbing telah ditetapkan sebelumnya. Anda tetap dapat memperbarui pilihan Dosen Pembimbing 1 &amp; 2 kapan saja.</p>
                                 </div>
                             </div>
-
-                            <!-- Catatan Koordinator -->
-                            <div class="pt-2">
-                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                                    Catatan Koordinator TA:
-                                </label>
-                                <div class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-medium text-slate-800 leading-relaxed shadow-2xs">
-                                    <?= !empty($detail['catatan_koor']) ? nl2br(htmlspecialchars($detail['catatan_koor'])) : '<span class="text-slate-400 italic">Tidak ada catatan khusus yang diberikan.</span>'; ?>
-                                </div>
-                            </div>
-
-                            <!-- Action Footer -->
-                            <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
-                                <button type="button" onclick="switchDockTab(2)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl text-xs border border-slate-200 shadow-xs inline-flex items-center gap-2 transition cursor-pointer">
-                                    <i class="fa-solid fa-arrow-left text-xs"></i>
-                                    <span>Kembali ke Berkas</span>
-                                </button>
-
-                                <button type="button" disabled class="bg-slate-100 text-slate-400 font-bold px-6 py-3 rounded-xl text-xs border border-slate-200 cursor-not-allowed inline-flex items-center gap-2 shadow-2xs">
-                                    <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
-                                    <span>Pendaftaran Telah Disetujui (Terkunci)</span>
-                                </button>
-                            </div>
+                            <span class="px-3 py-1 bg-white text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold shrink-0 shadow-2xs">
+                                <i class="fa-solid fa-pen-to-square mr-1 text-emerald-600"></i> Dapat Diedit
+                            </span>
                         </div>
+                    <?php endif; ?>
 
-                    <?php else: ?>
-                        <!-- EDITABLE FORM (MASIH PENDING / PERLU APPROVAL) -->
-                        <form id="formApprovalKoor" onsubmit="handleAjaxApproval(event)" class="space-y-6">
-                            <input type="hidden" name="nim" value="<?= $detail['nim']; ?>">
-                            <input type="hidden" name="status" value="Approved">
+                    <!-- EDITABLE FORM (APPROVAL & PERUBAHAN PEMBIMBING) -->
+                    <form id="formApprovalKoor" onsubmit="handleAjaxApproval(event)" class="space-y-6">
+                        <input type="hidden" name="nim" value="<?= $detail['nim']; ?>">
+                        <input type="hidden" name="status" value="Approved">
 
                             <!-- 1. Plotting Dosen Pembimbing 1 & 2 -->
                             <div id="sectionPembimbing" class="space-y-5">
@@ -760,7 +691,6 @@
                                 </button>
                             </div>
                         </form>
-                    <?php endif; ?>
                 </section>
 
             </div>

@@ -211,12 +211,13 @@ if (!$active_key && !empty($all_ruangan)) {
             if (empty($rkey)) $rkey = 'room_' . $r->id;
         }
 
-        if ($rkey === $lab_key) {
+        if ($rkey === $lab_key || (string)$r->id === (string)$lab_key || 'room_' . $r->id === (string)$lab_key || $c === (string)$lab_key || $n === (string)$lab_key) {
             $active_key = $lab_key;
             $img_url = !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : base_url('assets/images/multimedia.jpg');
             $model_url = !empty($r->model_3d) ? (strpos($r->model_3d, 'http') === 0 ? $r->model_3d : base_url($r->model_3d)) : '';
 
             $labs_data[$lab_key] = [
+                'id_ruangan'   => $r->id,
                 'title'        => $r->nama_ruangan,
                 'subtitle'     => !empty($r->tagline) ? $r->tagline : 'Fasilitas Ruangan Fakultas Industri Kreatif',
                 'badge'        => 'Laboratorium FIK',
@@ -231,14 +232,14 @@ if (!$active_key && !empty($all_ruangan)) {
                 'photo'        => $img_url,
                 'photo_fallback' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000&auto=format&fit=crop',
                 'location'     => !empty($r->lokasi) ? $r->lokasi : 'Gedung Fakultas Industri Kreatif',
-                'capacity'     => !empty($r->jumlah_unit) ? $r->jumlah_unit : '-',
+                'capacity'     => !empty($r->jumlah_unit) ? $r->jumlah_unit : (!empty($r->kapasitas) ? $r->kapasitas . ' Orang' : '-'),
                 'hours'        => !empty($r->jam_operasional) ? $r->jam_operasional : 'Senin - Jumat | 08:00 - 17:00 WIB',
-                'desc'         => !empty($r->deskripsi) ? $r->deskripsi : '-',
+                'desc'         => !empty($r->deskripsi) ? $r->deskripsi : 'Fasilitas ruangan praktikum dan perkuliahan di Fakultas Industri Kreatif.',
                 'specs'        => !empty($r->spesifikasi_fasilitas)
                     ? array_map(function($s) {
                         return ['icon' => '⚙️', 'title' => 'Spesifikasi', 'desc' => trim($s)];
                       }, array_filter(explode("\n", $r->spesifikasi_fasilitas)))
-                    : [['icon' => '🏫', 'title' => 'Fasilitas', 'desc' => 'Informasi fasilitas tersedia di lokasi.']],
+                    : [['icon' => '🏫', 'title' => 'Fasilitas', 'desc' => 'Informasi fasilitas lengkap tersedia di lokasi.']],
                 'rules'        => !empty($r->tata_tertib)
                     ? array_filter(array_map('trim', explode("\n", $r->tata_tertib)))
                     : ['Ikuti tata tertib yang berlaku di ruangan.'],

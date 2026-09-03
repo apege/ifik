@@ -117,6 +117,90 @@ class Mahasiswa extends CI_Controller {
         $this->load->view('mahasiswa/edit_pendaftaran', $data);
     }
 
+    // Submit perbaikan berkas revisi langsung dari modal mahasiswa
+    public function upload_revisi_berkas() {
+        $nim = $this->_get_current_nim();
+        $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
+        if (!$pendaftaran) {
+            redirect('mahasiswa');
+            return;
+        }
+
+        $config['upload_path']   = './uploads/persyaratan_ta/';
+        $config['allowed_types'] = 'pdf';
+        $config['max_size']      = 5120; // 5MB
+
+        if (!is_dir($config['upload_path'])) {
+            mkdir($config['upload_path'], 0777, true);
+        }
+
+        $this->load->library('upload', $config);
+
+        $fields = ['file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'];
+        $status_keys = [
+            'file_ksm'        => 'status_file_ksm',
+            'file_transkrip'  => 'status_file_transkrip',
+            'file_pernyataan' => 'status_file_pernyataan',
+            'file_bebas_lab'  => 'status_file_bebas_lab'
+        ];
+        $review_keys = [
+            'file_ksm'        => 'review_file_ksm',
+            'file_transkrip'  => 'review_file_transkrip',
+            'file_pernyataan' => 'review_file_pernyataan',
+            'file_bebas_lab'  => 'review_file_bebas_lab'
+        ];
+
+        $updated_data = [];
+        $uploaded_count = 0;
+
+        foreach ($fields as $f) {
+            if (!empty($_FILES[$f]['name'])) {
+                $new_file = $this->_do_upload($f, $config);
+                if ($new_file) {
+                    $updated_data[$f] = $new_file;
+                    $updated_data[$status_keys[$f]] = 'Pending';
+                    $updated_data[$review_keys[$f]] = 0;
+                    $short_key = str_replace('file_', '', $f);
+                    $updated_data['catatan_file_' . $short_key] = '';
+                    $uploaded_count++;
+                }
+            }
+        }
+
+        if ($this->input->post('judul_1')) {
+            $updated_data['judul_1'] = $this->input->post('judul_1');
+            $updated_data['status_judul'] = 'Pending';
+            $updated_data['catatan_judul'] = '';
+        }
+
+        if (!empty($updated_data)) {
+            $updated_data['status_approval_wali'] = 'Pending';
+            $updated_data['status_approval_admin'] = 'Pending';
+            $updated_data['current_stage'] = 'Dosen Wali';
+            $updated_data['updated_at'] = date('Y-m-d H:i:s');
+
+            // Reset catatan_wali jika semua item revisi sudah dikirimkan / diperbaiki
+            $curr_ksm = isset($updated_data['status_file_ksm']) ? $updated_data['status_file_ksm'] : ($pendaftaran['status_file_ksm'] ?? 'Pending');
+            $curr_trn = isset($updated_data['status_file_transkrip']) ? $updated_data['status_file_transkrip'] : ($pendaftaran['status_file_transkrip'] ?? 'Pending');
+            $curr_prn = isset($updated_data['status_file_pernyataan']) ? $updated_data['status_file_pernyataan'] : ($pendaftaran['status_file_pernyataan'] ?? 'Pending');
+            $curr_lab = isset($updated_data['status_file_bebas_lab']) ? $updated_data['status_file_bebas_lab'] : ($pendaftaran['status_file_bebas_lab'] ?? 'Pending');
+            $curr_jud = isset($updated_data['status_judul']) ? $updated_data['status_judul'] : ($pendaftaran['status_judul'] ?? 'Pending');
+
+            $has_any_rejected_left = ($curr_ksm === 'Rejected' || $curr_trn === 'Rejected' || $curr_prn === 'Rejected' || $curr_lab === 'Rejected' || $curr_jud === 'Rejected');
+
+            if (!$has_any_rejected_left) {
+                $updated_data['catatan_wali'] = '';
+            }
+
+            $this->db->where('nim', $nim)->update('pendaftaran_ta', $updated_data);
+            $this->session->set_flashdata('success', 'Berhasil mengunggah ' . ($uploaded_count ? $uploaded_count . ' berkas perbaikan' : 'perubahan usulan') . ' untuk diverifikasi kembali!');
+        } else {
+            $this->session->set_flashdata('error', 'Tidak ada file baru yang diunggah. Silakan pilih file PDF yang valid.');
+        }
+
+        redirect('mahasiswa');
+    }
+
     // Fitur Geodata Mahasiswa
     public function geodata() {
         $nim = $this->_get_current_nim();
@@ -147,12 +231,13 @@ class Mahasiswa extends CI_Controller {
 
         $this->load->model('AdminLayanan_model');
         $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
-        $has_ta = !empty($pendaftaran['judul_1']);
+        // Form hanya terkunci jika sudah resmi dikirim (is_submitted = 1)
+        $has_completed_submission = !empty($pendaftaran['is_submitted']);
 
         $has_revisi = false;
         $is_locked = false;
 
-        if ($has_ta) {
+        if ($has_completed_submission) {
             $w_status  = $pendaftaran['status_approval_wali'] ?? 'Pending';
             $a_status  = $pendaftaran['status_approval_admin'] ?? 'Pending';
             $k_status  = $pendaftaran['status_approval_koor'] ?? 'Pending';
@@ -162,7 +247,8 @@ class Mahasiswa extends CI_Controller {
             $is_locked = !$has_revisi;
         }
 
-        $data['title']          = $is_locked ? 'Pendaftaran Tugas Akhir (Sedang Ditinjau)' : 'Pendaftaran Tugas Akhir';
+        $has_ta = !empty($pendaftaran['judul_1']);
+        $data['title']          = $is_locked ? 'Pendaftaran Tugas Akhir (Sedang Ditinjau)' : 'Pendaftaran Tugas Akhir (6 Step)';
         $data['mahasiswa']      = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran']    = $pendaftaran;
         $data['is_locked']      = $is_locked;
@@ -170,6 +256,7 @@ class Mahasiswa extends CI_Controller {
         $data['has_ta']         = $has_ta;
         $data['syarat_berkas']  = $this->AdminLayanan_model->get_active_syarat_berkas();
         $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
+
 
         if ($this->input->post()) {
             // Konfigurasi Upload File PDF
@@ -216,8 +303,8 @@ class Mahasiswa extends CI_Controller {
             $k_status  = isset($existing_ta['status_approval_koor']) ? $existing_ta['status_approval_koor'] : 'Pending';
             $kk_status = isset($existing_ta['status_approval_kk']) ? $existing_ta['status_approval_kk'] : 'Pending';
 
-            // Jika status Dosen Wali tadinya Rejected, reset Dosen Wali ke Pending untuk re-review
-            if ($w_status === 'Rejected') {
+            // Jika status Dosen Wali tadinya Rejected atau Draft, reset Dosen Wali ke Pending saat dikirim resmi
+            if ($w_status === 'Rejected' || $w_status === 'Draft' || empty($w_status)) {
                 $w_status = 'Pending';
             }
 
@@ -250,9 +337,9 @@ class Mahasiswa extends CI_Controller {
             $id_dosen_wali = $dw_row ? $dw_row['id'] : null;
 
             $data_ta = array(
-
                 'nim'                  => $nim,
                 'id_dosen_wali'        => $id_dosen_wali,
+                'is_submitted'         => 1,
                 'jenis_ta'             => $this->input->post('jenis_ta'),
                 'judul_1'              => $this->input->post('judul_1'),
                 'judul_2'              => $this->input->post('judul_2'),
@@ -567,6 +654,129 @@ class Mahasiswa extends CI_Controller {
                 'judul_1'        => $pendaftaran['judul_1'] ?? ''
             ]));
     }
+
+    // AJAX Endpoint: Instant Background Auto-Upload berkas persyaratan TA (Step 3-6)
+    public function ajax_upload_file_ta() {
+        $nim = $this->_get_current_nim();
+        $field_name = $this->input->post('field_name'); // 'file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'
+
+        $allowed_fields = ['file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'];
+        if (!in_array($field_name, $allowed_fields)) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(['success' => false, 'message' => 'Field tidak valid.']));
+            return;
+        }
+
+        $upload_dir = './uploads/persyaratan_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config['upload_path']   = $upload_dir;
+        $config['allowed_types'] = 'pdf';
+        $config['max_size']      = 5120; // 5MB
+        $config['file_name']     = $field_name . '_' . $nim . '_' . time();
+
+        $this->load->library('upload', $config);
+        $this->upload->initialize($config);
+
+        if ($this->upload->do_upload($field_name)) {
+            $upload_data = $this->upload->data();
+            $file_name = $upload_data['file_name'];
+
+            $mhs = $this->Mahasiswa_model->get_mahasiswa($nim);
+            $mhs_konsentrasi = !empty($mhs['konsentrasi_dkv']) ? $mhs['konsentrasi_dkv'] : 'Desain Komunikasi Visual';
+            $mhs_id_kk = !empty($mhs['id_kk']) ? $mhs['id_kk'] : 1;
+
+            // Simpan / update ke database sebagai draft
+            $existing_ta = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+            if ($existing_ta) {
+                $upData = [$field_name => $file_name];
+                if (empty($existing_ta['konsentrasi_dkv'])) $upData['konsentrasi_dkv'] = $mhs_konsentrasi;
+                if (empty($existing_ta['id_kk'])) $upData['id_kk'] = $mhs_id_kk;
+                $this->db->where('nim', $nim)->update('pendaftaran_ta', $upData);
+            } else {
+                $this->db->insert('pendaftaran_ta', [
+                    'nim'                  => $nim,
+                    'konsentrasi_dkv'      => $mhs_konsentrasi,
+                    'id_kk'                => $mhs_id_kk,
+                    'is_submitted'         => 0,
+                    'status_approval_wali' => 'Draft',
+                    'current_stage'        => 'Draft',
+                    $field_name            => $file_name,
+                    'created_at'           => date('Y-m-d H:i:s')
+                ]);
+            }
+
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success'    => true,
+                    'field_name' => $field_name,
+                    'file_name'  => $file_name,
+                    'file_size'  => number_format($upload_data['file_size'] / 1024, 2) . ' MB',
+                    'file_url'   => base_url('uploads/persyaratan_ta/' . $file_name),
+                    'message'    => 'Berkas berhasil diunggah dan tersimpan di server.'
+                ]));
+        } else {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'success' => false,
+                    'message' => strip_tags($this->upload->display_errors())
+                ]));
+        }
+    }
+
+    // AJAX Endpoint: Auto-Save Draft Teks (Jenis TA & Judul) ke Database Server
+    public function ajax_save_draft_ta() {
+        $nim = $this->_get_current_nim();
+        $mhs = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $mhs_konsentrasi = !empty($mhs['konsentrasi_dkv']) ? $mhs['konsentrasi_dkv'] : 'Desain Komunikasi Visual';
+        $mhs_id_kk = !empty($mhs['id_kk']) ? $mhs['id_kk'] : 1;
+
+        $jenis_ta = $this->input->post('jenis_ta', true);
+        $judul_1  = $this->input->post('judul_1', true);
+        $judul_2  = $this->input->post('judul_2', true);
+        $judul_3  = $this->input->post('judul_3', true);
+        $judul_en = $this->input->post('judul_en', true);
+        $konsentrasi_dkv = $this->input->post('konsentrasi_dkv', true) ?: $mhs_konsentrasi;
+
+        $draft_step = (int)$this->input->post('draft_step', true);
+
+        $data_update = array();
+        if ($jenis_ta !== null && $jenis_ta !== '') $data_update['jenis_ta'] = $jenis_ta;
+        if ($judul_1 !== null)  $data_update['judul_1'] = $judul_1;
+        if ($judul_2 !== null)  $data_update['judul_2'] = $judul_2;
+        if ($judul_3 !== null)  $data_update['judul_3'] = $judul_3;
+        if ($judul_en !== null) $data_update['judul_en'] = $judul_en;
+        if ($draft_step >= 1 && $draft_step <= 6) $data_update['draft_step'] = $draft_step;
+        $data_update['konsentrasi_dkv'] = $konsentrasi_dkv;
+        $data_update['id_kk'] = $mhs_id_kk;
+
+        $data_update['updated_at'] = date('Y-m-d H:i:s');
+
+        $existing = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+        if ($existing) {
+            $this->db->where('nim', $nim)->update('pendaftaran_ta', $data_update);
+        } else {
+            $data_update['nim'] = $nim;
+            $data_update['created_at'] = date('Y-m-d H:i:s');
+            $data_update['is_submitted'] = 0;
+            $data_update['status_approval_wali'] = 'Draft';
+            $data_update['status_approval_admin'] = 'Pending';
+            $data_update['status_approval_koor'] = 'Pending';
+            $data_update['status_approval_kk'] = 'Pending';
+            $data_update['current_stage'] = 'Draft';
+            $this->db->insert('pendaftaran_ta', $data_update);
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(['success' => true, 'message' => 'Draft berhasil tersimpan di server.']));
+    }
+
     // AJAX Endpoint: Get list of students and their previews for Dosen Bimbingan
     public function ajax_get_dosen_bimbingan() {
         header('Content-Type: application/json');
@@ -718,6 +928,51 @@ class Mahasiswa extends CI_Controller {
             ];
             $this->Mahasiswa_model->update_review_preview($id, $data);
             $message = 'Komentar Pembimbing 2 berhasil disimpan.';
+        } else {
+            echo json_encode(['status' => false, 'message' => 'Posisi tidak valid']);
+            return;
+        }
+
+        echo json_encode([
+            'status' => true,
+            'message' => $message
+        ]);
+    }
+
+    // AJAX Endpoint: Review massal dosen
+    public function review_preview_batch_ajax() {
+        header('Content-Type: application/json');
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id != 4) {
+            echo json_encode(['status' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $ids = $this->input->post('ids');
+        $posisi = $this->input->post('posisi');
+
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => false, 'message' => 'Tidak ada data yang dipilih']);
+            return;
+        }
+
+        if ($posisi == 1) {
+            $data = [
+                'status_pembimbing' => 'Approved',
+                'catatan_pembimbing' => ''
+            ];
+            foreach ($ids as $id) {
+                $this->Mahasiswa_model->update_review_preview($id, $data);
+            }
+            $message = count($ids) . ' berkas berhasil disetujui (P1).';
+        } else if ($posisi == 2) {
+            $data = [
+                'catatan_pembimbing_2' => 'Telah ditinjau (massal)'
+            ];
+            foreach ($ids as $id) {
+                $this->Mahasiswa_model->update_review_preview($id, $data);
+            }
+            $message = count($ids) . ' berkas berhasil diberi catatan (P2).';
         } else {
             echo json_encode(['status' => false, 'message' => 'Posisi tidak valid']);
             return;

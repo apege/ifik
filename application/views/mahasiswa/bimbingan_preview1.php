@@ -13,9 +13,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap" rel="stylesheet">
-
+    
     <!-- Global Styling -->
     <link rel="stylesheet" href="<?= base_url('assets/css/style.css'); ?>?v=<?= time(); ?>">
+    <!-- TinyMCE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
     <style>
         body, button, input, textarea, select {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -378,7 +381,19 @@
                             </p>
                         </div>
 
-                        <?php if($is_pembimbing_assigned): ?>
+                        <?php if(!$is_pembimbing_assigned): ?>
+                        <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl">
+                            <i class="bi bi-person-fill-lock text-4xl text-slate-400 mb-3 block"></i>
+                            <h4 class="font-bold text-lg text-slate-700">Tahap Bimbingan Belum Tersedia</h4>
+                            <p class="text-slate-500 text-sm mt-2">Dosen Pembimbing 1 dan Pembimbing 2 Anda belum di-assign oleh Koordinator TA. Harap menunggu hingga pembimbing ditetapkan sebelum Anda dapat mulai mengunggah berkas.</p>
+                        </div>
+                        <?php elseif($is_p1_app): ?>
+                        <div class="py-10 text-center bg-emerald-50 border border-emerald-200 rounded-3xl">
+                            <i class="bi bi-lock-fill text-4xl text-emerald-500 mb-3 block"></i>
+                            <h4 class="font-bold text-lg text-emerald-800">Tahap Terkunci (Selesai)</h4>
+                            <p class="text-emerald-700 text-sm mt-2">Tahap ini telah disetujui oleh Pembimbing 1. Anda tidak dapat mengunggah ulang berkas. Silakan lanjut ke Preview 2.</p>
+                        </div>
+                        <?php else: ?>
                         <!-- Form Upload -->
                         <?= form_open_multipart('mahasiswa/upload_preview', ['id' => 'formUploadPreview1', 'class' => 'space-y-6']); ?>
                             <input type="hidden" name="tahap_preview" value="Preview 1">
@@ -434,12 +449,6 @@
                                 </button>
                             </div>
                         <?= form_close(); ?>
-                        <?php else: ?>
-                        <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl">
-                            <i class="bi bi-person-fill-lock text-4xl text-slate-400 mb-3 block"></i>
-                            <h4 class="font-bold text-lg text-slate-700">Tahap Bimbingan Belum Tersedia</h4>
-                            <p class="text-slate-500 text-sm mt-2">Dosen Pembimbing 1 dan Pembimbing 2 Anda belum di-assign oleh Koordinator TA. Harap menunggu hingga pembimbing ditetapkan sebelum Anda dapat mulai mengunggah berkas.</p>
-                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -554,7 +563,19 @@
                             </p>
                         </div>
 
-                        <?php if($is_p1_app): ?>
+                        <?php if(!$is_p1_app): ?>
+                        <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl">
+                            <i class="bi bi-lock-fill text-4xl text-slate-400 mb-3 block"></i>
+                            <h4 class="font-bold text-lg text-slate-700">Tahap Terkunci</h4>
+                            <p class="text-slate-500 text-sm mt-2">Anda harus mendapatkan persetujuan (ACC) dari Pembimbing 1 di tahap Preview 1 sebelum dapat mengunggah berkas di tahap ini.</p>
+                        </div>
+                        <?php elseif($is_p2_app): ?>
+                        <div class="py-10 text-center bg-emerald-50 border border-emerald-200 rounded-3xl">
+                            <i class="bi bi-lock-fill text-4xl text-emerald-500 mb-3 block"></i>
+                            <h4 class="font-bold text-lg text-emerald-800">Tahap Terkunci (Selesai)</h4>
+                            <p class="text-emerald-700 text-sm mt-2">Tahap ini telah disetujui oleh Penguji. Anda tidak dapat mengunggah ulang berkas. Silakan lanjut ke Preview 3.</p>
+                        </div>
+                        <?php else: ?>
                         <?= form_open_multipart('mahasiswa/upload_preview', ['id' => 'formUploadPreview2', 'class' => 'space-y-6']); ?>
                             <input type="hidden" name="tahap_preview" value="Preview 2">
                             
@@ -602,12 +623,6 @@
                                 </button>
                             </div>
                         <?= form_close(); ?>
-                        <?php else: ?>
-                        <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl">
-                            <i class="bi bi-lock-fill text-4xl text-slate-400 mb-3 block"></i>
-                            <h4 class="font-bold text-lg text-slate-700">Tahap Terkunci</h4>
-                            <p class="text-slate-500 text-sm mt-2">Anda harus mendapatkan persetujuan (ACC) dari Pembimbing 1 di tahap Preview 1 sebelum dapat mengunggah berkas di tahap ini.</p>
-                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -682,7 +697,19 @@
                     </button>
                 </div>
 
-                <?php if($is_p2_app): ?>
+                <?php if(!$is_p2_app): ?>
+                <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl max-w-3xl">
+                    <i class="bi bi-lock-fill text-4xl text-slate-400 mb-3 block"></i>
+                    <h4 class="font-bold text-lg text-slate-700">Tahap Terkunci</h4>
+                    <p class="text-slate-500 text-sm mt-2">Anda harus mendapatkan persetujuan (ACC) dari Penguji di tahap Preview 2 sebelum dapat mengunggah berkas Preview 3.</p>
+                </div>
+                <?php elseif($is_p3_app): ?>
+                <div class="py-10 text-center bg-emerald-50 border border-emerald-200 rounded-3xl max-w-3xl">
+                    <i class="bi bi-lock-fill text-4xl text-emerald-500 mb-3 block"></i>
+                    <h4 class="font-bold text-lg text-emerald-800">Tahap Terkunci (Selesai)</h4>
+                    <p class="text-emerald-700 text-sm mt-2">Tahap ini telah disetujui. Anda tidak dapat mengunggah ulang berkas. Anda sudah siap untuk mendaftar Sidang Akhir.</p>
+                </div>
+                <?php else: ?>
                 <?= form_open_multipart('mahasiswa/upload_preview', ['id' => 'formUploadPreview3', 'class' => 'space-y-6 max-w-3xl']); ?>
                     <input type="hidden" name="tahap_preview" value="Preview 3">
                     <div>
@@ -725,12 +752,6 @@
                         <i class="bi bi-send-check-fill mr-2"></i> Submit Berkas Pra-Sidang (Preview 3)
                     </button>
                 <?= form_close(); ?>
-                <?php else: ?>
-                <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl max-w-3xl">
-                    <i class="bi bi-lock-fill text-4xl text-slate-400 mb-3 block"></i>
-                    <h4 class="font-bold text-lg text-slate-700">Tahap Terkunci</h4>
-                    <p class="text-slate-500 text-sm mt-2">Anda harus mendapatkan persetujuan (ACC) dari Penguji di tahap Preview 2 sebelum dapat mengunggah berkas Preview 3.</p>
-                </div>
                 <?php endif; ?>
             </div>
 
@@ -846,12 +867,29 @@
         setupFileUploader(2);
         setupFileUploader(3);
 
+        // Initialize TinyMCE for textarea
+        tinymce.init({
+            selector: 'textarea[name="catatan_mahasiswa"]',
+            menubar: false,
+            statusbar: false,
+            plugins: 'lists link',
+            toolbar: 'bold italic underline | bullist numlist | link',
+            height: 200,
+            skin: 'oxide',
+            setup: function (editor) {
+                editor.on('change', function () {
+                    tinymce.triggerSave();
+                });
+            }
+        });
+
         // AJAX Form Submit
         ['formUploadPreview1', 'formUploadPreview2', 'formUploadPreview3'].forEach((formId, idx) => {
             const form = document.getElementById(formId);
             if (form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    tinymce.triggerSave(); // Ensure tinymce content is updated to textarea
                     const formData = new FormData(this);
                     const btn = this.querySelector('button[type="submit"]');
                     const originalBtnContent = btn.innerHTML;

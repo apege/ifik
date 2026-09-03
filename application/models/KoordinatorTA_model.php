@@ -12,22 +12,82 @@ class KoordinatorTA_model extends CI_Model {
         if (!$this->db->table_exists('pendaftaran_ta')) return;
         $fields = $this->db->list_fields('pendaftaran_ta');
         $new_cols = array(
-            'pembimbing_1'         => "VARCHAR(50) DEFAULT NULL",
-            'pembimbing_2'         => "VARCHAR(50) DEFAULT NULL",
-            'penguji_1'            => "VARCHAR(50) DEFAULT NULL",
-            'penguji_2'            => "VARCHAR(50) DEFAULT NULL",
-            'tgl_sidang'           => "DATE DEFAULT NULL",
-            'jam_mulai_sidang'     => "TIME DEFAULT NULL",
-            'jam_selesai_sidang'   => "TIME DEFAULT NULL",
-            'ruangan_sidang'       => "VARCHAR(100) DEFAULT NULL",
-            'status_approval_koor' => "VARCHAR(50) DEFAULT 'Pending'",
-            'catatan_koor'         => "TEXT DEFAULT NULL",
-            'current_stage'        => "VARCHAR(100) DEFAULT 'Koordinator TA'",
+            'pembimbing_1'            => "VARCHAR(50) DEFAULT NULL",
+            'pembimbing_2'            => "VARCHAR(50) DEFAULT NULL",
+            'penguji_1'               => "VARCHAR(50) DEFAULT NULL",
+            'penguji_2'               => "VARCHAR(50) DEFAULT NULL",
+            'tgl_sidang'              => "DATE DEFAULT NULL",
+            'jam_mulai_sidang'        => "TIME DEFAULT NULL",
+            'jam_selesai_sidang'      => "TIME DEFAULT NULL",
+            'ruangan_sidang'          => "VARCHAR(100) DEFAULT NULL",
+            'status_approval_koor'    => "VARCHAR(50) DEFAULT 'Pending'",
+            'catatan_koor'            => "TEXT DEFAULT NULL",
+            'current_stage'           => "VARCHAR(100) DEFAULT 'Koordinator TA'",
+            'peminatan'               => "VARCHAR(100) DEFAULT NULL",
+            'nilai_akhir_sidang'      => "DECIMAL(5,2) DEFAULT NULL",
+            'grade_sidang'            => "VARCHAR(10) DEFAULT NULL",
+            'status_kelulusan_sidang' => "VARCHAR(50) DEFAULT 'Belum Dinilai'",
+            'detail_penilaian_sidang' => "LONGTEXT DEFAULT NULL",
+            'tgl_penilaian_sidang'    => "DATETIME DEFAULT NULL",
         );
         foreach ($new_cols as $col => $type) {
             if (!in_array($col, $fields)) {
                 $this->db->query("ALTER TABLE `pendaftaran_ta` ADD COLUMN `{$col}` {$type}");
             }
+        }
+
+        // Buat tabel history log plotting penguji jika belum ada
+        if (!$this->db->table_exists('history_plotting_penguji')) {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `history_plotting_penguji` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `nim` VARCHAR(50) NOT NULL,
+                    `nama_mahasiswa` VARCHAR(150) NULL,
+                    `penguji_1_lama` VARCHAR(50) NULL,
+                    `penguji_2_lama` VARCHAR(50) NULL,
+                    `nama_penguji_1_lama` VARCHAR(150) NULL,
+                    `nama_penguji_2_lama` VARCHAR(150) NULL,
+                    `penguji_1_baru` VARCHAR(50) NOT NULL,
+                    `penguji_2_baru` VARCHAR(50) NOT NULL,
+                    `nama_penguji_1_baru` VARCHAR(150) NULL,
+                    `nama_penguji_2_baru` VARCHAR(150) NULL,
+                    `aksi` VARCHAR(50) NOT NULL DEFAULT 'Penetapan Penguji',
+                    `keterangan` TEXT NULL,
+                    `actor_nip` VARCHAR(50) NULL,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_nim` (`nim`),
+                    KEY `idx_created_at` (`created_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+        }
+
+        // Buat tabel history log plotting TA (Pembimbing & Penguji terpadu) jika belum ada
+        if (!$this->db->table_exists('history_plotting_ta')) {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `history_plotting_ta` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `kategori` ENUM('Pembimbing', 'Penguji') NOT NULL DEFAULT 'Pembimbing',
+                    `nim` VARCHAR(50) NOT NULL,
+                    `nama_mahasiswa` VARCHAR(150) NULL,
+                    `dosen_1_lama` VARCHAR(50) NULL,
+                    `dosen_2_lama` VARCHAR(50) NULL,
+                    `nama_dosen_1_lama` VARCHAR(150) NULL,
+                    `nama_dosen_2_lama` VARCHAR(150) NULL,
+                    `dosen_1_baru` VARCHAR(50) NULL,
+                    `dosen_2_baru` VARCHAR(50) NULL,
+                    `nama_dosen_1_baru` VARCHAR(150) NULL,
+                    `nama_dosen_2_baru` VARCHAR(150) NULL,
+                    `aksi` VARCHAR(50) NOT NULL DEFAULT 'Penetapan Dosen',
+                    `keterangan` TEXT NULL,
+                    `actor_nip` VARCHAR(50) NULL,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_nim` (`nim`),
+                    KEY `idx_kategori` (`kategori`),
+                    KEY `idx_created_at` (`created_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
         }
     }
 
@@ -86,6 +146,7 @@ class KoordinatorTA_model extends CI_Model {
         $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
         $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
         $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->where('p.is_submitted', 1);
         $this->db->order_by('p.created_at', 'DESC');
         $query = $this->db->get();
 
@@ -208,6 +269,11 @@ class KoordinatorTA_model extends CI_Model {
             );
         }
 
+        $p1_lama = $curr['pembimbing_1'] ?? null;
+        $p2_lama = $curr['pembimbing_2'] ?? null;
+        $is_changed = (string)$p1_lama !== (string)$pembimbing_1 || (string)$p2_lama !== (string)$pembimbing_2;
+        $aksi = (empty($p1_lama) && empty($p2_lama)) ? 'Penetapan Awal Pembimbing' : 'Perubahan Pembimbing';
+
         $data = array(
             'status_approval_koor' => $status, // 'Approved' / 'Rejected'
             'catatan_koor'         => trim($catatan),
@@ -226,6 +292,11 @@ class KoordinatorTA_model extends CI_Model {
         $update = $this->db->update('pendaftaran_ta', $data);
 
         if ($update) {
+            // Rekam ke history log jika disetujui atau terjadi perubahan pembimbing
+            if ($status === 'Approved' && $is_changed) {
+                $this->record_history_ta('Pembimbing', $nim, $p1_lama, $p2_lama, $pembimbing_1, $pembimbing_2, $aksi, $catatan);
+            }
+
             return array(
                 'status'  => true, 
                 'message' => ($status === 'Approved') ? 'Pendaftaran TA berhasil disetujui dan Dosen Pembimbing telah ditetapkan!' : 'Pendaftaran TA berhasil ditolak dengan catatan revisi.'
@@ -328,6 +399,11 @@ class KoordinatorTA_model extends CI_Model {
                 }
             }
 
+            $p1_lama = $curr['pembimbing_1'] ?? null;
+            $p2_lama = $curr['pembimbing_2'] ?? null;
+            $is_changed = (string)$p1_lama !== (string)$p1 || (string)$p2_lama !== (string)$p2;
+            $aksi = (empty($p1_lama) && empty($p2_lama)) ? 'Penetapan Awal Pembimbing' : 'Perubahan Pembimbing';
+
             $data = array(
                 'status_approval_koor' => $status,
                 'catatan_koor'         => trim($cat),
@@ -347,6 +423,10 @@ class KoordinatorTA_model extends CI_Model {
             $this->db->where('nim', $nimStr);
             if ($this->db->update('pendaftaran_ta', $data)) {
                 $successCount++;
+                // Rekam ke history log jika ada penetapan / perubahan
+                if ($status === 'Approved' && $is_changed) {
+                    $this->record_history_ta('Pembimbing', $nimStr, $p1_lama, $p2_lama, $p1, $p2, $aksi, $cat);
+                }
             } else {
                 $failedList[] = "NIM {$nimStr} (Gagal update database)";
             }
@@ -489,6 +569,11 @@ class KoordinatorTA_model extends CI_Model {
             return array('status' => false, 'message' => 'Dosen Penguji tidak boleh sama dengan Dosen Pembimbing mahasiswa!');
         }
 
+        $p1_lama = $curr['penguji_1'] ?? null;
+        $p2_lama = $curr['penguji_2'] ?? null;
+        $is_changed = (string)$p1_lama !== (string)$penguji_1 || (string)$p2_lama !== (string)$penguji_2;
+        $aksi = (empty($p1_lama) && empty($p2_lama)) ? 'Penetapan Awal' : 'Perubahan Penguji';
+
         $data = array(
             'penguji_1'          => $penguji_1,
             'penguji_2'          => $penguji_2,
@@ -503,6 +588,11 @@ class KoordinatorTA_model extends CI_Model {
         $update = $this->db->update('pendaftaran_ta', $data);
 
         if ($update) {
+            // Rekam ke tabel history_plotting_penguji jika terjadi penetapan/perubahan
+            if ($is_changed) {
+                $this->record_history_penguji($nim, $p1_lama, $p2_lama, $penguji_1, $penguji_2, $aksi, $catatan);
+            }
+
             // Update / Insert ke ta_penguji jika tabel ada
             if ($this->db->table_exists('ta_penguji')) {
                 $this->db->where('nim', $nim);
@@ -543,10 +633,114 @@ class KoordinatorTA_model extends CI_Model {
                 }
             }
 
-            return array('status' => true, 'message' => 'Dosen Penguji & Jadwal Sidang Preview 2 berhasil ditetapkan!');
+            return array('status' => true, 'message' => 'Dosen Penguji & Jadwal Sidang Preview 2 berhasil disimpan!');
         } else {
             return array('status' => false, 'message' => 'Gagal memperbarui database.');
         }
+    }
+
+    // Rekam Log Histori Plotting Terpadu (Pembimbing / Penguji)
+    public function record_history_ta($kategori, $nim, $d1_lama, $d2_lama, $d1_baru, $d2_baru, $aksi = 'Penetapan Dosen', $keterangan = '', $actor_nip = null) {
+        if (!$this->db->table_exists('history_plotting_ta')) {
+            $this->_ensure_columns_exist();
+        }
+
+        if (empty($actor_nip)) {
+            $actor_nip = $this->session->userdata('nip') ? $this->session->userdata('nip') : '19800202002';
+        }
+
+        // Ambil nama mahasiswa
+        $nama_mhs = '';
+        if ($this->db->table_exists('mahasiswa')) {
+            $mhs = $this->db->where('nim', $nim)->get('mahasiswa')->row_array();
+            if ($mhs) {
+                $nama_mhs = trim(($mhs['nama_depan'] ?? '') . ' ' . ($mhs['nama_belakang'] ?? ''));
+            }
+        }
+
+        // Helper nama dosen
+        $dosen_list = $this->get_dosen_list();
+        $get_dosen_name = function($nip) use ($dosen_list) {
+            if (empty($nip)) return null;
+            return $dosen_list[$nip]['nama_dosen'] ?? $nip;
+        };
+
+        $nama_d1_lama = $get_dosen_name($d1_lama);
+        $nama_d2_lama = $get_dosen_name($d2_lama);
+        $nama_d1_baru = $get_dosen_name($d1_baru);
+        $nama_d2_baru = $get_dosen_name($d2_baru);
+
+        $logData = array(
+            'kategori'          => $kategori, // 'Pembimbing' / 'Penguji'
+            'nim'               => $nim,
+            'nama_mahasiswa'    => $nama_mhs,
+            'dosen_1_lama'      => $d1_lama,
+            'dosen_2_lama'      => $d2_lama,
+            'nama_dosen_1_lama' => $nama_d1_lama,
+            'nama_dosen_2_lama' => $nama_d2_lama,
+            'dosen_1_baru'      => $d1_baru,
+            'dosen_2_baru'      => $d2_baru,
+            'nama_dosen_1_baru' => $nama_d1_baru,
+            'nama_dosen_2_baru' => $nama_d2_baru,
+            'aksi'              => $aksi,
+            'keterangan'        => $keterangan,
+            'actor_nip'         => $actor_nip,
+            'created_at'        => date('Y-m-d H:i:s')
+        );
+
+        $this->db->insert('history_plotting_ta', $logData);
+
+        // Kompatibilitas tabel history_plotting_penguji
+        if ($kategori === 'Penguji' && $this->db->table_exists('history_plotting_penguji')) {
+            $this->db->insert('history_plotting_penguji', array(
+                'nim'                 => $nim,
+                'nama_mahasiswa'      => $nama_mhs,
+                'penguji_1_lama'      => $d1_lama,
+                'penguji_2_lama'      => $d2_lama,
+                'nama_penguji_1_lama' => $nama_d1_lama,
+                'nama_penguji_2_lama' => $nama_d2_lama,
+                'penguji_1_baru'      => $d1_baru,
+                'penguji_2_baru'      => $d2_baru,
+                'nama_penguji_1_baru' => $nama_d1_baru,
+                'nama_penguji_2_baru' => $nama_d2_baru,
+                'aksi'                => $aksi,
+                'keterangan'          => $keterangan,
+                'actor_nip'           => $actor_nip,
+                'created_at'          => date('Y-m-d H:i:s')
+            ));
+        }
+
+        return true;
+    }
+
+    // Ambil Data Histori Log Perubahan TA (Pembimbing & Penguji)
+    public function get_history_ta($kategori = null, $nim = null, $limit = 100) {
+        if (!$this->db->table_exists('history_plotting_ta')) {
+            $this->_ensure_columns_exist();
+        }
+
+        $this->db->from('history_plotting_ta');
+        if (!empty($kategori) && in_array($kategori, array('Pembimbing', 'Penguji'))) {
+            $this->db->where('kategori', $kategori);
+        }
+        if (!empty($nim)) {
+            $this->db->where('nim', $nim);
+        }
+        $this->db->order_by('created_at', 'DESC');
+        if ($limit > 0) {
+            $this->db->limit($limit);
+        }
+        return $this->db->get()->result_array();
+    }
+
+    // Rekam Log Histori Plotting Penguji (Wrapper Backward Compatible)
+    public function record_history_penguji($nim, $p1_lama, $p2_lama, $p1_baru, $p2_baru, $aksi = 'Penetapan Penguji', $keterangan = '', $actor_nip = null) {
+        return $this->record_history_ta('Penguji', $nim, $p1_lama, $p2_lama, $p1_baru, $p2_baru, $aksi, $keterangan, $actor_nip);
+    }
+
+    // Ambil Data Histori Log Perubahan Penguji (Wrapper Backward Compatible)
+    public function get_history_penguji($nim = null, $limit = 50) {
+        return $this->get_history_ta('Penguji', $nim, $limit);
     }
 
     // Batch Plotting Penguji Preview 2 Massal (Mendukung Per-Mahasiswa Plotting)
@@ -616,10 +810,12 @@ class KoordinatorTA_model extends CI_Model {
         }
 
         $this->db->select('
-            m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.email, m.no_hp,
+            m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.prodi as master_prodi, m.email, m.no_hp,
             p.id as id_pendaftaran, p.nim, p.judul_1, p.pembimbing_1, p.pembimbing_2,
             p.penguji_1, p.penguji_2, p.tgl_sidang, p.jam_mulai_sidang, p.jam_selesai_sidang, p.ruangan_sidang,
             p.status_approval_koor, p.status_approval_kk, p.current_stage,
+            p.peminatan, p.nilai_akhir_sidang, p.grade_sidang, p.status_kelulusan_sidang,
+            p.detail_penilaian_sidang, p.tgl_penilaian_sidang,
             dw1.nama_dosen as nama_pembimbing_1,
             dw2.nama_dosen as nama_pembimbing_2,
             dp1.nama_dosen as nama_penguji_1,
@@ -652,7 +848,26 @@ class KoordinatorTA_model extends CI_Model {
                 $row['nama_belakang'] = $row['nim'];
             }
             $row['nama_lengkap'] = trim($row['nama_depan'] . ' ' . $row['nama_belakang']);
-            $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : 'Informatika';
+            $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : (!empty($row['master_prodi']) ? $row['master_prodi'] : 'Desain Komunikasi Visual');
+
+            // Format / default peminatan jika belum di-set
+            if (empty($row['peminatan'])) {
+                if (stripos($row['prodi'], 'DKV') !== false || stripos($row['prodi'], 'Komunikasi') !== false) {
+                    $row['peminatan'] = 'Multimedia';
+                } elseif (stripos($row['prodi'], 'Interior Bisnis') !== false || stripos($row['prodi'], 'DIB') !== false) {
+                    $row['peminatan'] = 'Spatial Branding';
+                } elseif (stripos($row['prodi'], 'Interior') !== false || stripos($row['prodi'], 'DI') !== false) {
+                    $row['peminatan'] = 'Komersial';
+                } elseif (stripos($row['prodi'], 'Produk') !== false || stripos($row['prodi'], 'DP') !== false) {
+                    $row['peminatan'] = 'Desain Industri';
+                } else {
+                    $row['peminatan'] = 'Multimedia';
+                }
+            }
+
+            if (empty($row['status_kelulusan_sidang'])) {
+                $row['status_kelulusan_sidang'] = 'Belum Dinilai';
+            }
 
             $hasJadwal = (!empty($row['tgl_sidang']) && !empty($row['jam_mulai_sidang']) && !empty($row['ruangan_sidang']));
             if ($hasJadwal) {
@@ -811,5 +1026,123 @@ class KoordinatorTA_model extends CI_Model {
             'message'       => "Berhasil menetapkan jadwal sidang untuk {$successCount} mahasiswa!",
             'success_count' => $successCount
         );
+    }
+
+    // =========================================================
+    // FITUR REVISI: PENILAIAN AKHIR SIDANG TA BERDASARKAN PRODI & PEMINATAN
+    // =========================================================
+
+    // Simpan Penilaian Akhir Sidang TA
+    public function simpan_penilaian_sidang_ajax($nim, $prodi, $peminatan, $nilai_akhir, $grade, $status_kelulusan, $detail_penilaian = array(), $catatan = '') {
+        try {
+            $this->_ensure_columns_exist();
+
+            if (!$this->db->table_exists('pendaftaran_ta')) {
+                return array('status' => false, 'message' => 'Tabel pendaftaran_ta tidak ditemukan.');
+            }
+
+            if (empty($nim)) {
+                return array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.');
+            }
+
+            $exist = $this->db->where('nim', $nim)->get('pendaftaran_ta')->row_array();
+            if (!$exist) {
+                return array('status' => false, 'message' => 'Data pendaftaran tugas akhir mahasiswa tidak ditemukan.');
+            }
+
+            $detailJson = is_array($detail_penilaian) ? json_encode($detail_penilaian) : $detail_penilaian;
+
+            $updateData = array(
+                'peminatan'               => !empty($peminatan) ? $peminatan : ($exist['peminatan'] ?? 'Multimedia'),
+                'nilai_akhir_sidang'      => is_numeric($nilai_akhir) ? floatval($nilai_akhir) : null,
+                'grade_sidang'            => !empty($grade) ? $grade : null,
+                'status_kelulusan_sidang' => !empty($status_kelulusan) ? $status_kelulusan : 'Lulus',
+                'detail_penilaian_sidang' => $detailJson,
+                'tgl_penilaian_sidang'    => date('Y-m-d H:i:s')
+            );
+
+            if (!empty($catatan)) {
+                $updateData['catatan_koor'] = $catatan;
+            }
+
+            $this->db->where('nim', $nim);
+            $ok = $this->db->update('pendaftaran_ta', $updateData);
+
+            if ($ok) {
+                // Ambil data mahasiswa untuk logging
+                $mhs = $this->db->where('nim', $nim)->get('mahasiswa')->row_array();
+                $namaMhs = $mhs ? trim(($mhs['nama_depan'] ?? '') . ' ' . ($mhs['nama_belakang'] ?? '')) : "Mahasiswa {$nim}";
+
+                // Rekam ke tabel riwayat histori terpadu
+                try {
+                    $this->record_history_ta(
+                        'Sidang TA',
+                        $nim,
+                        $exist['penguji_1'] ?? null,
+                        $exist['penguji_2'] ?? null,
+                        $exist['penguji_1'] ?? null,
+                        $exist['penguji_2'] ?? null,
+                        'Penilaian Sidang TA',
+                        "Nilai Akhir: {$nilai_akhir} (Grade: {$grade}) - Status: {$status_kelulusan} [Prodi: {$prodi}, Peminatan: {$peminatan}]" . (!empty($catatan) ? " | Catatan: {$catatan}" : "")
+                    );
+                } catch (\Throwable $thLog) {
+                    log_message('error', 'Logging history error: ' . $thLog->getMessage());
+                }
+
+                return array(
+                    'status'  => true,
+                    'message' => "Penilaian Akhir Sidang untuk {$namaMhs} ({$nim}) berhasil disimpan!",
+                    'data'    => array(
+                        'nim'              => $nim,
+                        'peminatan'        => $updateData['peminatan'],
+                        'nilai_akhir'      => $updateData['nilai_akhir_sidang'],
+                        'grade'            => $updateData['grade_sidang'],
+                        'status_kelulusan' => $updateData['status_kelulusan_sidang']
+                    )
+                );
+            } else {
+                $dbErr = $this->db->error();
+                return array('status' => false, 'message' => 'Gagal menyimpan penilaian: ' . ($dbErr['message'] ?? 'Database error.'));
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'simpan_penilaian_sidang_ajax error: ' . $e->getMessage());
+            return array('status' => false, 'message' => 'Exception: ' . $e->getMessage());
+        }
+    }
+
+    // Ambil Detail Penilaian Sidang Mahasiswa
+    public function get_detail_penilaian_sidang($nim) {
+        if (!$this->db->table_exists('pendaftaran_ta')) return null;
+
+        $this->db->select('
+            p.nim, p.judul_1, p.pembimbing_1, p.pembimbing_2, p.penguji_1, p.penguji_2,
+            p.tgl_sidang, p.jam_mulai_sidang, p.jam_selesai_sidang, p.ruangan_sidang,
+            p.peminatan, p.nilai_akhir_sidang, p.grade_sidang, p.status_kelulusan_sidang,
+            p.detail_penilaian_sidang, p.tgl_penilaian_sidang, p.catatan_koor,
+            m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.prodi as master_prodi,
+            dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2,
+            dp1.nama_dosen as nama_penguji_1, dp2.nama_dosen as nama_penguji_2
+        ');
+        $this->db->from('pendaftaran_ta p');
+        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('dosen_wali dp1', 'dp1.nip = p.penguji_1', 'left');
+        $this->db->join('dosen_wali dp2', 'dp2.nip = p.penguji_2', 'left');
+        $this->db->where('p.nim', $nim);
+
+        $row = $this->db->get()->row_array();
+        if (!$row) return null;
+
+        $row['nama_lengkap'] = trim(($row['nama_depan'] ?? '') . ' ' . ($row['nama_belakang'] ?? ''));
+        $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : (!empty($row['master_prodi']) ? $row['master_prodi'] : 'Desain Komunikasi Visual');
+
+        if (!empty($row['detail_penilaian_sidang']) && is_string($row['detail_penilaian_sidang'])) {
+            $row['detail_penilaian_parsed'] = json_decode($row['detail_penilaian_sidang'], true);
+        } else {
+            $row['detail_penilaian_parsed'] = null;
+        }
+
+        return $row;
     }
 }

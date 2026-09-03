@@ -88,6 +88,91 @@
             <!-- Main Content Area -->
             <div class="lg:col-span-2 space-y-8">
                 
+                <!-- Jenis TA Review & Keputusan Card -->
+                <?php
+                    $st_jenis = $detail['status_jenis_ta'] ?? 'Pending';
+                    $note_jenis = $detail['catatan_jenis_ta'] ?? '';
+                    $isJenisDecided = in_array($st_jenis, array('Approved', 'Rejected'));
+                ?>
+                <div id="card-jenis-global" class="card-3d-warm rounded-2xl p-6 sm:p-8 space-y-5 transition-all">
+                    <!-- Header Jenis TA -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-orange-200/60 gap-3">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center text-xl shrink-0 box-3d">
+                                <i class="bi bi-diagram-3-fill"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="font-bold text-base sm:text-lg text-slate-900 tracking-tight">Jenis &amp; Skema Tugas Akhir</h2>
+                                    <span id="badge-status-jenis-global" class="px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap <?= ($st_jenis === 'Approved') ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (($st_jenis === 'Rejected') ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-slate-100 text-slate-600 border-slate-200'); ?>">
+                                        <?= ($st_jenis === 'Approved') ? '✅ Disetujui' : (($st_jenis === 'Rejected') ? '❌ Ditolak' : '⏳ Menunggu'); ?>
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500 font-normal mt-0.5">Tinjau jenis tugas akhir dan kesesuaian konsentrasi kelompok keahlian mahasiswa.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Pilihan Jenis TA -->
+                    <div class="p-4 rounded-xl bg-white/90 border border-orange-200/80 shadow-2xs flex flex-wrap items-center gap-4 text-xs">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-0.5">Skema Tugas Akhir:</span>
+                            <span class="px-3 py-1 bg-orange-100 text-orange-800 font-black text-xs rounded-lg border border-orange-200 inline-block">
+                                <?= htmlspecialchars($detail['jenis_ta'] ?? 'Reguler'); ?>
+                            </span>
+                        </div>
+                        <div class="border-l border-slate-200 pl-4">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-0.5">Kelompok Keahlian / Konsentrasi:</span>
+                            <span class="font-bold text-slate-800 text-xs">
+                                <?= htmlspecialchars($detail['nama_kk'] ?? $detail['kode_kk'] ?? 'Visual & Communication Media'); ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Area Saran / Catatan & Tombol Keputusan (Approve, Reject, Reset) -->
+                    <div class="pt-4 border-t border-orange-200/60 space-y-3.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Catatan / Komentar untuk Jenis TA:</span>
+                                <span id="comment-status-jenis" class="text-[10px] <?= $isJenisDecided ? 'text-amber-600 font-semibold' : 'text-slate-400 font-normal'; ?>">
+                                    <?= $isJenisDecided ? '(Terkunci, klik Reset untuk mengedit kembali)' : '(Dapat diedit)'; ?>
+                                </span>
+                            </label>
+                            <textarea id="catatan_jenis_ta" rows="2" placeholder="Tuliskan catatan atau masukan terkait jenis tugas akhir..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition <?= $isJenisDecided ? 'bg-slate-50 opacity-80 cursor-not-allowed' : 'bg-white'; ?>" <?= $isJenisDecided ? 'readonly' : ''; ?>><?= htmlspecialchars($note_jenis); ?></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2.5" id="action-buttons-jenis">
+                            <!-- Reset Button -->
+                            <button type="button" id="btn-reset-jenis" onclick="resetJenisDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                                <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                            </button>
+
+                            <?php if($st_jenis === 'Approved'): ?>
+                                <button type="button" id="btn-approve-jenis" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                </button>
+                                <button type="button" id="btn-reject-jenis" onclick="handleResetFirstWarningJenis('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                                    <i class="bi bi-x-circle text-sm"></i> Denied
+                                </button>
+                            <?php elseif($st_jenis === 'Rejected'): ?>
+                                <button type="button" id="btn-approve-jenis" onclick="handleResetFirstWarningJenis('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                                    <i class="bi bi-check-circle text-sm"></i> Approve
+                                </button>
+                                <button type="button" id="btn-reject-jenis" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                </button>
+                            <?php else: ?>
+                                <button type="button" id="btn-approve-jenis" onclick="decideJenis('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                                </button>
+                                <button type="button" id="btn-reject-jenis" onclick="decideJenis('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Judul TA Review & Keputusan Card -->
                 <?php
                     $st_judul = $detail['status_judul'] ?? 'Pending';
@@ -290,8 +375,8 @@
                                         <div class="px-5 py-4 bg-white space-y-3.5">
                                             <!-- Form Komentar Per File -->
                                             <?php
-                                                $comment_val = $detail['catatan_file_' . $key] ?? '';
-                                                if (empty($comment_val) && !empty($detail['catatan_wali']) && preg_match('/\[' . preg_quote(strtoupper($key), '/') . '[^\]]*\]\s*:\s*([^\n\r]+)/i', $detail['catatan_wali'], $cm)) {
+                                                $comment_val = ($st === 'Rejected') ? ($detail['catatan_file_' . $key] ?? '') : '';
+                                                if ($st === 'Rejected' && empty($comment_val) && !empty($detail['catatan_wali']) && preg_match('/\[' . preg_quote(strtoupper($key), '/') . '[^\]]*\]\s*:\s*([^\n\r]+)/i', $detail['catatan_wali'], $cm)) {
                                                     $comment_val = trim($cm[1]);
                                                 }
                                             ?>
@@ -1215,6 +1300,135 @@
         .then(data => {
             if (!data.success) {
                 showSideToast(data.message || 'Gagal memperbarui status judul.', 'Peringatan', true);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    }
+
+    function handleResetFirstWarningJenis(targetAction) {
+        showSideToast(`Status Jenis TA sudah terkunci. Harap klik tombol Reset terlebih dahulu jika ingin mengganti ke ${targetAction}.`, 'Informasi');
+    }
+
+    function resetJenisDecision() {
+        const commentArea = document.getElementById('catatan_jenis_ta');
+        if (commentArea) {
+            commentArea.removeAttribute('readonly');
+            commentArea.className = 'w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition bg-white';
+            commentArea.focus();
+        }
+
+        const commentStatus = document.getElementById('comment-status-jenis');
+        if (commentStatus) {
+            commentStatus.className = 'text-[10px] text-slate-400 font-normal';
+            commentStatus.textContent = '(Dapat diedit)';
+        }
+
+        const statusBadge = document.getElementById('badge-status-jenis-global');
+        if (statusBadge) {
+            statusBadge.className = 'px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap bg-slate-100 text-slate-600 border-slate-200';
+            statusBadge.textContent = '⏳ Menunggu';
+        }
+
+        const actionContainer = document.getElementById('action-buttons-jenis');
+        if (actionContainer) {
+            actionContainer.innerHTML = `
+                <button type="button" id="btn-reset-jenis" onclick="resetJenisDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                    <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                </button>
+                <button type="button" id="btn-approve-jenis" onclick="decideJenis('Approved')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                    <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                </button>
+                <button type="button" id="btn-reject-jenis" onclick="decideJenis('Rejected')" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 cursor-pointer shadow-xs">
+                    <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                </button>
+            `;
+        }
+
+        showSideToast('Status Jenis TA di-reset ke Menunggu. Form catatan telah dibuka.', 'Pemberitahuan');
+
+        const formData = new FormData();
+        formData.append('nim', currentNim);
+        formData.append('status_jenis_ta', 'Pending');
+        formData.append('catatan_jenis_ta', commentArea ? commentArea.value.trim() : '');
+
+        fetch('<?= site_url('dosenwali/update_jenis_approval_ajax'); ?>', {
+            method: 'POST',
+            body: formData
+        }).catch(err => console.error(err));
+    }
+
+    function decideJenis(status) {
+        const commentArea = document.getElementById('catatan_jenis_ta');
+        const commentVal = commentArea ? commentArea.value.trim() : '';
+
+        if (commentArea) {
+            commentArea.setAttribute('readonly', 'true');
+            commentArea.className = 'w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 outline-none resize-none text-slate-700 placeholder:text-slate-400 transition bg-slate-50 opacity-80 cursor-not-allowed';
+        }
+
+        const commentStatus = document.getElementById('comment-status-jenis');
+        if (commentStatus) {
+            commentStatus.className = 'text-[10px] text-amber-600 font-semibold';
+            commentStatus.textContent = '(Terkunci, klik Reset untuk mengedit kembali)';
+        }
+
+        const statusBadge = document.getElementById('badge-status-jenis-global');
+        if (statusBadge) {
+            if (status === 'Approved') {
+                statusBadge.className = 'px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap bg-emerald-100 text-emerald-800 border-emerald-300';
+                statusBadge.textContent = '✅ Disetujui';
+            } else {
+                statusBadge.className = 'px-2.5 py-0.5 text-[10px] font-bold rounded-md border whitespace-nowrap bg-rose-100 text-rose-700 border-rose-300';
+                statusBadge.textContent = '❌ Ditolak';
+            }
+        }
+
+        const actionContainer = document.getElementById('action-buttons-jenis');
+        if (actionContainer) {
+            if (status === 'Approved') {
+                actionContainer.innerHTML = `
+                    <button type="button" id="btn-reset-jenis" onclick="resetJenisDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                        <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                    </button>
+                    <button type="button" id="btn-approve-jenis" class="px-5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                        <i class="bi bi-check-circle-fill text-sm"></i> Approve
+                    </button>
+                    <button type="button" id="btn-reject-jenis" onclick="handleResetFirstWarningJenis('Denied')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Denied">
+                        <i class="bi bi-x-circle text-sm"></i> Denied
+                    </button>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <button type="button" id="btn-reset-jenis" onclick="resetJenisDecision()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs" title="Reset status ke Menunggu & buka kunci tombol / saran">
+                        <i class="bi bi-arrow-counterclockwise text-sm"></i> Reset
+                    </button>
+                    <button type="button" id="btn-approve-jenis" onclick="handleResetFirstWarningJenis('Approve')" class="px-5 py-2 bg-slate-100 text-slate-400 text-xs font-bold rounded-xl border border-slate-200 cursor-not-allowed opacity-50 flex items-center gap-2" title="Klik Reset jika ingin mengganti ke Approve">
+                        <i class="bi bi-check-circle text-sm"></i> Approve
+                    </button>
+                    <button type="button" id="btn-reject-jenis" class="px-5 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-xs cursor-default">
+                        <i class="bi bi-x-circle-fill text-sm"></i> Denied
+                    </button>
+                `;
+            }
+        }
+
+        showSideToast(`Status Jenis TA berhasil di-${status === 'Approved' ? 'Approve' : 'Denied'}. Form catatan dikunci.`, 'Pemberitahuan');
+
+        const formData = new FormData();
+        formData.append('nim', currentNim);
+        formData.append('status_jenis_ta', status);
+        formData.append('catatan_jenis_ta', commentVal);
+
+        fetch('<?= site_url('dosenwali/update_jenis_approval_ajax'); ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                showSideToast(data.message || 'Gagal memperbarui status jenis TA.', 'Peringatan', true);
             }
         })
         .catch(err => {

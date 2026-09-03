@@ -276,6 +276,7 @@ class AdminLayanan_model extends CI_Model {
         $has_mhs = $this->db->table_exists('mahasiswa');
         $this->db->from('pendaftaran_ta p');
         if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->where('p.is_submitted', 1);
 
         if ($filter_status && $filter_status !== 'all') {
             $this->db->where('p.status_approval_admin', $filter_status);
@@ -320,13 +321,19 @@ class AdminLayanan_model extends CI_Model {
         $has_kk    = $this->db->table_exists('kelompok_keahlian') && $this->db->field_exists('id_kk', 'pendaftaran_ta');
 
         $select = 'p.*';
-        if ($has_mhs) $select .= ', m.nama_depan, m.nama_belakang, m.prodi, m.konsentrasi_dkv, m.email, m.no_hp';
+        if ($has_mhs) {
+            $select .= ', COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv, m.alamat';
+            if ($this->db->field_exists('prodi', 'mahasiswa')) $select .= ', m.prodi';
+            if ($this->db->field_exists('email', 'mahasiswa')) $select .= ', m.email';
+            if ($this->db->field_exists('no_hp', 'mahasiswa')) $select .= ', m.no_hp';
+        }
         if ($has_kk)  $select .= ', kk.nama_kk, kk.kode_kk';
 
         $this->db->select($select);
         $this->db->from('pendaftaran_ta p');
         if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
         if ($has_kk)  $this->db->join('kelompok_keahlian kk', 'kk.id = p.id_kk', 'left');
+        $this->db->where('p.is_submitted', 1);
 
         if ($filter_status && $filter_status !== 'all') {
             $this->db->where('p.status_approval_admin', $filter_status);
@@ -382,7 +389,10 @@ class AdminLayanan_model extends CI_Model {
         $has_mhs = $this->db->table_exists('mahasiswa');
         $this->db->select('p.nim, p.judul_1, p.status_approval_wali, p.status_approval_admin, m.nama_depan, m.nama_belakang, m.konsentrasi_dkv');
         $this->db->from('pendaftaran_ta p');
-        if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        if ($has_mhs) {
+            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        }
+        $this->db->where('p.is_submitted', 1);
 
         $this->db->group_start();
         if ($has_mhs) {
@@ -438,7 +448,12 @@ class AdminLayanan_model extends CI_Model {
         $has_kk  = $this->db->table_exists('kelompok_keahlian') && $this->db->field_exists('id_kk', 'pendaftaran_ta');
 
         $select = 'p.*';
-        if ($has_mhs) $select .= ', m.nama_depan, m.nama_belakang, m.prodi, m.konsentrasi_dkv, m.email, m.no_hp, m.alamat';
+        if ($has_mhs) {
+            $select .= ', COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv, m.alamat';
+            if ($this->db->field_exists('prodi', 'mahasiswa')) $select .= ', m.prodi';
+            if ($this->db->field_exists('email', 'mahasiswa')) $select .= ', m.email';
+            if ($this->db->field_exists('no_hp', 'mahasiswa')) $select .= ', m.no_hp';
+        }
         if ($has_kk)  $select .= ', kk.nama_kk, kk.kode_kk';
 
         $this->db->select($select);
