@@ -1412,18 +1412,23 @@
                 $totalSidang = count($list_sidang ?? []);
                 $terjadwalSidang = 0;
                 $belumSetSidang = 0;
+                $sudahDinilaiSidang = 0;
 
                 if(!empty($list_sidang)) {
                     foreach($list_sidang as $rs) {
                         $stSd = $rs['status_sidang'] ?? 'Belum Dijadwalkan';
                         if($stSd === 'Terjadwal') $terjadwalSidang++;
                         else $belumSetSidang++;
+
+                        $nilai = $rs['nilai_akhir_sidang'] ?? null;
+                        if(!empty($nilai) || !empty($rs['grade_sidang']) || ($rs['status_kelulusan_sidang'] ?? '') === 'Lulus') {
+                            $sudahDinilaiSidang++;
+                        }
                     }
                 }
-                $totalRuangan = count($ruangan_list ?? []);
             ?>
 
-            <!-- Stats Overview Cards (Tahap Sidang) -->
+            <!-- Stats Overview Cards (Tahap Sidang & Penilaian) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 <!-- 1. Total Mahasiswa Sidang (Amber) -->
                 <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
@@ -1439,7 +1444,7 @@
                             <div class="flex-1">
                                 <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Total Mahasiswa Sidang</p>
                                 <h3 id="statSidangTotal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalSidang; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Siap Dijadwalkan Sidang</p>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Pendaftar Sidang (Lulus P3)</p>
                             </div>
                             
                             <div class="relative shrink-0">
@@ -1475,7 +1480,7 @@
                             <div class="flex-1">
                                 <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Sudah Terjadwal</p>
                                 <h3 id="statSidangTerjadwal" class="text-2xl font-black text-emerald-600 mt-1 tracking-tight"><?= $terjadwalSidang; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Waktu & Ruangan Lengkap</p>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Waktu &amp; Ruangan Lengkap</p>
                             </div>
                             
                             <div class="relative shrink-0">
@@ -1497,7 +1502,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Belum Dijadwalkan (Rose/Amber) -->
+                <!-- 3. Belum Dijadwalkan (Rose) -->
                 <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
                     <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5">
                         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -1533,36 +1538,38 @@
                     </div>
                 </div>
 
-                <!-- 4. Ruangan Sidang Aktif Dinamis (Cyan/Teal) -->
-                <div onclick="openModalKelolaRuangan()" class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                <!-- 4. Selesai & Sudah Dinilai (Violet) -->
+                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 p-5">
                         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-violet-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-violet-500/10 blur-lg"></div>
                             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                         </div>
 
                         <div class="relative z-10 flex items-start justify-between gap-3">
                             <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Ruangan Sidang Aktif</p>
-                                <h3 id="statSidangRuanganCount" class="text-2xl font-black text-cyan-700 mt-1 tracking-tight"><?= $totalRuangan; ?></h3>
-                                <p class="text-xs font-medium text-cyan-600 mt-1 flex items-center gap-1 font-semibold">
-                                    <i class="fa-solid fa-sliders text-[10px]"></i> Kelola Ruangan
-                                </p>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-violet-600 transition-colors">Sudah Dinilai (Selesai)</p>
+                                <h3 id="statSidangSudahDinilai" class="text-2xl font-black text-violet-600 mt-1 tracking-tight"><?= $sudahDinilaiSidang; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Nilai &amp; Grade Terbit</p>
                             </div>
                             
                             <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-door-open text-lg"></i>
+                                <div class="absolute inset-0 rounded-2xl bg-violet-500/20 blur-md group-hover:blur-lg group-hover:bg-violet-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-violet-100/70 shadow-md text-violet-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-award text-lg"></i>
                                 </div>
                             </div>
                         </div>
 
                         <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <span class="text-[10px] font-bold text-cyan-600 group-hover:underline">Tambah / Hapus →</span>
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-violet-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1579,10 +1586,14 @@
                         <p class="text-xs text-slate-500 font-normal mt-0.5">Kelola tanggal sidang, rentang waktu, dan alokasi ruangan sidang mahasiswa secara dinamis.</p>
                     </div>
                     
-                    <div class="flex items-center gap-2.5 shrink-0">
-                        <button type="button" onclick="openModalKelolaRuangan()" class="px-4 py-2.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 font-bold rounded-xl text-xs shadow-2xs transition inline-flex items-center gap-2 cursor-pointer active:scale-95">
-                            <i class="fa-solid fa-door-open text-cyan-600"></i>
-                            <span>Kelola Ruangan Sidang</span>
+                    <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
+                        <button type="button" onclick="openHistorySidangModal()" class="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold rounded-xl text-xs shadow-2xs transition inline-flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                            <span>Riwayat Sidang TA</span>
+                        </button>
+                        <button type="button" onclick="openModalMasterRubrik()" class="px-4 py-2.5 bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 font-bold rounded-xl text-xs shadow-2xs transition inline-flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-sliders text-violet-600"></i>
+                            <span>Kelola Rubrik Penilaian</span>
                         </button>
                     </div>
                 </div>
@@ -1724,7 +1735,11 @@
                     <span class="text-xs font-bold text-slate-200">Mahasiswa Terpilih</span>
                 </div>
                 <div class="h-4 w-px bg-slate-700"></div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <button type="button" onclick="openBatchTerapkanRubrikModal()" class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-violet-600/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Terapkan Rubrik Massal</span>
+                    </button>
                     <button type="button" onclick="openModalBatchSidang()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
                         <i class="fa-solid fa-calendar-days"></i>
                         <span>Jadwalkan Massal (<span id="floatingSidangBatchCountText">0</span>)</span>
@@ -1739,10 +1754,12 @@
 
     </main>
 
+
+
     <!-- ========================================================= -->
     <!-- MODAL 1: MANAJEMEN RUANGAN SIDANG DINAMIS                 -->
     <!-- ========================================================= -->
-    <div id="modalKelolaRuangan" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+    <div id="modalKelolaRuangan" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalKelolaRuangan()"></div>
 
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
@@ -1827,6 +1844,187 @@
     </div>
 
     <!-- ========================================================= -->
+    <!-- MODAL 1B: MANAJEMEN MASTER RUBRIK PENILAIAN DINAMIS       -->
+    <!-- ========================================================= -->
+    <div id="modalKelolaMasterRubrik" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalMasterRubrik()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-violet-50/90 via-indigo-50/40 to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-violet-600/25 shrink-0">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-base font-extrabold text-slate-900 leading-snug">Kelola Master Rubrik Penilaian Sidang TA</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-violet-100 text-violet-800 border border-violet-200">Dinamis &amp; Terpusat</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Atur indikator soal &amp; persentase bobot (%) per Prodi/Peminatan, serta terapkan secara massal ke mahasiswa.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalMasterRubrik()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer shrink-0">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 sm:p-7 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <!-- 1. Prodi & Peminatan Selector Card -->
+                <div class="p-4 sm:p-5 bg-gradient-to-br from-violet-50/60 to-slate-50 border border-violet-200/80 rounded-2xl space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
+                            <div>
+                                <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 block mb-1">
+                                    Pilih Program Studi (Prodi)
+                                </label>
+                                <select id="masterRubrikProdiSelect" onchange="onMasterRubrikProdiChange(this.value)" class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-violet-500 outline-none shadow-2xs cursor-pointer">
+                                    <option value="DKV">DKV - Desain Komunikasi Visual</option>
+                                    <option value="DI">DI - Desain Interior</option>
+                                    <option value="DIB">DIB - Desain Interior Bisnis</option>
+                                    <option value="DP">DP - Desain Produk</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 block mb-1">
+                                    Pilih Peminatan / Konsentrasi
+                                </label>
+                                <select id="masterRubrikPeminatanSelect" onchange="onMasterRubrikPeminatanChange(this.value)" class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-violet-500 outline-none shadow-2xs cursor-pointer">
+                                    <!-- Injected via JS -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="sm:self-end">
+                            <button type="button" onclick="confirmResetDefaultMasterRubrik()" class="px-3.5 py-2.5 bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 border border-rose-200 font-bold rounded-xl text-xs transition shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Kembalikan semua rubrik ke standar kurikulum bawaan">
+                                <i class="fa-solid fa-rotate-left text-xs"></i>
+                                <span>Reset Default</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600 block mb-1">Judul / Nama Rubrik Penilaian:</label>
+                        <input type="text" id="masterRubrikJudulInput" placeholder="Contoh: Rubrik Sidang Tugas Akhir DKV - Multimedia" class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-violet-500 outline-none shadow-2xs">
+                    </div>
+                </div>
+
+                <!-- 2. Dynamic Criteria Items Container -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-ol text-violet-600"></i> Butir Kriteria &amp; Bobot Penilaian:
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="balanceMasterRubrikWeights()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs border border-slate-200 transition shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Bagi rata bobot 100% ke semua butir kriteria">
+                                <i class="fa-solid fa-scale-balanced text-[11px] text-slate-500"></i>
+                                <span>Bagi Rata (100%)</span>
+                            </button>
+                            <button type="button" onclick="addMasterRubrikCriterion()" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-xs shadow-md shadow-violet-600/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span>Tambah Kriteria</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="masterRubrikKriteriaContainer" class="space-y-3">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- 3. Validation Summary Card -->
+                <div id="masterRubrikValidationCard" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 transition">
+                    <div class="flex items-center gap-3">
+                        <div id="masterRubrikValidationIcon" class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Total Akumulasi Bobot:</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span id="masterRubrikTotalBobotText" class="text-xl font-black text-slate-900">100%</span>
+                                <span id="masterRubrikValidationStatusText" class="text-xs font-bold text-emerald-600">(Valid - Tepat 100%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 text-right sm:max-w-xs">
+                        Pastikan akumulasi bobot semua butir kriteria berjumlah tepat <strong>100%</strong> sebelum disimpan.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 sm:p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50">
+                <button type="button" onclick="applyMasterRubrikMassalDirect()" class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-users-gear text-xs"></i>
+                    <span>Terapkan Massal ke Mahasiswa Peminatan Ini</span>
+                </button>
+
+                <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="closeModalMasterRubrik()" class="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button" id="btnSaveMasterRubrik" onclick="submitSaveMasterRubrik()" class="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-md shadow-violet-600/25 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-floppy-disk text-xs"></i>
+                        <span>Simpan Template Rubrik</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 1C: TERAPKAN RUBRIK MASSAL KE MAHASISWA TERPILIH   -->
+    <!-- ========================================================= -->
+    <div id="modalBatchTerapkanRubrik" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeBatchTerapkanRubrikModal()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 overflow-hidden">
+            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-violet-600/25 shrink-0">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Terapkan Rubrik Penilaian Massal</h3>
+                    <p class="text-xs text-slate-500">Pasang rubrik standar kurikulum ke mahasiswa yang dipilih.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div class="p-3 bg-violet-50 border border-violet-200 rounded-xl text-violet-950 font-medium">
+                    Mahasiswa Terpilih: <strong id="batchTerapkanSelectedCountText" class="text-violet-700">0 Mahasiswa</strong>
+                </div>
+
+                <div>
+                    <label class="font-extrabold text-slate-700 block mb-1">Pilih Program Studi (Prodi):</label>
+                    <select id="batchRubrikProdiSelect" onchange="onBatchRubrikProdiChange(this.value)" class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-violet-500 outline-none shadow-2xs cursor-pointer">
+                        <option value="DKV">DKV - Desain Komunikasi Visual</option>
+                        <option value="DI">DI - Desain Interior</option>
+                        <option value="DIB">DIB - Desain Interior Bisnis</option>
+                        <option value="DP">DP - Desain Produk</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="font-extrabold text-slate-700 block mb-1">Pilih Peminatan / Konsentrasi:</label>
+                    <select id="batchRubrikPeminatanSelect" class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-violet-500 outline-none shadow-2xs cursor-pointer">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeBatchTerapkanRubrikModal()" class="px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="button" id="btnSubmitBatchTerapkanRubrik" onclick="submitBatchTerapkanRubrikSelected()" class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-md shadow-violet-600/25 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-check-double text-xs"></i>
+                    <span>Terapkan ke Mahasiswa Terpilih</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
     <!-- MODAL 2: SET JADWAL SIDANG SINGLE MAHASISWA               -->
     <!-- ========================================================= -->
     <div id="modalSingleSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
@@ -1864,14 +2062,14 @@
                     </div>
                 </div>
 
-                <!-- 2. RUANGAN SIDANG (SEARCH AUTOCOMPLETE & DYNAMIC INPUT) -->
+                <!-- 2. RUANGAN SIDANG (AUTOCOMPLETE INPUT) -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
                             Ruangan Sidang <span class="text-rose-500">*</span>
                         </label>
                         <button type="button" onclick="openModalKelolaRuangan()" class="text-xs text-cyan-600 hover:text-cyan-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-plus-circle text-[11px]"></i> Kelola Ruangan
+                            <i class="fa-solid fa-plus-circle text-[11px]"></i> + Tambah / Kelola Ruangan
                         </button>
                     </div>
                     <div class="relative custom-combobox-wrap" id="singleRuanganCombobox">
@@ -1880,7 +2078,7 @@
                                placeholder="Cari ruangan atau ketik nama ruangan baru..." 
                                autocomplete="off"
                                class="w-full pl-11 pr-11 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs transition cursor-pointer" 
-                               oninput="filterRuanganDropdown('single', this.value)" 
+                               oninput="openRuanganDropdown('single')" 
                                onfocus="openRuanganDropdown('single')"
                                onclick="openRuanganDropdown('single')">
                         <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-600 pointer-events-none">
@@ -1892,7 +2090,7 @@
                         <input type="hidden" name="ruangan_sidang" id="singleSidangRuangan" required>
 
                         <!-- Dropdown Menu List -->
-                        <div id="singleRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
+                        <div id="singleRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[80] max-h-56 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
                             <!-- Injected dynamically via JS -->
                         </div>
                     </div>
@@ -2032,14 +2230,14 @@
                     </div>
                 </div>
 
-                <!-- 2. RUANGAN SIDANG (SEARCH AUTOCOMPLETE & DYNAMIC INPUT) -->
+                <!-- 2. RUANGAN SIDANG (AUTOCOMPLETE INPUT) -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
                             Ruangan Sidang <span class="text-rose-500">*</span>
                         </label>
                         <button type="button" onclick="openModalKelolaRuangan()" class="text-xs text-cyan-600 hover:text-cyan-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-plus-circle text-[11px]"></i> Kelola Ruangan
+                            <i class="fa-solid fa-plus-circle text-[11px]"></i> + Tambah / Kelola Ruangan
                         </button>
                     </div>
                     <div class="relative custom-combobox-wrap" id="batchRuanganCombobox">
@@ -2048,7 +2246,7 @@
                                placeholder="Cari ruangan atau ketik nama ruangan baru..." 
                                autocomplete="off"
                                class="w-full pl-11 pr-11 py-3.5 bg-slate-50/70 border border-slate-300 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs transition cursor-pointer" 
-                               oninput="filterRuanganDropdown('batch', this.value)" 
+                               oninput="openRuanganDropdown('batch')" 
                                onfocus="openRuanganDropdown('batch')"
                                onclick="openRuanganDropdown('batch')">
                         <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-cyan-600 pointer-events-none">
@@ -2060,7 +2258,7 @@
                         <input type="hidden" name="ruangan_sidang" id="batchSidangRuangan" required>
 
                         <!-- Dropdown Menu List -->
-                        <div id="batchRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
+                        <div id="batchRuanganDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[80] max-h-56 overflow-y-auto divide-y divide-slate-100 text-xs custom-scrollbar">
                             <!-- Injected dynamically via JS -->
                         </div>
                     </div>
@@ -2145,6 +2343,167 @@
                     </button>
                     <button type="submit" id="btnSubmitBatchSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-save text-xs sm:text-sm"></i> Terapkan Jadwal Massal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 4: PENILAIAN AKHIR SIDANG TA (BERBASIS PRODI & PEMINATAN) -->
+    <!-- ========================================================= -->
+    <div id="modalPenilaianSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalPenilaianSidang()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="p-5 sm:p-6 px-7 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-amber-500/25 shrink-0">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Form Penilaian Akhir Sidang Tugas Akhir</h3>
+                            <span id="penilaianProdiBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">DKV</span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Penilaian resmi oleh Koordinator TA disesuaikan dengan kriteria Program Studi &amp; Peminatan.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalPenilaianSidang()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Form Body -->
+            <form id="formPenilaianSidang" onsubmit="submitPenilaianSidang(event)" class="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <input type="hidden" name="nim" id="penilaianNim">
+
+                <!-- 1. Student & Schedule Info Card -->
+                <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+                        <div>
+                            <h4 id="penilaianNamaMhs" class="text-sm font-extrabold text-slate-900">-</h4>
+                            <p class="text-xs font-mono font-bold text-slate-500" id="penilaianNimMhs">-</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap text-[11px]">
+                            <span id="penilaianJadwalPill" class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-calendar-day text-amber-500"></i> <span id="penilaianTglText">Belum Ada Jadwal</span>
+                            </span>
+                            <span id="penilaianRuanganPill" class="px-3 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 font-bold flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-door-open text-cyan-600"></i> <span id="penilaianRuanganText">-</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Judul TA -->
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Judul Tugas Akhir:</p>
+                        <p id="penilaianJudulTa" class="text-xs font-medium text-slate-800 mt-0.5 leading-relaxed">-</p>
+                    </div>
+
+                    <!-- Dosen Penguji & Pembimbing -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-[11px]">
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200/70 space-y-1">
+                            <span class="font-bold text-orange-800 block text-[10px] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-orange-600 mr-1"></i> Dosen Pembimbing</span>
+                            <p class="text-slate-700 truncate" id="penilaianPembimbing1">Pembimbing 1: -</p>
+                            <p class="text-slate-700 truncate" id="penilaianPembimbing2">Pembimbing 2: -</p>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200/70 space-y-1">
+                            <span class="font-bold text-indigo-800 block text-[10px] uppercase tracking-wider"><i class="fa-solid fa-chalkboard-user text-indigo-600 mr-1"></i> Dewan Penguji</span>
+                            <p class="text-slate-700 truncate" id="penilaianPenguji1">Penguji 1: -</p>
+                            <p class="text-slate-700 truncate" id="penilaianPenguji2">Penguji 2: -</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Prodi & Peminatan Selector -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                            Program Studi (Prodi) <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="prodi" id="penilaianProdiSelect" onchange="onPenilaianProdiChange(this.value)" class="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer">
+                            <option value="DKV">DKV - Desain Komunikasi Visual</option>
+                            <option value="DI">DI - Desain Interior</option>
+                            <option value="DIB">DIB - Desain Interior Bisnis</option>
+                            <option value="DP">DP - Desain Produk</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                            Peminatan / Konsentrasi <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="peminatan" id="penilaianPeminatanSelect" onchange="onPenilaianPeminatanChange(this.value)" class="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer">
+                            <!-- Injected dynamically via JS based on selected prodi -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. Dynamic Rubrik & Soal Penilaian List -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check text-amber-600"></i> Rubrik Soal &amp; Kriteria Penilaian:
+                        </label>
+                        <span class="text-[11px] font-semibold text-slate-400">Total Bobot: <strong class="text-slate-700">100%</strong></span>
+                    </div>
+
+                    <div id="penilaianRubrikContainer" class="space-y-3">
+                        <!-- Injected dynamically based on Prodi & Peminatan -->
+                    </div>
+                </div>
+
+                <!-- 4. Result Calculation Card (Live Calculated Total, Grade & Status Kelulusan) -->
+                <div class="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-white rounded-2xl p-5 border border-amber-300/80 shadow-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                        <!-- Nilai Akhir Angka -->
+                        <div class="text-center sm:text-left">
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Nilai Akhir Sidang</span>
+                            <div class="flex items-baseline gap-1.5 justify-center sm:justify-start mt-0.5">
+                                <span id="penilaianTotalScore" class="text-3xl font-black text-slate-900">0.00</span>
+                                <span class="text-xs font-bold text-slate-400">/ 100</span>
+                            </div>
+                        </div>
+
+                        <!-- Nilai Mutu / Grade -->
+                        <div class="text-center">
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Grade Mutu</span>
+                            <div class="mt-1 flex items-center justify-center">
+                                <span id="penilaianGradeBadge" class="px-4 py-1 rounded-xl text-lg font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                                    -
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Status Kelulusan -->
+                        <div>
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1">Status Kelulusan</span>
+                            <select name="status_kelulusan" id="penilaianStatusKelulusan" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-extrabold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none cursor-pointer">
+                                <option value="Lulus">✅ Lulus</option>
+                                <option value="Lulus dengan Revisi">⚠️ Lulus dengan Revisi</option>
+                                <option value="Tidak Lulus">❌ Tidak Lulus (Sidang Ulang)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Catatan / Rekomendasi Dewan Penguji & Koordinator -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                        Catatan Revisi / Rekomendasi Dewan Penguji &amp; Koordinator (Opsional)
+                    </label>
+                    <textarea name="catatan_sidang" id="penilaianCatatan" rows="2" placeholder="Masukkan poin-poin revisi naskah/karya atau catatan berita acara sidang..." class="w-full text-xs p-3 border border-slate-300 rounded-xl bg-white focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none shadow-2xs"></textarea>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModalPenilaianSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitPenilaianSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-floppy-disk text-xs sm:text-sm"></i> Simpan Penilaian Sidang TA
                     </button>
                 </div>
             </form>
@@ -2463,7 +2822,7 @@
             <!-- Modal Category Filter & Search Bar -->
             <div class="p-3.5 px-6 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
                 <!-- Category Tabs -->
-                <div class="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1 text-xs font-bold text-slate-600">
+                <div class="flex items-center bg-slate-200/80 p-1 rounded-xl gap-1 text-xs font-bold text-slate-600 flex-wrap">
                     <button type="button" id="tabHistoryFilterAll" onclick="switchHistoryCategoryTab('All')" class="px-3 py-1.5 rounded-lg transition cursor-pointer bg-white text-slate-900 shadow-2xs">
                         Semua
                     </button>
@@ -2472,6 +2831,9 @@
                     </button>
                     <button type="button" id="tabHistoryFilterPenguji" onclick="switchHistoryCategoryTab('Penguji')" class="px-3 py-1.5 rounded-lg transition cursor-pointer hover:text-indigo-600 text-slate-600">
                         👔 Penguji (Preview 2)
+                    </button>
+                    <button type="button" id="tabHistoryFilterSidang" onclick="switchHistoryCategoryTab('Sidang TA')" class="px-3 py-1.5 rounded-lg transition cursor-pointer hover:text-amber-600 text-slate-600">
+                        🎓 Sidang TA &amp; Nilai
                     </button>
                 </div>
 
@@ -2523,6 +2885,12 @@
             ajaxTambahRuanganUrl: "<?= site_url('koordinatorta/ajax_tambah_ruangan'); ?>",
             ajaxHapusRuanganUrl: "<?= site_url('koordinatorta/ajax_hapus_ruangan'); ?>",
             ajaxGetRuanganUrl: "<?= site_url('koordinatorta/ajax_get_ruangan_list'); ?>",
+            ajaxSimpanPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_simpan_penilaian_sidang'); ?>",
+            ajaxGetDetailPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_get_detail_penilaian_sidang'); ?>",
+            ajaxGetAllMasterRubrikUrl: "<?= site_url('koordinatorta/ajax_get_all_master_rubrik'); ?>",
+            ajaxSimpanMasterRubrikUrl: "<?= site_url('koordinatorta/ajax_simpan_master_rubrik'); ?>",
+            ajaxTerapkanRubrikMassalUrl: "<?= site_url('koordinatorta/ajax_terapkan_rubrik_massal'); ?>",
+            ajaxResetDefaultRubrikUrl: "<?= site_url('koordinatorta/ajax_reset_default_rubrik'); ?>",
             detailUrlPrefix: "<?= site_url('koordinatorta/detail_mahasiswa/'); ?>"
         };
     </script>

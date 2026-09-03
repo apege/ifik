@@ -452,11 +452,17 @@ class KoordinatorTA extends CI_Controller {
         $totalSidang = count($list);
         $terjadwalCount = 0;
         $belumSetCount = 0;
+        $sudahDinilaiCount = 0;
 
         foreach ($list as $row) {
             $st = $row['status_sidang'] ?? 'Belum Dijadwalkan';
             if ($st === 'Terjadwal') $terjadwalCount++;
             else $belumSetCount++;
+
+            $nilai = $row['nilai_akhir_sidang'] ?? null;
+            if (!empty($nilai) || !empty($row['grade_sidang']) || ($row['status_kelulusan_sidang'] ?? '') === 'Lulus') {
+                $sudahDinilaiCount++;
+            }
         }
 
         echo json_encode(array(
@@ -464,10 +470,11 @@ class KoordinatorTA extends CI_Controller {
             'data'    => $list,
             'ruangan' => $ruangan,
             'stats'   => array(
-                'total'       => $totalSidang,
-                'terjadwal'   => $terjadwalCount,
-                'belum_set'   => $belumSetCount,
-                'ruangan_cnt' => count($ruangan)
+                'total'         => $totalSidang,
+                'terjadwal'     => $terjadwalCount,
+                'belum_set'     => $belumSetCount,
+                'sudah_dinilai' => $sudahDinilaiCount,
+                'ruangan_cnt'   => count($ruangan)
             )
         ));
     }
@@ -520,4 +527,124 @@ class KoordinatorTA extends CI_Controller {
             'data'   => $ruangan
         ));
     }
+
+    // AJAX Endpoint: Simpan Penilaian Akhir Sidang TA
+    public function ajax_simpan_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim              = $this->input->post('nim');
+        $prodi            = $this->input->post('prodi');
+        $peminatan        = $this->input->post('peminatan');
+        $nilai_akhir      = $this->input->post('nilai_akhir');
+        $grade            = $this->input->post('grade');
+        $status_kelulusan = $this->input->post('status_kelulusan');
+        $detail_penilaian = $this->input->post('detail_penilaian');
+        $catatan          = $this->input->post('catatan');
+
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib disertakan.'));
+            return;
+        }
+
+        if (is_string($detail_penilaian)) {
+            $decoded = json_decode($detail_penilaian, true);
+            if (is_array($decoded)) {
+                $detail_penilaian = $decoded;
+            }
+        }
+
+        $res = $this->KoordinatorTA_model->simpan_penilaian_sidang_ajax(
+            $nim,
+            $prodi,
+            $peminatan,
+            $nilai_akhir,
+            $grade,
+            $status_kelulusan,
+            $detail_penilaian,
+            $catatan
+        );
+
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Ambil Detail Penilaian Sidang Mahasiswa
+    public function ajax_get_detail_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim = $this->input->get('nim') ?: $this->input->post('nim');
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.'));
+            return;
+        }
+
+        $detail = $this->KoordinatorTA_model->get_detail_penilaian_sidang($nim);
+        if (!$detail) {
+            echo json_encode(array('status' => false, 'message' => 'Data mahasiswa tidak ditemukan.'));
+            return;
+        }
+
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $detail
+        ));
+    }
+
+    // AJAX Endpoint: Ambil Semua Master Rubrik Dinamis
+    public function ajax_get_all_master_rubrik() {
+        header('Content-Type: application/json');
+        $rubriks = $this->KoordinatorTA_model->get_all_master_rubrik();
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $rubriks
+        ));
+    }
+
+    // AJAX Endpoint: Simpan / Update Master Rubrik Dinamis
+    public function ajax_simpan_master_rubrik() {
+        header('Content-Type: application/json');
+
+        $prodi        = $this->input->post('prodi');
+        $peminatan    = $this->input->post('peminatan');
+        $judul_rubrik = $this->input->post('judul_rubrik');
+        $kriteria_raw = $this->input->post('kriteria');
+
+        $kriteria = is_string($kriteria_raw) ? json_decode($kriteria_raw, true) : $kriteria_raw;
+
+        $res = $this->KoordinatorTA_model->simpan_master_rubrik($prodi, $peminatan, $judul_rubrik, $kriteria);
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Terapkan Rubrik Secara Massal
+    public function ajax_terapkan_rubrik_massal() {
+        header('Content-Type: application/json');
+
+        $prodi     = $this->input->post('prodi');
+        $peminatan = $this->input->post('peminatan');
+        $nim_list  = $this->input->post('nim_list');
+
+        if (is_string($nim_list)) {
+            $decoded = json_decode($nim_list, true);
+            if (is_array($decoded)) {
+                $nim_list = $decoded;
+            } else if (!empty($nim_list)) {
+                $nim_list = explode(',', $nim_list);
+            }
+        }
+
+        $res = $this->KoordinatorTA_model->terapkan_rubrik_massal($prodi, $peminatan, $nim_list);
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Reset ke Master Rubrik Default
+    public function ajax_reset_default_rubrik() {
+        header('Content-Type: application/json');
+        $this->KoordinatorTA_model->_seed_default_master_rubrik();
+        $rubriks = $this->KoordinatorTA_model->get_all_master_rubrik();
+        echo json_encode(array(
+            'status'  => true,
+            'message' => 'Seluruh master rubrik penilaian prodi & peminatan berhasil direset ke standar kurikulum default!',
+            'data'    => $rubriks
+        ));
+    }
 }
+
