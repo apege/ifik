@@ -12,17 +12,23 @@ class KoordinatorTA_model extends CI_Model {
         if (!$this->db->table_exists('pendaftaran_ta')) return;
         $fields = $this->db->list_fields('pendaftaran_ta');
         $new_cols = array(
-            'pembimbing_1'         => "VARCHAR(50) DEFAULT NULL",
-            'pembimbing_2'         => "VARCHAR(50) DEFAULT NULL",
-            'penguji_1'            => "VARCHAR(50) DEFAULT NULL",
-            'penguji_2'            => "VARCHAR(50) DEFAULT NULL",
-            'tgl_sidang'           => "DATE DEFAULT NULL",
-            'jam_mulai_sidang'     => "TIME DEFAULT NULL",
-            'jam_selesai_sidang'   => "TIME DEFAULT NULL",
-            'ruangan_sidang'       => "VARCHAR(100) DEFAULT NULL",
-            'status_approval_koor' => "VARCHAR(50) DEFAULT 'Pending'",
-            'catatan_koor'         => "TEXT DEFAULT NULL",
-            'current_stage'        => "VARCHAR(100) DEFAULT 'Koordinator TA'",
+            'pembimbing_1'            => "VARCHAR(50) DEFAULT NULL",
+            'pembimbing_2'            => "VARCHAR(50) DEFAULT NULL",
+            'penguji_1'               => "VARCHAR(50) DEFAULT NULL",
+            'penguji_2'               => "VARCHAR(50) DEFAULT NULL",
+            'tgl_sidang'              => "DATE DEFAULT NULL",
+            'jam_mulai_sidang'        => "TIME DEFAULT NULL",
+            'jam_selesai_sidang'      => "TIME DEFAULT NULL",
+            'ruangan_sidang'          => "VARCHAR(100) DEFAULT NULL",
+            'status_approval_koor'    => "VARCHAR(50) DEFAULT 'Pending'",
+            'catatan_koor'            => "TEXT DEFAULT NULL",
+            'current_stage'           => "VARCHAR(100) DEFAULT 'Koordinator TA'",
+            'peminatan'               => "VARCHAR(100) DEFAULT NULL",
+            'nilai_akhir_sidang'      => "DECIMAL(5,2) DEFAULT NULL",
+            'grade_sidang'            => "VARCHAR(10) DEFAULT NULL",
+            'status_kelulusan_sidang' => "VARCHAR(50) DEFAULT 'Belum Dinilai'",
+            'detail_penilaian_sidang' => "LONGTEXT DEFAULT NULL",
+            'tgl_penilaian_sidang'    => "DATETIME DEFAULT NULL",
         );
         foreach ($new_cols as $col => $type) {
             if (!in_array($col, $fields)) {
@@ -804,10 +810,12 @@ class KoordinatorTA_model extends CI_Model {
         }
 
         $this->db->select('
-            m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.email, m.no_hp,
+            m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.prodi as master_prodi, m.email, m.no_hp,
             p.id as id_pendaftaran, p.nim, p.judul_1, p.pembimbing_1, p.pembimbing_2,
             p.penguji_1, p.penguji_2, p.tgl_sidang, p.jam_mulai_sidang, p.jam_selesai_sidang, p.ruangan_sidang,
             p.status_approval_koor, p.status_approval_kk, p.current_stage,
+            p.peminatan, p.nilai_akhir_sidang, p.grade_sidang, p.status_kelulusan_sidang,
+            p.detail_penilaian_sidang, p.tgl_penilaian_sidang,
             dw1.nama_dosen as nama_pembimbing_1,
             dw2.nama_dosen as nama_pembimbing_2,
             dp1.nama_dosen as nama_penguji_1,
@@ -840,7 +848,26 @@ class KoordinatorTA_model extends CI_Model {
                 $row['nama_belakang'] = $row['nim'];
             }
             $row['nama_lengkap'] = trim($row['nama_depan'] . ' ' . $row['nama_belakang']);
-            $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : 'Informatika';
+            $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : (!empty($row['master_prodi']) ? $row['master_prodi'] : 'Desain Komunikasi Visual');
+
+            // Format / default peminatan jika belum di-set
+            if (empty($row['peminatan'])) {
+                if (stripos($row['prodi'], 'DKV') !== false || stripos($row['prodi'], 'Komunikasi') !== false) {
+                    $row['peminatan'] = 'Multimedia';
+                } elseif (stripos($row['prodi'], 'Interior Bisnis') !== false || stripos($row['prodi'], 'DIB') !== false) {
+                    $row['peminatan'] = 'Spatial Branding';
+                } elseif (stripos($row['prodi'], 'Interior') !== false || stripos($row['prodi'], 'DI') !== false) {
+                    $row['peminatan'] = 'Komersial';
+                } elseif (stripos($row['prodi'], 'Produk') !== false || stripos($row['prodi'], 'DP') !== false) {
+                    $row['peminatan'] = 'Desain Industri';
+                } else {
+                    $row['peminatan'] = 'Multimedia';
+                }
+            }
+
+            if (empty($row['status_kelulusan_sidang'])) {
+                $row['status_kelulusan_sidang'] = 'Belum Dinilai';
+            }
 
             $hasJadwal = (!empty($row['tgl_sidang']) && !empty($row['jam_mulai_sidang']) && !empty($row['ruangan_sidang']));
             if ($hasJadwal) {
@@ -999,5 +1026,123 @@ class KoordinatorTA_model extends CI_Model {
             'message'       => "Berhasil menetapkan jadwal sidang untuk {$successCount} mahasiswa!",
             'success_count' => $successCount
         );
+    }
+
+    // =========================================================
+    // FITUR REVISI: PENILAIAN AKHIR SIDANG TA BERDASARKAN PRODI & PEMINATAN
+    // =========================================================
+
+    // Simpan Penilaian Akhir Sidang TA
+    public function simpan_penilaian_sidang_ajax($nim, $prodi, $peminatan, $nilai_akhir, $grade, $status_kelulusan, $detail_penilaian = array(), $catatan = '') {
+        try {
+            $this->_ensure_columns_exist();
+
+            if (!$this->db->table_exists('pendaftaran_ta')) {
+                return array('status' => false, 'message' => 'Tabel pendaftaran_ta tidak ditemukan.');
+            }
+
+            if (empty($nim)) {
+                return array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.');
+            }
+
+            $exist = $this->db->where('nim', $nim)->get('pendaftaran_ta')->row_array();
+            if (!$exist) {
+                return array('status' => false, 'message' => 'Data pendaftaran tugas akhir mahasiswa tidak ditemukan.');
+            }
+
+            $detailJson = is_array($detail_penilaian) ? json_encode($detail_penilaian) : $detail_penilaian;
+
+            $updateData = array(
+                'peminatan'               => !empty($peminatan) ? $peminatan : ($exist['peminatan'] ?? 'Multimedia'),
+                'nilai_akhir_sidang'      => is_numeric($nilai_akhir) ? floatval($nilai_akhir) : null,
+                'grade_sidang'            => !empty($grade) ? $grade : null,
+                'status_kelulusan_sidang' => !empty($status_kelulusan) ? $status_kelulusan : 'Lulus',
+                'detail_penilaian_sidang' => $detailJson,
+                'tgl_penilaian_sidang'    => date('Y-m-d H:i:s')
+            );
+
+            if (!empty($catatan)) {
+                $updateData['catatan_koor'] = $catatan;
+            }
+
+            $this->db->where('nim', $nim);
+            $ok = $this->db->update('pendaftaran_ta', $updateData);
+
+            if ($ok) {
+                // Ambil data mahasiswa untuk logging
+                $mhs = $this->db->where('nim', $nim)->get('mahasiswa')->row_array();
+                $namaMhs = $mhs ? trim(($mhs['nama_depan'] ?? '') . ' ' . ($mhs['nama_belakang'] ?? '')) : "Mahasiswa {$nim}";
+
+                // Rekam ke tabel riwayat histori terpadu
+                try {
+                    $this->record_history_ta(
+                        'Sidang TA',
+                        $nim,
+                        $exist['penguji_1'] ?? null,
+                        $exist['penguji_2'] ?? null,
+                        $exist['penguji_1'] ?? null,
+                        $exist['penguji_2'] ?? null,
+                        'Penilaian Sidang TA',
+                        "Nilai Akhir: {$nilai_akhir} (Grade: {$grade}) - Status: {$status_kelulusan} [Prodi: {$prodi}, Peminatan: {$peminatan}]" . (!empty($catatan) ? " | Catatan: {$catatan}" : "")
+                    );
+                } catch (\Throwable $thLog) {
+                    log_message('error', 'Logging history error: ' . $thLog->getMessage());
+                }
+
+                return array(
+                    'status'  => true,
+                    'message' => "Penilaian Akhir Sidang untuk {$namaMhs} ({$nim}) berhasil disimpan!",
+                    'data'    => array(
+                        'nim'              => $nim,
+                        'peminatan'        => $updateData['peminatan'],
+                        'nilai_akhir'      => $updateData['nilai_akhir_sidang'],
+                        'grade'            => $updateData['grade_sidang'],
+                        'status_kelulusan' => $updateData['status_kelulusan_sidang']
+                    )
+                );
+            } else {
+                $dbErr = $this->db->error();
+                return array('status' => false, 'message' => 'Gagal menyimpan penilaian: ' . ($dbErr['message'] ?? 'Database error.'));
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'simpan_penilaian_sidang_ajax error: ' . $e->getMessage());
+            return array('status' => false, 'message' => 'Exception: ' . $e->getMessage());
+        }
+    }
+
+    // Ambil Detail Penilaian Sidang Mahasiswa
+    public function get_detail_penilaian_sidang($nim) {
+        if (!$this->db->table_exists('pendaftaran_ta')) return null;
+
+        $this->db->select('
+            p.nim, p.judul_1, p.pembimbing_1, p.pembimbing_2, p.penguji_1, p.penguji_2,
+            p.tgl_sidang, p.jam_mulai_sidang, p.jam_selesai_sidang, p.ruangan_sidang,
+            p.peminatan, p.nilai_akhir_sidang, p.grade_sidang, p.status_kelulusan_sidang,
+            p.detail_penilaian_sidang, p.tgl_penilaian_sidang, p.catatan_koor,
+            m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.prodi as master_prodi,
+            dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2,
+            dp1.nama_dosen as nama_penguji_1, dp2.nama_dosen as nama_penguji_2
+        ');
+        $this->db->from('pendaftaran_ta p');
+        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('dosen_wali dp1', 'dp1.nip = p.penguji_1', 'left');
+        $this->db->join('dosen_wali dp2', 'dp2.nip = p.penguji_2', 'left');
+        $this->db->where('p.nim', $nim);
+
+        $row = $this->db->get()->row_array();
+        if (!$row) return null;
+
+        $row['nama_lengkap'] = trim(($row['nama_depan'] ?? '') . ' ' . ($row['nama_belakang'] ?? ''));
+        $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : (!empty($row['master_prodi']) ? $row['master_prodi'] : 'Desain Komunikasi Visual');
+
+        if (!empty($row['detail_penilaian_sidang']) && is_string($row['detail_penilaian_sidang'])) {
+            $row['detail_penilaian_parsed'] = json_decode($row['detail_penilaian_sidang'], true);
+        } else {
+            $row['detail_penilaian_parsed'] = null;
+        }
+
+        return $row;
     }
 }

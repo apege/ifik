@@ -520,4 +520,65 @@ class KoordinatorTA extends CI_Controller {
             'data'   => $ruangan
         ));
     }
+
+    // AJAX Endpoint: Simpan Penilaian Akhir Sidang TA
+    public function ajax_simpan_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim              = $this->input->post('nim');
+        $prodi            = $this->input->post('prodi');
+        $peminatan        = $this->input->post('peminatan');
+        $nilai_akhir      = $this->input->post('nilai_akhir');
+        $grade            = $this->input->post('grade');
+        $status_kelulusan = $this->input->post('status_kelulusan');
+        $detail_penilaian = $this->input->post('detail_penilaian');
+        $catatan          = $this->input->post('catatan');
+
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib disertakan.'));
+            return;
+        }
+
+        if (is_string($detail_penilaian)) {
+            $decoded = json_decode($detail_penilaian, true);
+            if (is_array($decoded)) {
+                $detail_penilaian = $decoded;
+            }
+        }
+
+        $res = $this->KoordinatorTA_model->simpan_penilaian_sidang_ajax(
+            $nim,
+            $prodi,
+            $peminatan,
+            $nilai_akhir,
+            $grade,
+            $status_kelulusan,
+            $detail_penilaian,
+            $catatan
+        );
+
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Ambil Detail Penilaian Sidang Mahasiswa
+    public function ajax_get_detail_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim = $this->input->get('nim') ?: $this->input->post('nim');
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.'));
+            return;
+        }
+
+        $detail = $this->KoordinatorTA_model->get_detail_penilaian_sidang($nim);
+        if (!$detail) {
+            echo json_encode(array('status' => false, 'message' => 'Data mahasiswa tidak ditemukan.'));
+            return;
+        }
+
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $detail
+        ));
+    }
 }
