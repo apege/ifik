@@ -483,7 +483,7 @@
                         <i class="bi bi-lock-fill text-base"></i> Formulir Terkunci (Sedang Ditinjau)
                     </button>
                 <?php else: ?>
-                    <button type="submit" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-lg transition box-3d cursor-pointer hover:scale-105 active:scale-95">
+                    <button type="submit" id="btnSubmitEdit" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-lg transition box-3d cursor-pointer hover:scale-105 active:scale-95">
                         <i class="bi bi-check-circle-fill text-base"></i> Simpan Perubahan Pendaftaran
                     </button>
                 <?php endif; ?>
@@ -498,7 +498,106 @@
         &copy; <?= date('Y'); ?> IFIK Portal — Fakultas Industri Kreatif, Telkom University
     </footer>
 
+    <!-- High-Visibility Progress Bar Modal Overlay -->
+    <div id="submitProgressModal" class="fixed inset-0 z-[10000] bg-slate-900/75 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-orange-100 text-center space-y-6 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-36 h-36 bg-orange-400/20 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-36 h-36 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center text-3xl mx-auto shadow-lg shadow-orange-500/30 box-3d">
+                <i class="bi bi-cloud-arrow-up-fill animate-bounce"></i>
+            </div>
+
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-orange-600 bg-orange-100 px-3 py-1 rounded-full border border-orange-200">PERBAIKAN TUGAS AKHIR</span>
+                <h3 class="text-xl font-extrabold text-slate-900 tracking-tight mt-2.5">Mengirimkan Perubahan Berkas</h3>
+                <p class="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed">
+                    Mohon tunggu, perubahan data dan berkas Tugas Akhir sedang diunggah dan diproses oleh sistem.
+                </p>
+            </div>
+
+            <div class="space-y-2.5 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center justify-between text-xs font-bold">
+                    <span class="text-orange-600 uppercase tracking-wider text-[10px] flex items-center gap-1.5" id="submitProgressStatusText">
+                        <i class="bi bi-arrow-repeat animate-spin text-xs"></i> Memulai Pengiriman...
+                    </span>
+                    <span class="text-slate-800 font-extrabold" id="submitProgressPercent">0%</span>
+                </div>
+                <div class="w-full h-3.5 bg-slate-200/80 rounded-full overflow-hidden p-0.5 border border-slate-300/60 shadow-inner">
+                    <div id="submitProgressBar" class="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 rounded-full transition-all duration-300 shadow-xs" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-800 font-semibold flex items-center justify-center gap-2">
+                <i class="bi bi-shield-lock-fill text-rose-600 text-sm"></i>
+                <span>Tombol terkunci agar berkas tidak terkirim ganda.</span>
+            </div>
+        </div>
+    </div>
+
     <script>
+    // Prevent double submission and show progress bar modal
+    const formEdit = document.getElementById('formEditPendaftaranTA');
+    let isSubmittingEdit = false;
+
+    if (formEdit) {
+        formEdit.addEventListener('submit', function(e) {
+            if (isSubmittingEdit) {
+                e.preventDefault();
+                return false;
+            }
+            isSubmittingEdit = true;
+
+            const btnSubmit = document.getElementById('btnSubmitEdit');
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+                btnSubmit.innerHTML = '<i class="bi bi-arrow-repeat animate-spin text-base"></i> Mengirimkan Perubahan...';
+            }
+
+            const progressModal = document.getElementById('submitProgressModal');
+            const progressBar = document.getElementById('submitProgressBar');
+            const progressPercent = document.getElementById('submitProgressPercent');
+            const progressStatusText = document.getElementById('submitProgressStatusText');
+
+            if (progressModal) {
+                progressModal.classList.remove('hidden');
+                progressModal.classList.add('flex');
+            }
+
+            let progress = 5;
+            const updateProgressUI = (val, text) => {
+                if (progressBar) progressBar.style.width = val + '%';
+                if (progressPercent) progressPercent.textContent = val + '%';
+                if (progressStatusText && text) {
+                    progressStatusText.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-xs"></i> ${text}`;
+                }
+            };
+
+            updateProgressUI(progress, 'Memeriksa perbaikan data...');
+
+            setInterval(() => {
+                if (progress < 85) {
+                    progress += Math.floor(Math.random() * 10) + 6;
+                    if (progress > 85) progress = 85;
+                } else if (progress < 98) {
+                    progress += 1;
+                }
+
+                let statusMsg = 'Mengunggah Berkas TA...';
+                if (progress < 30) {
+                    statusMsg = 'Menyiapkan berkas perbaikan...';
+                } else if (progress < 70) {
+                    statusMsg = 'Mengunggah dokumen ke server...';
+                } else {
+                    statusMsg = 'Memproses simpan perbaikan...';
+                }
+
+                updateProgressUI(progress, statusMsg);
+            }, 250);
+        });
+    }
+
     // Radio buttons styling update
     document.querySelectorAll('.jenis-radio-label input[type="radio"]').forEach(radio => {
         radio.addEventListener('change', function() {
