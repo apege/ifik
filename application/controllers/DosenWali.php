@@ -45,7 +45,11 @@ class DosenWali extends CI_Controller {
                 return;
             }
 
+            $action  = strtolower($this->input->post('action'));
             $status  = $this->input->post('status'); // 'Approved' atau 'Rejected'
+            if (empty($status)) {
+                $status = ($action === 'approve') ? 'Approved' : (($action === 'reject') ? 'Rejected' : 'Pending');
+            }
             $catatan = trim($this->input->post('catatan_wali') ?? '');
 
             if ($status === 'Rejected' && empty($catatan)) {
@@ -54,9 +58,25 @@ class DosenWali extends CI_Controller {
                 return;
             }
 
+            // Simpan status per berkas jika dikirim melalui form
+            $berkas_valid_arr  = $this->input->post('berkas_valid') ?: array();
+            $berkas_kurang_arr = $this->input->post('berkas_kurang') ?: array();
+            $catatan_berkas    = $this->input->post('catatan_berkas') ?: array();
+            $semua_berkas      = array('ksm', 'transkrip', 'pernyataan', 'bebas_lab');
+
+            foreach ($semua_berkas as $bk) {
+                if (in_array($bk, $berkas_kurang_arr)) {
+                    $note = trim($catatan_berkas[$bk] ?? '');
+                    $this->DosenWali_model->update_file_approval($nim, $bk, 'Rejected', $note);
+                } else if (in_array($bk, $berkas_valid_arr) || $status === 'Approved') {
+                    $this->DosenWali_model->update_file_approval($nim, $bk, 'Approved', '');
+                }
+            }
+
             $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
             $this->session->set_flashdata('success', 'Status approval pendaftaran TA berhasil diperbarui!');
             redirect('dosenwali/detail_mahasiswa/' . $nim);
+            return;
         }
 
         $this->load->view('dosen_wali/detail_mahasiswa', $data);
