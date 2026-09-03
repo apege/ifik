@@ -86,6 +86,15 @@
                 </a>
                 <?php endif; ?>
 
+                <!-- Riwayat Log Approval - Global Access for Admin & Staff -->
+                <?php if (in_array($role_id, [1, 2, 3, 4, 6, 7])): ?>
+                <a href="<?= site_url('admin/log_history'); ?>" 
+                   class="text-xs font-semibold flex items-center gap-1.5 transition-colors py-1 <?= $current_uri === 'log_history' || $this->uri->segment(2) === 'log_history' ? 'text-orange-600 font-bold border-b-2 border-orange-600' : 'text-slate-600 hover:text-orange-600'; ?>" title="Audit Trail & Riwayat Log Approval System (Seluruh Modul)">
+                    <i class="bi bi-clock-history <?= $current_uri === 'log_history' || $this->uri->segment(2) === 'log_history' ? 'text-orange-600' : 'text-slate-400'; ?>"></i>
+                    <span>Log History</span>
+                </a>
+                <?php endif; ?>
+
                 <!-- Pusat Admin Hub (Hanya Super Admin - Role 1) -->
                 <?php if ($role_id == 1): ?>
                 <a href="<?= site_url('admin'); ?>" 

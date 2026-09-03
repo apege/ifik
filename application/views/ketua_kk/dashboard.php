@@ -329,17 +329,55 @@
             </div>
         </div>
 
-        <!-- Unified Search Pill Bar with AUTOCOMPLETE & INSTANT SEARCH -->
+        <!-- Unified Multi-Category Search Bar (+ 1/4 Standalone Add Button) -->
         <div class="card-custom p-4 mb-6 relative">
-            <form onsubmit="return false;" id="formSearchKK" class="relative">
-                <div class="unified-search-pill">
-                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm ml-1"></i>
-                    <input type="text" name="q" id="inputSearchKK" autocomplete="off" value="<?= htmlspecialchars($search ?? ''); ?>" 
-                           placeholder="Ketik nama mahasiswa, NIM, atau judul usulan TA..." 
-                           class="w-full bg-transparent px-3 text-xs text-slate-800 font-semibold focus:outline-none">
-                    
-                    <button type="button" id="btnClearSearchKK" onclick="clearKKSearch()" class="<?= empty($search) ? 'hidden' : ''; ?> text-slate-400 hover:text-rose-600 text-xs font-bold px-2 cursor-pointer">
-                        <i class="fa-solid fa-circle-xmark"></i>
+            <form action="<?= site_url('ketuakk'); ?>" method="GET" id="formSearchKK" class="relative search-pill-container">
+                <input type="hidden" name="kk" value="<?= htmlspecialchars($selected_kk); ?>">
+                <input type="hidden" name="status" value="<?= htmlspecialchars($filter_status); ?>">
+                <input type="hidden" name="cat" id="mainCategorySelectKK" value="<?= htmlspecialchars($cat ?? 'query'); ?>">
+                
+                <div class="flex items-center gap-2.5">
+                    <!-- Main Search Pill -->
+                    <div class="unified-search-pill flex-1 flex items-center justify-between gap-1">
+                        <!-- Main Category Selector Dropdown -->
+                        <div class="relative custom-dropdown-container shrink-0">
+                            <button type="button" onclick="toggleKKCustomDropdown('main-cat-kk', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-1 hover:text-brand-600 focus:outline-none">
+                                <span id="label-filter-main-cat-kk" class="truncate max-w-[130px]">Cari Kata Kunci</span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-main-cat-kk"></i>
+                            </button>
+                            <div id="menu-filter-main-cat-kk" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                                <div onclick="selectKKMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium active bg-orange-50 text-brand-600"><span>🔍 Kata Kunci (Semua)</span></div>
+                                <div onclick="selectKKMainCategory('nama', '🏷️ Nama Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🏷️ Nama Mahasiswa</span></div>
+                                <div onclick="selectKKMainCategory('nim', '🆔 NIM Mahasiswa', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🆔 NIM Mahasiswa</span></div>
+                                <div onclick="selectKKMainCategory('judul', '📖 Judul Usulan TA', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>📖 Judul Usulan TA</span></div>
+                                <div onclick="selectKKMainCategory('kk', '🎯 Kelompok Keahlian', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium text-slate-700 hover:bg-orange-50 hover:text-brand-600"><span>🎯 Kelompok Keahlian</span></div>
+                            </div>
+                        </div>
+
+                        <div class="unified-divider"></div>
+
+                        <!-- Input Text Container -->
+                        <div id="mainValueContainerKK" class="flex-1 flex items-center min-w-0">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
+                            <input type="text" name="q" id="inputSearchKK" autocomplete="off" value="<?= htmlspecialchars($search ?? ''); ?>" 
+                                   placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." 
+                                   class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400">
+                            
+                            <button type="button" id="btnClearSearchKK" onclick="clearKKSearch()" class="<?= empty($search) ? 'hidden' : ''; ?> text-slate-400 hover:text-rose-600 text-xs font-bold px-1 cursor-pointer shrink-0">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </button>
+                        </div>
+
+                        <!-- Tombol Cari -->
+                        <button type="submit" id="btnSubmitSearchKK" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 ml-1.5" title="Klik untuk melakukan pencarian">
+                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                        </button>
+                    </div>
+
+                    <!-- Standalone Add Filter Button (+ 1/4) -->
+                    <button type="button" id="standaloneAddBtnKK" onclick="toggleKKMultiFilter(event)" class="btn-standalone-add shrink-0" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span id="filterCountBadgeKK" class="badge-standalone-count">1/4</span>
                     </button>
                 </div>
 
@@ -512,7 +550,7 @@
 
                 <div id="kkPaginationControls">
                     <?php if($total_pages > 1): ?>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1 flex-wrap">
                             <?php if($page > 1): ?>
                                 <button type="button" onclick="changeKKPage(<?= $page - 1; ?>)" 
                                    class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">
@@ -524,12 +562,32 @@
                                 </span>
                             <?php endif; ?>
 
-                            <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                                <button type="button" onclick="changeKKPage(<?= $i; ?>)" 
-                                   class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer <?= $i == $page ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'; ?>">
-                                    <?= $i; ?>
-                                </button>
-                            <?php endfor; ?>
+                            <?php 
+                            $pages = array();
+                            if ($total_pages <= 7) {
+                                for ($i = 1; $i <= $total_pages; $i++) $pages[] = $i;
+                            } else {
+                                $pages[] = 1;
+                                if ($page > 3) $pages[] = '...';
+                                $start = max(2, $page - 1);
+                                $end = min($total_pages - 1, $page + 1);
+                                for ($i = $start; $i <= $end; $i++) {
+                                    if (!in_array($i, $pages)) $pages[] = $i;
+                                }
+                                if ($page < $total_pages - 2) $pages[] = '...';
+                                if (!in_array($total_pages, $pages)) $pages[] = $total_pages;
+                            }
+                            foreach($pages as $p): 
+                            ?>
+                                <?php if($p === '...'): ?>
+                                    <span class="px-2 text-slate-400 font-bold text-xs select-none">...</span>
+                                <?php else: ?>
+                                    <button type="button" onclick="changeKKPage(<?= $p; ?>)" 
+                                       class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all cursor-pointer <?= $p == $page ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'; ?>">
+                                        <?= $p; ?>
+                                    </button>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
 
                             <?php if($page < $total_pages): ?>
                                 <button type="button" onclick="changeKKPage(<?= $page + 1; ?>)" 
@@ -566,17 +624,54 @@
         </div>
     </form>
 
-    </main>
+</main>
 
     <!-- REAL-TIME AJAX JAVASCRIPT SYSTEM FOR KETUA KK -->
     <script>
         let currentKKState = {
-            kk: '<?= htmlspecialchars($selected_kk); ?>',
-            status: '<?= htmlspecialchars($filter_status); ?>',
-            search: '<?= addslashes($search ?? ""); ?>',
-            perPage: <?= $per_page; ?>,
-            page: <?= $page; ?>
+            kk: '<?= $selected_kk; ?>',
+            status: '<?= $filter_status; ?>',
+            search: '<?= addslashes($search ?? ''); ?>',
+            cat: '<?= addslashes($cat ?? 'query'); ?>',
+            page: 1,
+            per_page: <?= $per_page; ?>
         };
+
+        function toggleKKCustomDropdown(id, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('menu-filter-' + id);
+            const arrow = document.getElementById('arrow-filter-' + id);
+            if (!menu) return;
+
+            const isHidden = menu.classList.contains('hidden');
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                if (arrow) arrow.classList.add('rotate-180');
+            } else {
+                if (arrow) arrow.classList.remove('rotate-180');
+            }
+        }
+
+        function selectKKMainCategory(catKey, catLabel, el) {
+            const hiddenCat = document.getElementById('mainCategorySelectKK');
+            const labelEl = document.getElementById('label-filter-main-cat-kk');
+            if (hiddenCat) hiddenCat.value = catKey;
+            if (labelEl) labelEl.textContent = catLabel;
+
+            document.querySelectorAll('#menu-filter-main-cat-kk .dropdown-item').forEach(i => {
+                i.classList.remove('bg-orange-50', 'text-brand-600');
+                i.classList.add('text-slate-700');
+            });
+            if (el) {
+                el.classList.add('bg-orange-50', 'text-brand-600');
+                el.classList.remove('text-slate-700');
+            }
+
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.add('hidden'));
+        }
+
         let kkSearchTimer = null;
 
         function refreshKKTable(isSilent = false) {
@@ -728,7 +823,7 @@
                 return;
             }
 
-            let html = '<div class="flex items-center gap-1">';
+            let html = '<div class="flex items-center gap-1 flex-wrap">';
             
             if (page > 1) {
                 html += `<button type="button" onclick="changeKKPage(${page - 1})" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer"><i class="fa-solid fa-chevron-left text-[10px]"></i> Prev</button>`;
@@ -736,13 +831,32 @@
                 html += `<span class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-400 cursor-not-allowed flex items-center gap-1 opacity-60"><i class="fa-solid fa-chevron-left text-[10px]"></i> Prev</span>`;
             }
 
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === page) {
-                    html += `<button type="button" onclick="changeKKPage(${i})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-brand-600 text-white shadow-md cursor-pointer">${i}</button>`;
-                } else {
-                    html += `<button type="button" onclick="changeKKPage(${i})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 cursor-pointer">${i}</button>`;
+            const pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                if (page > 3) pages.push('...');
+                
+                const start = Math.max(2, page - 1);
+                const end = Math.min(totalPages - 1, page + 1);
+                for (let i = start; i <= end; i++) {
+                    if (!pages.includes(i)) pages.push(i);
                 }
+                
+                if (page < totalPages - 2) pages.push('...');
+                if (!pages.includes(totalPages)) pages.push(totalPages);
             }
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    html += `<span class="px-2 text-slate-400 font-bold text-xs select-none">...</span>`;
+                } else if (p === page) {
+                    html += `<button type="button" onclick="changeKKPage(${p})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-brand-600 text-white shadow-md cursor-pointer">${p}</button>`;
+                } else {
+                    html += `<button type="button" onclick="changeKKPage(${p})" class="w-8 h-8 rounded-xl text-xs font-black flex items-center justify-center transition-all bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 cursor-pointer">${p}</button>`;
+                }
+            });
 
             if (page < totalPages) {
                 html += `<button type="button" onclick="changeKKPage(${page + 1})" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-orange-50 hover:text-brand-600 transition-all flex items-center gap-1 shadow-xs cursor-pointer">Next <i class="fa-solid fa-chevron-right text-[10px]"></i></button>`;
@@ -860,22 +974,27 @@
         document.addEventListener('DOMContentLoaded', function() {
             const inputSearch = document.getElementById('inputSearchKK');
             const btnClear = document.getElementById('btnClearSearchKK');
+            const formSearchKK = document.getElementById('formSearchKK');
 
             if (inputSearch) {
                 inputSearch.addEventListener('input', function() {
                     const q = this.value.trim();
-
                     if (btnClear) {
                         if (q.length > 0) btnClear.classList.remove('hidden');
                         else btnClear.classList.add('hidden');
                     }
+                });
+            }
 
-                    clearTimeout(kkSearchTimer);
-                    kkSearchTimer = setTimeout(() => {
-                        currentKKState.search = q;
-                        currentKKState.page = 1;
-                        refreshKKTable();
-                    }, 250);
+            if (formSearchKK) {
+                formSearchKK.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const q = inputSearch ? inputSearch.value.trim() : '';
+                    const catEl = document.getElementById('mainCategorySelectKK');
+                    currentKKState.search = q;
+                    currentKKState.cat = catEl ? catEl.value : 'query';
+                    currentKKState.page = 1;
+                    refreshKKTable();
                 });
             }
 
@@ -911,11 +1030,6 @@
                     });
                 });
             }
-
-            // Silent Auto-polling every 8 seconds for real-time live data
-            setInterval(() => {
-                refreshKKTable(true);
-            }, 8000);
         });
 
         function showKKToast(msg) {

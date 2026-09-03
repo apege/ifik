@@ -26,9 +26,13 @@ class DosenWali extends CI_Controller {
     // Detail Mahasiswa Bimbingan & Approval
     public function detail_mahasiswa($nim) {
         $nip_dosen = $this->_get_current_nip();
-        $data['title'] = 'Detail Mahasiswa & Approval Pendaftaran TA';
-        $data['dosen_info'] = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
-        $data['detail'] = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
+        $this->load->model('AdminLayanan_model');
+
+        $data['title']          = 'Detail Mahasiswa & Approval Pendaftaran TA';
+        $data['dosen_info']     = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
+        $data['detail']         = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
+        $data['syarat_berkas']  = $this->AdminLayanan_model->get_active_syarat_berkas();
+        $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
 
         if ($this->input->post('action')) {
             $status  = $this->input->post('status'); // 'Approved' atau 'Rejected'
@@ -41,8 +45,21 @@ class DosenWali extends CI_Controller {
             }
 
             $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
+
+            // Record Approval History Log
+            $this->load->model('Approval_log_model');
+            $mhs_name = trim(($data['detail']['nama_depan'] ?? '') . ' ' . ($data['detail']['nama_belakang'] ?? ''));
+            $this->Approval_log_model->log(array(
+                'modul'       => 'Dosen Wali',
+                'ref_id'      => $nim,
+                'target_name' => $mhs_name,
+                'action'      => ($status === 'Approved') ? 'Approved' : 'Rejected',
+                'catatan'     => $catatan
+            ));
+
             $this->session->set_flashdata('success', 'Status approval pendaftaran TA berhasil diperbarui!');
             redirect('dosenwali/detail_mahasiswa/' . $nim);
+            return;
         }
 
         $this->load->view('dosen_wali/detail_mahasiswa', $data);
@@ -124,6 +141,17 @@ class DosenWali extends CI_Controller {
 
         $res = $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
         if ($res) {
+            $this->load->model('Approval_log_model');
+            $mhs = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
+            $mhs_name = trim(($mhs['nama_depan'] ?? '') . ' ' . ($mhs['nama_belakang'] ?? ''));
+            $this->Approval_log_model->log(array(
+                'modul'       => 'Dosen Wali',
+                'ref_id'      => $nim,
+                'target_name' => $mhs_name,
+                'action'      => ($status === 'Approved') ? 'Approved' : 'Rejected',
+                'catatan'     => $catatan
+            ));
+
             echo json_encode(array(
                 'success' => true,
                 'status' => $status,

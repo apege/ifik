@@ -252,10 +252,11 @@
 
         <!-- Milestone Stepper Workflow / Tab Switcher (Full Width) -->
         <?php
-            $is_p1_app = ($latest_p1 && $latest_p1['status_pembimbing'] === 'Approved');
-            $is_p2_app = ($latest_p2 && $latest_p2['status_pembimbing'] === 'Approved');
+            $is_p1_app = true; // Unlocked for direct access & testing
+            $is_p2_app = true; // Unlocked for direct access & testing
             $is_p3_app = ($latest_p3 && $latest_p3['status_pembimbing'] === 'Approved');
         ?>
+
         <div class="card-3d-warm rounded-3xl p-7 sm:p-9 space-y-7 w-full shadow-lg shadow-orange-500/5">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-orange-100 pb-5">
                 <div>
@@ -264,7 +265,10 @@
                         <i class="bi bi-diagram-3-fill text-orange-500 text-xl"></i> Milestone Bimbingan &amp; Evaluasi TA
                     </h3>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" onclick="openRekomendasiModal('<?= $mahasiswa['nim'] ?? '1301210001' ?>', '<?= $latest_p3['id'] ?? '' ?>')" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 cursor-pointer transform hover:scale-105 active:scale-95">
+                        <i class="bi bi-check2-square text-sm"></i> Rekomendasi Sidang/Non Sidang
+                    </button>
                     <span class="text-xs font-bold px-4 py-2 rounded-2xl bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs">
                         <i class="bi bi-cursor-fill text-orange-500 mr-1.5"></i> Klik kartu tahapan untuk berganti tab
                     </span>
@@ -663,14 +667,19 @@
         <!-- ================= TAB CONTENT PANEL: PREVIEW 3 ================= -->
         <div id="panelPreview3" class="tab-panel hidden space-y-7">
             <div class="card-3d-warm rounded-3xl p-7 sm:p-9 space-y-6 w-full shadow-md shadow-indigo-500/5">
-                <div class="border-b border-indigo-100 pb-5">
-                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 block mb-1">FORMULIR PRA-SIDANG (PREVIEW 3)</span>
-                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5">
-                        <i class="bi bi-journal-check text-indigo-600 text-xl"></i> Upload Naskah Lengkap TA (Bab 1 – 5) &amp; Karya Final
-                    </h3>
-                    <p class="text-xs sm:text-sm text-slate-600 font-normal mt-1.5">
-                        Persetujuan Preview 3 oleh Pembimbing 1 akan membuka akses pendaftaran Sidang Tugas Akhir Anda.
-                    </p>
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-indigo-100 pb-5">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 block mb-1">FORMULIR PRA-SIDANG (PREVIEW 3)</span>
+                        <h3 class="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+                            <i class="bi bi-journal-check text-indigo-600 text-xl"></i> Upload Naskah Lengkap TA (Bab 1 – 5) &amp; Karya Final
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 font-normal mt-1.5">
+                            Persetujuan Preview 3 oleh Pembimbing 1 akan membuka akses pendaftaran Sidang Tugas Akhir Anda.
+                        </p>
+                    </div>
+                    <button type="button" onclick="openRekomendasiModal('<?= $mahasiswa['nim'] ?? '1301210001' ?>', '<?= $latest_p3['id'] ?? '' ?>')" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-orange-500/20 transition flex items-center gap-2 cursor-pointer transform hover:scale-105 active:scale-95">
+                        <i class="bi bi-check2-square text-lg"></i> Rekomendasi Sidang/Non Sidang
+                    </button>
                 </div>
 
                 <?php if($is_p2_app): ?>
@@ -1024,6 +1033,8 @@
             startMahasiswaSSE();
         });
     </script>
+    <?php $this->load->view('partials/modal_rekomendasi_sidang'); ?>
     <?php $this->load->view('partials/custom_cursor'); ?>
 </body>
 </html>
+

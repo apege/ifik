@@ -299,7 +299,7 @@
 
         <!-- 1. Layanan LAB -->
         <li class="nav-item">
-            <a href="<?= site_url('welcome') ?>" class="nav-link">
+            <a href="javascript:void(0)" class="nav-link">
                 <span class="btn-box">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -356,7 +356,7 @@
 
         <!-- 2. Layanan LAA -->
         <li class="nav-item">
-            <a href="<?= site_url('welcome') ?>" class="nav-link">
+            <a href="javascript:void(0)" class="nav-link">
                 <span class="btn-box">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -366,7 +366,7 @@
                 <span>Layanan LAA</span>
             </a>
             <div class="nav-dropdown">
-                <a href="<?= site_url('welcome') ?>">
+                <a href="<?= site_url('mahasiswa/pendaftaran_ta') ?>">
                     <span class="btn-box">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -399,7 +399,7 @@
 
         <!-- 3. Center of Excelent -->
         <li class="nav-item">
-            <a href="<?= site_url('welcome') ?>" class="nav-link">
+            <a href="javascript:void(0)" class="nav-link">
                 <span class="btn-box">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -452,7 +452,7 @@
 
         <!-- 4. Ticketing -->
         <li class="nav-item">
-            <a href="<?= site_url('welcome') ?>" class="nav-link">
+            <a href="javascript:void(0)" class="nav-link">
                 <span class="btn-box">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>

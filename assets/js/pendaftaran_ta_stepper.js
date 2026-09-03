@@ -1,23 +1,16 @@
 /**
- * JavaScript logic for 6-step Pendaftaran Tugas Akhir (Mahasiswa Module)
+ * JavaScript logic for 3-step Pendaftaran Tugas Akhir (Mahasiswa Module)
  * Handles Stepper Navigation, Validation, Dynamic Step Counter, Interactive PDF Upload Card UI, and High-Visibility In-Page Web Toast Alerts
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-    const totalSteps = 6;
+    const totalSteps = 3;
     const userNim = window.CURRENT_USER_NIM ? window.CURRENT_USER_NIM.trim() : 'guest';
     const STEP_KEY = 'ifik_ta_active_step_' + userNim;
-    const DRAFT_KEY = 'ifik_ta_form_draft_' + userNim;
-
-    // Clean legacy un-scoped draft keys from browser
-    try {
-        localStorage.removeItem('ifik_ta_active_step');
-        localStorage.removeItem('ifik_ta_form_draft');
-    } catch(e) {}
 
     let currentStep = 1;
 
-    // Direct navigation support from Dashboard redirect (e.g. ?step=3) or localStorage
+    // Direct navigation support from URL or localStorage
     const urlParams = new URLSearchParams(window.location.search);
     const urlStep = parseInt(urlParams.get('step'));
     const savedStep = parseInt(localStorage.getItem(STEP_KEY));
@@ -35,10 +28,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const toastAlert = document.getElementById('inPageToastAlert');
     const toastMessage = document.getElementById('toastAlertMessage');
     const btnCloseToast = document.getElementById('btnCloseToast');
+    const stepperProgressLine = document.getElementById('stepperProgressLine');
 
     let toastTimeout;
 
-    // Show High-Visibility In-Page Toast Notification (Below sticky header)
+    // Show High-Visibility In-Page Toast Notification
     function showInPageAlert(message, type = 'warning') {
         if (!toastAlert || !toastMessage) return;
 
@@ -70,10 +64,63 @@ document.addEventListener('DOMContentLoaded', function () {
         btnCloseToast.addEventListener('click', hideInPageAlert);
     }
 
+    // Populate Summary on Step 3
+    function populateSummary() {
+        const jenisTA = document.getElementById('inputJenisTA')?.value.trim() || '-';
+        const judul1 = document.getElementById('inputJudul1')?.value.trim() || '-';
+        const judulEn = document.getElementById('inputJudulEn')?.value.trim() || '-';
+        const konsentrasi = document.querySelector('input[name="konsentrasi_dkv"]')?.value.trim() || 'Desain Komunikasi Visual';
+
+        const sumJenis = document.getElementById('summaryJenisTA');
+        const sumJudul1 = document.getElementById('summaryJudul1');
+        const sumJudulEn = document.getElementById('summaryJudulEn');
+        const sumKons = document.getElementById('summaryKonsentrasi');
+
+        if (sumJenis) sumJenis.textContent = jenisTA || '-';
+        if (sumJudul1) sumJudul1.textContent = judul1 || '-';
+        if (sumJudulEn) sumJudulEn.textContent = judulEn || '-';
+        if (sumKons) sumKons.textContent = konsentrasi || 'Desain Komunikasi Visual';
+
+        // Populate Document Status List
+        const sumDocList = document.getElementById('summaryDocList');
+        if (sumDocList) {
+            sumDocList.innerHTML = '';
+            const docCards = document.querySelectorAll('.doc-requirement-card');
+
+            docCards.forEach(card => {
+                const titleEl = card.querySelector('h4');
+                const rawTitle = titleEl ? titleEl.textContent.trim() : 'Dokumen';
+                const cleanTitle = rawTitle.replace(/^\d+\.\s*/, '').replace(/\s*(Wajib|Opsional)\s*$/gi, '').trim();
+
+                const fileInput = card.querySelector('.input-doc-file');
+                const oldInput = card.querySelector('.input-doc-old');
+                const hasFile = (fileInput && fileInput.files && fileInput.files.length > 0) || (oldInput && oldInput.value.trim() !== '');
+
+                const docItem = document.createElement('div');
+                docItem.className = `p-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold ${hasFile ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900' : 'bg-rose-50/80 border-rose-200 text-rose-900'}`;
+                docItem.innerHTML = `
+                    <span class="truncate pr-2">${cleanTitle}</span>
+                    <span class="text-[10px] uppercase font-bold shrink-0 ${hasFile ? 'text-emerald-700 bg-emerald-100 border border-emerald-300' : 'text-rose-700 bg-rose-100 border border-rose-300'} px-2 py-0.5 rounded-full">
+                        ${hasFile ? '<i class="bi bi-check-lg mr-1"></i> Terunggah' : '<i class="bi bi-x-lg mr-1"></i> Belum ada'}
+                    </span>
+                `;
+                sumDocList.appendChild(docItem);
+            });
+        }
+    }
+
     // Update UI step state
     function updateStepUI() {
+        if (currentStep === 3) {
+            populateSummary();
+        }
         if (stepCounterText) {
             stepCounterText.textContent = `LANGKAH ${currentStep} / ${totalSteps}`;
+        }
+
+        if (stepperProgressLine) {
+            const pct = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            stepperProgressLine.style.width = pct + '%';
         }
 
         // Toggle Step Views & Stepper Header UI
@@ -95,45 +142,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 const counter = stepItem.querySelector('.step-counter');
                 const title = stepItem.querySelector('.step-title');
 
-                // Step Item Clickable to navigate to visited steps
                 stepItem.style.cursor = (i <= currentStep) ? 'pointer' : 'default';
                 stepItem.onclick = () => {
-                    if (i < currentStep) {
+                    if (i <= currentStep) {
                         currentStep = i;
                         updateStepUI();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 };
 
                 if (i === currentStep) {
                     stepItem.classList.add('active');
-                    stepItem.classList.remove('completed');
                     if (counter) {
-                        counter.className = 'step-counter w-11 h-11 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center text-sm shadow-md ring-8 ring-orange-100 transition-all duration-300 z-10';
-                        counter.innerHTML = i;
+                        counter.className = 'step-counter w-11 h-11 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-bold flex items-center justify-center text-sm box-3d ring-4 ring-orange-200/80 transition-all duration-300 z-10';
                     }
                     if (title) {
-                        title.className = 'step-title font-bold text-xs text-orange-500 mt-2.5 text-center transition-all duration-300';
+                        title.className = 'step-title font-bold text-xs sm:text-sm text-orange-600 mt-2 text-center transition-all duration-300';
                     }
                 } else if (i < currentStep) {
-                    stepItem.classList.add('completed');
-                    stepItem.classList.remove('active');
-                    if (counter) {
-                        counter.className = 'step-counter w-11 h-11 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm transition-all duration-300 z-10';
-                        counter.innerHTML = '<i class="bi bi-check-lg text-base"></i>';
-                    }
-                    if (title) {
-                        title.className = 'step-title font-medium text-xs text-slate-500 mt-2.5 text-center transition-all duration-300';
-                    }
-                } else {
-                    stepItem.classList.remove('active', 'completed');
-                    if (counter) {
-                        counter.className = 'step-counter w-11 h-11 rounded-full bg-slate-100 text-slate-400 font-semibold flex items-center justify-center text-sm transition-all duration-300 z-10';
-                        counter.innerHTML = i;
-                    }
-                    if (title) {
-                        title.className = 'step-title font-medium text-xs text-slate-400 mt-2.5 text-center transition-all duration-300';
-                    }
                 }
             }
         }
@@ -149,27 +174,25 @@ document.addEventListener('DOMContentLoaded', function () {
         function checkStepCompletionStatus(stepIndex) {
             if (stepIndex === 1) {
                 const inputJenis = document.getElementById('inputJenisTA');
-                return inputJenis && inputJenis.value.trim() !== '';
-            } else if (stepIndex === 2) {
                 const inputJ1 = document.querySelector('input[name="judul_1"]');
                 const inputJEn = document.querySelector('input[name="judul_en"]');
-                return inputJ1 && inputJ1.value.trim() !== '' && inputJEn && inputJEn.value.trim() !== '';
+                return (inputJenis && inputJenis.value.trim() !== '') &&
+                       (inputJ1 && inputJ1.value.trim() !== '') &&
+                       (inputJEn && inputJEn.value.trim() !== '');
+            } else if (stepIndex === 2) {
+                const reqCards = document.querySelectorAll('.doc-requirement-card[data-required="1"]');
+                if (reqCards.length === 0) return true;
+                let allUploaded = true;
+                reqCards.forEach(card => {
+                    const fileInput = card.querySelector('.input-doc-file');
+                    const oldInput = card.querySelector('.input-doc-old');
+                    const hasFile = (fileInput && fileInput.files && fileInput.files.length > 0) || (oldInput && oldInput.value.trim() !== '');
+                    if (!hasFile) allUploaded = false;
+                });
+                return allUploaded;
             } else if (stepIndex === 3) {
-                const inputKsm = document.querySelector('input[name="file_ksm"]');
-                const oldKsm = document.querySelector('input[name="file_ksm_old"]');
-                return (inputKsm && inputKsm.files && inputKsm.files.length > 0) || (oldKsm && oldKsm.value.trim() !== '');
-            } else if (stepIndex === 4) {
-                const inputTranskrip = document.querySelector('input[name="file_transkrip"]');
-                const oldTranskrip = document.querySelector('input[name="file_transkrip_old"]');
-                return (inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0) || (oldTranskrip && oldTranskrip.value.trim() !== '');
-            } else if (stepIndex === 5) {
-                const inputPernyataan = document.querySelector('input[name="file_pernyataan"]');
-                const oldPernyataan = document.querySelector('input[name="file_pernyataan_old"]');
-                return (inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0) || (oldPernyataan && oldPernyataan.value.trim() !== '');
-            } else if (stepIndex === 6) {
-                const inputBebasLab = document.querySelector('input[name="file_bebas_lab"]');
-                const oldBebasLab = document.querySelector('input[name="file_bebas_lab_old"]');
-                return (inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0) || (oldBebasLab && oldBebasLab.value.trim() !== '');
+                const checkSubmit = document.getElementById('checkKonfirmasiSubmit');
+                return checkSubmit ? checkSubmit.checked : false;
             }
             return false;
         }
@@ -292,73 +315,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (step === 1) {
             const inputJenis = document.getElementById('inputJenisTA');
+            const inputJ1 = document.querySelector('input[name="judul_1"]');
+            const inputJEn = document.querySelector('input[name="judul_en"]');
+
             if (!inputJenis || !inputJenis.value.trim()) {
                 isValid = false;
                 errorMessage = '⚠️ Harap pilih Jenis Tugas Akhir pada Langkah 1 terlebih dahulu!';
                 const trigger = currentContainer.querySelector('.dropdown-trigger');
                 if (trigger) trigger.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
-            } else {
-                const trigger = currentContainer.querySelector('.dropdown-trigger');
-                if (trigger) trigger.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
-            }
-        } else if (step === 2) {
-            const inputJ1 = document.querySelector('input[name="judul_1"]');
-            const inputJEn = document.querySelector('input[name="judul_en"]');
-            if (!inputJ1 || !inputJ1.value.trim()) {
+            } else if (!inputJ1 || !inputJ1.value.trim()) {
                 isValid = false;
-                errorMessage = '⚠️ Harap isi Judul Usulan 1 (Utama) pada Langkah 2!';
+                errorMessage = '⚠️ Harap isi Judul Usulan 1 (Utama) pada Langkah 1!';
                 if (inputJ1) inputJ1.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
             } else if (!inputJEn || !inputJEn.value.trim()) {
                 isValid = false;
-                errorMessage = '⚠️ Harap isi Judul dalam Bahasa Inggris pada Langkah 2 (atau klik Translate Otomatis)!';
+                errorMessage = '⚠️ Harap isi Judul dalam Bahasa Inggris pada Langkah 1 (atau klik Translate Otomatis)!';
                 if (inputJEn) inputJEn.classList.add('border-rose-500', 'ring-2', 'ring-rose-500/20');
             } else {
+                const trigger = currentContainer.querySelector('.dropdown-trigger');
+                if (trigger) trigger.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
                 if (inputJ1) inputJ1.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
                 if (inputJEn) inputJEn.classList.remove('border-rose-500', 'ring-2', 'ring-rose-500/20');
             }
+        } else if (step === 2) {
+            const reqCards = currentContainer.querySelectorAll('.doc-requirement-card[data-required="1"]');
+            let missingDoc = null;
+            reqCards.forEach(card => {
+                const fileInput = card.querySelector('.input-doc-file');
+                const oldInput = card.querySelector('.input-doc-old');
+                const hasFile = (fileInput && fileInput.files && fileInput.files.length > 0) || (oldInput && oldInput.value.trim() !== '');
+                if (!hasFile && !missingDoc) {
+                    const titleEl = card.querySelector('h4');
+                    missingDoc = titleEl ? titleEl.textContent.trim().replace(/^\d+\.\s*/, '').replace(/\s*(Wajib|Opsional)\s*$/gi, '') : 'Dokumen';
+                    card.querySelector('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
+                } else if (hasFile) {
+                    card.querySelector('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
+                }
+            });
+            if (missingDoc) {
+                isValid = false;
+                errorMessage = `⚠️ Mohon unggah berkas wajib "${missingDoc}" pada Langkah 2 sebelum melanjutkan!`;
+            }
         } else if (step === 3) {
-            const inputKsm = document.querySelector('input[name="file_ksm"]');
-            const oldKsm = document.querySelector('input[name="file_ksm_old"]');
-            const hasFile = (inputKsm && inputKsm.files && inputKsm.files.length > 0) || (oldKsm && oldKsm.value.trim() !== '');
-            if (!hasFile) {
+            const checkSubmit = document.getElementById('checkKonfirmasiSubmit');
+            if (checkSubmit && !checkSubmit.checked) {
                 isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF KSM pada Langkah 3 sebelum melanjutkan!';
-                inputKsm?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-            } else {
-                inputKsm?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
-            }
-        } else if (step === 4) {
-            const inputTranskrip = document.querySelector('input[name="file_transkrip"]');
-            const oldTranskrip = document.querySelector('input[name="file_transkrip_old"]');
-            const hasFile = (inputTranskrip && inputTranskrip.files && inputTranskrip.files.length > 0) || (oldTranskrip && oldTranskrip.value.trim() !== '');
-            if (!hasFile) {
-                isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF Transkrip Nilai pada Langkah 4 sebelum melanjutkan!';
-                inputTranskrip?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-            } else {
-                inputTranskrip?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
-            }
-        } else if (step === 5) {
-            const inputPernyataan = document.querySelector('input[name="file_pernyataan"]');
-            const oldPernyataan = document.querySelector('input[name="file_pernyataan_old"]');
-            const hasFile = (inputPernyataan && inputPernyataan.files && inputPernyataan.files.length > 0) || (oldPernyataan && oldPernyataan.value.trim() !== '');
-            if (!hasFile) {
-                isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF Surat Pernyataan pada Langkah 5 sebelum melanjutkan!';
-                inputPernyataan?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-            } else {
-                inputPernyataan?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
-            }
-        } else if (step === 6) {
-            const inputBebasLab = document.querySelector('input[name="file_bebas_lab"]');
-            const oldBebasLab = document.querySelector('input[name="file_bebas_lab_old"]');
-            const hasFile = (inputBebasLab && inputBebasLab.files && inputBebasLab.files.length > 0) || (oldBebasLab && oldBebasLab.value.trim() !== '');
-            if (!hasFile) {
-                isValid = false;
-                errorMessage = '⚠️ Mohon unggah berkas PDF Surat Bebas Lab pada Langkah 6 sebelum mengirim pendaftaran!';
-                inputBebasLab?.closest('.drop-zone')?.classList.add('border-rose-500', 'bg-rose-50');
-            } else {
-                inputBebasLab?.closest('.drop-zone')?.classList.remove('border-rose-500', 'bg-rose-50');
+                errorMessage = '⚠️ Harap centang pernyataan konfirmasi sebelum mengirimkan pendaftaran!';
             }
         }
 
@@ -400,8 +402,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateStepUI();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                const dashboardLink = document.querySelector('a[href*="/mahasiswa"]')?.href;
-                window.location.href = dashboardLink || '/mahasiswa';
+                const targetUrl = btnPrev.getAttribute('data-dashboard-url') || (window.location.origin + '/ifik/mahasiswa');
+                window.location.href = targetUrl;
             }
         });
     }
@@ -669,12 +671,19 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (e) {}
     }
 
-    // Form submission validation & draft listening
+    // Form submission validation, double-submit protection & progress bar
     const form = document.querySelector('form');
+    let isSubmitting = false;
+
     if (form) {
         form.addEventListener('input', saveDraft);
 
         form.addEventListener('submit', function (e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
             for (let step = 1; step <= totalSteps; step++) {
                 if (!validateStep(step)) {
                     e.preventDefault();
@@ -684,6 +693,77 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
             }
+
+            // Flag to prevent multiple submit clicks
+            isSubmitting = true;
+
+            // Immediately disable buttons and show loading status on submit button
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+                btnSubmit.innerHTML = '<i class="bi bi-arrow-repeat animate-spin text-sm"></i> <span>Mengirimkan...</span>';
+            }
+            if (btnPrev) {
+                btnPrev.disabled = true;
+                btnPrev.classList.add('opacity-50', 'pointer-events-none');
+            }
+
+            // Show Progress Modal Overlay & Inline Progress
+            const progressModal = document.getElementById('submitProgressModal');
+            const progressBar = document.getElementById('submitProgressBar');
+            const progressPercent = document.getElementById('submitProgressPercent');
+            const progressStatusText = document.getElementById('submitProgressStatusText');
+
+            const inlineProgress = document.getElementById('inlineSubmitProgress');
+            const inlineBar = document.getElementById('inlineProgressBar');
+            const inlinePercent = document.getElementById('inlineProgressPercent');
+            const inlineStatusText = document.getElementById('inlineProgressStatusText');
+
+            if (progressModal) {
+                progressModal.classList.remove('hidden');
+                progressModal.classList.add('flex');
+            }
+            if (inlineProgress) {
+                inlineProgress.classList.remove('hidden');
+            }
+
+            let progress = 5;
+            const updateProgressUI = (val, text) => {
+                if (progressBar) progressBar.style.width = val + '%';
+                if (progressPercent) progressPercent.textContent = val + '%';
+                if (progressStatusText && text) {
+                    progressStatusText.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-xs"></i> ${text}`;
+                }
+
+                if (inlineBar) inlineBar.style.width = val + '%';
+                if (inlinePercent) inlinePercent.textContent = val + '%';
+                if (inlineStatusText && text) {
+                    inlineStatusText.innerHTML = `<i class="bi bi-arrow-repeat animate-spin text-xs"></i> ${text}`;
+                }
+            };
+
+            updateProgressUI(progress, 'Memeriksa kelengkapan data...');
+
+            const progressInterval = setInterval(() => {
+                if (progress < 85) {
+                    progress += Math.floor(Math.random() * 10) + 6;
+                    if (progress > 85) progress = 85;
+                } else if (progress < 98) {
+                    progress += 1;
+                }
+
+                let statusMsg = 'Mengunggah Berkas TA...';
+                if (progress < 30) {
+                    statusMsg = 'Menyiapkan dokumen PDF...';
+                } else if (progress < 70) {
+                    statusMsg = 'Mengunggah berkas ke server...';
+                } else {
+                    statusMsg = 'Memproses finalisasi pendaftaran...';
+                }
+
+                updateProgressUI(progress, statusMsg);
+            }, 250);
+
             // Clear saved draft & step upon valid submit
             try {
                 localStorage.removeItem(STEP_KEY);
