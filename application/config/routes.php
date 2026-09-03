@@ -53,6 +53,9 @@ $route['default_controller'] = 'dashboard';
 $route['login'] = 'login';
 $route['logout'] = 'login/logout';
 $route['forgot_password'] = 'login/forgot_password';
+$route['forgot-password'] = 'login/forgot_password';
+$route['reset_password'] = 'login/reset_password';
+$route['reset-password'] = 'login/reset_password';
 $route['ajukan-booking'] = 'dashboard/ajukan';
 $route['kalender'] = 'dashboard/kalender';
 // Mahasiswa Routes

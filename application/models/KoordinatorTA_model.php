@@ -67,7 +67,7 @@ class KoordinatorTA_model extends CI_Model {
             $this->db->query("
                 CREATE TABLE IF NOT EXISTS `history_plotting_ta` (
                     `id` INT(11) NOT NULL AUTO_INCREMENT,
-                    `kategori` ENUM('Pembimbing', 'Penguji') NOT NULL DEFAULT 'Pembimbing',
+                    `kategori` VARCHAR(50) NOT NULL DEFAULT 'Pembimbing',
                     `nim` VARCHAR(50) NOT NULL,
                     `nama_mahasiswa` VARCHAR(150) NULL,
                     `dosen_1_lama` VARCHAR(50) NULL,
@@ -88,6 +88,33 @@ class KoordinatorTA_model extends CI_Model {
                     KEY `idx_created_at` (`created_at`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             ");
+        } else {
+            // Pastikan kolom kategori bertipe VARCHAR agar menampung 'Sidang TA'
+            $this->db->query("ALTER TABLE `history_plotting_ta` MODIFY COLUMN `kategori` VARCHAR(50) NOT NULL DEFAULT 'Pembimbing'");
+        }
+
+        // Buat tabel master rubrik sidang dinamis jika belum ada
+        if (!$this->db->table_exists('master_rubrik_sidang')) {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `master_rubrik_sidang` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `prodi` VARCHAR(50) NOT NULL,
+                    `peminatan` VARCHAR(100) NOT NULL,
+                    `judul_rubrik` VARCHAR(150) NOT NULL,
+                    `kriteria_json` LONGTEXT NOT NULL,
+                    `total_bobot` INT(11) NOT NULL DEFAULT 100,
+                    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    UNIQUE KEY `idx_prodi_peminatan` (`prodi`, `peminatan`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+            $this->_seed_default_master_rubrik();
+        } else {
+            $count = $this->db->count_all('master_rubrik_sidang');
+            if ($count === 0) {
+                $this->_seed_default_master_rubrik();
+            }
         }
     }
 
@@ -713,14 +740,14 @@ class KoordinatorTA_model extends CI_Model {
         return true;
     }
 
-    // Ambil Data Histori Log Perubahan TA (Pembimbing & Penguji)
+    // Ambil Data Histori Log Perubahan TA (Pembimbing, Penguji, & Sidang TA)
     public function get_history_ta($kategori = null, $nim = null, $limit = 100) {
         if (!$this->db->table_exists('history_plotting_ta')) {
             $this->_ensure_columns_exist();
         }
 
         $this->db->from('history_plotting_ta');
-        if (!empty($kategori) && in_array($kategori, array('Pembimbing', 'Penguji'))) {
+        if (!empty($kategori) && $kategori !== 'All') {
             $this->db->where('kategori', $kategori);
         }
         if (!empty($nim)) {
@@ -993,6 +1020,19 @@ class KoordinatorTA_model extends CI_Model {
                 }
             }
 
+            // Catat log histori penjadwalan sidang
+            $jamStr = $jam_mulai . (!empty($jam_selesai) ? " - {$jam_selesai}" : "");
+            $this->record_history_ta(
+                'Sidang TA',
+                $nim,
+                '-',
+                '-',
+                "Tgl: {$tgl_sidang} ({$jamStr})",
+                "Ruangan: {$ruangan}",
+                'Penjadwalan Sidang',
+                "Penetapan jadwal sidang TA: Tanggal {$tgl_sidang} pukul {$jamStr} di Ruangan {$ruangan}."
+            );
+
             return array('status' => true, 'message' => 'Jadwal Sidang Tugas Akhir berhasil ditetapkan!');
         } else {
             return array('status' => false, 'message' => 'Gagal memperbarui jadwal sidang.');
@@ -1145,4 +1185,295 @@ class KoordinatorTA_model extends CI_Model {
 
         return $row;
     }
+
+    // =========================================================
+    // MASTER RUBRIK PENILAIAN DINAMIS & PENERAPAN MASSAL PER PRODI/PEMINATAN
+    // =========================================================
+
+    public function _seed_default_master_rubrik() {
+        if (!$this->db->table_exists('master_rubrik_sidang')) return;
+
+        $defaults = array(
+            array(
+                'prodi' => 'DKV',
+                'peminatan' => 'Multimedia',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir DKV - Multimedia',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Konsep & Storyboard Multimedia', 'desc' => 'Kedalaman gagasan, orisinalitas ide, alur narasi, dan struktur storyboard visual.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Penguasaan Teknis Audio Visual & Animasi', 'desc' => 'Kualitas editing, rendering, compositing, motion graphic, dan sinkronisasi audio-visual.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Interaktivitas & User Experience (UI/UX)', 'desc' => 'Kemudahan interaksi antarmuka, responsivitas, dan fungsionalitas media multimedia terapan.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Komprehensi & Presentasi Sidang', 'desc' => 'Kelancaran penyampaian argumen karya, penguasaan materi, dan pertanggungjawaban desain.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DKV',
+                'peminatan' => 'Game',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir DKV - Game',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Game Design Document (GDD) & Core Concept', 'desc' => 'Kelengkapan GDD, target audience, core loop, dan inovasi genre mekanika game.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Game Mechanics, Balancing & Asset Art 2D/3D', 'desc' => 'Kualitas asset grafis karakter/lingkungan, animasi, balancing kesulitan, dan level design.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Playability, Prototype Testing & Bug Handling', 'desc' => 'Kelancaran gameplay (playability), performa frame rate, dan hasil uji coba playtest pengguna.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Live Demo & Argumentasi Teknis Sidang', 'desc' => 'Penguasaan implementasi game engine, demonstrasi gameplay langsung, dan respon tanya jawab.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DKV',
+                'peminatan' => 'Designpreneur',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir DKV - Designpreneur',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Riset Pasar & Business Model Canvas (BMC)', 'desc' => 'Validasi problem-solution fit, positioning pasar, analisis kompetitor, dan segmen konsumen.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Identitas Visual & Desain Produk/Kemasan Komersial', 'desc' => 'Kekuatan branding, packaging design, konsistensi collateral visual, dan daya tarik jual.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Strategi Pemasaran & Feasibility Finansial', 'desc' => 'Rencana go-to-market, cost of goods sold (COGS), proyeksi ROI, dan skalabilitas bisnis.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Pitching Produk & Pertanggungjawaban Bisnis', 'desc' => 'Kualitas deck presentasi, kemampuan pitching, dan kesiapan eksekusi komersial di pasar.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DKV',
+                'peminatan' => 'VIID',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir DKV - VIID',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Riset Strategis & Brand Architecture VIID', 'desc' => 'Landasan riset identitas visual, brand DNA, brand archetype, dan positioning strategi.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Sistem Identitas Visual & Graphic Guidelines', 'desc' => 'Ketepatan tipografi, color palette, grid system, logo versatility, dan manual guideline lengkap.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Aplikasi Interaktif & Environmental Media Terapan', 'desc' => 'Penerapan identitas visual pada media digital/interaktif, signage, wayfinding, dan merchandise.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Presentasi Konsep & Ketajaman Analisis Visual', 'desc' => 'Artikulasi konsep visual, justifikasi semiotika desain, dan penguasaan respon akademik.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DI',
+                'peminatan' => 'Komersial',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir Desain Interior - Komersial',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Konsep Ruang & Analisis Tapak Komersial', 'desc' => 'Kesesuaian tema desain dengan fungsi komersial, zoning, dan brand experience pengunjung.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Detail Konstruksi, Material & Furnitur Kustom', 'desc' => 'Spesifikasi material, keakuratan gambar kerja interior, dan inovasi furnitur kustom.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Ergonomi, Tata Cahaya (Lighting) & Akustik Ruang', 'desc' => 'Efisiensi sirkulasi, standar kenyamanan termal, pencahayaan buatan/alami, dan akustik.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Visualisasi 3D Rendering & Presentasi Sidang', 'desc' => 'Realisme 3D render, kelengkapan maket/board material, dan argumentasi pemilihan desain.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DI',
+                'peminatan' => 'Residensial',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir Desain Interior - Residensial',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Analisis Kebutuhan Penghuni & Konsep Hunian', 'desc' => 'Pemahaman profil klien, efisiensi zonasi ruang privat-publik, dan atmosfer interior.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Pemilihan Material, Tekstur & Furnitur Hunian', 'desc' => 'Kualitas pemilihan finishing, keselarasan warna, dan ketahanan material interior.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Sirkulasi Ruang, Utilitas & Keberlanjutan (Eco-Design)', 'desc' => 'Penataan utilitas ME, sirkulasi udara alami, dan penggunaan material ramah lingkungan.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Gambar Kerja Teknis & Pertanggungjawaban Desain', 'desc' => 'Kelengkapan dokumen gambar arsitektural interior dan kelancaran presentasi sidang.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DIB',
+                'peminatan' => 'Spatial Branding',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir DIB - Spatial Branding',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Analisis Spatial Branding & Customer Journey', 'desc' => 'Integrasi brand identity ke dalam elemen spasial, touchpoints konsumen, dan visual merchandising.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Layout Efisiensi Ruang Retail & Sirkulasi', 'desc' => 'Optimalisasi sales floor, zoning display produk, dan kenyamanan sirkulasi flow pengunjung.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Analisis Kelayakan Finansial & Fit-out Costing', 'desc' => 'Estimasi RAB interior, pemilihan material tahan lama cost-effective, dan ROI ruang bisnis.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Pitching Konsep Bisnis Interior & Presentasi Teknis', 'desc' => 'Kemampuan menyampaikan value proposition ruang terhadap peningkatan performa bisnis.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DIB',
+                'peminatan' => 'Hospitality',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir DIB - Hospitality',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Konsep Hospitality & Standar Layanan Ruang', 'desc' => 'Karakter ambience penginapan/kafe/hotel, alur front-of-house dan back-of-house efisien.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Spesifikasi Material Heavy-Duty & Furnitur Kontrak', 'desc' => 'Ketahanan material standar komersial tinggi, kemudahan perawatan, dan estetika premium.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Standar Keamanan, Pencahayaan Mood & Akustik', 'desc' => 'Penerapan jalur evakuasi, pencahayaan dramatis, dan peredaman suara lingkungan hospitality.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Presentasi Komprehensif & Gambar Detail Interior', 'desc' => 'Kelengkapan gambar kerja dan kepiawaian dalam menjawab pertanyaan dewan penguji.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DP',
+                'peminatan' => 'Desain Industri',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir Desain Produk - Desain Industri',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'User Research, Problem Framing & Inovasi Fungsi', 'desc' => 'Ketepatan identifikasi masalah pengguna, riset antropometri, dan kebaruan solusi fungsi produk.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Bentuk Estetika, Ergonomi & Styling Produk', 'desc' => 'Kematangan eksplorasi bentuk, proporsi, kenyamanan genggaman/penggunaan, dan CMF design.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Material, Manufakturabilitas & Prototyping Uji', 'desc' => 'Kesesuaian proses produksi massal, pemilihan polimer/logam, dan hasil uji prototype fisik.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Demonstrasi Produk Fisik & Argumentasi Sidang', 'desc' => 'Unjuk kerja prototype 1:1, detail exploded view 3D CAD, dan penguasaan materi sidang.', 'bobot' => 20)
+                ))
+            ),
+            array(
+                'prodi' => 'DP',
+                'peminatan' => 'Furnitur',
+                'judul_rubrik' => 'Rubrik Sidang Tugas Akhir Desain Produk - Furnitur',
+                'total_bobot' => 100,
+                'kriteria_json' => json_encode(array(
+                    array('id' => 'k1', 'title' => 'Riset Kebutuhan Furnitur & Analisis Ergonomi', 'desc' => 'Standar antropometri duduk/kerja, fungsi multi-purpose, dan efisiensi ruang pakai.', 'bobot' => 25),
+                    array('id' => 'k2', 'title' => 'Konstruksi Sambungan, Kekuatan Struktur & Material', 'desc' => 'Inovasi joint system (knockdown/tenon), pemilihan kayu/metal, dan uji beban struktur.', 'bobot' => 30),
+                    array('id' => 'k3', 'title' => 'Finishing, Kemudahan Perakitan & Kemasan Flat-pack', 'desc' => 'Kualitas finishing permukaan, efisiensi kemasan distribusi, dan instruksi perakitan.', 'bobot' => 25),
+                    array('id' => 'k4', 'title' => 'Presentasi Prototype Skala 1:1 & Pertanggungjawaban', 'desc' => 'Kualitas mock-up fisik, keakuratan gambar kerja teknik, dan ketajaman jawaban ujian.', 'bobot' => 20)
+                ))
+            )
+        );
+
+        foreach ($defaults as $d) {
+            $check = $this->db->where('prodi', $d['prodi'])->where('peminatan', $d['peminatan'])->get('master_rubrik_sidang')->row_array();
+            if ($check) {
+                $this->db->where('id', $check['id'])->update('master_rubrik_sidang', $d);
+            } else {
+                $this->db->insert('master_rubrik_sidang', $d);
+            }
+        }
+    }
+
+    // Ambil Semua Master Rubrik Sidang
+    public function get_all_master_rubrik() {
+        if (!$this->db->table_exists('master_rubrik_sidang')) {
+            $this->_ensure_columns_exist();
+        }
+
+        $rows = $this->db->order_by('prodi', 'ASC')->order_by('peminatan', 'ASC')->get('master_rubrik_sidang')->result_array();
+        foreach ($rows as &$r) {
+            $r['kriteria'] = json_decode($r['kriteria_json'], true) ?: array();
+        }
+        return $rows;
+    }
+
+    public function _normalize_prodi($prodi) {
+        $prodi = trim((string)$prodi);
+        if (stripos($prodi, 'DIB') !== false) return 'DIB';
+        if (stripos($prodi, 'DKV') !== false) return 'DKV';
+        if (stripos($prodi, 'DI') !== false || stripos($prodi, 'Interior') !== false) return 'DI';
+        if (stripos($prodi, 'DP') !== false || stripos($prodi, 'Produk') !== false) return 'DP';
+        return $prodi;
+    }
+
+    // Ambil Master Rubrik Berdasarkan Prodi dan Peminatan
+    public function get_master_rubrik_by_prodi_peminatan($prodi, $peminatan) {
+        if (!$this->db->table_exists('master_rubrik_sidang')) {
+            $this->_ensure_columns_exist();
+        }
+
+        $cleanProdi = $this->_normalize_prodi($prodi);
+        $cleanPem   = trim((string)$peminatan);
+
+        $row = $this->db->where('prodi', $cleanProdi)->where('peminatan', $cleanPem)->get('master_rubrik_sidang')->row_array();
+        
+        // If not found, re-seed defaults and try again
+        if (!$row) {
+            $this->_seed_default_master_rubrik();
+            $row = $this->db->where('prodi', $cleanProdi)->where('peminatan', $cleanPem)->get('master_rubrik_sidang')->row_array();
+        }
+
+        // Fallback to any rubric in same prodi if specific peminatan isn't matched
+        if (!$row) {
+            $row = $this->db->where('prodi', $cleanProdi)->order_by('id', 'ASC')->get('master_rubrik_sidang')->row_array();
+        }
+
+        if ($row) {
+            $row['kriteria'] = json_decode($row['kriteria_json'], true) ?: array();
+        }
+        return $row;
+    }
+
+    // Simpan / Update Master Rubrik Dinamis
+    public function simpan_master_rubrik($prodi, $peminatan, $judul_rubrik, $kriteria = array(), $total_bobot = 100) {
+        $this->_ensure_columns_exist();
+
+        $cleanProdi = $this->_normalize_prodi($prodi);
+        $cleanPem   = trim((string)$peminatan);
+
+        if (empty($cleanProdi) || empty($cleanPem)) {
+            return array('status' => false, 'message' => 'Prodi dan Peminatan wajib dipilih.');
+        }
+
+        if (empty($kriteria) || !is_array($kriteria)) {
+            return array('status' => false, 'message' => 'Kriteria rubrik penilaian tidak boleh kosong.');
+        }
+
+        // Hitung total bobot
+        $sumBobot = 0;
+        foreach ($kriteria as &$k) {
+            $k['bobot'] = floatval($k['bobot'] ?? 0);
+            $sumBobot += $k['bobot'];
+            if (empty($k['id'])) {
+                $k['id'] = 'k_' . substr(md5(uniqid()), 0, 6);
+            }
+        }
+
+        if (abs($sumBobot - 100) > 0.01) {
+            return array('status' => false, 'message' => "Total persentase bobot harus pas 100% (saat ini: {$sumBobot}%).");
+        }
+
+        $kriteriaJson = json_encode($kriteria);
+        $data = array(
+            'prodi'        => $cleanProdi,
+            'peminatan'    => $cleanPem,
+            'judul_rubrik' => $judul_rubrik ?: "Rubrik Sidang TA {$cleanProdi} - {$cleanPem}",
+            'kriteria_json'=> $kriteriaJson,
+            'total_bobot'  => $sumBobot,
+            'is_active'    => 1,
+            'updated_at'   => date('Y-m-d H:i:s')
+        );
+
+        $exist = $this->db->where('prodi', $cleanProdi)->where('peminatan', $cleanPem)->get('master_rubrik_sidang')->row_array();
+        if ($exist) {
+            $this->db->where('id', $exist['id'])->update('master_rubrik_sidang', $data);
+            $id = $exist['id'];
+        } else {
+            $this->db->insert('master_rubrik_sidang', $data);
+            $id = $this->db->insert_id();
+        }
+
+        return array(
+            'status'  => true,
+            'message' => "Master Rubrik Penilaian untuk {$cleanProdi} - {$cleanPem} berhasil disimpan!",
+            'data'    => array_merge($data, array('id' => $id, 'kriteria' => $kriteria))
+        );
+    }
+
+    // Terapkan Rubrik Secara Massal ke Seluruh / Sebagian Mahasiswa di Prodi & Peminatan
+    public function terapkan_rubrik_massal($prodi, $peminatan, $nim_list = array()) {
+        $this->_ensure_columns_exist();
+
+        $cleanProdi = $this->_normalize_prodi($prodi);
+        $cleanPem   = trim((string)$peminatan);
+
+        $rubrik = $this->get_master_rubrik_by_prodi_peminatan($cleanProdi, $cleanPem);
+        if (!$rubrik) {
+            return array('status' => false, 'message' => "Master rubrik untuk {$prodi} - {$peminatan} belum disetting.");
+        }
+
+        $kriteria = isset($rubrik['kriteria']) && is_array($rubrik['kriteria']) ? $rubrik['kriteria'] : array();
+        $detailTemplate = array();
+        foreach ($kriteria as $k) {
+            $detailTemplate[] = array(
+                'id'       => $k['id'] ?? ('k_' . substr(md5(uniqid()), 0, 6)),
+                'kriteria' => $k['title'] ?? ($k['kriteria'] ?? 'Kriteria Penilaian'),
+                'bobot'    => floatval($k['bobot'] ?? 25),
+                'nilai'    => 0
+            );
+        }
+
+        $detailJson = json_encode($detailTemplate);
+
+        if (!empty($nim_list) && is_array($nim_list)) {
+            $this->db->where_in('nim', $nim_list);
+        }
+
+        $updateData = array(
+            'peminatan' => $cleanPem
+        );
+
+        $this->db->update('pendaftaran_ta', $updateData);
+        $affected = $this->db->affected_rows();
+
+        return array(
+            'status'  => true,
+            'message' => "Rubrik {$cleanProdi} - {$cleanPem} berhasil diterapkan secara massal ke {$affected} mahasiswa!",
+            'affected'=> $affected,
+            'rubrik'  => $rubrik
+        );
+    }
 }
+
