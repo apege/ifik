@@ -590,18 +590,94 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     }
     .swal2-container { z-index: 99999999 !important; }
 
-    /* Staging Table (Tambah Slide - multi file upload) */
-    .staging-table th, .staging-table td { padding: 8px 12px; text-align: left; }
-    .staging-table th { background: #f8fafc; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; }
-    .staging-table td { border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-    .staging-preview-thumb {
-      width: 56px;
-      height: 56px;
+    /* === MULTI-UPLOAD DROPZONE (Tambah Slide - Media) === */
+    .dropzone-multi {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 18px;
+      background: #f8fafc;
+      transition: all 0.25s;
+      position: relative;
+      cursor: pointer;
+      min-height: 130px;
+    }
+    .dropzone-multi.dragover {
+      border-color: #ea580c;
+      background: #fff7ed;
+    }
+    .dropzone-multi > input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 1;
+    }
+    .media-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      gap: 10px;
+      position: relative;
+      pointer-events: none;
+    }
+    .media-preview-grid.hidden { display: none; }
+    .media-preview-item {
+      position: relative;
       border-radius: 10px;
-      object-fit: cover;
-      border: 1.5px solid #e2e8f0;
+      overflow: hidden;
       background: #0f172a;
-      flex-shrink: 0;
+      aspect-ratio: 1 / 1;
+      border: 1.5px solid #e2e8f0;
+      pointer-events: none;
+    }
+    .media-preview-item img,
+    .media-preview-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .media-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.75);
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      line-height: 1;
+      transition: all 0.2s ease;
+      pointer-events: auto;
+      z-index: 3;
+    }
+    .media-remove-btn:hover {
+      background: #ef4444;
+      transform: scale(1.12);
+    }
+    .media-file-name {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.78), transparent);
+      color: #ffffff;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 12px 6px 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -676,49 +752,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <p class="text-xs text-orange-600 mt-1">&#9998; Editor TinyMCE aktif.</p>
                 </div>
 
-                <!-- STAGING AREA (1 file per upload, preview di dalam card) -->
+                <!-- UPLOAD AREA (Multi File, Preview Langsung di Kotak Upload) -->
                 <div class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <h3 class="font-bold text-sm mb-3">Upload File Media (Maksimal Satu File per Upload)</h3>
-                    
-                    <!-- Dropzone dengan preview internal -->
-                    <div class="dropzone mb-3" id="dropzoneStaging">
-                        <input type="file" id="stagedFile" accept="image/*,video/*">
+                    <h3 class="font-bold text-sm mb-3">Upload File Media (Bisa Pilih Beberapa File Sekaligus)</h3>
+
+                    <!-- Durasi Tampil (disamakan untuk semua file yang diupload) -->
+                    <div class="mb-3">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">⏱️ Durasi Tampil per Slide (detik)</label>
+                        <input type="number" id="slideDuration" class="form-input" style="max-width:160px;" min="1" value="3">
+                        <p class="text-[0.68rem] text-gray-500 mt-1">Durasi ini otomatis diterapkan sama rata ke semua file media yang ditambahkan di bawah.</p>
+                    </div>
+
+                    <!-- Dropzone multi-upload dengan preview grid internal -->
+                    <div class="dropzone-multi" id="dropzoneStaging">
+                        <input type="file" id="stagedFile" accept="image/png, image/jpeg, image/webp, image/gif, video/*" multiple>
                         <!-- Konten default dropzone (instruksi) -->
-                        <div id="dropzoneDefault" class="text-gray-400 pointer-events-none">
+                        <div id="dropzoneDefault" class="text-gray-400" style="pointer-events:none;">
                             <svg class="w-10 h-10 mx-auto mb-2 text-brand opacity-50" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"></path></svg>
                             <p class="font-semibold text-gray-700">Tarik &amp; Lepas File Media di Sini</p>
-                            <p class="text-xs mt-1">atau klik untuk memilih file (Maksimal 1 file)</p>
+                            <p class="text-xs mt-1">atau klik untuk memilih file (bisa lebih dari satu — JPG, PNG, WEBP, GIF, Video)</p>
                         </div>
-                        <!-- Preview file yang dipilih -->
-                        <div id="singleFilePreview" class="hidden pointer-events-none">
-                            <img id="previewSingleImg" class="max-h-32 mx-auto rounded-lg object-contain" src="" alt="">
-                            <video id="previewSingleVideo" class="max-h-32 mx-auto rounded-lg hidden" controls muted></video>
-                            <p id="previewSingleName" class="text-xs mt-2 font-bold text-gray-700"></p>
-                            <p id="previewSingleSize" class="text-xs text-gray-500"></p>
-                        </div>
+                        <!-- Grid preview file yang sudah dipilih -->
+                        <div id="mediaPreviewGrid" class="media-preview-grid hidden"></div>
                     </div>
-                    
-                    <!-- Tombol konfirmasi untuk memasukkan file ke tabel -->
-                    <button type="button" id="btnAddToTable" class="btn-brand py-2 px-4 rounded-lg font-bold hidden w-full">
-                        ➕ Tambahkan File ke Tabel
-                    </button>
-                    
-                    <!-- Tabel staging untuk file yang sudah dikonfirmasi -->
-                    <div class="overflow-x-auto border border-gray-200 rounded-lg bg-white mt-3">
-                        <table class="w-full staging-table" id="stagingTable">
-                            <thead>
-                                <tr>
-                                    <th>Preview</th>
-                                    <th>Durasi (s)</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stagingTableBody">
-                                <tr><td colspan="3" class="text-center text-gray-400 py-4">Belum ada file yang ditambahkan.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
+
                     <!-- Hidden inputs untuk submit final -->
                     <input type="file" name="media_files[]" id="finalFiles" multiple style="display: none;">
                     <div id="hiddenDurationsContainer"></div>
@@ -986,6 +1043,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
               <div class="mb-6">
                   <label class="block text-sm font-bold text-orange-800 mb-2">Deskripsi Slide</label>
                   <textarea id="editOverlayDescription" name="overlay_description" class="form-input text-sm" rows="5" placeholder="Tulis deskripsi untuk slide ini..."></textarea>
+                  <p class="text-xs text-orange-600 mt-1">&#9998; Editor TinyMCE aktif.</p>
               </div>
               <div class="flex justify-end gap-3">
                   <button type="button" onclick="closeEditModal()" class="btn-secondary px-5 py-2 rounded-xl font-bold">Batal</button>
@@ -1255,20 +1313,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           document.getElementById('slideLabel').disabled = false;
       });
 
-      // --- STAGING TABLE LOGIC (1 file per upload, preview dalam dropzone) ---
-      const dataTransfer = new DataTransfer();
-      const stagingFiles = []; // file yang sudah dikonfirmasi
-      let selectedFile = null; // file yang sedang dipilih untuk ditambahkan
-      const fileInput = document.getElementById('stagedFile');
+      // ===== TINYMCE: Editor untuk Deskripsi Slide (modal Edit) =====
+      tinymce.init({
+          selector: '#editOverlayDescription',
+          plugins: 'lists link autolink',
+          toolbar: 'bold italic underline | bullist numlist | link | removeformat',
+          menubar: false,
+          height: 180,
+          skin: 'oxide',
+          branding: false,
+          setup: function(editor) {
+              editor.on('change', function() { editor.save(); });
+          }
+      });
+
+      // --- MULTI-UPLOAD MEDIA LOGIC (preview langsung di kotak upload, hapus via tombol X) ---
+      const mediaFiles = []; // { file, url, isVideo } — daftar file yang sudah dipilih/di-drop
+      const stagedFileInput = document.getElementById('stagedFile');
       const finalFilesInput = document.getElementById('finalFiles');
       const hiddenDurationsContainer = document.getElementById('hiddenDurationsContainer');
-      const tableBody = document.getElementById('stagingTableBody');
       const labelInput = document.getElementById('slideLabel');
       const btnSubmit = document.getElementById('btnSubmitSlide');
       const dropzoneStaging = document.getElementById('dropzoneStaging');
-      const btnAddToTable = document.getElementById('btnAddToTable');
       const dropzoneDefault = document.getElementById('dropzoneDefault');
-      const singleFilePreview = document.getElementById('singleFilePreview');
+      const mediaPreviewGrid = document.getElementById('mediaPreviewGrid');
+      const slideDurationInput = document.getElementById('slideDuration');
 
       // Fungsi format ukuran file (jika belum ada)
       function formatFileSize(bytes) {
@@ -1279,147 +1348,117 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
       }
 
-      // Render tabel file yang sudah dikonfirmasi
-      function renderTable() {
-          if (stagingFiles.length === 0) {
-              tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-400 py-4">Belum ada file yang ditambahkan.</td></tr>';
-              labelInput.disabled = false;
-              btnSubmit.disabled = true;
-              btnSubmit.innerText = "Tambah Slide (Pilih File Dulu)";
-              return;
-          }
+      // Validasi tipe file yang diterima: gambar (termasuk webp) & video
+      function isAcceptedMediaFile(file) {
+          return file.type.startsWith('image/') || file.type.startsWith('video/');
+      }
 
-          labelInput.disabled = true;
-          btnSubmit.disabled = false;
-          btnSubmit.innerText = "Tambah Slide";
+      // Sinkronkan array mediaFiles ke input file tersembunyi (untuk submit)
+      function syncFinalFiles() {
+          const dt = new DataTransfer();
+          mediaFiles.forEach(item => dt.items.add(item.file));
+          finalFilesInput.files = dt.files;
+      }
 
-          tableBody.innerHTML = '';
+      // Buat hidden input durations[] sejumlah file, nilainya disamakan dari input durasi di atas
+      function syncDurationsHidden() {
           hiddenDurationsContainer.innerHTML = '';
-
-          stagingFiles.forEach((item, index) => {
-              const tr = document.createElement('tr');
-              const isVideo = item.file.type.startsWith('video/');
-              const previewEl = isVideo
-                  ? `<video src="${item.url}" class="staging-preview-thumb" muted playsinline></video>`
-                  : `<img src="${item.url}" class="staging-preview-thumb" alt="Preview">`;
-
-              tr.innerHTML = `
-                  <td>
-                      <div class="flex items-center gap-3">
-                          ${previewEl}
-                          <span class="text-xs text-gray-500 truncate max-w-[140px]" title="${item.file.name}">${item.file.name}</span>
-                      </div>
-                  </td>
-                  <td><input type="number" class="form-input py-1 px-2 text-sm w-20" min="1" value="${item.duration}" onchange="updateDuration(${index}, this.value)"></td>
-                  <td><button type="button" onclick="removeStagedFile(${index})" class="text-red-500 font-bold hover:underline text-sm">Hapus</button></td>
-              `;
-              tableBody.appendChild(tr);
-
+          const durVal = parseInt(slideDurationInput.value) || 3;
+          mediaFiles.forEach(() => {
               const hiddenDuration = document.createElement('input');
               hiddenDuration.type = 'hidden';
               hiddenDuration.name = 'durations[]';
-              hiddenDuration.value = item.duration;
+              hiddenDuration.value = durVal;
               hiddenDurationsContainer.appendChild(hiddenDuration);
           });
-
-          // Update finalFiles input
-          finalFilesInput.files = dataTransfer.files;
       }
 
-      // Update durasi file
-      window.updateDuration = function(index, val) {
-          stagingFiles[index].duration = parseInt(val) || 3;
-          renderTable();
-      };
-
-      // Hapus file dari staging
-      window.removeStagedFile = function(index) {
-          if (stagingFiles[index] && stagingFiles[index].url) {
-              URL.revokeObjectURL(stagingFiles[index].url);
+      // Render ulang grid preview di dalam kotak upload
+      function renderMediaPreviews() {
+          if (mediaFiles.length === 0) {
+              dropzoneDefault.classList.remove('hidden');
+              mediaPreviewGrid.classList.add('hidden');
+              mediaPreviewGrid.innerHTML = '';
+              labelInput.disabled = false;
+              btnSubmit.disabled = true;
+              btnSubmit.innerText = "Tambah Slide (Pilih File Dulu)";
+              syncFinalFiles();
+              syncDurationsHidden();
+              return;
           }
-          stagingFiles.splice(index, 1);
-          dataTransfer.items.remove(index);
-          renderTable();
-      };
 
-      // Menampilkan preview file tunggal di dalam dropzone
-      function showSinglePreview(file) {
-          if (!file) return;
-          
           dropzoneDefault.classList.add('hidden');
-          singleFilePreview.classList.remove('hidden');
-          btnAddToTable.classList.remove('hidden');
+          mediaPreviewGrid.classList.remove('hidden');
+          labelInput.disabled = true;
+          btnSubmit.disabled = false;
+          btnSubmit.innerText = `Tambah Slide (${mediaFiles.length} File)`;
 
-          const isVideo = file.type.startsWith('video/');
-          const img = document.getElementById('previewSingleImg');
-          const video = document.getElementById('previewSingleVideo');
-          
-          if (isVideo) {
-              img.classList.add('hidden');
-              video.classList.remove('hidden');
-              video.src = URL.createObjectURL(file);
-          } else {
-              video.classList.add('hidden');
-              img.classList.remove('hidden');
-              img.src = URL.createObjectURL(file);
+          mediaPreviewGrid.innerHTML = '';
+          mediaFiles.forEach((item, index) => {
+              const box = document.createElement('div');
+              box.className = 'media-preview-item';
+              const mediaTag = item.isVideo
+                  ? `<video src="${item.url}" muted playsinline></video>`
+                  : `<img src="${item.url}" alt="${item.file.name}">`;
+
+              box.innerHTML = `
+                  ${mediaTag}
+                  <button type="button" class="media-remove-btn" title="Hapus file ini">&times;</button>
+                  <span class="media-file-name">${item.file.name}</span>
+              `;
+              box.querySelector('.media-remove-btn').addEventListener('click', function(e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  removeMediaFile(index);
+              });
+              mediaPreviewGrid.appendChild(box);
+          });
+
+          syncFinalFiles();
+          syncDurationsHidden();
+      }
+
+      // Tambahkan file baru (dari file picker atau drag & drop) ke daftar media
+      function addFilesToMedia(fileList) {
+          Array.from(fileList).forEach(file => {
+              if (!isAcceptedMediaFile(file)) return;
+              mediaFiles.push({
+                  file: file,
+                  url: URL.createObjectURL(file),
+                  isVideo: file.type.startsWith('video/')
+              });
+          });
+          renderMediaPreviews();
+      }
+
+      // Hapus salah satu file dari daftar media (tombol X)
+      function removeMediaFile(index) {
+          if (mediaFiles[index] && mediaFiles[index].url) {
+              URL.revokeObjectURL(mediaFiles[index].url);
           }
-          
-          document.getElementById('previewSingleName').innerText = file.name;
-          document.getElementById('previewSingleSize').innerText = formatFileSize(file.size);
+          mediaFiles.splice(index, 1);
+          renderMediaPreviews();
       }
 
-      // Reset area preview ke kondisi awal
-      function resetSinglePreview() {
-          selectedFile = null;
-          dropzoneDefault.classList.remove('hidden');
-          singleFilePreview.classList.add('hidden');
-          btnAddToTable.classList.add('hidden');
-          // Reset input file
-          fileInput.value = '';
-          // Hentikan video jika ada
-          const video = document.getElementById('previewSingleVideo');
-          video.pause();
-          video.src = '';
-          document.getElementById('previewSingleImg').src = '';
-      }
+      // Saat durasi di atas diubah, samakan ke semua file yang sudah ada
+      slideDurationInput.addEventListener('input', syncDurationsHidden);
+      slideDurationInput.addEventListener('change', syncDurationsHidden);
 
-      // Event listener saat file dipilih
-      fileInput.addEventListener('change', function(e) {
+      // Event listener saat file dipilih lewat file picker (bisa lebih dari satu)
+      stagedFileInput.addEventListener('change', function(e) {
           if (this.files && this.files.length > 0) {
-              selectedFile = this.files[0];
-              showSinglePreview(selectedFile);
+              addFilesToMedia(this.files);
           }
           this.value = ''; // reset input agar bisa memilih file yang sama lagi
       });
 
-      // Dropzone drag & drop (hanya ambil file pertama)
+      // Dropzone drag & drop (menerima banyak file sekaligus)
       dropzoneStaging.addEventListener('dragover', e => { e.preventDefault(); dropzoneStaging.classList.add('dragover'); });
       dropzoneStaging.addEventListener('dragleave', e => { dropzoneStaging.classList.remove('dragover'); });
       dropzoneStaging.addEventListener('drop', e => {
           e.preventDefault(); dropzoneStaging.classList.remove('dragover');
           if (e.dataTransfer.files.length) {
-              selectedFile = e.dataTransfer.files[0];
-              showSinglePreview(selectedFile);
-          }
-      });
-
-      // Tombol konfirmasi: masukkan file ke staging
-      btnAddToTable.addEventListener('click', function() {
-          if (selectedFile) {
-              // Tambahkan ke dataTransfer dan stagingFiles
-              dataTransfer.items.add(selectedFile);
-              stagingFiles.push({
-                  file: selectedFile,
-                  duration: 3,
-                  url: URL.createObjectURL(selectedFile) // URL baru untuk preview di tabel
-              });
-              
-              // Reset area preview
-              resetSinglePreview();
-              
-              // Update finalFiles input dan render tabel
-              finalFilesInput.files = dataTransfer.files;
-              renderTable();
+              addFilesToMedia(e.dataTransfer.files);
           }
       });
 
@@ -1462,7 +1501,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           document.getElementById('editSlideId').value = id;
           document.getElementById('editLabel').value = label || '';
           document.getElementById('editOverlayTitle').value = overlayTitle || '';
-          document.getElementById('editOverlayDescription').value = overlayDescription || '';
+
+          // Isi konten deskripsi ke editor TinyMCE (bukan textarea langsung)
+          if (window.tinymce && tinymce.get('editOverlayDescription')) {
+              tinymce.get('editOverlayDescription').setContent(overlayDescription || '');
+          } else {
+              document.getElementById('editOverlayDescription').value = overlayDescription || '';
+          }
 
           const modal = document.getElementById('editSlideModal');
           modal.classList.remove('hidden');
@@ -1498,6 +1543,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       // Submit form edit slide via AJAX
       document.getElementById('editSlideForm').addEventListener('submit', function(e) {
           e.preventDefault();
+
+          // Sinkronkan isi editor TinyMCE ke textarea sebelum ambil FormData
+          if (window.tinymce) {
+              tinymce.triggerSave();
+          }
+
           const formData = new FormData(this);
           const id = document.getElementById('editSlideId').value;
           formData.append('id', id);
