@@ -61,6 +61,57 @@ class User_model extends CI_Model {
     }
 
     /**
+     * Store password reset token for a user
+     * @param string $email
+     * @param string $token
+     * @return bool
+     */
+    public function set_reset_token($email, $token)
+    {
+        $this->db->where('email', strtolower(trim($email)));
+        return $this->db->update('users', [
+            'token'      => $token,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
+     * Verify if password reset token matches for an email
+     * @param string $email
+     * @param string $token
+     * @return object|null
+     */
+    public function verify_reset_token($email, $token)
+    {
+        $user = $this->get_by_email($email);
+        if ($user && !empty($user->token) && $user->token === $token) {
+            return $user;
+        }
+        return null;
+    }
+
+    /**
+     * Reset user password using token
+     * @param string $email
+     * @param string $token
+     * @param string $newHashedPassword
+     * @return bool
+     */
+    public function reset_password_by_token($email, $token, $newHashedPassword)
+    {
+        $user = $this->verify_reset_token($email, $token);
+        if (!$user) return false;
+
+        $this->db->where('id', $user->id);
+        return $this->db->update('users', [
+            'password'         => $newHashedPassword,
+            'password_changed' => 1,
+            'token'            => null,
+            'updated_at'       => date('Y-m-d H:i:s')
+        ]);
+    }
+
+    /**
      * Check if user exists by NIM/NIDN or Name
      * @param string $identifier
      * @return bool

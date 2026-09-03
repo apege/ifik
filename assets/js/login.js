@@ -67,14 +67,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function validateEmail(val, strict) {
     if (!val) { setEmailState('none'); return false; }
-    const hasAt       = val.includes('@');
-    const validDomain = /^[^\s@]+@telkomuniversity\.ac\.id$/i.test(val);
+    const hasAt = val.includes('@');
+    const isTelU = /@(student\.)?telkomuniversity\.ac\.id$/i.test(val);
+    const isGeneralEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
     if (!hasAt && !strict) { setEmailState('none'); return false; }
-    if (validDomain) {
+
+    if (isTelU) {
       setEmailState('valid', 'Email Telkom University valid');
       return true;
+    } else if (isGeneralEmail) {
+      setEmailState('valid', 'Email valid');
+      return true;
     } else {
-      setEmailState('error', 'Harus email @telkomuniversity.ac.id');
+      setEmailState('error', 'Masukkan format email yang valid');
       return false;
     }
   }
