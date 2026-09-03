@@ -235,25 +235,45 @@ class KoordinatorTA extends CI_Controller {
         $list = $this->KoordinatorTA_model->get_all_mahasiswa_ta();
 
         $totalMhs = count($list);
-        $pendingCount = 0;
+        $siapDiplotCount = 0;
         $approvedCount = 0;
         $rejectedCount = 0;
+        $kkApprovedCount = 0;
 
         foreach ($list as $row) {
-            $st = $row['status_approval_koor'] ?? 'Pending';
-            if ($st === 'Approved') $approvedCount++;
-            else if ($st === 'Rejected') $rejectedCount++;
-            else $pendingCount++;
+            $stKoor = $row['status_approval_koor'] ?? 'Pending';
+            $stWali = $row['status_approval_wali'] ?? 'Pending';
+            $stAdmin = $row['status_approval_admin'] ?? 'Pending';
+            $stKk = $row['status_approval_kk'] ?? 'Pending';
+
+            $isWaliApproved = (strcasecmp($stWali, 'Approved') === 0);
+            $isAdminApproved = (strcasecmp($stAdmin, 'Approved') === 0);
+
+            if (strcasecmp($stKoor, 'Approved') === 0) {
+                $approvedCount++;
+            } else if (strcasecmp($stKoor, 'Rejected') === 0) {
+                $rejectedCount++;
+            } else {
+                if ($isWaliApproved && $isAdminApproved) {
+                    $siapDiplotCount++;
+                }
+            }
+
+            if (strcasecmp($stKk, 'Approved') === 0) {
+                $kkApprovedCount++;
+            }
         }
 
         echo json_encode(array(
             'status' => true,
             'data'   => $list,
             'stats'  => array(
-                'total'    => $totalMhs,
-                'pending'  => $pendingCount,
-                'approved' => $approvedCount,
-                'rejected' => $rejectedCount
+                'total'       => $totalMhs,
+                'siap_diplot' => $siapDiplotCount,
+                'pending'     => $siapDiplotCount,
+                'approved'    => $approvedCount,
+                'rejected'    => $rejectedCount,
+                'kk_approved' => $kkApprovedCount
             )
         ));
     }
@@ -312,27 +332,63 @@ class KoordinatorTA extends CI_Controller {
 
         $list = $this->KoordinatorTA_model->get_all_mahasiswa_preview2();
 
-        $totalP2 = count($list);
-        $terjadwalCount = 0;
-        $pengujiSetCount = 0;
-        $belumSetCount = 0;
+        $totalP2        = count($list);
+        $pengujiLengkap = 0;
+        $belumPenguji   = 0;
 
         foreach ($list as $row) {
-            $st = $row['status_preview2'] ?? 'Belum Diplot';
-            if ($st === 'Terjadwal') $terjadwalCount++;
-            else if ($st === 'Penguji Ditetapkan') $pengujiSetCount++;
-            else $belumSetCount++;
+            $hasP1 = !empty($row['penguji_1']);
+            $hasP2 = !empty($row['penguji_2']);
+            if ($hasP1 && $hasP2) {
+                $pengujiLengkap++;
+            } else {
+                $belumPenguji++;
+            }
         }
+
+        $pctLengkap = $totalP2 > 0 ? round(($pengujiLengkap / $totalP2) * 100) : 0;
+        $pctBelum   = $totalP2 > 0 ? round(($belumPenguji   / $totalP2) * 100) : 0;
 
         echo json_encode(array(
             'status' => true,
             'data'   => $list,
             'stats'  => array(
                 'total'       => $totalP2,
-                'terjadwal'   => $terjadwalCount,
-                'penguji_set' => $pengujiSetCount,
-                'belum_set'   => $belumSetCount
+                'terjadwal'   => $pengujiLengkap,
+                'belum_set'   => $belumPenguji,
+                'pct_lengkap' => $pctLengkap,
+                'pct_belum'   => $pctBelum
             )
+        ));
+    }
+
+    // AJAX Endpoint: Ambil Histori Log Perubahan TA (Pembimbing & Penguji)
+    public function ajax_get_history_ta() {
+        header('Content-Type: application/json');
+
+        $kategori = $this->input->get('kategori') ?: $this->input->post('kategori');
+        $nim      = $this->input->get('nim') ?: $this->input->post('nim');
+        $limit    = (int)($this->input->get('limit') ?: $this->input->post('limit') ?: 100);
+
+        $logs = $this->KoordinatorTA_model->get_history_ta($kategori, $nim, $limit);
+
+        echo json_encode(array(
+            'status'   => true,
+            'kategori' => $kategori,
+            'data'     => $logs
+        ));
+    }
+
+    // AJAX Endpoint: Ambil Histori Log Perubahan Penugasan Dosen Penguji (Wrapper)
+    public function ajax_get_history_penguji() {
+        header('Content-Type: application/json');
+
+        $nim = $this->input->get('nim') ?: $this->input->post('nim');
+        $logs = $this->KoordinatorTA_model->get_history_penguji($nim);
+
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $logs
         ));
     }
 
@@ -462,6 +518,67 @@ class KoordinatorTA extends CI_Controller {
         echo json_encode(array(
             'status' => true,
             'data'   => $ruangan
+        ));
+    }
+
+    // AJAX Endpoint: Simpan Penilaian Akhir Sidang TA
+    public function ajax_simpan_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim              = $this->input->post('nim');
+        $prodi            = $this->input->post('prodi');
+        $peminatan        = $this->input->post('peminatan');
+        $nilai_akhir      = $this->input->post('nilai_akhir');
+        $grade            = $this->input->post('grade');
+        $status_kelulusan = $this->input->post('status_kelulusan');
+        $detail_penilaian = $this->input->post('detail_penilaian');
+        $catatan          = $this->input->post('catatan');
+
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib disertakan.'));
+            return;
+        }
+
+        if (is_string($detail_penilaian)) {
+            $decoded = json_decode($detail_penilaian, true);
+            if (is_array($decoded)) {
+                $detail_penilaian = $decoded;
+            }
+        }
+
+        $res = $this->KoordinatorTA_model->simpan_penilaian_sidang_ajax(
+            $nim,
+            $prodi,
+            $peminatan,
+            $nilai_akhir,
+            $grade,
+            $status_kelulusan,
+            $detail_penilaian,
+            $catatan
+        );
+
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Ambil Detail Penilaian Sidang Mahasiswa
+    public function ajax_get_detail_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim = $this->input->get('nim') ?: $this->input->post('nim');
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.'));
+            return;
+        }
+
+        $detail = $this->KoordinatorTA_model->get_detail_penilaian_sidang($nim);
+        if (!$detail) {
+            echo json_encode(array('status' => false, 'message' => 'Data mahasiswa tidak ditemukan.'));
+            return;
+        }
+
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $detail
         ));
     }
 }
