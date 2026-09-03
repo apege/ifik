@@ -2151,6 +2151,167 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- MODAL 4: PENILAIAN AKHIR SIDANG TA (BERBASIS PRODI & PEMINATAN) -->
+    <!-- ========================================================= -->
+    <div id="modalPenilaianSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalPenilaianSidang()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="p-5 sm:p-6 px-7 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-amber-500/25 shrink-0">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Form Penilaian Akhir Sidang Tugas Akhir</h3>
+                            <span id="penilaianProdiBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">DKV</span>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500 mt-0.5">Penilaian resmi oleh Koordinator TA disesuaikan dengan kriteria Program Studi &amp; Peminatan.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalPenilaianSidang()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Form Body -->
+            <form id="formPenilaianSidang" onsubmit="submitPenilaianSidang(event)" class="p-6 sm:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <input type="hidden" name="nim" id="penilaianNim">
+
+                <!-- 1. Student & Schedule Info Card -->
+                <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+                        <div>
+                            <h4 id="penilaianNamaMhs" class="text-sm font-extrabold text-slate-900">-</h4>
+                            <p class="text-xs font-mono font-bold text-slate-500" id="penilaianNimMhs">-</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap text-[11px]">
+                            <span id="penilaianJadwalPill" class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-calendar-day text-amber-500"></i> <span id="penilaianTglText">Belum Ada Jadwal</span>
+                            </span>
+                            <span id="penilaianRuanganPill" class="px-3 py-1 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 font-bold flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-door-open text-cyan-600"></i> <span id="penilaianRuanganText">-</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Judul TA -->
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Judul Tugas Akhir:</p>
+                        <p id="penilaianJudulTa" class="text-xs font-medium text-slate-800 mt-0.5 leading-relaxed">-</p>
+                    </div>
+
+                    <!-- Dosen Penguji & Pembimbing -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-[11px]">
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200/70 space-y-1">
+                            <span class="font-bold text-orange-800 block text-[10px] uppercase tracking-wider"><i class="fa-solid fa-user-tie text-orange-600 mr-1"></i> Dosen Pembimbing</span>
+                            <p class="text-slate-700 truncate" id="penilaianPembimbing1">Pembimbing 1: -</p>
+                            <p class="text-slate-700 truncate" id="penilaianPembimbing2">Pembimbing 2: -</p>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200/70 space-y-1">
+                            <span class="font-bold text-indigo-800 block text-[10px] uppercase tracking-wider"><i class="fa-solid fa-chalkboard-user text-indigo-600 mr-1"></i> Dewan Penguji</span>
+                            <p class="text-slate-700 truncate" id="penilaianPenguji1">Penguji 1: -</p>
+                            <p class="text-slate-700 truncate" id="penilaianPenguji2">Penguji 2: -</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Prodi & Peminatan Selector -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                            Program Studi (Prodi) <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="prodi" id="penilaianProdiSelect" onchange="onPenilaianProdiChange(this.value)" class="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer">
+                            <option value="DKV">DKV - Desain Komunikasi Visual</option>
+                            <option value="DI">DI - Desain Interior</option>
+                            <option value="DIB">DIB - Desain Interior Bisnis</option>
+                            <option value="DP">DP - Desain Produk</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                            Peminatan / Konsentrasi <span class="text-rose-500">*</span>
+                        </label>
+                        <select name="peminatan" id="penilaianPeminatanSelect" onchange="onPenilaianPeminatanChange(this.value)" class="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs cursor-pointer">
+                            <!-- Injected dynamically via JS based on selected prodi -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 3. Dynamic Rubrik & Soal Penilaian List -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check text-amber-600"></i> Rubrik Soal &amp; Kriteria Penilaian:
+                        </label>
+                        <span class="text-[11px] font-semibold text-slate-400">Total Bobot: <strong class="text-slate-700">100%</strong></span>
+                    </div>
+
+                    <div id="penilaianRubrikContainer" class="space-y-3">
+                        <!-- Injected dynamically based on Prodi & Peminatan -->
+                    </div>
+                </div>
+
+                <!-- 4. Result Calculation Card (Live Calculated Total, Grade & Status Kelulusan) -->
+                <div class="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-white rounded-2xl p-5 border border-amber-300/80 shadow-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                        <!-- Nilai Akhir Angka -->
+                        <div class="text-center sm:text-left">
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Nilai Akhir Sidang</span>
+                            <div class="flex items-baseline gap-1.5 justify-center sm:justify-start mt-0.5">
+                                <span id="penilaianTotalScore" class="text-3xl font-black text-slate-900">0.00</span>
+                                <span class="text-xs font-bold text-slate-400">/ 100</span>
+                            </div>
+                        </div>
+
+                        <!-- Nilai Mutu / Grade -->
+                        <div class="text-center">
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Grade Mutu</span>
+                            <div class="mt-1 flex items-center justify-center">
+                                <span id="penilaianGradeBadge" class="px-4 py-1 rounded-xl text-lg font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                                    -
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Status Kelulusan -->
+                        <div>
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1">Status Kelulusan</span>
+                            <select name="status_kelulusan" id="penilaianStatusKelulusan" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-extrabold text-slate-800 focus:ring-2 focus:ring-amber-500 outline-none cursor-pointer">
+                                <option value="Lulus">✅ Lulus</option>
+                                <option value="Lulus dengan Revisi">⚠️ Lulus dengan Revisi</option>
+                                <option value="Tidak Lulus">❌ Tidak Lulus (Sidang Ulang)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Catatan / Rekomendasi Dewan Penguji & Koordinator -->
+                <div>
+                    <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                        Catatan Revisi / Rekomendasi Dewan Penguji &amp; Koordinator (Opsional)
+                    </label>
+                    <textarea name="catatan_sidang" id="penilaianCatatan" rows="2" placeholder="Masukkan poin-poin revisi naskah/karya atau catatan berita acara sidang..." class="w-full text-xs p-3 border border-slate-300 rounded-xl bg-white focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none shadow-2xs"></textarea>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModalPenilaianSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitPenilaianSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-floppy-disk text-xs sm:text-sm"></i> Simpan Penilaian Sidang TA
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- PREVIEW 2 PLOTTING MODAL (PER-MAHASISWA PLOTTING SAMA SEPERTI TA) -->
     <div id="modalPreview2Plotting" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeP2Modal()">
 
@@ -2523,6 +2684,8 @@
             ajaxTambahRuanganUrl: "<?= site_url('koordinatorta/ajax_tambah_ruangan'); ?>",
             ajaxHapusRuanganUrl: "<?= site_url('koordinatorta/ajax_hapus_ruangan'); ?>",
             ajaxGetRuanganUrl: "<?= site_url('koordinatorta/ajax_get_ruangan_list'); ?>",
+            ajaxSimpanPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_simpan_penilaian_sidang'); ?>",
+            ajaxGetDetailPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_get_detail_penilaian_sidang'); ?>",
             detailUrlPrefix: "<?= site_url('koordinatorta/detail_mahasiswa/'); ?>"
         };
     </script>

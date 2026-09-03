@@ -5739,6 +5739,14 @@
             const iconClass = isTerjadwal ? 'fa-pen-to-square' : 'fa-arrow-right';
             const btnTitle = isTerjadwal ? 'Ubah Jadwal & Ruangan Sidang' : 'Jadwalkan Sidang TA';
 
+            const hasNilai = Boolean(row.nilai_akhir_sidang && parseFloat(row.nilai_akhir_sidang) > 0);
+            const peminatanBadge = row.peminatan
+                ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200 mt-1 block max-w-fit">${escapeHtml(row.peminatan)}</span>`
+                : '';
+            const nilaiBadge = hasNilai
+                ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 mt-1" title="Status: ${escapeHtml(row.status_kelulusan_sidang || 'Lulus')}"><i class="fa-solid fa-award text-emerald-600 text-[10px]"></i> ${escapeHtml(row.nilai_akhir_sidang)} (${escapeHtml(row.grade_sidang || 'A')})</span>`
+                : `<span class="text-[10px] text-slate-400 italic block mt-1">Belum dinilai</span>`;
+
             html += `
                 <tr class="table-row-animate ${rowHighlight} transition-colors" style="--row-index: ${idx};">
                     <td class="w-8 py-3 px-3 text-center">
@@ -5749,8 +5757,10 @@
                             onchange="toggleRowSelectSidang(this)">
                     </td>
                     <td class="w-24 py-3 px-2 font-bold font-mono text-[11px] text-slate-900">${row.nim}</td>
-                    <td class="w-36 py-3 px-2 font-semibold text-slate-800 text-xs">
-                        <span class="truncate block max-w-[130px] cursor-pointer hover:text-amber-600 transition" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" title="${escapeHtml(fullName)}">${escapeHtml(fullName)}</span>
+                    <td class="w-40 py-3 px-2 font-semibold text-slate-800 text-xs">
+                        <span class="truncate block max-w-[140px] cursor-pointer hover:text-amber-600 transition" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" title="${escapeHtml(fullName)}">${escapeHtml(fullName)}</span>
+                        ${peminatanBadge}
+                        ${nilaiBadge}
                     </td>
                     <td class="py-3 px-2 text-slate-600 font-normal">
                         <div class="inline-flex items-center gap-1.5 cursor-pointer group/title max-w-[200px]"
@@ -5758,8 +5768,8 @@
                             data-nim="${escapeHtml(row.nim)}"
                             data-name="${escapeHtml(fullName)}"
                             data-judul1="${escapeHtml(judul)}"
-                            data-pemb1="${escapeHtml(pb1Name)}"
-                            data-pemb2="${escapeHtml(pb2Name)}"
+                            data-pemb1="${escapeHtml(p1Name)}"
+                            data-pemb2="${escapeHtml(p2Name)}"
                             data-peng1="${escapeHtml(pg1Name)}"
                             data-peng2="${escapeHtml(pg2Name)}"
                             data-status="${escapeHtml(isTerjadwal ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan')}"
@@ -5776,35 +5786,40 @@
                     <td class="w-32 py-3 px-2">${waktuDisplay}</td>
                     <td class="w-28 py-3 px-2">${ruanganDisplay}</td>
                     <td class="w-28 py-3 px-2 text-center">${statusBadge}</td>
-                    <td class="w-32 py-3 px-3 pr-4 text-right">
-                        <button type="button" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" class="btn-3d-kinetic ${btnColor} btn-compact ml-auto cursor-pointer" title="${btnTitle}">
-                            <div class="bg"></div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
-                                <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
-                                <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
-                                <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
-                                <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
-                                <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
-                                <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
-                                <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
-                            </svg>
-                            <div class="wrap">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
-                                    <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
+                    <td class="w-36 py-3 px-3 pr-4 text-right">
+                        <div class="flex items-center justify-end gap-1.5 ml-auto">
+                            <button type="button" onclick="openModalPenilaianSidang('${escapeHtml(row.nim)}')" class="w-8 h-8 rounded-xl ${hasNilai ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-600 border border-slate-200'} flex items-center justify-center text-xs transition cursor-pointer shadow-2xs shrink-0" title="${hasNilai ? 'Lihat / Edit Penilaian Akhir Sidang' : 'Input Penilaian Akhir Sidang TA'}">
+                                <i class="fa-solid ${hasNilai ? 'fa-award text-sm' : 'fa-clipboard-check text-sm'}"></i>
+                            </button>
+                            <button type="button" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" class="btn-3d-kinetic ${btnColor} btn-compact cursor-pointer" title="${btnTitle}">
+                                <div class="bg"></div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height="208" width="342" class="splash">
+                                    <path stroke-linecap="round" stroke-width="3" d="M54.1054 99.7837C54.1054 99.7837 40.0984 90.7874 26.6893 97.6362C13.2802 104.485 1.5 97.6362 1.5 97.6362" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M285.273 99.7841C285.273 99.7841 299.28 90.7879 312.689 97.6367C326.098 104.486 340.105 95.4893 340.105 95.4893" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 64.9917C281.133 64.9917 287.96 49.8089 302.934 48.2295C317.908 46.6501 319.712 36.5272 319.712 36.5272" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M281.133 138.984C281.133 138.984 287.96 154.167 302.934 155.746C317.908 157.326 319.712 167.449 319.712 167.449" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M230.578 57.4476C230.578 57.4476 225.785 41.5051 236.061 30.4998C246.337 19.4945 244.686 12.9998 244.686 12.9998" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M230.578 150.528C230.578 150.528 225.785 166.471 236.061 177.476C246.337 188.481 244.686 194.976 244.686 194.976" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 57.0278C170.392 57.0278 173.89 42.1322 169.571 29.54C165.252 16.9478 168.751 2.05227 168.751 2.05227" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M170.392 150.948C170.392 150.948 173.89 165.844 169.571 178.436C165.252 191.028 168.751 205.924 168.751 205.924" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M112.609 57.4476C112.609 57.4476 117.401 41.5051 107.125 30.4998C96.8492 19.4945 98.5 12.9998 98.5 12.9998" />
+                                    <path stroke-linecap="round" stroke-width="3" d="M112.609 150.528C112.609 150.528 117.401 166.471 107.125 177.476C96.8492 188.481 98.5 194.976 98.5 194.976" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 64.9917C62.2941 64.9917 55.4671 49.8089 40.4932 48.2295C25.5194 46.6501 23.7159 36.5272 23.7159 36.5272" />
+                                    <path stroke-linecap="round" stroke-width="3" stroke-opacity="0.3" d="M62.2941 145.984C62.2941 145.984 55.4671 161.167 40.4932 162.746C25.5194 164.326 23.7159 174.449 23.7159 174.449" />
                                 </svg>
-                                <div class="outline"></div>
-                                <div class="content">
-                                    <span class="char state-1">${renderAnimatedChars(label1)}</span>
-                                    <span class="char state-2">${renderAnimatedChars(label2)}</span>
-                                    <i class="fa-solid ${iconClass} icon-action"></i>
+                                <div class="wrap">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height="42" width="221" class="path">
+                                        <path stroke-linecap="round" stroke-width="3" d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
+                                    </svg>
+                                    <div class="outline"></div>
+                                    <div class="content">
+                                        <span class="char state-1">${renderAnimatedChars(label1)}</span>
+                                        <span class="char state-2">${renderAnimatedChars(label2)}</span>
+                                        <i class="fa-solid ${iconClass} icon-action"></i>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -7017,8 +7032,468 @@
         });
     };
     // =========================================================
-    // HOVER TOOLTIP POPUP FOR USULAN JUDUL TA & LONG TEXT
+    // MODUL PENILAIAN AKHIR SIDANG TA (PRODI & PEMINATAN)
     // =========================================================
+    const RUBRIK_PENILAIAN_PRODI = {
+        'DKV': {
+            name: 'Desain Komunikasi Visual (DKV)',
+            peminatan: {
+                'Multimedia': [
+                    { id: 'k1', title: 'Konsep & Storyboard Multimedia', desc: 'Kedalaman gagasan, orisinalitas ide, alur narasi, dan struktur storyboard visual.', bobot: 25 },
+                    { id: 'k2', title: 'Penguasaan Teknis Audio Visual & Animasi', desc: 'Kualitas editing, rendering, compositing, motion graphic, dan sinkronisasi audio-visual.', bobot: 30 },
+                    { id: 'k3', title: 'Interaktivitas & User Experience (UI/UX)', desc: 'Kemudahan interaksi antarmuka, responsivitas, dan fungsionalitas media multimedia terapan.', bobot: 25 },
+                    { id: 'k4', title: 'Komprehensi & Presentasi Sidang', desc: 'Kelancaran penyampaian argumen karya, penguasaan materi, dan pertanggungjawaban desain.', bobot: 20 }
+                ],
+                'Game': [
+                    { id: 'k1', title: 'Game Design Document (GDD) & Core Concept', desc: 'Kelengkapan GDD, target audience, core loop, dan inovasi genre mekanika game.', bobot: 25 },
+                    { id: 'k2', title: 'Game Mechanics, Balancing & Asset Art 2D/3D', desc: 'Kualitas asset grafis karakter/lingkungan, animasi, balancing kesulitan, dan level design.', bobot: 30 },
+                    { id: 'k3', title: 'Playability, Prototype Testing & Bug Handling', desc: 'Kelancaran gameplay (playability), performa frame rate, dan hasil uji coba playtest pengguna.', bobot: 25 },
+                    { id: 'k4', title: 'Live Demo & Argumentasi Teknis Sidang', desc: 'Penguasaan implementasi game engine, demonstrasi gameplay langsung, dan respon tanya jawab.', bobot: 20 }
+                ],
+                'Designpreneur': [
+                    { id: 'k1', title: 'Riset Pasar & Business Model Canvas (BMC)', desc: 'Validasi problem-solution fit, positioning pasar, analisis kompetitor, dan segmen konsumen.', bobot: 25 },
+                    { id: 'k2', title: 'Identitas Visual & Desain Produk/Kemasan Komersial', desc: 'Kekuatan branding, packaging design, konsistensi collateral visual, dan daya tarik jual.', bobot: 30 },
+                    { id: 'k3', title: 'Strategi Pemasaran & Feasibility Finansial', desc: 'Rencana go-to-market, cost of goods sold (COGS), proyeksi ROI, dan skalabilitas bisnis.', bobot: 25 },
+                    { id: 'k4', title: 'Pitching Produk & Pertanggungjawaban Bisnis', desc: 'Kualitas deck presentasi, kemampuan pitching, dan kesiapan eksekusi komersial di pasar.', bobot: 20 }
+                ],
+                'VIID': [
+                    { id: 'k1', title: 'Riset Strategis & Brand Architecture VIID', desc: 'Landasan riset identitas visual, brand DNA, brand archetype, dan positioning strategi.', bobot: 25 },
+                    { id: 'k2', title: 'Sistem Identitas Visual & Graphic Guidelines', desc: 'Ketepatan tipografi, color palette, grid system, logo versatility, dan manual guideline lengkap.', bobot: 30 },
+                    { id: 'k3', title: 'Aplikasi Interaktif & Environmental Media Terapan', desc: 'Penerapan identitas visual pada media digital/interaktif, signage, wayfinding, dan merchandise.', bobot: 25 },
+                    { id: 'k4', title: 'Presentasi Konsep & Ketajaman Analisis Visual', desc: 'Artikulasi konsep visual, justifikasi semiotika desain, dan penguasaan respon akademik.', bobot: 20 }
+                ]
+            }
+        },
+        'DI': {
+            name: 'Desain Interior (DI)',
+            peminatan: {
+                'Komersial': [
+                    { id: 'k1', title: 'Konsep Ruang & Analisis Tapak Komersial', desc: 'Kesesuaian tema desain dengan fungsi komersial, zoning, dan brand experience pengunjung.', bobot: 25 },
+                    { id: 'k2', title: 'Detail Konstruksi, Material & Furnitur Kustom', desc: 'Spesifikasi material, keakuratan gambar kerja interior, dan inovasi furnitur kustom.', bobot: 30 },
+                    { id: 'k3', title: 'Ergonomi, Tata Cahaya (Lighting) & Akustik Ruang', desc: 'Efisiensi sirkulasi, standar kenyamanan termal, pencahayaan buatan/alami, dan akustik.', bobot: 25 },
+                    { id: 'k4', title: 'Visualisasi 3D Rendering & Presentasi Sidang', desc: 'Realisme 3D render, kelengkapan maket/board material, dan argumentasi pemilihan desain.', bobot: 20 }
+                ],
+                'Residensial': [
+                    { id: 'k1', title: 'Analisis Kebutuhan Penghuni & Konsep Hunian', desc: 'Pemahaman profil klien, efisiensi zonasi ruang privat-publik, dan atmosfer interior.', bobot: 25 },
+                    { id: 'k2', title: 'Pemilihan Material, Tekstur & Furnitur Hunian', desc: 'Kualitas pemilihan finishing, keselarasan warna, dan ketahanan material interior.', bobot: 30 },
+                    { id: 'k3', title: 'Sirkulasi Ruang, Utilitas & Keberlanjutan (Eco-Design)', desc: 'Penataan utilitas ME, sirkulasi udara alami, dan penggunaan material ramah lingkungan.', bobot: 25 },
+                    { id: 'k4', title: 'Gambar Kerja Teknis & Pertanggungjawaban Desain', desc: 'Kelengkapan dokumen gambar arsitektural interior dan kelancaran presentasi sidang.', bobot: 20 }
+                ]
+            }
+        },
+        'DIB': {
+            name: 'Desain Interior Bisnis (DIB)',
+            peminatan: {
+                'Spatial Branding': [
+                    { id: 'k1', title: 'Analisis Spatial Branding & Customer Journey', desc: 'Integrasi brand identity ke dalam elemen spasial, touchpoints konsumen, dan visual merchandising.', bobot: 25 },
+                    { id: 'k2', title: 'Layout Efisiensi Ruang Retail & Sirkulasi', desc: 'Optimalisasi sales floor, zoning display produk, dan kenyamanan sirkulasi flow pengunjung.', bobot: 30 },
+                    { id: 'k3', title: 'Analisis Kelayakan Finansial & Fit-out Costing', desc: 'Estimasi RAB interior, pemilihan material tahan lama cost-effective, dan ROI ruang bisnis.', bobot: 25 },
+                    { id: 'k4', title: 'Pitching Konsep Bisnis Interior & Presentasi Teknis', desc: 'Kemampuan menyampaikan value proposition ruang terhadap peningkatan performa bisnis.', bobot: 20 }
+                ],
+                'Hospitality': [
+                    { id: 'k1', title: 'Konsep Hospitality & Standar Layanan Ruang', desc: 'Karakter ambience penginapan/kafe/hotel, alur front-of-house dan back-of-house efisien.', bobot: 25 },
+                    { id: 'k2', title: 'Spesifikasi Material Heavy-Duty & Furnitur Kontrak', desc: 'Ketahanan material standar komersial tinggi, kemudahan perawatan, dan estetika premium.', bobot: 30 },
+                    { id: 'k3', title: 'Standar Keamanan, Pencahayaan Mood & Akustik', desc: 'Penerapan jalur evakuasi, pencahayaan dramatis, dan peredaman suara lingkungan hospitality.', bobot: 25 },
+                    { id: 'k4', title: 'Presentasi Komprehensif & Gambar Detail Interior', desc: 'Kelengkapan gambar kerja dan kepiawaian dalam menjawab pertanyaan dewan penguji.', bobot: 20 }
+                ]
+            }
+        },
+        'DP': {
+            name: 'Desain Produk (DP)',
+            peminatan: {
+                'Desain Industri': [
+                    { id: 'k1', title: 'User Research, Problem Framing & Inovasi Fungsi', desc: 'Ketepatan identifikasi masalah pengguna, riset antropometri, dan kebaruan solusi fungsi produk.', bobot: 25 },
+                    { id: 'k2', title: 'Bentuk Estetika, Ergonomi & Styling Produk', desc: 'Kematangan eksplorasi bentuk, proporsi, kenyamanan genggaman/penggunaan, dan CMF design.', bobot: 30 },
+                    { id: 'k3', title: 'Material, Manufakturabilitas & Prototyping Uji', desc: 'Kesesuaian proses produksi massal, pemilihan polimer/logam, dan hasil uji prototype fisik.', bobot: 25 },
+                    { id: 'k4', title: 'Demonstrasi Produk Fisik & Argumentasi Sidang', desc: 'Unjuk kerja prototype 1:1, detail exploded view 3D CAD, dan penguasaan materi sidang.', bobot: 20 }
+                ],
+                'Furnitur': [
+                    { id: 'k1', title: 'Riset Kebutuhan Furnitur & Analisis Ergonomi', desc: 'Standar antropometri duduk/kerja, fungsi multi-purpose, dan efisiensi ruang pakai.', bobot: 25 },
+                    { id: 'k2', title: 'Konstruksi Sambungan, Kekuatan Struktur & Material', desc: 'Inovasi joint system (knockdown/tenon), pemilihan kayu/metal, dan uji beban struktur.', bobot: 30 },
+                    { id: 'k3', title: 'Finishing, Kemudahan Perakitan & Kemasan Flat-pack', desc: 'Kualitas finishing permukaan, efisiensi kemasan distribusi, dan instruksi perakitan.', bobot: 25 },
+                    { id: 'k4', title: 'Presentasi Prototype Skala 1:1 & Pertanggungjawaban', desc: 'Kualitas mock-up fisik, keakuratan gambar kerja teknik, dan ketajaman jawaban ujian.', bobot: 20 }
+                ]
+            }
+        }
+    };
+
+    function detectProdiKey(prodiStr) {
+        if (!prodiStr) return 'DKV';
+        const str = String(prodiStr).toUpperCase();
+        if (str.includes('DIB') || str.includes('BISNIS')) return 'DIB';
+        if (str.includes('INTERIOR') || str.includes('DI')) return 'DI';
+        if (str.includes('PRODUK') || str.includes('DP')) return 'DP';
+        return 'DKV';
+    }
+
+    window.openModalPenilaianSidang = function (nim) {
+        const student = (state.sidangList || []).find(s => String(s.nim) === String(nim));
+        if (!student) return;
+
+        const modal = document.getElementById('modalPenilaianSidang');
+        const inputNim = document.getElementById('penilaianNim');
+        const namaMhsEl = document.getElementById('penilaianNamaMhs');
+        const nimMhsEl = document.getElementById('penilaianNimMhs');
+        const judulEl = document.getElementById('penilaianJudulTa');
+        const tglTextEl = document.getElementById('penilaianTglText');
+        const ruanganTextEl = document.getElementById('penilaianRuanganText');
+        const pb1El = document.getElementById('penilaianPembimbing1');
+        const pb2El = document.getElementById('penilaianPembimbing2');
+        const pg1El = document.getElementById('penilaianPenguji1');
+        const pg2El = document.getElementById('penilaianPenguji2');
+        const prodiSelect = document.getElementById('penilaianProdiSelect');
+        const prodiBadge = document.getElementById('penilaianProdiBadge');
+        const catatanEl = document.getElementById('penilaianCatatan');
+        const statusKelulusanEl = document.getElementById('penilaianStatusKelulusan');
+
+        if (inputNim) inputNim.value = student.nim;
+        if (namaMhsEl) namaMhsEl.textContent = student.nama_lengkap || student.nama || `Mahasiswa ${student.nim}`;
+        if (nimMhsEl) nimMhsEl.textContent = `NIM: ${student.nim}`;
+        if (judulEl) judulEl.textContent = student.judul_1 || '-';
+        if (tglTextEl) {
+            tglTextEl.textContent = student.tgl_sidang ? `${student.tgl_sidang} (${(student.jam_mulai_sidang || '').substring(0,5)} WIB)` : 'Belum Ada Jadwal';
+        }
+        if (ruanganTextEl) {
+            ruanganTextEl.textContent = student.detail_nama_ruangan || student.ruangan_sidang || 'Belum Ditentukan';
+        }
+
+        const pb1 = student.nama_pembimbing_1 || (student.pembimbing_1 ? 'NIP: ' + student.pembimbing_1 : '-');
+        const pb2 = student.nama_pembimbing_2 || (student.pembimbing_2 ? 'NIP: ' + student.pembimbing_2 : '-');
+        const pg1 = student.nama_penguji_1 || (student.penguji_1 ? 'NIP: ' + student.penguji_1 : '-');
+        const pg2 = student.nama_penguji_2 || (student.penguji_2 ? 'NIP: ' + student.penguji_2 : '-');
+
+        if (pb1El) pb1El.textContent = `Pembimbing 1: ${pb1}`;
+        if (pb2El) pb2El.textContent = `Pembimbing 2: ${pb2}`;
+        if (pg1El) pg1El.textContent = `Penguji 1: ${pg1}`;
+        if (pg2El) pg2El.textContent = `Penguji 2: ${pg2}`;
+
+        const prodiKey = detectProdiKey(student.prodi || student.konsentrasi_dkv);
+        if (prodiSelect) prodiSelect.value = prodiKey;
+        if (prodiBadge) prodiBadge.textContent = prodiKey;
+
+        // Fetch detail penilaian jika endpoint tersedia
+        const getDetailUrl = cfg.ajaxGetDetailPenilaianSidangUrl || 
+                             window.DASHBOARD_CONFIG?.ajaxGetDetailPenilaianSidangUrl || 
+                             'ajax_get_detail_penilaian_sidang';
+
+        if (getDetailUrl) {
+            fetch(`${getDetailUrl}?nim=${encodeURIComponent(student.nim)}`)
+                .then(r => r.json())
+                .then(res => {
+                    if (res && res.status && res.data) {
+                        const d = res.data;
+                        if (d.catatan_koor && catatanEl) catatanEl.value = d.catatan_koor;
+                        if (d.status_kelulusan_sidang && statusKelulusanEl) statusKelulusanEl.value = d.status_kelulusan_sidang;
+                        setupPenilaianPeminatanOptions(prodiKey, d.peminatan || student.peminatan);
+                        renderPenilaianRubrik(d.detail_penilaian_parsed);
+                        calculatePenilaianScore();
+                    } else {
+                        setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
+                        renderPenilaianRubrik(null);
+                        calculatePenilaianScore();
+                    }
+                })
+                .catch(() => {
+                    setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
+                    renderPenilaianRubrik(null);
+                    calculatePenilaianScore();
+                });
+        } else {
+            setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
+            renderPenilaianRubrik(null);
+            calculatePenilaianScore();
+        }
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.style.display = 'flex';
+            document.body.classList.add('overflow-hidden');
+        }
+    };
+
+    window.closeModalPenilaianSidang = function () {
+        const modal = document.getElementById('modalPenilaianSidang');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modal.style.display = 'none';
+            document.body.classList.remove('overflow-hidden');
+        }
+    };
+
+    function setupPenilaianPeminatanOptions(prodiKey, selectedPeminatan) {
+        const peminatanSelect = document.getElementById('penilaianPeminatanSelect');
+        if (!peminatanSelect) return;
+
+        const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+        const peminatanList = Object.keys(prodiData.peminatan);
+
+        let html = '';
+        peminatanList.forEach(p => {
+            const isSel = (p === selectedPeminatan) || (!selectedPeminatan && p === peminatanList[0]);
+            html += `<option value="${escapeHtml(p)}" ${isSel ? 'selected' : ''}>${escapeHtml(p)}</option>`;
+        });
+
+        peminatanSelect.innerHTML = html;
+    }
+
+    window.onPenilaianProdiChange = function (prodiVal) {
+        const prodiKey = detectProdiKey(prodiVal);
+        const prodiBadge = document.getElementById('penilaianProdiBadge');
+        if (prodiBadge) prodiBadge.textContent = prodiKey;
+
+        setupPenilaianPeminatanOptions(prodiKey, null);
+        renderPenilaianRubrik(null);
+        calculatePenilaianScore();
+    };
+
+    window.onPenilaianPeminatanChange = function () {
+        renderPenilaianRubrik(null);
+        calculatePenilaianScore();
+    };
+
+    window.renderPenilaianRubrik = function (existingParsed) {
+        const container = document.getElementById('penilaianRubrikContainer');
+        const prodiSelect = document.getElementById('penilaianProdiSelect');
+        const peminatanSelect = document.getElementById('penilaianPeminatanSelect');
+        if (!container) return;
+
+        const prodiKey = detectProdiKey(prodiSelect ? prodiSelect.value : 'DKV');
+        const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+        const peminatanKey = peminatanSelect ? peminatanSelect.value : Object.keys(prodiData.peminatan)[0];
+        const criteriaList = prodiData.peminatan[peminatanKey] || prodiData.peminatan[Object.keys(prodiData.peminatan)[0]];
+
+        let html = '';
+        criteriaList.forEach((crit, idx) => {
+            let existingScore = '';
+            if (existingParsed && existingParsed.scores && typeof existingParsed.scores[crit.id] !== 'undefined') {
+                existingScore = existingParsed.scores[crit.id];
+            } else if (existingParsed && Array.isArray(existingParsed) && existingParsed[idx]) {
+                existingScore = existingParsed[idx].nilai;
+            }
+
+            html += `
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs hover:border-amber-300 transition-all space-y-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-700 flex items-center justify-center font-black text-xs shrink-0 mt-0.5">${idx + 1}</span>
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-900">${escapeHtml(crit.title)}</h5>
+                                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">${escapeHtml(crit.desc)}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[10.5px] font-bold">
+                                Bobot: <strong class="text-amber-700">${crit.bobot}%</strong>
+                            </span>
+                            <div class="w-24">
+                                <input type="number" 
+                                       min="0" 
+                                       max="100" 
+                                       step="0.5" 
+                                       id="penilaian_score_${crit.id}" 
+                                       data-bobot="${crit.bobot}" 
+                                       data-crit-id="${crit.id}"
+                                       data-crit-title="${escapeHtml(crit.title)}"
+                                       value="${existingScore !== '' ? escapeHtml(existingScore) : ''}" 
+                                       placeholder="0 - 100" 
+                                       oninput="calculatePenilaianScore()" 
+                                       class="rubrik-score-input w-full px-3 py-2 bg-slate-50 border border-slate-300 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl text-center text-sm font-black text-slate-900 outline-none transition" 
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    };
+
+    window.calculatePenilaianScore = function () {
+        const inputs = document.querySelectorAll('.rubrik-score-input');
+        const totalScoreEl = document.getElementById('penilaianTotalScore');
+        const gradeBadgeEl = document.getElementById('penilaianGradeBadge');
+        const statusKelulusanEl = document.getElementById('penilaianStatusKelulusan');
+
+        let totalWeighted = 0;
+        let totalBobot = 0;
+        let hasAnyInput = false;
+
+        inputs.forEach(inp => {
+            const val = parseFloat(inp.value);
+            const bobot = parseFloat(inp.getAttribute('data-bobot')) || 0;
+            if (!isNaN(val)) {
+                totalWeighted += (val * bobot) / 100;
+                hasAnyInput = true;
+            }
+            totalBobot += bobot;
+        });
+
+        const finalScore = hasAnyInput ? totalWeighted : 0;
+        if (totalScoreEl) totalScoreEl.textContent = finalScore.toFixed(2);
+
+        // Grade Mapping: A (>=85), AB (>=77.5), B (>=70), BC (>=62.5), C (>=55), D (>=45), E (<45)
+        let grade = '-';
+        let gradeClass = 'bg-slate-100 text-slate-600 border-slate-200';
+
+        if (hasAnyInput) {
+            if (finalScore >= 85) {
+                grade = 'A';
+                gradeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            } else if (finalScore >= 77.5) {
+                grade = 'AB';
+                gradeClass = 'bg-teal-100 text-teal-800 border-teal-300';
+            } else if (finalScore >= 70) {
+                grade = 'B';
+                gradeClass = 'bg-cyan-100 text-cyan-800 border-cyan-300';
+            } else if (finalScore >= 62.5) {
+                grade = 'BC';
+                gradeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+            } else if (finalScore >= 55) {
+                grade = 'C';
+                gradeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            } else if (finalScore >= 45) {
+                grade = 'D';
+                gradeClass = 'bg-rose-100 text-rose-800 border-rose-300';
+            } else {
+                grade = 'E';
+                gradeClass = 'bg-rose-200 text-rose-900 border-rose-400';
+            }
+        }
+
+        if (gradeBadgeEl) {
+            gradeBadgeEl.textContent = grade;
+            gradeBadgeEl.className = `px-4 py-1 rounded-xl text-lg font-black border shadow-2xs ${gradeClass}`;
+        }
+
+        if (statusKelulusanEl && hasAnyInput) {
+            if (finalScore >= 70) {
+                statusKelulusanEl.value = 'Lulus';
+            } else if (finalScore >= 55) {
+                statusKelulusanEl.value = 'Lulus dengan Revisi';
+            } else {
+                statusKelulusanEl.value = 'Tidak Lulus';
+            }
+        }
+
+        return { score: finalScore, grade: grade };
+    };
+
+    window.submitPenilaianSidang = function (e) {
+        e.preventDefault();
+
+        const nim = document.getElementById('penilaianNim')?.value;
+        const prodi = document.getElementById('penilaianProdiSelect')?.value;
+        const peminatan = document.getElementById('penilaianPeminatanSelect')?.value;
+        const statusKelulusan = document.getElementById('penilaianStatusKelulusan')?.value;
+        const catatan = document.getElementById('penilaianCatatan')?.value;
+        const calc = calculatePenilaianScore();
+
+        if (!nim) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'NIM mahasiswa tidak valid.' });
+            return;
+        }
+
+        const scoreInputs = document.querySelectorAll('.rubrik-score-input');
+        const details = [];
+        let allValid = true;
+
+        scoreInputs.forEach(inp => {
+            const val = parseFloat(inp.value);
+            if (isNaN(val) || val < 0 || val > 100) {
+                allValid = false;
+            }
+            details.push({
+                id: inp.getAttribute('data-crit-id'),
+                kriteria: inp.getAttribute('data-crit-title'),
+                bobot: parseFloat(inp.getAttribute('data-bobot')),
+                nilai: isNaN(val) ? 0 : val
+            });
+        });
+
+        if (!allValid) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Nilai Belum Lengkap',
+                text: 'Pastikan seluruh kolom nilai kriteria terisi dengan rentang angka 0 hingga 100.'
+            });
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmitPenilaianSidang');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Menyimpan...';
+        }
+
+        const formData = new FormData();
+        formData.append('nim', nim);
+        formData.append('prodi', prodi);
+        formData.append('peminatan', peminatan);
+        formData.append('nilai_akhir', calc.score.toFixed(2));
+        formData.append('grade', calc.grade);
+        formData.append('status_kelulusan', statusKelulusan);
+        formData.append('detail_penilaian', JSON.stringify(details));
+        formData.append('catatan', catatan || '');
+
+        const targetUrl = cfg.ajaxSimpanPenilaianSidangUrl || 
+                          window.DASHBOARD_CONFIG?.ajaxSimpanPenilaianSidangUrl || 
+                          'ajax_simpan_penilaian_sidang';
+
+        fetch(targetUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(async r => {
+            const text = await r.text();
+            try {
+                return JSON.parse(text);
+            } catch (err) {
+                console.error('Server non-JSON response:', text);
+                throw new Error('Server mengembalikan respon tidak valid: ' + text.substring(0, 150));
+            }
+        })
+        .then(res => {
+            if (res && res.status) {
+                // Update local state
+                const mhs = (state.sidangList || []).find(s => String(s.nim) === String(nim));
+                if (mhs) {
+                    mhs.peminatan = peminatan;
+                    mhs.nilai_akhir_sidang = calc.score.toFixed(2);
+                    mhs.grade_sidang = calc.grade;
+                    mhs.status_kelulusan_sidang = statusKelulusan;
+                }
+
+                closeModalPenilaianSidang();
+                renderSidangTable();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Penilaian Disimpan!',
+                    text: res.message || 'Penilaian akhir sidang tugas akhir berhasil disimpan.',
+                    confirmButtonColor: '#d97706'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan',
+                    text: (res && res.message) ? res.message : 'Terjadi kesalahan saat menyimpan penilaian.'
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error simpan penilaian:', err);
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Gagal terhubung ke server.' });
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-xs sm:text-sm"></i> Simpan Penilaian Sidang TA';
+            }
+        });
+    };
     let activeTooltipTimer = null;
 
     function getGlobalTooltipEl() {
