@@ -135,11 +135,11 @@
                                 const stTot = document.getElementById('statSidangTotal');
                                 const stTr = document.getElementById('statSidangTerjadwal');
                                 const stBl = document.getElementById('statSidangBelumSet');
-                                const stRq = document.getElementById('statSidangRuanganCount');
+                                const stDn = document.getElementById('statSidangSudahDinilai');
                                 if (stTot) stTot.textContent = data.stats.total;
                                 if (stTr) stTr.textContent = data.stats.terjadwal;
                                 if (stBl) stBl.textContent = data.stats.belum_set;
-                                if (stRq) stRq.textContent = data.stats.ruangan_cnt;
+                                if (stDn) stDn.textContent = data.stats.sudah_dinilai || 0;
                             }
                             renderSidangTable();
                         }
@@ -223,10 +223,6 @@
         document.querySelectorAll('.dropdown-arrow').forEach(a => a.classList.remove('rotate-180'));
         document.querySelectorAll('.extra-filter-row').forEach(r => r.classList.remove('open-dropdown'));
         document.querySelectorAll('.custom-dropdown-container').forEach(c => c.classList.remove('open'));
-        if (typeof closeRuanganDropdown === 'function') {
-            closeRuanganDropdown('single');
-            closeRuanganDropdown('batch');
-        }
     }
 
     window.toggleOrAddFilterRow = function (e) {
@@ -4945,11 +4941,15 @@
     window.closeHistoryPengujiModal = function() {
         window.closeHistoryPlottingModal();
     };
+    window.openHistorySidangModal = function(filterNim = null) {
+        window.openHistoryPlottingModal('Sidang TA', filterNim);
+    };
 
     function updateHistoryCategoryTabsUI(cat) {
         const tabAll = document.getElementById('tabHistoryFilterAll');
         const tabPemb = document.getElementById('tabHistoryFilterPembimbing');
         const tabPeng = document.getElementById('tabHistoryFilterPenguji');
+        const tabSidang = document.getElementById('tabHistoryFilterSidang');
 
         const resetTab = (el, active) => {
             if (!el) return;
@@ -4963,6 +4963,7 @@
         resetTab(tabAll, cat === 'All');
         resetTab(tabPemb, cat === 'Pembimbing');
         resetTab(tabPeng, cat === 'Penguji');
+        resetTab(tabSidang, cat === 'Sidang TA' || cat === 'Sidang');
     }
 
     window.switchHistoryCategoryTab = function(category) {
@@ -4995,15 +4996,25 @@
 
         let html = '';
         logs.forEach(log => {
+            const isSidang = (log.kategori === 'Sidang TA' || log.kategori === 'Sidang');
             const isPembimbing = (log.kategori === 'Pembimbing');
-            const katBadgeClass = isPembimbing 
-                ? 'bg-orange-100 text-orange-800 border-orange-200' 
-                : 'bg-indigo-100 text-indigo-800 border-indigo-200';
-            const katIcon = isPembimbing ? 'fa-user-tie' : 'fa-chalkboard-user';
-            const katLabel = isPembimbing ? 'Dosen Pembimbing' : 'Dosen Penguji';
 
-            const d1Label = isPembimbing ? 'Dosen Pembimbing 1' : 'Dosen Penguji 1';
-            const d2Label = isPembimbing ? 'Dosen Pembimbing 2' : 'Dosen Penguji 2';
+            let katBadgeClass = 'bg-indigo-100 text-indigo-800 border-indigo-200';
+            let katIcon = 'fa-chalkboard-user';
+            let katLabel = 'Dosen Penguji';
+
+            if (isPembimbing) {
+                katBadgeClass = 'bg-orange-100 text-orange-800 border-orange-200';
+                katIcon = 'fa-user-tie';
+                katLabel = 'Dosen Pembimbing';
+            } else if (isSidang) {
+                katBadgeClass = 'bg-amber-100 text-amber-900 border-amber-300';
+                katIcon = 'fa-calendar-check';
+                katLabel = 'Sidang TA & Nilai';
+            }
+
+            const d1Label = isPembimbing ? 'Dosen Pembimbing 1' : (isSidang ? 'Detail Jadwal / Nilai' : 'Dosen Penguji 1');
+            const d2Label = isPembimbing ? 'Dosen Pembimbing 2' : (isSidang ? 'Ruangan / Status' : 'Dosen Penguji 2');
 
             const isInitial = (log.aksi && log.aksi.toLowerCase().includes('awal')) || (!log.dosen_1_lama && !log.dosen_2_lama);
             const aksiBadgeClass = isInitial ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-800 border-slate-300';
@@ -5014,15 +5025,15 @@
             const d1Baru = log.nama_dosen_1_baru || log.dosen_1_baru || log.nama_penguji_1_baru || log.penguji_1_baru;
             const d2Baru = log.nama_dosen_2_baru || log.dosen_2_baru || log.nama_penguji_2_baru || log.penguji_2_baru;
 
-            const isD1Changed = Boolean(d1Lama && String(d1Lama) !== String(d1Baru));
-            const isD2Changed = Boolean(d2Lama && String(d2Lama) !== String(d2Baru));
+            const isD1Changed = Boolean(d1Lama && String(d1Lama) !== String(d1Baru) && d1Lama !== '-');
+            const isD2Changed = Boolean(d2Lama && String(d2Lama) !== String(d2Baru) && d2Lama !== '-');
 
             html += `
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 transition-all hover:shadow-md hover:border-indigo-300 space-y-3 text-left">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 transition-all hover:shadow-md hover:border-amber-300 space-y-3 text-left">
                     <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-2.5">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl ${isPembimbing ? 'bg-orange-50 text-orange-600 border border-orange-200' : 'bg-indigo-50 text-indigo-600 border border-indigo-200'} flex items-center justify-center text-xs font-bold shrink-0">
-                                <i class="fa-solid fa-user-graduate"></i>
+                            <div class="w-8 h-8 rounded-xl ${isSidang ? 'bg-amber-50 text-amber-600 border border-amber-200' : (isPembimbing ? 'bg-orange-50 text-orange-600 border border-orange-200' : 'bg-indigo-50 text-indigo-600 border border-indigo-200')} flex items-center justify-center text-xs font-bold shrink-0">
+                                <i class="fa-solid ${isSidang ? 'fa-graduation-cap' : 'fa-user-graduate'}"></i>
                             </div>
                             <div>
                                 <h4 class="text-xs font-bold text-slate-900">${escapeHtml(log.nama_mahasiswa || ('Mahasiswa NIM ' + log.nim))}</h4>
@@ -5053,7 +5064,7 @@
                         <div class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-100 space-y-1">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">${d1Label}:</span>
                             <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                                <span class="w-4 h-4 rounded ${isPembimbing ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center text-[9px] font-bold shrink-0">1</span>
+                                <span class="w-4 h-4 rounded ${isSidang ? 'bg-amber-100 text-amber-700' : (isPembimbing ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700')} flex items-center justify-center text-[9px] font-bold shrink-0">1</span>
                                 <span class="truncate">${escapeHtml(d1Baru || '-')}</span>
                             </div>
                             ${isD1Changed ? `
@@ -5067,7 +5078,7 @@
                         <div class="p-2.5 bg-slate-50/80 rounded-xl border border-slate-100 space-y-1">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">${d2Label}:</span>
                             <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                                <span class="w-4 h-4 rounded ${isPembimbing ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700'} flex items-center justify-center text-[9px] font-bold shrink-0">2</span>
+                                <span class="w-4 h-4 rounded ${isSidang ? 'bg-amber-100 text-amber-700' : (isPembimbing ? 'bg-orange-100 text-orange-700' : 'bg-indigo-100 text-indigo-700')} flex items-center justify-center text-[9px] font-bold shrink-0">2</span>
                                 <span class="truncate">${escapeHtml(d2Baru || '-')}</span>
                             </div>
                             ${isD2Changed ? `
@@ -5258,11 +5269,11 @@
                                     const stTot = document.getElementById('statSidangTotal');
                                     const stTr = document.getElementById('statSidangTerjadwal');
                                     const stBl = document.getElementById('statSidangBelumSet');
-                                    const stRq = document.getElementById('statSidangRuanganCount');
+                                    const stDn = document.getElementById('statSidangSudahDinilai');
                                     if (stTot) stTot.textContent = res.stats.total;
                                     if (stTr) stTr.textContent = res.stats.terjadwal;
                                     if (stBl) stBl.textContent = res.stats.belum_set;
-                                    if (stRq) stRq.textContent = res.stats.ruangan_cnt;
+                                    if (stDn) stDn.textContent = res.stats.sudah_dinilai || 0;
                                 }
 
                                 renderSidangTable();
@@ -5759,7 +5770,6 @@
                     <td class="w-24 py-3 px-2 font-bold font-mono text-[11px] text-slate-900">${row.nim}</td>
                     <td class="w-40 py-3 px-2 font-semibold text-slate-800 text-xs">
                         <span class="truncate block max-w-[140px] cursor-pointer hover:text-amber-600 transition" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" title="${escapeHtml(fullName)}">${escapeHtml(fullName)}</span>
-                        ${peminatanBadge}
                         ${nilaiBadge}
                     </td>
                     <td class="py-3 px-2 text-slate-600 font-normal">
@@ -5788,6 +5798,9 @@
                     <td class="w-28 py-3 px-2 text-center">${statusBadge}</td>
                     <td class="w-36 py-3 px-3 pr-4 text-right">
                         <div class="flex items-center justify-end gap-1.5 ml-auto">
+                            <button type="button" onclick="openHistorySidangModal('${escapeHtml(row.nim)}')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-600 border border-slate-200 flex items-center justify-center text-xs transition cursor-pointer shadow-2xs shrink-0" title="Lihat Riwayat Histori Sidang Mahasiswa Ini">
+                                <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            </button>
                             <button type="button" onclick="openModalPenilaianSidang('${escapeHtml(row.nim)}')" class="w-8 h-8 rounded-xl ${hasNilai ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-600 border border-slate-200'} flex items-center justify-center text-xs transition cursor-pointer shadow-2xs shrink-0" title="${hasNilai ? 'Lihat / Edit Penilaian Akhir Sidang' : 'Input Penilaian Akhir Sidang TA'}">
                                 <i class="fa-solid ${hasNilai ? 'fa-award text-sm' : 'fa-clipboard-check text-sm'}"></i>
                             </button>
@@ -6381,10 +6394,30 @@
 
     window.filterRuanganDropdown = function (modalType, query) {
         const dropdown = document.getElementById(`${modalType}RuanganDropdown`);
+        const arrow = document.getElementById(`${modalType}RuanganArrow`);
         const hiddenInput = document.getElementById(`${modalType}SidangRuangan`);
         if (!dropdown) return;
 
-        const list = state.ruanganList || [];
+        // Ensure dropdown is visible when typing
+        dropdown.classList.remove('hidden');
+        if (arrow) arrow.classList.add('rotate-180');
+
+        let list = state.ruanganList || [];
+        if ((!list || list.length === 0) && Array.isArray(cfg.ruanganList) && cfg.ruanganList.length > 0) {
+            list = cfg.ruanganList;
+            state.ruanganList = list;
+        }
+        if (!list || list.length === 0) {
+            list = [
+                { id: 1, kode_ruangan: 'R.301', nama_ruangan: 'Ruang Sidang 1 (Lantai 3)', lokasi: 'Gedung FIK' },
+                { id: 2, kode_ruangan: 'R.302', nama_ruangan: 'Ruang Sidang 2 (Lantai 3)', lokasi: 'Gedung FIK' },
+                { id: 3, kode_ruangan: 'LAB.DKV', nama_ruangan: 'Lab Komputer Multimedia', lokasi: 'Gedung B' },
+                { id: 4, kode_ruangan: 'LAB.DI', nama_ruangan: 'Studio Desain Interior & Ergonomi', lokasi: 'Gedung A' },
+                { id: 5, kode_ruangan: 'AUDITORIUM', nama_ruangan: 'Auditorium Utama FIK', lokasi: 'Lantai 4' }
+            ];
+            state.ruanganList = list;
+        }
+
         const q = (query || '').toLowerCase().trim();
 
         let filtered = list.filter(r => {
@@ -6396,43 +6429,45 @@
 
         let html = '';
 
-        // If there is a custom query typed that doesn't match an exact room, show option to add / use custom
+        // If user typed custom text that is not an exact match
         const exactMatch = list.some(r => (r.nama_ruangan || '').toLowerCase() === q || (r.kode_ruangan || '').toLowerCase() === q);
         if (q && !exactMatch) {
             html += `
                 <div onclick="selectRuangan('${modalType}', '${escapeHtml(query.trim())}', '${escapeHtml(query.trim())}')" 
-                     class="p-2.5 bg-amber-50 hover:bg-amber-100/90 text-amber-900 font-bold cursor-pointer flex items-center justify-between transition border-b border-amber-200">
-                    <span class="flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle text-amber-600"></i>
-                        <span>Gunakan / Input Ruangan Baru: <strong>"${escapeHtml(query.trim())}"</strong></span>
+                     class="p-3 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold cursor-pointer flex items-center justify-between transition border-b border-amber-200">
+                    <span class="flex items-center gap-2 text-xs">
+                        <i class="fa-solid fa-pen-to-square text-amber-600"></i>
+                        <span>Gunakan Ruangan Ini: <strong class="text-amber-800 font-extrabold">"${escapeHtml(query.trim())}"</strong></span>
                     </span>
-                    <span class="text-[10px] bg-amber-200 text-amber-800 px-2 py-0.5 rounded-md font-semibold">Custom</span>
+                    <span class="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Kustom</span>
                 </div>
             `;
         }
 
         if (filtered.length > 0) {
             filtered.forEach(r => {
-                const code = r.kode_ruangan || '-';
-                const name = r.nama_ruangan || '-';
+                const code = r.kode_ruangan || '';
+                const name = r.nama_ruangan || '';
                 const loc = r.lokasi ? `(${r.lokasi})` : '';
-                const display = `${code !== '-' ? code + ' - ' : ''}${name} ${loc}`;
-                const val = r.kode_ruangan || r.nama_ruangan;
+                const display = `${code ? code + ' - ' : ''}${name} ${loc}`.trim();
+                const val = code || name;
 
                 html += `
                     <div onclick="selectRuangan('${modalType}', '${escapeHtml(val)}', '${escapeHtml(display)}')" 
-                         class="p-2.5 hover:bg-slate-50 text-slate-800 font-medium cursor-pointer flex items-center justify-between transition">
-                        <div class="flex items-center gap-2">
-                            <span class="px-1.5 py-0.5 bg-cyan-50 text-cyan-800 border border-cyan-200 rounded text-[10.5px] font-bold font-mono">${escapeHtml(code)}</span>
-                            <span class="font-semibold text-slate-900">${escapeHtml(name)}</span>
+                         class="p-2.5 hover:bg-amber-50 text-slate-800 font-medium cursor-pointer flex items-center justify-between transition">
+                        <div class="flex items-center gap-2.5">
+                            ${code ? `<span class="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10.5px] font-black font-mono">${escapeHtml(code)}</span>` : ''}
+                            <span class="font-bold text-slate-900 text-xs">${escapeHtml(name)}</span>
                             <span class="text-slate-400 text-[11px]">${escapeHtml(loc)}</span>
                         </div>
                         <i class="fa-solid fa-check text-xs text-amber-600 ${hiddenInput && hiddenInput.value === val ? '' : 'hidden'}"></i>
                     </div>
                 `;
             });
-        } else if (!q) {
-            html += `<div class="p-3 text-center text-slate-400 text-xs">Belum ada data ruangan terdaftar.</div>`;
+        } else if (q) {
+            html += `<div class="p-3 text-center text-slate-400 text-xs italic">Tidak ada ruangan terdaftar yang cocok. Silakan klik opsi "Gunakan Ruangan Ini" di atas.</div>`;
+        } else {
+            html += `<div class="p-3.5 text-center text-slate-400 text-xs italic">Ketik untuk mencari ruangan atau pilih dari daftar...</div>`;
         }
 
         dropdown.innerHTML = html;
@@ -6963,10 +6998,24 @@
                 const stRq = document.getElementById('statSidangRuanganCount');
                 if (stRq) stRq.textContent = state.ruanganList.length;
 
+                // Auto-select into active scheduling modal if open
+                const newCode = (res.data && res.data.kode_ruangan) ? res.data.kode_ruangan : kode;
+                const newDisplay = `${newCode} - ${nama} ${lokasi ? '(' + lokasi + ')' : ''}`;
+                const singleModal = document.getElementById('modalSingleSidang');
+                const batchModal = document.getElementById('modalBatchSidang');
+
+                if (singleModal && (singleModal.style.display === 'flex' || !singleModal.classList.contains('hidden'))) {
+                    selectRuangan('single', newCode, newDisplay);
+                    closeModalKelolaRuangan();
+                } else if (batchModal && (batchModal.style.display === 'flex' || !batchModal.classList.contains('hidden'))) {
+                    selectRuangan('batch', newCode, newDisplay);
+                    closeModalKelolaRuangan();
+                }
+
                 Swal.fire({
                     icon: 'success',
-                    title: 'Berhasil!',
-                    text: res.message || 'Ruangan baru berhasil ditambahkan!',
+                    title: 'Ruangan Ditambahkan!',
+                    text: res.message || 'Ruangan baru berhasil ditambahkan dan dipilih!',
                     timer: 2000,
                     showConfirmButton: false
                 });
@@ -7032,9 +7081,9 @@
         });
     };
     // =========================================================
-    // MODUL PENILAIAN AKHIR SIDANG TA (PRODI & PEMINATAN)
+    // MODUL PENILAIAN AKHIR SIDANG TA & MASTER RUBRIK DINAMIS
     // =========================================================
-    const RUBRIK_PENILAIAN_PRODI = {
+    let RUBRIK_PENILAIAN_PRODI = {
         'DKV': {
             name: 'Desain Komunikasi Visual (DKV)',
             peminatan: {
@@ -7117,6 +7166,9 @@
         }
     };
 
+    state.masterRubrikList = [];
+    state.activeMasterRubrikCriteria = [];
+
     function detectProdiKey(prodiStr) {
         if (!prodiStr) return 'DKV';
         const str = String(prodiStr).toUpperCase();
@@ -7126,6 +7178,686 @@
         return 'DKV';
     }
 
+    // Fetch master rubrik list from server
+    window.fetchMasterRubrikList = function (callback) {
+        const url = cfg.ajaxGetAllMasterRubrikUrl || window.DASHBOARD_CONFIG?.ajaxGetAllMasterRubrikUrl || 'ajax_get_all_master_rubrik';
+        fetch(url)
+            .then(r => r.json())
+            .then(res => {
+                if (res && res.status && Array.isArray(res.data)) {
+                    state.masterRubrikList = res.data;
+                    // Sync with RUBRIK_PENILAIAN_PRODI
+                    res.data.forEach(item => {
+                        const pKey = item.prodi;
+                        const pemKey = item.peminatan;
+                        if (!RUBRIK_PENILAIAN_PRODI[pKey]) {
+                            RUBRIK_PENILAIAN_PRODI[pKey] = { name: pKey, peminatan: {} };
+                        }
+                        if (item.kriteria && item.kriteria.length > 0) {
+                            RUBRIK_PENILAIAN_PRODI[pKey].peminatan[pemKey] = item.kriteria;
+                        }
+                    });
+                }
+                if (typeof callback === 'function') callback();
+            })
+            .catch(err => {
+                console.warn('Gagal memuat master rubrik dari server, menggunakan default lokal:', err);
+                if (typeof callback === 'function') callback();
+            });
+    };
+
+    // =========================================================
+    // MODAL MASTER RUBRIK DINAMIS
+    // =========================================================
+    window.openModalMasterRubrik = function () {
+        const modal = document.getElementById('modalKelolaMasterRubrik');
+        const prodiSelect = document.getElementById('masterRubrikProdiSelect');
+        const curProdi = prodiSelect ? prodiSelect.value : 'DKV';
+
+        fetchMasterRubrikList(() => {
+            setupMasterRubrikPeminatanOptions(curProdi);
+            loadMasterRubrikIntoEditor();
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                modal.style.display = 'flex';
+                document.body.classList.add('overflow-hidden');
+            }
+        });
+    };
+
+    window.closeModalMasterRubrik = function () {
+        const modal = document.getElementById('modalKelolaMasterRubrik');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modal.style.display = 'none';
+            document.body.classList.remove('overflow-hidden');
+        }
+    };
+
+    function setupMasterRubrikPeminatanOptions(prodiKey, selectedPem) {
+        const pemSelect = document.getElementById('masterRubrikPeminatanSelect');
+        if (!pemSelect) return;
+
+        const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+        const list = Object.keys(prodiData.peminatan);
+
+        let html = '';
+        list.forEach(p => {
+            const isSel = (p === selectedPem) || (!selectedPem && p === list[0]);
+            html += `<option value="${escapeHtml(p)}" ${isSel ? 'selected' : ''}>${escapeHtml(p)}</option>`;
+        });
+
+        pemSelect.innerHTML = html;
+    }
+
+    window.onMasterRubrikProdiChange = function (prodiVal) {
+        const prodiKey = detectProdiKey(prodiVal);
+        setupMasterRubrikPeminatanOptions(prodiKey, null);
+        loadMasterRubrikIntoEditor();
+    };
+
+    window.onMasterRubrikPeminatanChange = function () {
+        loadMasterRubrikIntoEditor();
+    };
+
+    function loadMasterRubrikIntoEditor() {
+        const prodiSelect = document.getElementById('masterRubrikProdiSelect');
+        const pemSelect = document.getElementById('masterRubrikPeminatanSelect');
+        const judulInput = document.getElementById('masterRubrikJudulInput');
+
+        const prodi = prodiSelect ? prodiSelect.value : 'DKV';
+        const pem = pemSelect ? pemSelect.value : 'Multimedia';
+
+        // Check if master exists in state
+        const masterItem = (state.masterRubrikList || []).find(m => m.prodi === prodi && m.peminatan === pem);
+        if (masterItem && masterItem.kriteria && masterItem.kriteria.length > 0) {
+            state.activeMasterRubrikCriteria = JSON.parse(JSON.stringify(masterItem.kriteria));
+            if (judulInput) judulInput.value = masterItem.judul_rubrik || `Rubrik Sidang TA ${prodi} - ${pem}`;
+        } else {
+            const fallbackCriteria = (RUBRIK_PENILAIAN_PRODI[prodi]?.peminatan[pem]) || [
+                { id: 'k1', title: 'Konsep & Perancangan Karya TA', desc: 'Kedalaman gagasan dan orisinalitas konsep perancangan.', bobot: 30 },
+                { id: 'k2', title: 'Penguasaan Teknis & Eksekusi Karya', desc: 'Kualitas hasil karya/produk/prototipe terapan.', bobot: 40 },
+                { id: 'k3', title: 'Komprehensi Presentasi & Sidang', desc: 'Kelancaran penyampaian dan respon tanya jawab.', bobot: 30 }
+            ];
+            state.activeMasterRubrikCriteria = JSON.parse(JSON.stringify(fallbackCriteria));
+            if (judulInput) judulInput.value = `Rubrik Sidang TA ${prodi} - ${pem}`;
+        }
+
+        renderMasterRubrikCriteriaList();
+        validateMasterRubrikBobot();
+    }
+
+    function renderMasterRubrikCriteriaList() {
+        const container = document.getElementById('masterRubrikKriteriaContainer');
+        if (!container) return;
+
+        let html = '';
+        state.activeMasterRubrikCriteria.forEach((crit, idx) => {
+            html += `
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs space-y-3 transition hover:border-violet-300">
+                    <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-violet-100 text-violet-800 flex items-center justify-center font-black text-xs shrink-0">${idx + 1}</span>
+                            <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Butir Penilaian #${idx + 1}</span>
+                        </div>
+                        <button type="button" onclick="removeMasterRubrikCriterion(${idx})" class="text-rose-500 hover:text-rose-700 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-rose-50 transition cursor-pointer flex items-center gap-1" title="Hapus Butir Kriteria Ini">
+                            <i class="fa-solid fa-trash-can text-[11px]"></i> <span>Hapus</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                        <div class="sm:col-span-8 space-y-2">
+                            <div>
+                                <label class="text-[10.5px] font-bold text-slate-500 block mb-0.5">Judul Kriteria Penilaian:</label>
+                                <input type="text" 
+                                       value="${escapeHtml(crit.title || '')}" 
+                                       placeholder="Contoh: Penguasaan Teknis Audio Visual & Animasi" 
+                                       data-crit-idx="${idx}"
+                                       oninput="validateMasterRubrikBobot()"
+                                       class="master-rubrik-title-input w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition" required>
+                            </div>
+                            <div>
+                                <label class="text-[10.5px] font-bold text-slate-500 block mb-0.5">Deskripsi / Indikator Penilaian:</label>
+                                <textarea rows="2" 
+                                          placeholder="Tuliskan poin-poin yang dinilai oleh dewan penguji..." 
+                                          data-crit-idx="${idx}"
+                                          oninput="validateMasterRubrikBobot()"
+                                          class="master-rubrik-desc-input w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition resize-none">${escapeHtml(crit.desc || '')}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-4 bg-slate-50/90 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between h-full">
+                            <div>
+                                <label class="text-[10.5px] font-extrabold uppercase tracking-wider text-slate-700 block mb-1">
+                                    Bobot Persentase (%) <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" 
+                                           min="0" 
+                                           max="100" 
+                                           step="0.5" 
+                                           value="${crit.bobot || 0}" 
+                                           placeholder="0 - 100" 
+                                           data-crit-idx="${idx}"
+                                           oninput="validateMasterRubrikBobot()" 
+                                           onkeyup="validateMasterRubrikBobot()" 
+                                           onchange="validateMasterRubrikBobot()" 
+                                           class="master-rubrik-bobot-input w-full px-3 py-2 pr-8 bg-white border border-slate-300 rounded-xl text-sm font-black text-slate-900 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition text-center" required>
+                                    <span class="absolute right-3 top-2.5 text-xs font-bold text-slate-400 pointer-events-none">%</span>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-2 italic text-center">Kontribusi terhadap nilai akhir 100.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (state.activeMasterRubrikCriteria.length === 0) {
+            html = `<div class="p-6 text-center text-slate-400 italic bg-slate-50 border border-dashed border-slate-300 rounded-2xl">Belum ada kriteria penilaian. Klik tombol "Tambah Kriteria" di atas.</div>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+    window.balanceMasterRubrikWeights = function () {
+        const total = state.activeMasterRubrikCriteria.length;
+        if (total === 0) return;
+
+        const base = Math.floor(100 / total);
+        const remainder = 100 - (base * total);
+
+        state.activeMasterRubrikCriteria.forEach((crit, idx) => {
+            crit.bobot = (idx === 0) ? (base + remainder) : base;
+        });
+
+        renderMasterRubrikCriteriaList();
+        validateMasterRubrikBobot();
+    };
+
+    window.addMasterRubrikCriterion = function () {
+        // Sync any typed text first
+        validateMasterRubrikBobot();
+
+        const currentCount = state.activeMasterRubrikCriteria.length;
+        let sum = 0;
+        state.activeMasterRubrikCriteria.forEach(c => {
+            sum += (parseFloat(c.bobot) || 0);
+        });
+
+        let newBobot = 20;
+        if (sum < 100 && (100 - sum) > 0) {
+            // Take the leftover gap so total hits exactly 100%
+            newBobot = Math.round((100 - sum) * 10) / 10;
+        } else {
+            // Auto re-balance all items evenly so total stays 100%
+            const newTotal = currentCount + 1;
+            const base = Math.floor(100 / newTotal);
+            const remainder = 100 - (base * newTotal);
+            state.activeMasterRubrikCriteria.forEach((c, idx) => {
+                c.bobot = (idx === 0) ? (base + remainder) : base;
+            });
+            newBobot = base;
+        }
+
+        const newId = 'k_' + Date.now().toString(36);
+        state.activeMasterRubrikCriteria.push({
+            id: newId,
+            title: '',
+            desc: '',
+            bobot: newBobot
+        });
+
+        renderMasterRubrikCriteriaList();
+        validateMasterRubrikBobot();
+
+        // Smooth scroll to the newly created criterion card + auto focus to title input
+        setTimeout(() => {
+            const container = document.getElementById('masterRubrikKriteriaContainer');
+            if (container) {
+                const cards = container.children;
+                if (cards.length > 0) {
+                    const lastCard = cards[cards.length - 1];
+                    lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    lastCard.classList.add('ring-2', 'ring-violet-500', 'bg-violet-50/40');
+                    setTimeout(() => {
+                        lastCard.classList.remove('ring-2', 'ring-violet-500', 'bg-violet-50/40');
+                    }, 1400);
+
+                    const titleInput = lastCard.querySelector('.master-rubrik-title-input');
+                    if (titleInput) {
+                        titleInput.focus();
+                    }
+                }
+            }
+        }, 100);
+    };
+
+    window.removeMasterRubrikCriterion = function (idx) {
+        if (state.activeMasterRubrikCriteria.length <= 1) {
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Minimal harus ada 1 butir kriteria penilaian.' });
+            return;
+        }
+
+        const removedBobot = parseFloat(state.activeMasterRubrikCriteria[idx].bobot) || 0;
+        state.activeMasterRubrikCriteria.splice(idx, 1);
+
+        // Auto distribute removed weight to remaining items if total was 100%
+        if (state.activeMasterRubrikCriteria.length > 0 && removedBobot > 0) {
+            const remCount = state.activeMasterRubrikCriteria.length;
+            const extraPerItem = Math.floor((removedBobot / remCount) * 10) / 10;
+            state.activeMasterRubrikCriteria.forEach((c) => {
+                c.bobot = Math.round((c.bobot + extraPerItem) * 10) / 10;
+            });
+            // Ensure exact 100
+            let currentSum = 0;
+            state.activeMasterRubrikCriteria.forEach(c => { currentSum += c.bobot; });
+            if (Math.abs(currentSum - 100) > 0.01 && state.activeMasterRubrikCriteria[0]) {
+                state.activeMasterRubrikCriteria[0].bobot = Math.round((state.activeMasterRubrikCriteria[0].bobot + (100 - currentSum)) * 10) / 10;
+            }
+        }
+
+        renderMasterRubrikCriteriaList();
+        validateMasterRubrikBobot();
+    };
+
+    window.validateMasterRubrikBobot = function () {
+        const totalText = document.getElementById('masterRubrikTotalBobotText');
+        const statusText = document.getElementById('masterRubrikValidationStatusText');
+        const iconEl = document.getElementById('masterRubrikValidationIcon');
+        const cardEl = document.getElementById('masterRubrikValidationCard');
+
+        const bobotInputs = document.querySelectorAll('.master-rubrik-bobot-input');
+        let sum = 0;
+
+        bobotInputs.forEach((inp, i) => {
+            const val = parseFloat(inp.value);
+            const cleanVal = isNaN(val) ? 0 : val;
+            sum += cleanVal;
+            if (state.activeMasterRubrikCriteria[i]) {
+                state.activeMasterRubrikCriteria[i].bobot = cleanVal;
+            }
+        });
+
+        // Also sync titles and descriptions
+        const titleInputs = document.querySelectorAll('.master-rubrik-title-input');
+        titleInputs.forEach((inp, i) => {
+            if (state.activeMasterRubrikCriteria[i]) {
+                state.activeMasterRubrikCriteria[i].title = inp.value;
+            }
+        });
+
+        const descInputs = document.querySelectorAll('.master-rubrik-desc-input');
+        descInputs.forEach((inp, i) => {
+            if (state.activeMasterRubrikCriteria[i]) {
+                state.activeMasterRubrikCriteria[i].desc = inp.value;
+            }
+        });
+
+        const formattedSum = Number.isInteger(sum) ? sum : sum.toFixed(1);
+        const isValid = Math.abs(sum - 100) < 0.01;
+
+        if (totalText) totalText.textContent = `${formattedSum}%`;
+
+        if (isValid) {
+            if (statusText) {
+                statusText.textContent = '(Valid - Tepat 100%)';
+                statusText.className = 'text-xs font-bold text-emerald-600';
+            }
+            if (iconEl) {
+                iconEl.className = 'w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shrink-0';
+                iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+            }
+            if (cardEl) cardEl.className = 'p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-3 transition';
+        } else {
+            const diff = 100 - sum;
+            const diffFormatted = Number.isInteger(diff) ? Math.abs(diff) : Math.abs(diff).toFixed(1);
+            const diffText = diff > 0 ? `(Kurang ${diffFormatted}% lagi)` : `(Lebih ${diffFormatted}%)`;
+            if (statusText) {
+                statusText.textContent = `${diffText} - Wajib 100%`;
+                statusText.className = 'text-xs font-bold text-rose-600';
+            }
+            if (iconEl) {
+                iconEl.className = 'w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold text-sm shrink-0';
+                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            }
+            if (cardEl) cardEl.className = 'p-4 rounded-2xl bg-rose-50/60 border border-rose-200 flex flex-col sm:flex-row items-center justify-between gap-3 transition';
+        }
+
+        return isValid;
+    };
+
+    window.submitSaveMasterRubrik = function (callbackSuccess) {
+        const prodi = document.getElementById('masterRubrikProdiSelect')?.value;
+        const pem = document.getElementById('masterRubrikPeminatanSelect')?.value;
+        const judul = document.getElementById('masterRubrikJudulInput')?.value;
+
+        if (!validateMasterRubrikBobot()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Total Bobot Belum 100%',
+                text: 'Pastikan seluruh persentase bobot kriteria berjumlah tepat 100% sebelum disimpan.'
+            });
+            return;
+        }
+
+        // Validate title on each criterion
+        const emptyTitle = state.activeMasterRubrikCriteria.some(c => !c.title || !c.title.trim());
+        if (emptyTitle) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Judul Kriteria Kosong',
+                text: 'Harap isi seluruh judul kriteria penilaian.'
+            });
+            return;
+        }
+
+        const btn = document.getElementById('btnSaveMasterRubrik');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Menyimpan...';
+        }
+
+        const formData = new FormData();
+        formData.append('prodi', prodi);
+        formData.append('peminatan', pem);
+        formData.append('judul_rubrik', judul || `Rubrik Sidang TA ${prodi} - ${pem}`);
+        formData.append('kriteria', JSON.stringify(state.activeMasterRubrikCriteria));
+
+        const url = window.DASHBOARD_CONFIG?.ajaxSimpanMasterRubrikUrl || cfg.ajaxSimpanMasterRubrikUrl || 'koordinatorta/ajax_simpan_master_rubrik';
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(async r => {
+            const text = await r.text();
+            try {
+                return JSON.parse(text);
+            } catch (err) {
+                console.error('Save master rubrik non-JSON response:', text);
+                throw new Error('Respon server tidak valid: ' + text.substring(0, 150));
+            }
+        })
+        .then(res => {
+            if (res && res.status) {
+                // Update local dictionary
+                if (!RUBRIK_PENILAIAN_PRODI[prodi]) {
+                    RUBRIK_PENILAIAN_PRODI[prodi] = { name: prodi, peminatan: {} };
+                }
+                RUBRIK_PENILAIAN_PRODI[prodi].peminatan[pem] = JSON.parse(JSON.stringify(state.activeMasterRubrikCriteria));
+
+                // Refresh state list
+                fetchMasterRubrikList();
+
+                if (typeof callbackSuccess === 'function') {
+                    callbackSuccess();
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Master Rubrik Disimpan!',
+                        text: res.message || `Master rubrik ${prodi} - ${pem} berhasil diperbarui.`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal Menyimpan', text: (res && res.message) ? res.message : 'Terjadi kesalahan pada server.' });
+            }
+        })
+        .catch(err => {
+            console.error('Save master rubrik error:', err);
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Gagal menghubungi server.' });
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-xs"></i> <span>Simpan Template Rubrik</span>';
+            }
+        });
+    };
+
+    window.applyMasterRubrikMassalDirect = function () {
+        const prodi = document.getElementById('masterRubrikProdiSelect')?.value;
+        const pem = document.getElementById('masterRubrikPeminatanSelect')?.value;
+
+        Swal.fire({
+            title: 'Terapkan Rubrik Massal?',
+            html: `Apakah Anda yakin ingin menerapkan master rubrik ini ke <b>seluruh mahasiswa</b> di peminatan <b>${escapeHtml(prodi)} - ${escapeHtml(pem)}</b>?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-users-gear mr-1"></i> Ya, Terapkan Massal',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#059669',
+            cancelButtonColor: '#64748b'
+        }).then(result => {
+            if (result.isConfirmed) {
+                submitSaveMasterRubrik(() => {
+                    const formData = new FormData();
+                    formData.append('prodi', prodi);
+                    formData.append('peminatan', pem);
+
+                    const url = window.DASHBOARD_CONFIG?.ajaxTerapkanRubrikMassalUrl || cfg.ajaxTerapkanRubrikMassalUrl || 'koordinatorta/ajax_terapkan_rubrik_massal';
+
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(async r => {
+                        const text = await r.text();
+                        try {
+                            return JSON.parse(text);
+                        } catch (err) {
+                            throw new Error('Respon server: ' + text.substring(0, 150));
+                        }
+                    })
+                    .then(res => {
+                        if (res && res.status) {
+                            // Update local student peminatan where matching
+                            (state.sidangList || []).forEach(s => {
+                                const sProdi = detectProdiKey(s.prodi || s.konsentrasi_dkv);
+                                if (sProdi === prodi) {
+                                    s.peminatan = pem;
+                                }
+                            });
+
+                            renderSidangTable();
+                            closeModalMasterRubrik();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Penerapan Massal Berhasil!',
+                                text: res.message || `Rubrik ${prodi} - ${pem} berhasil diterapkan ke mahasiswa terkait!`,
+                                confirmButtonColor: '#059669'
+                            });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: (res && res.message) ? res.message : 'Gagal menerapkan rubrik massal.' });
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Gagal terhubung ke server.' });
+                    });
+                });
+            }
+        });
+    };
+
+    window.confirmResetDefaultMasterRubrik = function () {
+        Swal.fire({
+            title: 'Reset ke Standar Kurikulum?',
+            text: 'Semua rubrik penilaian prodi & peminatan akan dikembalikan ke standar bawaan kurikulum resmi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fa-solid fa-rotate-left mr-1"></i> Ya, Reset Semua',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#64748b'
+        }).then(res => {
+            if (res.isConfirmed) {
+                const url = window.DASHBOARD_CONFIG?.ajaxResetDefaultRubrikUrl || cfg.ajaxResetDefaultRubrikUrl || 'koordinatorta/ajax_reset_default_rubrik';
+                fetch(url, { method: 'POST' })
+                    .then(async r => {
+                        const text = await r.text();
+                        try {
+                            return JSON.parse(text);
+                        } catch (err) {
+                            throw new Error('Respon server: ' + text.substring(0, 150));
+                        }
+                    })
+                    .then(resData => {
+                        if (resData && resData.status) {
+                            fetchMasterRubrikList(() => {
+                                loadMasterRubrikIntoEditor();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil Direset!',
+                                    text: resData.message || 'Master rubrik berhasil dikembalikan ke standar kurikulum.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                            });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: (resData && resData.message) ? resData.message : 'Gagal mereset rubrik default.' });
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Gagal menghubungi server.' });
+                    });
+            }
+        });
+    };
+
+    // =========================================================
+    // MODAL BATCH TERAPKAN RUBRIK (MAHASISWA TERPILIH)
+    // =========================================================
+    window.openBatchTerapkanRubrikModal = function () {
+        const count = state.sidangSelectedStudents.size;
+        if (count === 0) {
+            Swal.fire({ icon: 'info', title: 'Pilih Mahasiswa', text: 'Silakan centang mahasiswa yang ingin diterapkan rubrik massal.' });
+            return;
+        }
+
+        const modal = document.getElementById('modalBatchTerapkanRubrik');
+        const countText = document.getElementById('batchTerapkanSelectedCountText');
+        const prodiSelect = document.getElementById('batchRubrikProdiSelect');
+
+        if (countText) countText.textContent = `${count} Mahasiswa Terpilih`;
+
+        const curProdi = prodiSelect ? prodiSelect.value : 'DKV';
+        setupBatchRubrikPeminatanOptions(curProdi);
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.style.display = 'flex';
+            document.body.classList.add('overflow-hidden');
+        }
+    };
+
+    window.closeBatchTerapkanRubrikModal = function () {
+        const modal = document.getElementById('modalBatchTerapkanRubrik');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modal.style.display = 'none';
+            document.body.classList.remove('overflow-hidden');
+        }
+    };
+
+    function setupBatchRubrikPeminatanOptions(prodiKey) {
+        const pemSelect = document.getElementById('batchRubrikPeminatanSelect');
+        if (!pemSelect) return;
+
+        const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+        const list = Object.keys(prodiData.peminatan);
+
+        let html = '';
+        list.forEach(p => {
+            html += `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`;
+        });
+
+        pemSelect.innerHTML = html;
+    }
+
+    window.onBatchRubrikProdiChange = function (prodiVal) {
+        setupBatchRubrikPeminatanOptions(detectProdiKey(prodiVal));
+    };
+
+    window.submitBatchTerapkanRubrikSelected = function () {
+        const prodi = document.getElementById('batchRubrikProdiSelect')?.value;
+        const pem = document.getElementById('batchRubrikPeminatanSelect')?.value;
+        const selectedNims = Array.from(state.sidangSelectedStudents);
+
+        if (selectedNims.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'Pilih Mahasiswa', text: 'Tidak ada mahasiswa terpilih.' });
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmitBatchTerapkanRubrik');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Menerapkan...';
+        }
+
+        const formData = new FormData();
+        formData.append('prodi', prodi);
+        formData.append('peminatan', pem);
+        formData.append('nim_list', JSON.stringify(selectedNims));
+
+        const url = window.DASHBOARD_CONFIG?.ajaxTerapkanRubrikMassalUrl || cfg.ajaxTerapkanRubrikMassalUrl || 'koordinatorta/ajax_terapkan_rubrik_massal';
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(async r => {
+            const text = await r.text();
+            try {
+                return JSON.parse(text);
+            } catch (err) {
+                throw new Error('Respon server: ' + text.substring(0, 150));
+            }
+        })
+        .then(res => {
+            if (res && res.status) {
+                // Update local state
+                selectedNims.forEach(nim => {
+                    const mhs = (state.sidangList || []).find(s => String(s.nim) === String(nim));
+                    if (mhs) {
+                        mhs.peminatan = pem;
+                    }
+                });
+
+                closeBatchTerapkanRubrikModal();
+                state.sidangSelectedStudents.clear();
+                renderSidangTable();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Rubrik Berhasil Diterapkan!',
+                    text: res.message || `Rubrik ${prodi} - ${pem} berhasil diterapkan ke ${selectedNims.length} mahasiswa terpilih!`,
+                    confirmButtonColor: '#7c3aed'
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: (res && res.message) ? res.message : 'Gagal menerapkan rubrik massal.' });
+            }
+        })
+        .catch(err => {
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Gagal menghubungi server.' });
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check-double text-xs"></i> <span>Terapkan ke Mahasiswa Terpilih</span>';
+            }
+        });
+    };
+
+    // =========================================================
+    // MODAL FORM PENILAIAN INDIVIDUAL (MENYESUAIKAN DENGAN MASTER RUBRIK)
+    // =========================================================
     window.openModalPenilaianSidang = function (nim) {
         const student = (state.sidangList || []).find(s => String(s.nim) === String(nim));
         if (!student) return;
@@ -7601,6 +8333,7 @@
         initP2ClockEvents();
         initP2SlotDragEvents();
         initSidangDatePickers();
+        fetchMasterRubrikList();
         startRealtimeSync();
     });
 
