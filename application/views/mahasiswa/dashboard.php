@@ -212,12 +212,11 @@
 
                 <div class="w-full pt-3.5 border-t border-orange-100 text-xs flex items-center justify-between">
                     <span class="font-medium text-slate-600">Akses Bimbingan:</span>
-                    <?php if($kk_status === 'Approved'): ?>
-                        <span class="font-bold text-emerald-600 text-xs flex items-center gap-1"><i class="bi bi-unlock-fill"></i> Terbuka</span>
-                    <?php else: ?>
-                        <span class="font-bold text-orange-600 text-xs flex items-center gap-1"><i class="bi bi-clock-history"></i> Proses Approval</span>
-                    <?php endif; ?>
+                    <a href="<?= site_url('mahasiswa/bimbingan'); ?>" class="font-extrabold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-3 py-1.5 rounded-xl border border-emerald-300 text-xs flex items-center gap-1.5 transition shadow-2xs">
+                        <i class="bi bi-unlock-fill text-emerald-600"></i> Buka Bimbingan TA &rarr;
+                    </a>
                 </div>
+
             </div>
         </div>
 

@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ── Navbar Setup ──────────────────────────────────────────────────────
-    const navContainer = document.getElementById('mainNav');
+    const navContainer = document.getElementById('mainNav') || document.querySelector('.dashboard-topbar');
     if (!navContainer) return;
 
     const navLinks = navContainer.querySelectorAll('.nav-link');
@@ -22,8 +22,16 @@ document.addEventListener('DOMContentLoaded', function () {
     navLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             const targetUrl = this.getAttribute('href');
+            const parentItem = this.closest('.nav-item');
+            const hasDropdown = parentItem && parentItem.querySelector('.nav-dropdown');
+            const hasOnClick = this.hasAttribute('onclick');
 
-            if (targetUrl && targetUrl !== '#' && !this.classList.contains('active-link')) {
+            // Do NOT hijack dropdown triggers, inline onclick handlers, or empty/hash anchors
+            if (hasDropdown || hasOnClick || !targetUrl || targetUrl === '#' || targetUrl.startsWith('javascript:')) {
+                return;
+            }
+
+            if (!this.classList.contains('active-link')) {
                 e.preventDefault();
 
                 // Set active link underline instantly on click

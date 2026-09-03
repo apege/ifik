@@ -297,12 +297,31 @@
                     <div class="space-y-5 text-xs">
 
                             <?php
-                            $files_list = array(
-                                'ksm'        => array('title' => 'Kartu Studi Mahasiswa (KSM)', 'short' => 'KSM', 'file' => $detail['file_ksm'] ?? '', 'reviewed' => !empty($detail['review_file_ksm']), 'status' => $detail['status_file_ksm'] ?? 'Pending'),
-                                'transkrip'  => array('title' => 'Transkrip Nilai Akademik', 'short' => 'Transkrip', 'file' => $detail['file_transkrip'] ?? '', 'reviewed' => !empty($detail['review_file_transkrip']), 'status' => $detail['status_file_transkrip'] ?? 'Pending'),
-                                'pernyataan' => array('title' => 'Surat Pernyataan TA', 'short' => 'Surat Pernyataan', 'file' => $detail['file_pernyataan'] ?? '', 'reviewed' => !empty($detail['review_file_pernyataan']), 'status' => $detail['status_file_pernyataan'] ?? 'Pending'),
-                                'bebas_lab'  => array('title' => 'Surat Bebas Laboratorium', 'short' => 'Bebas Lab', 'file' => $detail['file_bebas_lab'] ?? '', 'reviewed' => !empty($detail['review_file_bebas_lab']), 'status' => $detail['status_file_bebas_lab'] ?? 'Pending'),
-                            );
+                            $files_list = array();
+                            if (!empty($syarat_berkas)) {
+                                foreach ($syarat_berkas as $sb) {
+                                    $kode = $sb['kode_berkas'];
+                                    $st_info = $student_berkas[$kode] ?? null;
+                                    $fname = $st_info['file_name'] ?? ($detail['file_' . $kode] ?? '');
+                                    $rev   = !empty($detail['review_file_' . $kode]);
+                                    $st    = $st_info['status_verifikasi'] ?? ($detail['status_file_' . $kode] ?? 'Pending');
+                                    
+                                    $files_list[$kode] = array(
+                                        'title'    => $sb['nama_berkas'],
+                                        'short'    => $sb['nama_berkas'],
+                                        'file'     => $fname,
+                                        'reviewed' => $rev,
+                                        'status'   => $st
+                                    );
+                                }
+                            } else {
+                                $files_list = array(
+                                    'ksm'        => array('title' => 'Kartu Studi Mahasiswa (KSM)', 'short' => 'KSM', 'file' => $detail['file_ksm'] ?? '', 'reviewed' => !empty($detail['review_file_ksm']), 'status' => $detail['status_file_ksm'] ?? 'Pending'),
+                                    'transkrip'  => array('title' => 'Transkrip Nilai Akademik', 'short' => 'Transkrip', 'file' => $detail['file_transkrip'] ?? '', 'reviewed' => !empty($detail['review_file_transkrip']), 'status' => $detail['status_file_transkrip'] ?? 'Pending'),
+                                    'pernyataan' => array('title' => 'Surat Pernyataan TA', 'short' => 'Surat Pernyataan', 'file' => $detail['file_pernyataan'] ?? '', 'reviewed' => !empty($detail['review_file_pernyataan']), 'status' => $detail['status_file_pernyataan'] ?? 'Pending'),
+                                    'bebas_lab'  => array('title' => 'Surat Bebas Laboratorium', 'short' => 'Bebas Lab', 'file' => $detail['file_bebas_lab'] ?? '', 'reviewed' => !empty($detail['review_file_bebas_lab']), 'status' => $detail['status_file_bebas_lab'] ?? 'Pending'),
+                                );
+                            }
                             ?>
 
                             <div class="grid grid-cols-1 gap-4">
@@ -312,7 +331,7 @@
                                         $st = $item['status'];
                                         $isDecided = in_array($st, array('Approved', 'Rejected'));
                                         $cardBorder = $st === 'Approved' ? 'border-emerald-200 bg-emerald-50/30' : ($st === 'Rejected' ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200 bg-white');
-                                        $fileUrl = !empty($item['file']) ? base_url('uploads/persyaratan_ta/' . $item['file']) : '#';
+                                        $fileUrl = !empty($item['file']) ? (strpos($item['file'], 'uploads/') === 0 ? base_url($item['file']) : base_url('uploads/persyaratan_ta/' . $item['file'])) : '#';
                                     ?>
 
                                     <!-- Outer card per file -->

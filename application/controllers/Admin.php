@@ -47,4 +47,36 @@ class Admin extends CI_Controller {
 
         $this->load->view('admin/dashboard', $data);
     }
+
+    /**
+     * Halaman Riwayat Log Approval System
+     */
+    public function log_history() {
+        $this->load->model('Approval_log_model');
+
+        $modul  = $this->input->get('modul', true);
+        $action = $this->input->get('action', true);
+        $search = $this->input->get('search', true);
+        $page   = (int)($this->input->get('page') ?: 1);
+        if ($page < 1) $page = 1;
+        $per_page = 20;
+
+        $total_logs   = $this->Approval_log_model->count_logs($modul, $action, $search);
+        $total_pages  = max(1, ceil($total_logs / $per_page));
+        $offset       = ($page - 1) * $per_page;
+
+        $data['title']         = 'Riwayat Log Approval System';
+        $data['logs']          = $this->Approval_log_model->get_all_logs($modul, $action, $search, $per_page, $offset);
+        $data['stats']         = $this->Approval_log_model->get_log_stats();
+        $data['total_logs']    = $total_logs;
+        $data['total_pages']   = $total_pages;
+        $data['current_page']  = $page;
+        $data['page']          = $page;
+        $data['per_page']      = $per_page;
+        $data['filter_modul']  = $modul;
+        $data['filter_action'] = $action;
+        $data['search']        = $search;
+
+        $this->load->view('admin/log_history', $data);
+    }
 }

@@ -181,6 +181,18 @@
                         </div>
                         
                         <div class="flex items-center gap-2">
+                            <!-- View Layout Mode Toggle (1-Column List vs 2x2 Grid) -->
+                            <div class="flex items-center bg-slate-200/80 p-0.5 rounded-xl border border-slate-300">
+                                <button type="button" onclick="setDocLayout('grid')" id="btnLayoutGrid" 
+                                        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs flex items-center gap-1 cursor-pointer" title="Tampilan Grid 2x2">
+                                    <i class="bi bi-grid-fill"></i> <span class="hidden sm:inline">2x2 Grid</span>
+                                </button>
+                                <button type="button" onclick="setDocLayout('list')" id="btnLayoutList" 
+                                        class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-900 flex items-center gap-1 cursor-pointer" title="Tampilan List 1 Kolom (Horizontal)">
+                                    <i class="bi bi-view-list"></i> <span class="hidden sm:inline">1 Kolom</span>
+                                </button>
+                            </div>
+
                             <button type="button" onclick="markAllValid()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer">
                                 <i class="bi bi-check2-all"></i> Tandai Semua Valid
                             </button>
@@ -202,44 +214,66 @@
                             return base_url('uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf');
                         };
 
-                        $berkas_items = array(
-                            array(
-                                'key'       => 'ksm',
-                                'label'     => '1. KSM (Kartu Studi Mahasiswa)',
-                                'desc'      => 'Bukti KRS semester aktif yang memuat mata kuliah Tugas Akhir.',
-                                'file'      => $detail['file_ksm'] ?? 'ksm_' . $detail['nim'] . '.pdf',
-                                'status'    => $detail['status_ksm'] ?? 'Pending',
-                                'icon'      => 'bi-card-checklist',
-                                'presets'   => array('Tanpa TTD Dosen Wali', 'Mata Kuliah TA Belum Ada', 'File Buram / Tidak Jelas')
-                            ),
-                            array(
-                                'key'       => 'transkrip',
-                                'label'     => '2. Transkrip Nilai Akademik Terakhir',
-                                'desc'      => 'Transkrip nilai resmi yang sudah divalidasi dan memenuhi syarat SKS kelulusan.',
-                                'file'      => $detail['file_transkrip'] ?? 'transkrip_' . $detail['nim'] . '.pdf',
-                                'status'    => $detail['status_transkrip'] ?? 'Pending',
-                                'icon'      => 'bi-file-earmark-spreadsheet',
-                                'presets'   => array('Belum Update Semester Terbaru', 'SKS Kelulusan Kurang', 'Belum Tervalidasi Resmi')
-                            ),
-                            array(
-                                'key'       => 'pernyataan',
-                                'label'     => '3. Surat Pernyataan Mahasiswa',
-                                'desc'      => 'Surat kesanggupan menyelesaikan TA bermaterai dan ditandatangani.',
-                                'file'      => $detail['file_pernyataan'] ?? 'pernyataan_' . $detail['nim'] . '.pdf',
-                                'status'    => $detail['status_pernyataan'] ?? 'Pending',
-                                'icon'      => 'bi-file-earmark-ruled',
-                                'presets'   => array('Tanpa Materai Rp 10.000', 'Belum Ditandatangani', 'Format Surat Salah')
-                            ),
-                            array(
-                                'key'       => 'bebas_lab',
-                                'label'     => '4. Surat Bebas Laboratorium & Perpustakaan',
-                                'desc'      => 'Surat keterangan bebas pinjaman alat lab FIK dan buku perpustakaan.',
-                                'file'      => $detail['file_bebas_lab'] ?? 'bebas_lab_' . $detail['nim'] . '.pdf',
-                                'status'    => $detail['status_bebas_lab'] ?? 'Pending',
-                                'icon'      => 'bi-building-check',
-                                'presets'   => array('Tanpa Stempel Resmi Lab', 'Pinjaman Alat Lab Belum Lunas', 'Buku Perpus Belum Kembali')
-                            )
-                        );
+                        $berkas_items = array();
+                        if (!empty($syarat_berkas)) {
+                            $idx_b = 1;
+                            foreach ($syarat_berkas as $sb) {
+                                $kode = $sb['kode_berkas'];
+                                $st_map = $student_berkas[$kode] ?? null;
+                                $file_val = $st_map['file_name'] ?? ($detail['file_' . $kode] ?? '');
+                                $status_val = $st_map['status_verifikasi'] ?? ($detail['status_' . $kode] ?? 'Pending');
+
+                                $berkas_items[] = array(
+                                    'key'       => $kode,
+                                    'label'     => $idx_b . '. ' . $sb['nama_berkas'],
+                                    'desc'      => $sb['deskripsi'] ?: 'Berkas persyaratan ' . $sb['nama_berkas'],
+                                    'file'      => $file_val ?: ($kode . '_' . $detail['nim'] . '.pdf'),
+                                    'status'    => $status_val,
+                                    'icon'      => 'bi-file-earmark-pdf',
+                                    'presets'   => array('File Buram / Tidak Jelas', 'Format File Tidak Sesuai', 'Berkas Tidak Lengkap')
+                                );
+                                $idx_b++;
+                            }
+                        } else {
+                            $berkas_items = array(
+                                array(
+                                    'key'       => 'ksm',
+                                    'label'     => '1. KSM (Kartu Studi Mahasiswa)',
+                                    'desc'      => 'Bukti KRS semester aktif yang memuat mata kuliah Tugas Akhir.',
+                                    'file'      => $detail['file_ksm'] ?? 'ksm_' . $detail['nim'] . '.pdf',
+                                    'status'    => $detail['status_ksm'] ?? 'Pending',
+                                    'icon'      => 'bi-card-checklist',
+                                    'presets'   => array('Tanpa TTD Dosen Wali', 'Mata Kuliah TA Belum Ada', 'File Buram / Tidak Jelas')
+                                ),
+                                array(
+                                    'key'       => 'transkrip',
+                                    'label'     => '2. Transkrip Nilai Akademik Terakhir',
+                                    'desc'      => 'Transkrip nilai resmi yang sudah divalidasi dan memenuhi syarat SKS kelulusan.',
+                                    'file'      => $detail['file_transkrip'] ?? 'transkrip_' . $detail['nim'] . '.pdf',
+                                    'status'    => $detail['status_transkrip'] ?? 'Pending',
+                                    'icon'      => 'bi-file-earmark-spreadsheet',
+                                    'presets'   => array('Belum Update Semester Terbaru', 'SKS Kelulusan Kurang', 'Belum Tervalidasi Resmi')
+                                ),
+                                array(
+                                    'key'       => 'pernyataan',
+                                    'label'     => '3. Surat Pernyataan Mahasiswa',
+                                    'desc'      => 'Surat kesanggupan menyelesaikan TA bermaterai dan ditandatangani.',
+                                    'file'      => $detail['file_pernyataan'] ?? 'pernyataan_' . $detail['nim'] . '.pdf',
+                                    'status'    => $detail['status_pernyataan'] ?? 'Pending',
+                                    'icon'      => 'bi-file-earmark-ruled',
+                                    'presets'   => array('Tanpa Materai Rp 10.000', 'Belum Ditandatangani', 'Format Surat Salah')
+                                ),
+                                array(
+                                    'key'       => 'bebas_lab',
+                                    'label'     => '4. Surat Bebas Laboratorium & Perpustakaan',
+                                    'desc'      => 'Surat keterangan bebas pinjaman alat lab FIK dan buku perpustakaan.',
+                                    'file'      => $detail['file_bebas_lab'] ?? 'bebas_lab_' . $detail['nim'] . '.pdf',
+                                    'status'    => $detail['status_bebas_lab'] ?? 'Pending',
+                                    'icon'      => 'bi-building-check',
+                                    'presets'   => array('Tanpa Stempel Resmi Lab', 'Pinjaman Alat Lab Belum Lunas', 'Buku Perpus Belum Kembali')
+                                )
+                            );
+                        }
                         $raw_bk = $detail['berkas_kurang'] ?? '';
                         $berkas_kurang_selected = array();
                         if (!empty($raw_bk)) {
@@ -266,7 +300,7 @@
                                 $is_valid = ($b['status'] === 'Valid') && !$is_invalid;
                                 $card_border = $is_valid ? 'border-emerald-200 bg-emerald-50/20' : ($is_invalid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-white');
                             ?>
-                            <div class="clean-card doc-card rounded-2xl p-5 border <?= $card_border; ?> flex flex-col justify-between space-y-4" data-key="<?= $b['key']; ?>">
+                            <div id="doc_card_<?= $b['key']; ?>" class="clean-card doc-card rounded-2xl p-5 border <?= $card_border; ?> flex flex-col justify-between space-y-4 transition-all duration-300" data-key="<?= $b['key']; ?>">
                                 <div>
                                     <div class="flex items-start justify-between gap-3 mb-2">
                                         <div class="flex items-center gap-2.5">
@@ -284,19 +318,43 @@
                                             <?= $is_valid ? 'Valid' : ($is_invalid ? 'Kurang/Revisi' : 'Belum Dicek'); ?>
                                         </span>
                                     </div>
-                                    <p class="text-xs text-slate-500 leading-relaxed mb-3 font-medium"><?= $b['desc']; ?></p>
 
-                                    <!-- Document Action Buttons (Modal Preview & New Tab) -->
+                                    <!-- Document Action Buttons (Dropdown Preview & New Tab) -->
                                     <div class="flex items-center gap-2 pt-1">
-                                        <button type="button" onclick="openPdfModal('<?= addslashes($b['label']); ?>', '<?= htmlspecialchars($b['file']); ?>', '<?= $b['key']; ?>', '<?= $resolve_pdf_url($b['file']); ?>')" 
+                                        <button type="button" onclick="toggleInlinePdfPreview('<?= $b['key']; ?>', '<?= $resolve_pdf_url($b['file']); ?>')" 
+                                                id="btnTogglePdf_<?= $b['key']; ?>"
                                                 class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all">
                                             <i class="bi bi-file-earmark-pdf text-rose-400 text-sm"></i>
                                             <span>Pratinjau Dokumen</span>
+                                            <i class="bi bi-chevron-down text-[10px] ml-1 transition-transform duration-300" id="iconPdf_<?= $b['key']; ?>"></i>
                                         </button>
                                         <a href="<?= $resolve_pdf_url($b['file']); ?>" target="_blank" 
                                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all">
                                             <i class="bi bi-box-arrow-up-right"></i> Unduh
                                         </a>
+                                    </div>
+
+                                    <!-- Inline Dropdown PDF Viewer Accordion (Buttery Smooth CSS Grid Animation) -->
+                                    <div id="inlinePdfWrapper_<?= $b['key']; ?>" class="grid grid-rows-[0fr] transition-all duration-500 ease-in-out opacity-0 overflow-hidden">
+                                        <div class="min-h-0 overflow-hidden">
+                                            <div id="inlinePdfBox_<?= $b['key']; ?>" class="rounded-2xl border border-slate-200 shadow-inner bg-slate-100 mt-3 overflow-hidden">
+                                                <div class="p-2 px-3.5 bg-slate-900 text-white flex items-center justify-between text-xs">
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="bi bi-file-earmark-pdf text-rose-400"></i>
+                                                        <span class="font-bold text-white text-[11px]"><?= htmlspecialchars($b['label']); ?></span>
+                                                        <span class="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">(<?= htmlspecialchars($b['file']); ?>)</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <button type="button" onclick="toggleInlinePdfPreview('<?= $b['key']; ?>')" class="text-slate-400 hover:text-white font-bold text-xs cursor-pointer">
+                                                            <i class="bi bi-x-lg"></i> Tutup
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="w-full h-[450px] relative bg-slate-200">
+                                                    <iframe id="inlinePdfFrame_<?= $b['key']; ?>" src="about:blank" class="w-full h-full border-none" loading="lazy"></iframe>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -463,42 +521,87 @@
         let currentModalKey = '';
         let currentModalFileUrl = '';
 
-        function openPdfModal(title, filename, key, fileUrl) {
-            currentModalKey = key;
-            currentModalFileUrl = fileUrl || '';
+        function toggleInlinePdfPreview(key, fileUrl) {
+            const wrapper = document.getElementById('inlinePdfWrapper_' + key);
+            const icon = document.getElementById('iconPdf_' + key);
+            const iframe = document.getElementById('inlinePdfFrame_' + key);
+            const btn = document.getElementById('btnTogglePdf_' + key);
 
-            document.getElementById('pdfModalTitle').textContent = title;
-            document.getElementById('pdfModalFilename').textContent = filename;
+            if (!wrapper) return;
 
-            const iframe = document.getElementById('pdfIframeViewer');
             const defaultSamplePdf = '<?= base_url("uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf"); ?>';
-
             const targetUrl = (fileUrl && fileUrl.match(/\.(pdf|png|jpg|jpeg)$/i)) ? fileUrl : defaultSamplePdf;
-            iframe.src = targetUrl;
 
-            // Wire up modal buttons
-            document.getElementById('modalBtnKurang').onclick = function() {
-                toggleDocStatus(key, true);
-                closePdfModal();
-                showToast(title + ' ditandai Kurang/Revisi');
-            };
+            const isOpen = wrapper.classList.contains('grid-rows-[1fr]');
 
-            document.getElementById('modalBtnValid').onclick = function() {
-                toggleDocStatus(key, false);
-                closePdfModal();
-                showToast(title + ' ditandai Valid');
-            };
+            if (!isOpen) {
+                // Close any other open dropdowns first for clean accordion UX
+                document.querySelectorAll('[id^="inlinePdfWrapper_"]').forEach(el => {
+                    el.classList.remove('grid-rows-[1fr]', 'opacity-100');
+                    el.classList.add('grid-rows-[0fr]', 'opacity-0');
+                });
+                document.querySelectorAll('[id^="iconPdf_"]').forEach(el => el.classList.remove('rotate-180'));
+                document.querySelectorAll('[id^="btnTogglePdf_"]').forEach(el => el.classList.remove('ring-2', 'ring-orange-500/40'));
 
-            document.getElementById('pdfModal').classList.remove('hidden');
-            document.getElementById('pdfModal').classList.add('flex');
+                if (iframe && (iframe.src === 'about:blank' || !iframe.src)) {
+                    iframe.src = targetUrl + '#view=FitH&zoom=100';
+                }
+
+                wrapper.classList.remove('grid-rows-[0fr]', 'opacity-0');
+                wrapper.classList.add('grid-rows-[1fr]', 'opacity-100');
+                if (icon) icon.classList.add('rotate-180');
+                if (btn) btn.classList.add('ring-2', 'ring-orange-500/40');
+            } else {
+                wrapper.classList.remove('grid-rows-[1fr]', 'opacity-100');
+                wrapper.classList.add('grid-rows-[0fr]', 'opacity-0');
+                if (icon) icon.classList.remove('rotate-180');
+                if (btn) btn.classList.remove('ring-2', 'ring-orange-500/40');
+            }
         }
 
-        function closePdfModal() {
-            const iframe = document.getElementById('pdfIframeViewer');
-            if (iframe) iframe.src = 'about:blank';
-            document.getElementById('pdfModal').classList.add('hidden');
-            document.getElementById('pdfModal').classList.remove('flex');
+        function openPdfModal(title, filename, key, fileUrl) {
+            toggleInlinePdfPreview(key, fileUrl);
         }
+
+        function setDocLayout(mode) {
+            const container = document.getElementById('docGridContainer');
+            const btnGrid = document.getElementById('btnLayoutGrid');
+            const btnList = document.getElementById('btnLayoutList');
+
+            if (!container) return;
+
+            if (mode === 'list') {
+                container.classList.remove('md:grid-cols-2');
+                container.classList.add('grid-cols-1');
+
+                if (btnList && btnGrid) {
+                    btnList.classList.add('bg-white', 'text-slate-900', 'shadow-xs');
+                    btnList.classList.remove('text-slate-500');
+                    btnGrid.classList.remove('bg-white', 'text-slate-900', 'shadow-xs');
+                    btnGrid.classList.add('text-slate-500');
+                }
+                localStorage.setItem('laa_doc_layout', 'list');
+            } else {
+                container.classList.remove('grid-cols-1');
+                container.classList.add('grid-cols-1', 'md:grid-cols-2');
+
+                if (btnGrid && btnList) {
+                    btnGrid.classList.add('bg-white', 'text-slate-900', 'shadow-xs');
+                    btnGrid.classList.remove('text-slate-500');
+                    btnList.classList.remove('bg-white', 'text-slate-900', 'shadow-xs');
+                    btnList.classList.add('text-slate-500');
+                }
+                localStorage.setItem('laa_doc_layout', 'grid');
+            }
+        }
+
+        // Restore saved layout choice on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLayout = localStorage.getItem('laa_doc_layout');
+            if (savedLayout === 'list') {
+                setDocLayout('list');
+            }
+        });
 
         // Close pdfModal when clicking dark backdrop outside content box
         document.addEventListener('DOMContentLoaded', () => {
@@ -804,6 +907,16 @@
             if (cols === 1) {
                 container.className = 'grid grid-cols-1 gap-6';
                 if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
+        }
+        function toggleDocGrid(cols) {
+            const container = document.getElementById('docGridContainer');
+            const btnSingle = document.getElementById('btnLayoutSingle');
+            const btnGrid = document.getElementById('btnLayoutGrid');
+            if (!container) return;
+
+            if (cols === 1) {
+                container.className = 'grid grid-cols-1 gap-6';
+                if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
                 if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-all cursor-pointer';
             } else {
                 container.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
@@ -811,6 +924,26 @@
                 if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-all cursor-pointer';
             }
         }
+
+        // Focus & highlight specific document card if requested via hash or URL param
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            const urlParams = new URLSearchParams(window.location.search);
+            const focusKey = urlParams.get('focus') || (hash ? hash.replace('#doc_card_', '').replace('#', '') : null);
+
+            if (focusKey) {
+                const targetCard = document.getElementById('doc_card_' + focusKey) || document.querySelector(`[data-key="${focusKey}"]`);
+                if (targetCard) {
+                    setTimeout(() => {
+                        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetCard.classList.add('ring-4', 'ring-orange-500', 'ring-offset-2', 'shadow-2xl', 'scale-[1.02]');
+                        setTimeout(() => {
+                            targetCard.classList.remove('ring-4', 'ring-orange-500', 'ring-offset-2', 'shadow-2xl', 'scale-[1.02]');
+                        }, 3000);
+                    }, 300);
+                }
+            }
+        });
     </script>
 
 </body>

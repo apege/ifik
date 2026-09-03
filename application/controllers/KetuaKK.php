@@ -204,6 +204,17 @@ class KetuaKK extends CI_Controller {
 
         $this->KetuaKK_model->update_approval_kk($nim, $status, $catatan);
 
+        // Record Approval History Log
+        $this->load->model('Approval_log_model');
+        $mhs_name = trim(($detail['nama_depan'] ?? '') . ' ' . ($detail['nama_belakang'] ?? ''));
+        $this->Approval_log_model->log(array(
+            'modul'       => 'Ketua KK',
+            'ref_id'      => $nim,
+            'target_name' => $mhs_name,
+            'action'      => ($status === 'Approved') ? 'Approved' : 'Rejected',
+            'catatan'     => $catatan
+        ));
+
         $msg = "";
         if ($status === 'Approved') {
             $msg = 'Persetujuan Ketua KK berhasil disimpan! Akses modul Bimbingan Tugas Akhir mahasiswa resmi DIBUKA (Unlocked).';
@@ -239,6 +250,7 @@ class KetuaKK extends CI_Controller {
             return;
         }
 
+        $this->load->model('Approval_log_model');
         $approved_count = 0;
         foreach ($nim_list as $nim) {
             $detail = $this->KetuaKK_model->get_detail_mahasiswa($nim);
@@ -251,6 +263,15 @@ class KetuaKK extends CI_Controller {
                 if ($is_wali_app && $is_admin_app && $is_koor_app) {
                     $note = !empty($catatan) ? $catatan : 'Disetujui secara masif oleh Ketua KK.';
                     $this->KetuaKK_model->update_approval_kk($nim, 'Approved', $note);
+                    
+                    $mhs_name = trim(($detail['nama_depan'] ?? '') . ' ' . ($detail['nama_belakang'] ?? ''));
+                    $this->Approval_log_model->log(array(
+                        'modul'       => 'Ketua KK',
+                        'ref_id'      => $nim,
+                        'target_name' => $mhs_name,
+                        'action'      => 'Approved',
+                        'catatan'     => $note
+                    ));
                     $approved_count++;
                 }
             }
