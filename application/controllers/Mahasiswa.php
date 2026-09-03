@@ -231,7 +231,11 @@ class Mahasiswa extends CI_Controller {
 
     // Fitur Pendaftaran TA 6-Step Wizard
     public function pendaftaran_ta() {
-        $nim = $this->_get_current_nim();
+        $nim = method_exists($this, '_get_current_nim') 
+            ? $this->_get_current_nim() 
+            : ($this->session->userdata('nim') ?: '1301210001');
+
+        $this->load->model('AdminLayanan_model');
         $pendaftaran = $this->Mahasiswa_model->get_status_pendaftaran($nim);
         // Form hanya terkunci jika sudah resmi dikirim (is_submitted = 1)
         $has_completed_submission = !empty($pendaftaran['is_submitted']);
@@ -275,13 +279,15 @@ class Mahasiswa extends CI_Controller {
             if ($server_draft_step > 6) $server_draft_step = 6;
         }
 
-        $data['title'] = $is_locked ? 'Pendaftaran Tugas Akhir (Sedang Ditinjau)' : 'Pendaftaran Tugas Akhir (6 Step)';
-        $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
-        $data['pendaftaran'] = $pendaftaran;
-        $data['is_locked'] = $is_locked;
-        $data['has_revisi'] = $has_revisi;
-        $data['has_ta'] = $has_ta;
+        $data['title']          = $is_locked ? 'Pendaftaran Tugas Akhir (Sedang Ditinjau)' : 'Pendaftaran Tugas Akhir (6 Step)';
+        $data['mahasiswa']      = $this->Mahasiswa_model->get_mahasiswa($nim);
+        $data['pendaftaran']    = $pendaftaran;
+        $data['is_locked']      = $is_locked;
+        $data['has_revisi']     = $has_revisi;
+        $data['has_ta']         = $has_ta;
         $data['server_draft_step'] = $server_draft_step;
+        $data['syarat_berkas']  = $this->AdminLayanan_model->get_active_syarat_berkas();
+        $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
 
         if ($this->input->post()) {
             // Konfigurasi Upload File PDF
@@ -295,10 +301,30 @@ class Mahasiswa extends CI_Controller {
 
             $this->load->library('upload', $config);
 
-            $file_step3 = $this->_do_upload('file_ksm', $config);
-            $file_step4 = $this->_do_upload('file_transkrip', $config);
-            $file_step5 = $this->_do_upload('file_pernyataan', $config);
-            $file_step6 = $this->_do_upload('file_bebas_lab', $config);
+            // Upload Dinamis per Syarat Berkas
+            $active_syarat = $data['syarat_berkas'];
+            $file_uploads = [];
+
+            foreach ($active_syarat as $sb) {
+                $kode = $sb['kode_berkas'];
+                $field_name = 'file_' . $kode;
+                $uploaded = $this->_do_upload($field_name, $config);
+
+                if ($uploaded) {
+                    $file_uploads[$kode] = $uploaded;
+                    $this->AdminLayanan_model->save_student_berkas($nim, $kode, $uploaded, 'Pending');
+                } else {
+                    $old = $this->input->post($field_name . '_old');
+                    if ($old) {
+                        $file_uploads[$kode] = $old;
+                    }
+                }
+            }
+
+            $file_step3 = $file_uploads['ksm'] ?? $this->_do_upload('file_ksm', $config);
+            $file_step4 = $file_uploads['transkrip'] ?? $this->_do_upload('file_transkrip', $config);
+            $file_step5 = $file_uploads['pernyataan'] ?? $this->_do_upload('file_pernyataan', $config);
+            $file_step6 = $file_uploads['bebas_lab'] ?? $this->_do_upload('file_bebas_lab', $config);
 
             // Ambil data pendaftaran_ta yang sudah ada untuk menjaga status yang sudah di-Approve
             $existing_ta = $this->db->get_where('pendaftaran_ta', array('nim' => $nim))->row_array();
@@ -495,11 +521,15 @@ class Mahasiswa extends CI_Controller {
         }
 
         $nim = $this->_get_current_nim();
+        $this->load->model('Rekomendasi_model');
+        $this->Rekomendasi_model->seed_dummy_bimbingan_data($nim ?: '1301210001');
+
         $data['title'] = 'Bimbingan & Evaluasi Preview TA';
         $data['mahasiswa'] = $this->Mahasiswa_model->get_mahasiswa($nim);
         $data['pendaftaran'] = $this->Mahasiswa_model->get_status_pendaftaran($nim);
         
         $pembimbing_penguji = $this->Mahasiswa_model->get_pembimbing_penguji($nim);
+
         
         // Riwayat tiap tahapan preview
         $data['riwayat_preview1'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
@@ -1096,4 +1126,244 @@ class Mahasiswa extends CI_Controller {
         }
         exit;
     }
+
+    // ==========================================
+    // REKOMENDASI SIDANG / NON SIDANG ENDPOINTS
+    // ==========================================
+
+    // AJAX: Get active main options and non-sidang options dynamically
+    public function ajax_get_rekomen_options() {
+        $this->load->model('Rekomendasi_model');
+        $main = $this->Rekomendasi_model->get_active_main_options();
+        $non_sidang = $this->Rekomendasi_model->get_active_non_sidang_options();
+        echo json_encode([
+            'status' => 'success',
+            'data' => $non_sidang,
+            'main_options' => $main
+        ]);
+        exit;
+    }
+
+
+    // Process Submission: Rekomendasi SIDANG (Reguler)
+    public function submit_rekomendasi_sidang() {
+        $this->load->model('Rekomendasi_model');
+        $nim = $this->input->post('nim') ?: $this->_get_current_nim();
+        $id_preview = $this->input->post('id_preview');
+        $user_id = $this->session->userdata('user_id');
+
+        $data_sub = [
+            'nim' => $nim,
+            'id_preview' => $id_preview,
+            'recommendation_type' => 'sidang',
+            'jalur_id' => NULL,
+            'jalur_title' => 'SIDANG',
+            'form_data_json' => json_encode(['catatan' => 'Direkomendasikan Sidang Akhir Reguler']),
+            'catatan_dosen' => 'Lanjut ke Tahapan Pendaftaran Sidang Akhir',
+            'status' => 'Submitted',
+            'created_by' => $user_id
+        ];
+
+        $sub_id = $this->Rekomendasi_model->save_submission($data_sub);
+
+        // Update status pendaftaran TA if exists
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $update_ta = ['current_stage' => 'Pendaftaran Sidang'];
+            if ($this->db->field_exists('status_sidang', 'pendaftaran_ta')) {
+                $update_ta['status_sidang'] = 'Belum Dijadwalkan';
+            }
+            $this->db->where('nim', $nim)->update('pendaftaran_ta', $update_ta);
+        }
+
+        if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => 'Rekomendasi Sidang berhasil disimpan! Status mahasiswa kini berlanjut ke Pendaftaran Sidang.']);
+            exit;
+        }
+
+        $this->session->set_flashdata('success', 'Rekomendasi Sidang berhasil disimpan!');
+        redirect('mahasiswa/bimbingan');
+    }
+
+    // Process Submission: Rekomendasi NON SIDANG (Upload Berkas PDF/DOCX)
+    public function submit_rekomendasi_nonsidang() {
+        $this->load->model('Rekomendasi_model');
+        $nim = $this->input->post('nim') ?: $this->_get_current_nim();
+        $id_preview = $this->input->post('id_preview');
+        $jalur_id = $this->input->post('jalur_id');
+        $user_id = $this->session->userdata('user_id');
+
+        $option = $this->Rekomendasi_model->get_option($jalur_id);
+        if (!$option) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => 'Jalur Non-Sidang tidak ditemukan.']);
+                exit;
+            }
+            $this->session->set_flashdata('error', 'Jalur Non-Sidang tidak valid.');
+            redirect('mahasiswa/bimbingan');
+        }
+
+        // Folder upload
+        $upload_dir = './uploads/rekomendasi_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $form_data = [];
+        $allowed_ext_array = ['pdf', 'docx', 'doc'];
+
+        // Loop through dynamic fields for this option
+        if (!empty($option['fields'])) {
+            foreach ($option['fields'] as $f) {
+                $fkey = $f['field_key'];
+                if ($f['field_type'] == 'file') {
+                    if (isset($_FILES[$fkey]) && $_FILES[$fkey]['error'] == UPLOAD_ERR_OK) {
+                        $file_ext = strtolower(pathinfo($_FILES[$fkey]['name'], PATHINFO_EXTENSION));
+                        if (!in_array($file_ext, $allowed_ext_array)) {
+                            $res = ['status' => 'error', 'message' => 'Format file "' . $f['field_label'] . '" harus PDF atau DOCX (.pdf, .docx, .doc).'];
+                            if ($this->input->is_ajax_request()) { echo json_encode($res); exit; }
+                            $this->session->set_flashdata('error', $res['message']);
+                            redirect('mahasiswa/bimbingan');
+                        }
+
+                        $new_filename = 'rekomen_' . $fkey . '_' . $nim . '_' . time() . '.' . $file_ext;
+                        $target_path = $upload_dir . $new_filename;
+                        if (move_uploaded_file($_FILES[$fkey]['tmp_name'], $target_path)) {
+                            $form_data[$fkey] = [
+                                'label' => $f['field_label'],
+                                'file' => base_url('uploads/rekomendasi_ta/' . $new_filename),
+                                'original_name' => $_FILES[$fkey]['name']
+                            ];
+                        }
+                    } else if ($f['is_required']) {
+                        $res = ['status' => 'error', 'message' => 'Berkas "' . $f['field_label'] . '" wajib diunggah.'];
+                        if ($this->input->is_ajax_request()) { echo json_encode($res); exit; }
+                        $this->session->set_flashdata('error', $res['message']);
+                        redirect('mahasiswa/bimbingan');
+                    }
+                } else {
+                    $form_data[$fkey] = [
+                        'label' => $f['field_label'],
+                        'val' => $this->input->post($fkey)
+                    ];
+                }
+            }
+        }
+
+        $catatan_alasan = $this->input->post('catatan_alasan') ?: ($this->input->post('tanggapan') ?: '');
+
+        $data_sub = [
+            'nim' => $nim,
+            'id_preview' => $id_preview,
+            'recommendation_type' => 'non_sidang',
+            'jalur_id' => $option['id'],
+            'jalur_title' => $option['title'],
+            'form_data_json' => json_encode($form_data),
+            'catatan_dosen' => $catatan_alasan,
+            'status' => 'Submitted',
+            'created_by' => $user_id
+        ];
+
+        $sub_id = $this->Rekomendasi_model->save_submission($data_sub);
+
+        // Update status pendaftaran TA if exists
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $update_ta = ['current_stage' => 'Rekomendasi Non-Sidang (' . $option['title'] . ')'];
+            if ($this->db->field_exists('status_sidang', 'pendaftaran_ta')) {
+                $update_ta['status_sidang'] = 'Non-Sidang (' . $option['title'] . ')';
+            }
+            $this->db->where('nim', $nim)->update('pendaftaran_ta', $update_ta);
+        }
+
+
+        if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => 'Rekomendasi Non-Sidang (' . $option['title'] . ') dan berkas persyaratan berhasil disimpan!']);
+            exit;
+        }
+
+        $this->session->set_flashdata('success', 'Rekomendasi Non-Sidang (' . $option['title'] . ') berhasil disimpan!');
+        redirect('mahasiswa/bimbingan');
+    }
+
+    // ==========================================
+    // DYNAMIC CRUD MANAGEMENT FOR RECOMMENDATIONS
+    // ==========================================
+
+    // Fetch all options & fields for dynamic management modal/page
+    public function ajax_get_all_rekomen_crud() {
+        $this->load->model('Rekomendasi_model');
+        $options = $this->Rekomendasi_model->get_all_options();
+        echo json_encode(['status' => 'success', 'data' => $options]);
+        exit;
+    }
+
+    // Add or Edit Option (Sidang / Non-Sidang Pathways)
+    public function ajax_save_rekomen_option() {
+        $this->load->model('Rekomendasi_model');
+        $id = $this->input->post('id');
+        $data = [
+            'category' => $this->input->post('category') ?: 'non_sidang',
+            'code' => strtolower(url_title($this->input->post('title'), '_', true)) . '_' . time(),
+            'title' => $this->input->post('title'),
+            'description' => $this->input->post('description'),
+            'icon_type' => 'bi',
+            'icon_class' => $this->input->post('icon_class') ?: 'bi-award-fill',
+            'is_active' => $this->input->post('is_active') !== null ? (int)$this->input->post('is_active') : 1,
+            'sort_order' => (int)($this->input->post('sort_order') ?: 0)
+        ];
+
+        if ($id) {
+            unset($data['code']);
+        }
+
+        $res_id = $this->Rekomendasi_model->save_option($data, $id);
+        echo json_encode(['status' => 'success', 'message' => 'Jalur berhasil disimpan!', 'id' => $res_id]);
+        exit;
+    }
+
+    // Delete Option
+    public function ajax_delete_rekomen_option() {
+        $this->load->model('Rekomendasi_model');
+        $id = $this->input->post('id');
+        if ($id) {
+            $this->Rekomendasi_model->delete_option($id);
+            echo json_encode(['status' => 'success', 'message' => 'Jalur berhasil dihapus!']);
+            exit;
+        }
+        echo json_encode(['status' => 'error', 'message' => 'ID tidak ditemukan']);
+        exit;
+    }
+
+    // Add or Edit Form Field per Option
+    public function ajax_save_rekomen_field() {
+        $this->load->model('Rekomendasi_model');
+        $id = $this->input->post('id');
+        $data = [
+            'jalur_id' => $this->input->post('jalur_id'),
+            'field_key' => $this->input->post('field_key') ?: strtolower(url_title($this->input->post('field_label'), '_', true)),
+            'field_label' => $this->input->post('field_label'),
+            'field_type' => $this->input->post('field_type') ?: 'file',
+            'allowed_ext' => $this->input->post('allowed_ext') ?: 'pdf,docx,doc',
+            'is_required' => (int)($this->input->post('is_required') ?: 0),
+            'help_text' => $this->input->post('help_text') ?: 'Format file diharuskan pdf/docx',
+            'sort_order' => (int)($this->input->post('sort_order') ?: 0)
+        ];
+
+        $res_id = $this->Rekomendasi_model->save_field($data, $id);
+        echo json_encode(['status' => 'success', 'message' => 'Field persyararan berhasil disimpan!', 'id' => $res_id]);
+        exit;
+    }
+
+    // Delete Form Field
+    public function ajax_delete_rekomen_field() {
+        $this->load->model('Rekomendasi_model');
+        $id = $this->input->post('id');
+        if ($id) {
+            $this->Rekomendasi_model->delete_field($id);
+            echo json_encode(['status' => 'success', 'message' => 'Field berhasil dihapus!']);
+            exit;
+        }
+        echo json_encode(['status' => 'error', 'message' => 'ID field tidak ditemukan']);
+        exit;
+    }
 }
+

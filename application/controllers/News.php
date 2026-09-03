@@ -34,19 +34,86 @@ class News extends CI_Controller {
         $berita = $this->News_model->get_by_id($id);
 
         if (!$berita) {
-            // Fallback mock berita jika ID belum ada di database
-            $berita = (object) array(
-                'id'           => $id,
-                'judul'        => 'Pameran Karya & Inovasi Mahasiswa FIK 2026 Sukses Digelar',
-                'kategori'     => 'Akademik & Event',
-                'penulis'      => 'Tim Redaksi FIK Portal',
-                'tanggal'      => date('Y-m-d'),
-                'gambar'       => 'assets/images/ifik_portal_3d_render.jpg',
-                'excerpt'      => 'Ratusan karya inovatif dari mahasiswa dipamerkan dalam ajang tahunan yang dihadiri oleh praktisi industri kreatif terkemuka.',
-                'konten'       => '<p>Fakultas Industri Kreatif (FIK) Telkom University kembali menggelar ajang pameran karya tahunan mahasiswa yang menampilkan ratusan karya desain, animasi, sinematografi, dan produk digital interaktif.</p><p>Acara yang berlangsung selama tiga hari ini menarik antusiasme lebih dari 1.500 pengunjung, termasuk perwakilan dari studio industri kreatif ternama, investor startup, dan civitas akademika.</p><p>Dekan FIK menyampaikan apresiasi tinggi atas dedikasi para mahasiswa dalam menghasilkan karya berstandar industri yang siap bersaing di pasar global.</p>',
-                'published'    => 1,
-                'border_style' => 'none'
+            // Fallback sample news mapping matching sample items from berita.php
+            $sample_news = array(
+                1 => array(
+                    'id'           => 1,
+                    'judul'        => 'Pameran Karya Mahasiswa FIK 2026 Sukses Digelar',
+                    'kategori'     => 'Akademik & Event',
+                    'penulis'      => 'Tim Redaksi FIK Portal',
+                    'tanggal'      => '2026-08-12',
+                    'gambar'       => 'assets/images/Fakultas.jpg',
+                    'excerpt'      => 'Ratusan karya inovatif dari mahasiswa dipamerkan dalam ajang tahunan yang dihadiri oleh praktisi industri kreatif terkemuka.',
+                    'konten'       => '<p>Fakultas Industri Kreatif kembali membuktikan komitmennya dalam mencetak talenta-talenta muda berbakat melalui ajang tahunan yang paling ditunggu, yakni "Pameran Karya Mahasiswa FIK 2026". Acara yang berlangsung meriah selama tiga hari berturut-turut ini sukses menarik perhatian tidak hanya civitas akademika, tetapi juga para praktisi dan pelaku industri kreatif nasional.</p><p>Dengan mengusung tema <em>"Future Intersection: Where Art Meets Technology"</em>, pameran kali ini menghadirkan lebih dari 200 karya inovatif. Mulai dari instalasi seni interaktif, prototipe desain produk futuristik, hingga eksplorasi WebGL dan realitas virtual (VR) yang memungkinkan pengunjung masuk ke dalam dunia digital tanpa batas dan berinteraksi langsung dengan karya-karya visual tingkat tinggi.</p><blockquote>"Karya-karya yang dipamerkan tahun ini benar-benar melampaui ekspektasi kami. Mahasiswa tidak hanya berpikir tentang estetika visual, tetapi juga memprioritaskan fungsionalitas dan interaksi manusia dengan teknologi di masa depan," <br><br><span style="font-size:1rem; color:#64748b; font-style:normal;">— Dekan Fakultas Industri Kreatif</span></blockquote><p>Selain pameran karya, acara ini juga diramaikan dengan berbagai sesi seminar, <em>workshop</em>, dan <em>talkshow</em> yang menghadirkan narasumber ternama dari berbagai perusahaan teknologi dan studio desain terkemuka di Indonesia.</p>',
+                    'published'    => 1,
+                    'border_style' => 'swirl'
+                ),
+                2 => array(
+                    'id'           => 2,
+                    'judul'        => 'Workshop Desain Interaktif Bersama Pakar UI/UX',
+                    'kategori'     => 'Workshop & Skill',
+                    'penulis'      => 'Tim Redaksi FIK Portal',
+                    'tanggal'      => '2026-08-05',
+                    'gambar'       => 'assets/images/multimedia.jpg',
+                    'excerpt'      => 'Mahasiswa diajak untuk mendalami tren UI/UX dan interaksi 3D web modern dalam workshop intensif selama dua hari.',
+                    'konten'       => '<p>Fakultas Industri Kreatif sukses menggelar Workshop Desain Interaktif yang berfokus pada perkembangan tren UI/UX terkini serta integrasi komponen 3D interaktif berbasis web. Workshop ini menghadirkan praktisi senior UI/UX dari berbagai perusahaan teknologi terkemuka.</p><p>Para peserta diberikan kesempatan untuk mempraktikkan langsung pembuatan antarmuka digital modern yang mengutamakan User Experience (UX), aksesibilitas, dan performa tinggi.</p>',
+                    'published'    => 1,
+                    'border_style' => 'neon'
+                ),
+                3 => array(
+                    'id'           => 3,
+                    'judul'        => 'Peluncuran Sistem Layanan Terpadu IFIK Versi Baru',
+                    'kategori'     => 'Pengumuman',
+                    'penulis'      => 'Tim IT FIK',
+                    'tanggal'      => '2026-07-28',
+                    'gambar'       => 'assets/images/ifik_portal_3d_render.jpg',
+                    'excerpt'      => 'Sistem IFIK kini hadir dengan wajah baru yang lebih premium, responsif, dan interaktif untuk memudahkan seluruh civitas akademika.',
+                    'konten'       => '<p>Fakultas Industri Kreatif resmi meluncurkan pembaruan besar pada Sistem Layanan Terpadu IFIK Portal. Versi baru ini menyajikan antarmuka yang lebih intuitif, animasi yang smooth, serta integrasi layanan administrasi yang lebih cepat dan efisien.</p><p>Sistem baru ini dirancang untuk mendukung kebutuhan mahasiswa, dosen wali, koordinator TA, hingga pimpinan fakultas dalam memantau dan mengelola berkas administrasi secara real-time.</p>',
+                    'published'    => 1,
+                    'border_style' => 'geometric'
+                ),
+                4 => array(
+                    'id'           => 4,
+                    'judul'        => 'Prestasi Gemilang Tim Riset FIK di Tingkat Nasional',
+                    'kategori'     => 'Prestasi',
+                    'penulis'      => 'Humas FIK',
+                    'tanggal'      => '2026-07-15',
+                    'gambar'       => 'assets/images/Aula1.jpg',
+                    'excerpt'      => 'Penelitian kolaboratif dosen dan mahasiswa tentang pemanfaatan AI dalam desain komunikasi visual berhasil memenangkan hibah.',
+                    'konten'       => '<p>Tim riset kolaboratif yang terdiri dari dosen dan mahasiswa Fakultas Industri Kreatif berhasil meraih penghargaan bergengsi dalam kompetisi inovasi teknologi tingkat nasional. Riset yang diusung mengkaji penerapan kecerdasan buatan (AI) dalam mempercepat proses ideasi dan produksi desain komunikasi visual.</p><p>Pencapaian ini membuktikan kualitas riset dan komitmen FIK dalam memajukan ilmu pengetahuan dan teknologi di bidang industri kreatif.</p>',
+                    'published'    => 1,
+                    'border_style' => 'polaroid'
+                ),
+                5 => array(
+                    'id'           => 5,
+                    'judul'        => 'Kunjungan Studi Industri Kreatif ke Studio Animasi',
+                    'kategori'     => 'Kunjungan Industri',
+                    'penulis'      => 'Tim Redaksi FIK Portal',
+                    'tanggal'      => '2026-07-02',
+                    'gambar'       => 'assets/images/Fakultas.jpg',
+                    'excerpt'      => 'Mahasiswa semester akhir berkesempatan melihat langsung alur kerja produksi animasi 3D kelas dunia dan berdiskusi.',
+                    'konten'       => '<p>Dalam rangka memperluas wawasan praktis, mahasiswa Fakultas Industri Kreatif melakukan kunjungan studi ke studio animasi ternama. Kegiatan ini bertujuan memberikan gambaran nyata mengenai pipeline produksi animasi 3D, pengelolaan aset visual, serta standar kerja di dunia industri.</p><p>Diharapkan pengalaman ini dapat menginspirasi para mahasiswa dalam menyelesaikan tugas akhir dan mempersiapkan diri menghadapi tantangan profesional setelah lulus.</p>',
+                    'published'    => 1,
+                    'border_style' => 'none'
+                ),
             );
+
+            if (isset($sample_news[(int)$id])) {
+                $berita = (object)$sample_news[(int)$id];
+            } else {
+                $berita = (object) array(
+                    'id'           => $id,
+                    'judul'        => 'Berita Informatif FIK #' . $id,
+                    'kategori'     => 'Informasi',
+                    'penulis'      => 'Tim Redaksi FIK Portal',
+                    'tanggal'      => date('Y-m-d'),
+                    'gambar'       => 'assets/images/background.png',
+                    'excerpt'      => 'Informasi terbaru mengenai kegiatan dan pengumuman di lingkungan Fakultas Industri Kreatif.',
+                    'konten'       => '<p>Berikut adalah rincian informasi dan berita terkini dari Fakultas Industri Kreatif Telkom University.</p>',
+                    'published'    => 1,
+                    'border_style' => 'none'
+                );
+            }
         }
 
         $data['berita'] = $berita;

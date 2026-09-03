@@ -280,9 +280,14 @@
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Catatan / Feedback Anda</label>
                             <textarea name="catatan_pembimbing" id="modalCatatan" rows="4" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm font-medium" placeholder="Tuliskan feedback atau arahan revisi di sini..."></textarea>
                         </div>
-                        <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                            <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition">Batal</button>
-                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-md transition transform hover:scale-105 active:scale-95">Simpan Review</button>
+                        <div class="pt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
+                            <button type="button" onclick="triggerRekomenFromModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 transform hover:scale-105 active:scale-95">
+                                <i class="bi bi-check2-square text-base"></i> Rekomendasi Sidang/Non Sidang
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition text-xs">Batal</button>
+                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition transform hover:scale-105 active:scale-95">Simpan Review</button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -305,6 +310,7 @@
                     </div>
                 </div>
             </div>
+
 
         </div>
     </main>
@@ -641,8 +647,17 @@
                         // format compatibility with the current rendering logic.
                         fetchBimbinganData(true);
                     }
-                } catch(e) { console.error('SSE Error:', e); }
-            };
+        let currentSelectedStudentForRekomen = null;
+
+        function triggerRekomenFromModal() {
+            const previewId = document.getElementById('modalIdPreview').value;
+            const studentText = document.getElementById('modalStudentName').textContent;
+            // extract nim inside parentheses e.g. "Nama (NIM)"
+            const match = studentText.match(/\(([^)]+)\)/);
+            const nim = match ? match[1] : '';
+            
+            closeReviewModal();
+            openRekomendasiModal(nim, previewId);
         }
 
         function rebindDosenCheckboxes() {
@@ -1006,7 +1021,7 @@
         function closeP2Comment() {
             document.getElementById('p2CommentModal').classList.remove('open');
         }
-    </script>
+    </script>    <?php $this->load->view('partials/modal_rekomendasi_sidang'); ?>
 
     <!-- Hover Preview Panel -->
     <div id="hoverPreviewPanel">
@@ -1023,6 +1038,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- P2 Comment Modal -->
     <div id="p2CommentModal">
@@ -1090,5 +1106,7 @@
             </div>
         </div>
     </div>
+>>>>>>> upstream/main
 </body>
 </html>
+

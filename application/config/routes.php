@@ -99,9 +99,19 @@ $route['onboarding/(:any)'] = 'Onboarding/$1';
 
 // Admin Layanan (LAA) Routes
 $route['adminlayanan'] = 'AdminLayanan/index';
+$route['adminlayanan/ajax_get_table'] = 'AdminLayanan/ajax_get_table';
+$route['adminlayanan/pengaturan_berkas'] = 'AdminLayanan/pengaturan_berkas';
+$route['adminlayanan/pengaturan_jalur'] = 'AdminLayanan/pengaturan_jalur';
+$route['koordinatorta/pengaturan_jalur'] = 'KoordinatorTA/pengaturan_jalur';
+$route['adminlayanan/simpan_syarat_berkas'] = 'AdminLayanan/simpan_syarat_berkas';
+$route['adminlayanan/toggle_syarat_berkas/(:any)'] = 'AdminLayanan/toggle_syarat_berkas/$1';
+$route['adminlayanan/hapus_syarat_berkas/(:any)'] = 'AdminLayanan/hapus_syarat_berkas/$1';
 $route['adminlayanan/autocomplete'] = 'AdminLayanan/autocomplete';
 $route['adminlayanan/detail_berkas/(:any)'] = 'AdminLayanan/detail_berkas/$1';
 $route['adminlayanan/submit_verifikasi/(:any)'] = 'AdminLayanan/submit_verifikasi/$1';
+$route['adminlayanan/submit_verifikasi_batch'] = 'AdminLayanan/submit_verifikasi_batch';
+$route['adminlayanan/get_batch_details'] = 'AdminLayanan/get_batch_details';
+
 
 // Ketua KK Routes
 $route['ketuakk'] = 'KetuaKK/index';
@@ -112,6 +122,8 @@ $route['ketuakk/submit_bulk_approval'] = 'KetuaKK/submit_bulk_approval';
 
 // Central Admin Panel Routes
 $route['admin'] = 'Admin/index';
+$route['admin/log_history'] = 'Admin/log_history';
+$route['log-history'] = 'Admin/log_history';
 
 // News / Berita Routes
 $route['news/detail/(:num)'] = 'News/detail/$1';

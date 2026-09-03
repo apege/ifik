@@ -308,6 +308,34 @@
                     </div>
                 </div>
 
+                <!-- Module 8: Audit Trail & Riwayat Log Approval System -->
+                <div class="clean-card rounded-2xl p-6 flex flex-col justify-between hover:border-orange-300 transition-all group">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase">
+                                System Audit Trail
+                            </span>
+                            <div class="w-9 h-9 rounded-xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center text-base">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 mb-1 group-hover:text-orange-600 transition-colors">
+                            Riwayat Log Approval System
+                        </h3>
+                        <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                            Audit trail terpusat seluruh aksi persetujuan, penolakan, dan revisi dari Dosen Wali, Admin LAA, Koor TA, Ketua KK, dan Fasilitas.
+                        </p>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-[11px] font-medium text-slate-400">
+                            Lintas Seluruh Modul
+                        </span>
+                        <a href="<?= site_url('admin/log_history'); ?>" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all">
+                            Buka Log History <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </div>
 
