@@ -196,14 +196,11 @@
         }
         
         @media (max-width: 900px) {
-            #global-model-container.pos-left {
-                left: 10%;
-                top: 40%; 
-            }
-            #global-model-container.pos-top-left {
-                left: 40px;
-                top: 35px;
-                transform: translate(-50%, -50%) scale(0.1) rotateY(720deg);
+            #global-model-container {
+                display: none !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
             }
         }
 
@@ -319,6 +316,32 @@
         /* Rotasi panah ke atas jika di sesi terakhir */
         .global-scroll-btn.pointing-up svg {
             transform: rotate(180deg);
+        }
+
+        @media (max-width: 900px) {
+            .global-scroll-btn {
+                width: 38px;
+                height: 38px;
+                bottom: 18px;
+                border-width: 1.5px;
+            }
+            .global-scroll-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .global-scroll-btn {
+                width: 34px;
+                height: 34px;
+                bottom: 12px;
+                border-width: 1.5px;
+            }
+            .global-scroll-btn svg {
+                width: 15px;
+                height: 15px;
+            }
         }
 
         /* Elevate specific content cards so they glide over the global scroll button (z-index: 1) */

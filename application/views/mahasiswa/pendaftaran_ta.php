@@ -518,8 +518,15 @@
         &copy; <?= date('Y'); ?> IFIK Portal — Fakultas Industri Kreatif, Telkom University
     </footer>
 
+    <?php
+        $has_saved_draft = !empty($has_ta) && !empty($pendaftaran) && (!empty($pendaftaran['jenis_ta']) || !empty($pendaftaran['judul_1']) || !empty($pendaftaran['file_ksm']));
+    ?>
     <script>
-        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ''); ?>";
+        window.CURRENT_USER_NIM = "<?= htmlspecialchars($mahasiswa['nim'] ?? ($this->session->userdata('nim') ?: ($this->session->userdata('nidn_nim') ?: ''))); ?>";
+        window.UPLOAD_AJAX_URL = "<?= site_url('mahasiswa/ajax_upload_file_ta'); ?>";
+        window.SAVE_DRAFT_AJAX_URL = "<?= site_url('mahasiswa/ajax_save_draft_ta'); ?>";
+        window.SERVER_DRAFT_STEP = <?= (int)($server_draft_step ?? 1); ?>;
+        window.SERVER_HAS_DRAFT = <?= $has_saved_draft ? 'true' : 'false'; ?>;
     </script>
     <script src="<?= base_url('assets/js/navbar_animated.js'); ?>?v=<?= time(); ?>"></script>
     <script src="<?= base_url('assets/js/pendaftaran_ta_stepper.js'); ?>?v=<?= time(); ?>"></script>

@@ -19,23 +19,24 @@
     /* Styling Sesi Laboratorium Fakultas (Pergeseran Super Lambat 1.6s Ultra Silk-Smooth) */
     /* Styling Sesi Laboratorium Fakultas (Full-Screen Room Photo Mode) */
     #section-lab {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
         position: relative;
         z-index: 2;
-        background: #000000;
+        background: #0f172a;
     }
 
     .lab-container {
         margin: 0;
-        width: 100vw;
-        height: 100vh;
-        max-width: 100vw;
-        max-height: 100vh;
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        max-width: 100%;
         padding: 0;
         z-index: 2;
         background: transparent;
@@ -75,10 +76,10 @@
         text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
     }
 
-    /* Viewport Container (Full 100vw x 100vh) */
+    /* Viewport Container (Full 100% x 100%) */
     .lab-viewport {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
         position: absolute;
         top: 0;
@@ -97,17 +98,17 @@
     .lab-track {
         display: flex;
         gap: 0px;
-        align-items: center;
-        height: 100vh;
+        align-items: stretch;
+        height: 100%;
         transition: transform 1.0s cubic-bezier(0.25, 1, 0.35, 1);
         will-change: transform;
     }
 
-    /* Card Fullscreen 100vw x 100vh */
+    /* Card Fullscreen 100% */
     .lab-card {
         flex: 0 0 100vw;
         width: 100vw;
-        height: 100vh;
+        height: 100%;
         max-width: 100vw;
         border-radius: 0;
         border: none;
@@ -130,8 +131,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
         z-index: 1;
         transform: none !important;
@@ -144,8 +145,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         z-index: 2;
         background: linear-gradient(180deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.1) 45%, rgba(15, 23, 42, 0.88) 100%);
         display: flex;
@@ -487,16 +488,62 @@
     }
 
     @media (max-width: 768px) {
+        .lab-header {
+            top: 72px;
+            left: 20px;
+            right: 20px;
+            text-align: left;
+            z-index: 30;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .lab-header h1 {
+            font-size: 1.45rem;
+            letter-spacing: -0.3px;
+            margin-bottom: 2px;
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+        }
+        .lab-header p {
+            font-size: 0.78rem;
+            line-height: 1.3;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+        }
         .lab-card {
-            flex: 0 0 88vw;
-            height: 360px;
+            flex: 0 0 100vw;
+            width: 100vw;
+            height: 100%;
+            max-width: 100vw;
+        }
+        .lab-card-overlay {
+            padding: 0 20px 88px 20px;
         }
         .lab-card-title-text {
-            font-size: 1.25rem;
+            font-size: 1.45rem;
+            margin: 6px 0;
+        }
+        .lab-card-desc-text {
+            font-size: 0.82rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .btn-apple-action {
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            border-radius: 12px;
         }
         .lab-nav-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
+        }
+        .lab-nav-btn svg {
+            width: 18px;
+            height: 18px;
         }
         .lab-nav-btn.prev-btn {
             left: 8px;
@@ -508,17 +555,18 @@
 </style>
 
 <!-- Sesi: Laboratorium Fakultas (Pergeseran Super Lambat 2.5s & Ultra Silk-Smooth) -->
-<div class="section-wrapper" id="section-lab">
+<div id="section-lab" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;">
     <div class="lab-container">
         
-        <div class="lab-header">
-            <div>
-                <h1>LABORATORIUM FAKULTAS</h1>
-                <p>Fasilitas laboratorium di fakultas industri kreatif</p>
-            </div>
-        </div>
-
         <div class="lab-viewport" id="labViewport">
+            <!-- Header Judul Sesi Laboratorium (Selalu Tampil di Atas Foto) -->
+            <div class="lab-header">
+                <div>
+                    <h1>LABORATORIUM FAKULTAS</h1>
+                    <p>Fasilitas laboratorium di fakultas industri kreatif</p>
+                </div>
+            </div>
+
             <!-- Tombol Navigasi Kiri & Kanan -->
             <button class="lab-nav-btn prev-btn" id="labPrevBtn" aria-label="Slide Kiri" title="Foto Sebelumnya">
                 <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -892,21 +940,31 @@
         setTrackTransform(targetX, animate);
     }
 
+    function isMobileView() {
+        return window.innerWidth <= 900 || window.matchMedia('(pointer: coarse)').matches;
+    }
+
     function startLabSequence() {
         activeLabIndex = 0;
-        isPlaying = true;
+        isPlaying = !isMobileView(); // Di HP/mobile auto-play otomatis dimatikan
         isMoving = false;
         renderTrackPosition(CENTER_SLOT_INDEX, false);
         updateAllSlots(0);
         const playPauseIcon = document.getElementById('playPauseIcon');
         if (playPauseIcon) {
-            playPauseIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`; // Icon Pause
+            playPauseIcon.innerHTML = isPlaying 
+                ? `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>` 
+                : `<path d="M8 5v14l11-7z"/>`;
         }
         syncIndicators(0);
     }
     window.startLabSequence = startLabSequence;
 
     function startAutoPlay() {
+        if (isMobileView()) {
+            isPlaying = false;
+            return;
+        }
         isPlaying = true;
         const playPauseIcon = document.getElementById('playPauseIcon');
         if (playPauseIcon) {

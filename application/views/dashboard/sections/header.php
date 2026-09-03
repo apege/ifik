@@ -2,7 +2,7 @@
     /* Styling khusus Sesi 1 */
     #section-carousel {
         position: relative;
-        background-color: #d97706; /* Fallback color asli */
+        background-color: #0f172a;
     }
 
     /* Horizontal Carousel Snapping (Hijacking kiri-kanan) */
@@ -35,6 +35,17 @@
     /* Khusus Slide 1 background-nya fakultas.jpg tanpa filter */
     .carousel-slide.slide-1 {
         background-image: url('<?= base_url("assets/images/Fakultas.jpg") ?>');
+    }
+
+    /* Khusus Slide 2 (Fasilitas Lab) membentang penuh 100% tanpa centering gap */
+    .carousel-slide.slide-2 {
+        display: block !important;
+        position: relative;
+        width: 100vw;
+        height: 100%;
+        overflow: hidden;
+        background: #0f172a !important;
+        background-image: none !important;
     }
     /* CSS untuk Pop-up / Modal "Baca Selengkapnya" */
     .read-more-modal {
@@ -560,10 +571,121 @@
     .dots-nav-btn svg { width: 12px; height: 12px; }
     
     @media (max-width: 900px) {
-        .slide1-layout { padding: 0 20px; }
-        .slide1-text-container { margin-top: 0; width: 100%; }
-        .dekanat-img-right { max-height: 250px; opacity: 0.5; }
-        .carousel-indicators { left: 20px; right: 20px; bottom: 25px; }
+        .slide1-layout { padding: 0 20px; top: 70px; }
+        .slide1-text-container { margin-top: 0; width: 100%; margin-left: 0; }
+        .slide1-title-box { padding: 12px 20px; border-radius: 12px; }
+        .slide1-title-box h1 { font-size: 1.6rem; }
+        .slide1-content-box { font-size: 0.82rem; padding: 16px 20px; border-radius: 12px; }
+        .dekanat-img-right { max-height: 250px; opacity: 0.4; }
+
+        /* Responsif Sempurna untuk Tab Bawah (Overview, Fasilitas, Prestasi) */
+        .carousel-indicators {
+            width: 96vw;
+            max-width: 100%;
+            bottom: 18px;
+            gap: 0;
+            padding: 0 4px;
+            box-sizing: border-box;
+            display: flex;
+        }
+        .dots-half {
+            width: calc(50% - 28px);
+            flex: 1 1 0;
+            min-width: 0;
+            gap: 6px;
+        }
+        .dots-half.dots-left {
+            padding-right: 6px;
+            box-sizing: border-box;
+        }
+        .dots-half.dots-right {
+            padding-left: 6px;
+            box-sizing: border-box;
+        }
+        .dots-center-gap {
+            width: 54px;
+            min-width: 54px;
+            max-width: 54px;
+            flex: 0 0 54px;
+        }
+        .carousel-indicators .dot {
+            min-width: 0 !important;
+            flex: 1 1 0;
+            padding: 5px 6px;
+            border-radius: 8px;
+            gap: 3px;
+            box-sizing: border-box;
+        }
+        .carousel-indicators .dot .dot-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.2px;
+            height: 13px;
+        }
+        .carousel-indicators .dot .dot-label::before {
+            display: none;
+        }
+        .fasilitas-controls-group {
+            gap: 2px;
+        }
+        .fasilitas-counter {
+            font-size: 0.55rem;
+            padding: 0 3px;
+            letter-spacing: 0;
+            border-radius: 4px;
+        }
+        .lab-play-pause-btn-side {
+            display: none;
+        }
+        .dot .dot-track,
+        .dot-track-continuous {
+            height: 3px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .slide1-layout { padding: 0 14px; top: 65px; }
+        .slide1-title-box h1 { font-size: 1.35rem; }
+        .slide1-content-box { font-size: 0.78rem; padding: 12px 16px; }
+        .read-more-btn { padding: 5px 12px; font-size: 0.75rem; }
+
+        .carousel-indicators {
+            width: 98vw;
+            bottom: 12px;
+            padding: 0 2px;
+        }
+        .dots-half {
+            width: calc(50% - 24px);
+            gap: 4px;
+        }
+        .dots-half.dots-left {
+            padding-right: 4px;
+        }
+        .dots-half.dots-right {
+            padding-left: 4px;
+        }
+        .dots-center-gap {
+            width: 46px;
+            min-width: 46px;
+            max-width: 46px;
+            flex: 0 0 46px;
+        }
+        .carousel-indicators .dot {
+            padding: 4px 4px;
+            border-radius: 7px;
+            gap: 2px;
+        }
+        .carousel-indicators .dot .dot-label {
+            font-size: 0.54rem;
+            letter-spacing: 0px;
+        }
+        .fasilitas-counter {
+            font-size: 0.48rem;
+            padding: 0 2px;
+        }
+        .dot .dot-track,
+        .dot-track-continuous {
+            height: 2px;
+        }
     }
     
     @keyframes slideProgress {

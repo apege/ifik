@@ -23,6 +23,14 @@ class DosenWali extends CI_Controller {
         $this->load->view('dosen_wali/dashboard', $data);
     }
 
+    private function _is_stage_locked($nim) {
+        $detail = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
+        if (!$detail) return false;
+        $current_stage = $detail['current_stage'] ?? 'Dosen Wali';
+        $status_wali = $detail['status_approval_wali'] ?? 'Pending';
+        return ($status_wali === 'Approved' || in_array($current_stage, ['Admin Layanan', 'Koordinator TA', 'Ketua KK', 'Selesai Approval']));
+    }
+
     // Detail Mahasiswa Bimbingan & Approval
     public function detail_mahasiswa($nim) {
         $nip_dosen = $this->_get_current_nip();
@@ -35,13 +43,38 @@ class DosenWali extends CI_Controller {
         $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
 
         if ($this->input->post('action')) {
+            if ($this->_is_stage_locked($nim)) {
+                $this->session->set_flashdata('error', 'Pendaftaran mahasiswa ini telah disetujui dan saat ini berada di tahap selanjutnya, sehingga tidak dapat diubah lagi.');
+                redirect('dosenwali/detail_mahasiswa/' . $nim);
+                return;
+            }
+
+            $action  = strtolower($this->input->post('action'));
             $status  = $this->input->post('status'); // 'Approved' atau 'Rejected'
+            if (empty($status)) {
+                $status = ($action === 'approve') ? 'Approved' : (($action === 'reject') ? 'Rejected' : 'Pending');
+            }
             $catatan = trim($this->input->post('catatan_wali') ?? '');
 
             if ($status === 'Rejected' && empty($catatan)) {
                 $this->session->set_flashdata('error', 'Alasan penolakan / catatan revisi wajib diisi jika memilih Reject!');
                 redirect('dosenwali/detail_mahasiswa/' . $nim);
                 return;
+            }
+
+            // Simpan status per berkas jika dikirim melalui form
+            $berkas_valid_arr  = $this->input->post('berkas_valid') ?: array();
+            $berkas_kurang_arr = $this->input->post('berkas_kurang') ?: array();
+            $catatan_berkas    = $this->input->post('catatan_berkas') ?: array();
+            $semua_berkas      = array('ksm', 'transkrip', 'pernyataan', 'bebas_lab');
+
+            foreach ($semua_berkas as $bk) {
+                if (in_array($bk, $berkas_kurang_arr)) {
+                    $note = trim($catatan_berkas[$bk] ?? '');
+                    $this->DosenWali_model->update_file_approval($nim, $bk, 'Rejected', $note);
+                } else if (in_array($bk, $berkas_valid_arr) || $status === 'Approved') {
+                    $this->DosenWali_model->update_file_approval($nim, $bk, 'Approved', '');
+                }
             }
 
             $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
@@ -95,6 +128,11 @@ class DosenWali extends CI_Controller {
             return;
         }
 
+        if ($this->_is_stage_locked($nim)) {
+            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
+            return;
+        }
+
         $res = $this->DosenWali_model->update_file_approval($nim, $file_type, $status, $comment);
         echo json_encode(array(
             'success' => $res,
@@ -115,6 +153,11 @@ class DosenWali extends CI_Controller {
             return;
         }
 
+        if ($this->_is_stage_locked($nim)) {
+            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
+            return;
+        }
+
         $res = $this->DosenWali_model->update_all_files_approval($nim, $status);
         echo json_encode(array(
             'success' => $res,
@@ -131,6 +174,11 @@ class DosenWali extends CI_Controller {
 
         if (!$nim || !$status) {
             echo json_encode(array('success' => false, 'message' => 'NIM dan Status wajib diisi!'));
+            return;
+        }
+
+        if ($this->_is_stage_locked($nim)) {
+            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
             return;
         }
 
@@ -174,6 +222,11 @@ class DosenWali extends CI_Controller {
             return;
         }
 
+        if ($this->_is_stage_locked($nim)) {
+            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
+            return;
+        }
+
         $res = $this->DosenWali_model->approve_jenis_ta($nim, $status_jenis, $catatan_jenis);
         echo json_encode(array(
             'success' => $res,
@@ -191,6 +244,11 @@ class DosenWali extends CI_Controller {
 
         if (!$nim) {
             echo json_encode(array('success' => false, 'message' => 'NIM wajib diisi.'));
+            return;
+        }
+
+        if ($this->_is_stage_locked($nim)) {
+            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
             return;
         }
 
@@ -226,12 +284,17 @@ class DosenWali extends CI_Controller {
 
             $nama = trim(($m['nama_depan'] ?? '') . ' ' . ($m['nama_belakang'] ?? ''));
             $formattedList[] = [
-                'nim'                  => $m['nim'],
-                'nama'                 => $nama,
-                'judul'                => $m['judul_1'] ?? '',
-                'status_approval_wali' => $st,
-                'current_stage'        => $m['current_stage'] ?? 'Dosen Wali',
-                'detail_url'           => site_url('dosenwali/detail_mahasiswa/' . $m['nim'])
+                'nim'                    => $m['nim'],
+                'nama'                   => $nama,
+                'konsentrasi'            => $m['mhs_konsentrasi'] ?? '',
+                'judul'                  => $m['judul_1'] ?? '',
+                'status_approval_wali'   => $st,
+                'current_stage'          => $m['current_stage'] ?? 'Dosen Wali',
+                'status_file_ksm'        => $m['status_file_ksm'] ?? 'Pending',
+                'status_file_transkrip'  => $m['status_file_transkrip'] ?? 'Pending',
+                'status_file_pernyataan' => $m['status_file_pernyataan'] ?? 'Pending',
+                'status_file_bebas_lab'  => $m['status_file_bebas_lab'] ?? 'Pending',
+                'detail_url'             => site_url('dosenwali/detail_mahasiswa/' . $m['nim'])
             ];
         }
 
@@ -240,10 +303,10 @@ class DosenWali extends CI_Controller {
             ->set_output(json_encode([
                 'success' => true,
                 'stats'   => [
-                    'total'    => $totalMhs,
-                    'pending'  => $pendingCount,
-                    'approved' => $approvedCount,
-                    'rejected' => $rejectedCount,
+                    'total'        => $totalMhs,
+                    'pending'      => $pendingCount,
+                    'approved'     => $approvedCount,
+                    'rejected'     => $rejectedCount,
                     'approved_pct' => $totalMhs > 0 ? round(($approvedCount / $totalMhs) * 100) : 0
                 ],
                 'data'    => $formattedList
@@ -347,18 +410,53 @@ class DosenWali extends CI_Controller {
             return;
         }
 
+        // Filter: hanya proses NIM yang belum locked (belum di Admin LAA ke atas)
+        $valid_nims  = array();
+        $locked_nims = array();
+        foreach ($nims as $nim) {
+            if ($this->_is_stage_locked($nim)) {
+                $locked_nims[] = $nim;
+            } else {
+                $valid_nims[] = $nim;
+            }
+        }
+
         $msg = "Persetujuan massal berhasil diselesaikan!";
 
         if ($action === 'approve_all') {
-            $count = $this->DosenWali_model->batch_approve_wali($nims);
-            $msg = "Berhasil menyetujui (Approve) $count berkas pendaftaran mahasiswa sekaligus! Pengajuan otomatis diteruskan ke Admin LAA.";
+            if (empty($valid_nims)) {
+                $msg = "Semua mahasiswa yang dipilih sudah berada di tahap Admin LAA atau lebih lanjut, tidak ada yang diproses.";
+            } else {
+                $count = $this->DosenWali_model->batch_approve_wali($valid_nims);
+                $msg = "Berhasil menyetujui (Approve) $count berkas pendaftaran mahasiswa sekaligus! Pengajuan otomatis diteruskan ke Admin LAA.";
+                if (!empty($locked_nims)) {
+                    $msg .= " (" . count($locked_nims) . " mahasiswa dilewati karena sudah di tahap selanjutnya.)";
+                }
+            }
             $this->session->set_flashdata('success', $msg);
         } else if ($action === 'batch_update') {
             $decisions = json_decode($this->input->post('decisions_json') ?? '[]', true);
-            $result = $this->DosenWali_model->update_batch_decisions($decisions);
-            $count_app = $result['approved'] ?? 0;
-            $count_rej = $result['rejected'] ?? 0;
-            $msg = "Persetujuan massal selesai! $count_app Mahasiswa Disetujui, $count_rej Mahasiswa Ditolak / Diberi Catatan Revisi.";
+            // Filter decisions hanya untuk valid_nims
+            if (!empty($valid_nims)) {
+                $decisions = array_filter($decisions, function($d) use ($valid_nims) {
+                    return in_array($d['nim'] ?? '', $valid_nims);
+                });
+                $decisions = array_values($decisions);
+            } else {
+                $decisions = array();
+            }
+
+            if (empty($decisions)) {
+                $msg = "Semua mahasiswa yang dipilih sudah berada di tahap Admin LAA atau lebih lanjut, tidak ada yang diproses.";
+            } else {
+                $result = $this->DosenWali_model->update_batch_decisions($decisions);
+                $count_app = $result['approved'] ?? 0;
+                $count_rej = $result['rejected'] ?? 0;
+                $msg = "Persetujuan massal selesai! $count_app Mahasiswa Disetujui, $count_rej Mahasiswa Ditolak / Diberi Catatan Revisi.";
+                if (!empty($locked_nims)) {
+                    $msg .= " (" . count($locked_nims) . " mahasiswa dilewati karena sudah di tahap selanjutnya.)";
+                }
+            }
             $this->session->set_flashdata('success', $msg);
         }
 
