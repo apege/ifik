@@ -64,8 +64,18 @@
     .read-more-close:hover { background: #e2e8f0; }
     .read-more-close svg { width: 20px; height: 20px; stroke: #475569; stroke-width: 2; fill: none; }
     #readMoreTitle { font-size: 1.6rem; font-weight: 800; color: #1e293b; margin-bottom: 20px; line-height: 1.3; }
-    #readMoreDesc { font-size: 1.05rem; color: #334155; line-height: 1.7; text-align: justify; }
-    
+
+    /* [FIX #1] Scrollable description area inside the modal, independent of the close button */
+    #readMoreDesc {
+        font-size: 1.05rem;
+        color: #334155;
+        line-height: 1.7;
+        text-align: justify;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
     .multi-bg-fade { transition: background-image 1s ease-in-out; }
 
     /* Dashboard Header Styles */
@@ -103,56 +113,59 @@
         font-weight: 700;
     }
 
-    /* Carousel Indicators (Dots) - Modern Glassmorphism Hybrid */
+    /* [FIX #2 & #3 v2] Carousel Indicators — SATU grup tunggal (tidak lagi terpisah kiri/kanan).
+       Container ini dibatasi dari sisi kiri card deskripsi (left:100px) sampai sisi kanan yang sama
+       seperti sebelumnya (right:80px). Track di dalamnya berisi SEMUA tab (Overview, Fasilitas,
+       Prestasi, dan seluruh custom slide) dalam satu baris flex yang bisa tumbuh mengisi ruang
+       secara merata, menyusut sampai batas minimum lebar teksnya, lalu baru pakai pagination. */
     .carousel-indicators {
         position: absolute;
         bottom: 38px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 86vw;
-        max-width: 1350px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
+        left: 100px;
+        right: 80px;
         z-index: 30;
         pointer-events: none;
     }
-    
-    .dots-half {
-        flex: 1 1 0;
-        width: calc(50% - 42.5px);
+
+    /* [FIX v3-#2] Track selalu mengisi 100% lebar container (left:100px = sisi kiri card),
+       tanpa ruang dan tanpa gap tersisa. Tombol panah TIDAK lagi ikut memakan ruang flex —
+       sekarang mengambang (position: absolute) di atas track, jadi dot pertama selalu mulai
+       tepat sejajar dengan sisi kiri card, baik saat panah kiri muncul maupun tidak. */
+    .carousel-indicators-track {
+        width: 100%;
+        height: 100%;
         display: flex;
         gap: 12px;
         align-items: center;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        pointer-events: auto;
+        transition: padding 0.2s ease;
     }
+    .carousel-indicators-track::-webkit-scrollbar { display: none; }
+    /* Beri sedikit ruang di dalam track hanya ketika tombol panah sedang tampil, supaya
+       tombol tidak menutupi dot yang sedang terlihat sebagian */
+    .carousel-indicators-track.has-prev { padding-left: 30px; }
+    .carousel-indicators-track.has-next { padding-right: 30px; }
 
-    .dots-half.dots-left {
-        justify-content: flex-end;
-    }
+    /* [FIX v3-#1] Celah tengah (dots-center-gap) DIHAPUS — sebelumnya menyisakan jarak kosong
+       di tengah track setelah semua tab digabung. Semua dot sekarang berjejer rapat tanpa jarak. */
 
-    .dots-half.dots-right {
-        justify-content: flex-start;
-    }
-
-    .dots-center-gap {
-        width: 85px;
-        min-width: 85px;
-        max-width: 85px;
-        flex: 0 0 85px;
-        pointer-events: none;
-    }
-
+    /* [FIX #2] Tiap dot: flex-grow merata mengisi sisa ruang (flex-basis 0), tapi TIDAK PERNAH
+       lebih kecil dari lebar teks label-nya sendiri (min-content) — atau minimal 140px, mana yang
+       lebih besar. Begitu total lebar minimum semua dot melebihi ruang tersedia, track otomatis
+       overflow dan panah pagination di sisi kiri/kanan container akan muncul. */
     .carousel-indicators .dot {
         flex: 1 1 0;
-        max-width: 250px;
-        min-width: fit-content;
+        min-width: max(140px, min-content);
         display: flex;
         flex-direction: column;
         gap: 8px;
         cursor: pointer;
         opacity: 0.7;
-        transition: all 0.3s ease;
+        transition: opacity 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
         background: rgba(0, 0, 0, 0.45);
         padding: 9px 12px;
         border-radius: 12px;
@@ -160,12 +173,13 @@
         -webkit-backdrop-filter: blur(8px);
         border: 1px solid rgba(255, 255, 255, 0.15);
         pointer-events: auto;
+        scroll-snap-align: start;
+        flex-shrink: 0;
     }
 
-    /* Ketika sayap kanan hanya memiliki 1 item (Prestasi), buat lebarnya proporsional mengimbangi 2 item di sayap kiri */
-    .dots-half.dots-right .dot:only-child {
-        max-width: 512px;
-        width: 100%;
+    /* Dot Fasilitas butuh sedikit ruang ekstra untuk counter + tombol play/pause */
+    .carousel-indicators .dot.dot-fasilitas {
+        min-width: max(170px, min-content);
     }
     
     .carousel-indicators .dot.active, 
@@ -189,15 +203,25 @@
         white-space: nowrap;
     }
     
+    /* [FIX v3-#3] Bulatan oranye kecil sebelum label HANYA muncul saat dot sedang aktif
+       (sesi slide itu sedang berjalan), bukan tampil terus-menerus di semua tab. */
     .carousel-indicators .dot .dot-label::before {
         content: '';
         display: inline-block;
-        width: 8px;
+        width: 0;
         height: 8px;
         background-color: #ea580c;
         border-radius: 50%;
-        margin-right: 8px;
+        margin-right: 0;
         flex-shrink: 0;
+        opacity: 0;
+        transition: width 0.25s ease, margin-right 0.25s ease, opacity 0.25s ease;
+    }
+
+    .carousel-indicators .dot.active .dot-label::before {
+        width: 8px;
+        margin-right: 8px;
+        opacity: 1;
     }
     
     .carousel-indicators .dot .dot-track {
@@ -431,44 +455,39 @@
     .slide1-text-container {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 0;
         width: 500px;
         max-width: 90vw;
         z-index: 10;
         margin-top: -40px;
         margin-left: 20px;
     }
-    .slide1-title-box {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 15px 30px;
-        border-radius: 14px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        backdrop-filter: blur(8px);
-        pointer-events: auto;
-        width: 100%;
-        box-sizing: border-box;
-    }
-    .slide1-title-box h1 {
-        color: #ea580c;
-        font-size: 2.1rem;
-        font-weight: 800;
-        margin: 0;
-    }
-    .slide1-content-box {
+
+    /* [FIX #4] Merged title + description into a single unified card */
+    .slide1-card {
         background: rgba(255, 255, 255, 0.95);
         padding: 22px 28px;
         border-radius: 14px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        color: #334155;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        text-align: justify;
         backdrop-filter: blur(8px);
         pointer-events: auto;
         width: 100%;
         box-sizing: border-box;
         position: relative;
     }
+    .slide1-card-title {
+        color: #ea580c;
+        font-size: 2.1rem;
+        font-weight: 800;
+        margin: 0 0 14px 0;
+    }
+    .slide1-card-desc {
+        color: #334155;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        text-align: justify;
+    }
+
     .dekanat-img-right {
         position: absolute;
         bottom: 0;
@@ -509,25 +528,16 @@
     }
     .read-more-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-    /* ===== DOTS RIGHT: SCROLLABLE OVERFLOW ===== */
-    .dots-half.dots-right {
-        position: relative;
-        overflow: hidden;
-    }
-    .dots-right-inner {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        transition: transform 0.35s cubic-bezier(0.25,1,0.5,1);
-        will-change: transform;
-    }
-    /* Arrow nav buttons for dots-right */
+    /* [FIX v3-#2] Tombol panah kembali jadi overlay (position: absolute) di atas track, PIN ke
+       tepi container `.carousel-indicators` — bukan flex sibling lagi. Ini memastikan dot
+       pertama (leftmost) selalu mulai tepat sejajar dengan sisi kiri container (=sisi kiri card
+       deskripsi), karena tombol tidak lagi mencuri ruang flex dari track saat sedang tersembunyi. */
     .dots-nav-btn {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         background: rgba(234,88,12,0.85);
         border: none;
@@ -539,21 +549,21 @@
         z-index: 10;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.2s ease;
+        transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         flex-shrink: 0;
     }
-    .dots-nav-btn.visible { opacity: 1; pointer-events: auto; }
-    .dots-nav-btn svg { width: 11px; height: 11px; }
     .dots-nav-btn.btn-prev { left: 0; }
     .dots-nav-btn.btn-next { right: 0; }
-    .dots-nav-btn:hover { background: #ea580c; transform: translateY(-50%) scale(1.1); }
+    .dots-nav-btn.visible { opacity: 1; pointer-events: auto; }
+    .dots-nav-btn:hover { background: #ea580c; transform: translateY(-50%) scale(1.12); }
+    .dots-nav-btn svg { width: 12px; height: 12px; }
     
     @media (max-width: 900px) {
         .slide1-layout { padding: 0 20px; }
         .slide1-text-container { margin-top: 0; width: 100%; }
         .dekanat-img-right { max-height: 250px; opacity: 0.5; }
-        .carousel-indicators { width: 90vw; bottom: 25px; }
+        .carousel-indicators { left: 20px; right: 20px; bottom: 25px; }
     }
     
     @keyframes slideProgress {
@@ -577,31 +587,32 @@
         <div class="carousel-slide slide-1">
             <div class="slide1-layout">
                 <div class="slide1-text-container">
-                    <div class="slide1-title-box">
-                        <h1><?= htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif') ?></h1>
-                    </div>
-                    <div class="slide1-content-box" id="headerDescBox">
-                        <?php
-                            $full_desc = $header_settings->description ?? 'Seiring dengan berkembangnya kebutuhan pelayanan untuk mahasiswa, dosen dan pegawai FIK maka diperlukan peningkatan layanan yang mengusung efisiensi dan efektifitas. Ifik lahir dari keresahan dan kesulitan mahasiswa maupun dosen dalam beberapa layanan, antara lain pendaftaran TA, bimbingan online, dokumen online, peminjaman ruangan dan lain sebagainya. Sejak dibuat tahun 2021 oleh tim unit lab FIK, aplikasi berbasis web ini telah digunakan hingga saat ini untuk mempermudah layanan untuk kalangan internal FIK, baik untuk mahasiswa, dosen maupun pegawai FIK.';
-                            $plain_desc = strip_tags($full_desc);
-                            $char_limit = 280;
-                            if (mb_strlen($plain_desc) > $char_limit) {
-                                $truncated = mb_substr($plain_desc, 0, $char_limit);
-                                $last_space = mb_strrpos($truncated, ' ');
-                                echo htmlspecialchars($last_space ? mb_substr($truncated, 0, $last_space) : $truncated) . '...';
-                            } else {
-                                echo htmlspecialchars($plain_desc);
-                            }
-                        ?>
-                        <?php
-                            $modalTitle1 = htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif', ENT_QUOTES);
-                            $modalDesc1 = htmlspecialchars(json_encode($header_settings->description ?? ''), ENT_QUOTES);
-                        ?>
-                        <div class="read-more-container">
-                            <button class="read-more-btn" onclick='openReadMoreModal("<?= $modalTitle1 ?>", <?= $modalDesc1 ?>)'>
-                                Baca Selengkapnya
-                                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                            </button>
+                    <!-- [FIX #4] Single unified card (title + description) -->
+                    <div class="slide1-card" id="headerDescBox">
+                        <h1 class="slide1-card-title"><?= htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif') ?></h1>
+                        <div class="slide1-card-desc">
+                            <?php
+                                $full_desc = $header_settings->description ?? 'Seiring dengan berkembangnya kebutuhan pelayanan untuk mahasiswa, dosen dan pegawai FIK maka diperlukan peningkatan layanan yang mengusung efisiensi dan efektifitas. Ifik lahir dari keresahan dan kesulitan mahasiswa maupun dosen dalam beberapa layanan, antara lain pendaftaran TA, bimbingan online, dokumen online, peminjaman ruangan dan lain sebagainya. Sejak dibuat tahun 2021 oleh tim unit lab FIK, aplikasi berbasis web ini telah digunakan hingga saat ini untuk mempermudah layanan untuk kalangan internal FIK, baik untuk mahasiswa, dosen maupun pegawai FIK.';
+                                $plain_desc = strip_tags($full_desc);
+                                $char_limit = 280;
+                                if (mb_strlen($plain_desc) > $char_limit) {
+                                    $truncated = mb_substr($plain_desc, 0, $char_limit);
+                                    $last_space = mb_strrpos($truncated, ' ');
+                                    echo htmlspecialchars($last_space ? mb_substr($truncated, 0, $last_space) : $truncated) . '...';
+                                } else {
+                                    echo htmlspecialchars($plain_desc);
+                                }
+                            ?>
+                            <?php
+                                $modalTitle1 = htmlspecialchars($header_settings->title ?? 'Fakultas Industri Kreatif', ENT_QUOTES);
+                                $modalDesc1 = htmlspecialchars(json_encode($header_settings->description ?? ''), ENT_QUOTES);
+                            ?>
+                            <div class="read-more-container">
+                                <button class="read-more-btn" onclick='openReadMoreModal("<?= $modalTitle1 ?>", <?= $modalDesc1 ?>)'>
+                                    Baca Selengkapnya
+                                    <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -620,11 +631,11 @@
         <div class="carousel-slide slide-3">
             <div class="slide1-layout">
                 <div class="slide1-text-container">
-                    <div class="slide1-title-box">
-                        <h1>Prestasi &amp; Inovasi FIK</h1>
-                    </div>
-                    <div class="slide1-content-box">
-                        Fakultas Industri Kreatif secara konsisten mengukir berbagai prestasi baik di tingkat nasional maupun internasional. Melalui fasilitas laboratorium yang canggih dan bimbingan dosen berpengalaman, mahasiswa FIK terus melahirkan karya-karya inovatif di bidang desain, seni, media interaktif, dan teknologi kreatif.
+                    <div class="slide1-card">
+                        <h1 class="slide1-card-title">Prestasi &amp; Inovasi FIK</h1>
+                        <div class="slide1-card-desc">
+                            Fakultas Industri Kreatif secara konsisten mengukir berbagai prestasi baik di tingkat nasional maupun internasional. Melalui fasilitas laboratorium yang canggih dan bimbingan dosen berpengalaman, mahasiswa FIK terus melahirkan karya-karya inovatif di bidang desain, seni, media interaktif, dan teknologi kreatif.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -653,33 +664,33 @@
                                 $used_title = !empty($s->overlay_title) ? $s->overlay_title : ($header_settings->title ?? 'Fakultas Industri Kreatif');
                                 $used_desc = !empty($s->overlay_description) ? $s->overlay_description : ($header_settings->description ?? '');
                             ?>
-                            <div class="slide1-title-box">
-                                <h1><?= htmlspecialchars($used_title) ?></h1>
-                            </div>
-                            <div class="slide1-content-box">
-                                <?php
-                                    $def_plain = strip_tags($used_desc);
-                                    $def_limit = 280;
-                                    if (mb_strlen($def_plain) > $def_limit) {
-                                        $def_cut   = mb_substr($def_plain, 0, $def_limit);
-                                        $def_space = mb_strrpos($def_cut, ' ');
-                                        echo htmlspecialchars($def_space ? mb_substr($def_cut, 0, $def_space) : $def_cut) . '...';
-                                    } else {
-                                        echo htmlspecialchars($def_plain);
-                                    }
-                                ?>
-                                <?php if (mb_strlen($def_plain) > 280): ?>
-                                <div class="read-more-container">
+                            <div class="slide1-card">
+                                <h1 class="slide1-card-title"><?= htmlspecialchars($used_title) ?></h1>
+                                <div class="slide1-card-desc">
                                     <?php
-                                        $modalTitle = htmlspecialchars($used_title, ENT_QUOTES);
-                                        $modalDesc = htmlspecialchars(json_encode($used_desc), ENT_QUOTES);
+                                        $def_plain = strip_tags($used_desc);
+                                        $def_limit = 280;
+                                        if (mb_strlen($def_plain) > $def_limit) {
+                                            $def_cut   = mb_substr($def_plain, 0, $def_limit);
+                                            $def_space = mb_strrpos($def_cut, ' ');
+                                            echo htmlspecialchars($def_space ? mb_substr($def_cut, 0, $def_space) : $def_cut) . '...';
+                                        } else {
+                                            echo htmlspecialchars($def_plain);
+                                        }
                                     ?>
-                                    <button class="read-more-btn" onclick='openReadMoreModal("<?= $modalTitle ?>", <?= $modalDesc ?>)'>
-                                        Baca Selengkapnya
-                                        <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                                    </button>
+                                    <?php if (mb_strlen($def_plain) > 280): ?>
+                                    <div class="read-more-container">
+                                        <?php
+                                            $modalTitle = htmlspecialchars($used_title, ENT_QUOTES);
+                                            $modalDesc = htmlspecialchars(json_encode($used_desc), ENT_QUOTES);
+                                        ?>
+                                        <button class="read-more-btn" onclick='openReadMoreModal("<?= $modalTitle ?>", <?= $modalDesc ?>)'>
+                                            Baca Selengkapnya
+                                            <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                        </button>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -687,17 +698,6 @@
                 </div>
             <?php endfor; ?>
         <?php endif; ?>
-    </div>
-    
-    <!-- Modal BACA SELENGKAPNYA -->
-    <div class="read-more-modal" id="readMoreModal">
-        <div class="read-more-modal-content">
-            <button class="read-more-close" onclick="closeReadMoreModal()">
-                <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-            <h2 id="readMoreTitle"></h2>
-            <div id="readMoreDesc"></div>
-        </div>
     </div>
     
     <!-- Indikator Dots Terbagi Kiri & Kanan (Simetris Mengelilingi Tombol Tengah) -->
@@ -744,31 +744,34 @@
 
         $total_rooms_count = count($all_rooms);
 
-        // HIERARKI DISTRIBUSI SECTION / TAB
-        // Sayap Kiri: Overview & Fasilitas (1 kesatuan utuh)
-        // Sayap Kanan: Prestasi & Custom Slide lainnya
+        // [FIX #1] SEMUA TAB DISATUKAN — Overview, Fasilitas, Prestasi, dan seluruh custom slide
+        // sekarang berada dalam SATU array tunggal & dirender lewat SATU loop. Pagination
+        // (panah kiri/kanan) jadi berlaku untuk seluruh tab, bukan hanya custom slide yang baru
+        // ditambahkan dari web.
         $total_slides_count = !empty($header_slides) && count($header_slides) >= 3 ? count($header_slides) : 3;
 
-        $tabs_left = [
+        $tabs_all = [
             ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'],
-            ['type' => 'fasilitas_full', 'index' => 1, 'id' => 'dotFasilitas', 'label' => 'Fasilitas', 'rooms' => $all_rooms, 'has_play' => true, 'has_add' => true]
-        ];
-
-        $tabs_right = [
+            ['type' => 'fasilitas_full', 'index' => 1, 'id' => 'dotFasilitas', 'label' => 'Fasilitas', 'rooms' => $all_rooms, 'has_play' => true, 'has_add' => true],
             ['type' => 'prestasi', 'index' => 2, 'id' => 'dotPrestasi', 'label' => 'Prestasi']
         ];
 
         for ($i = 3; $i < $total_slides_count; $i++) {
             $slide_label = $header_slides[$i]->label ?? ('Slide ' . ($i + 1));
-            $tabs_right[] = ['type' => 'custom_slide', 'index' => $i, 'id' => 'dotSlide' . $i, 'label' => $slide_label];
+            $tabs_all[] = ['type' => 'custom_slide', 'index' => $i, 'id' => 'dotSlide' . $i, 'label' => $slide_label];
         }
     ?>
     <div class="carousel-indicators" id="carouselDots">
-        <!-- SISI KIRI (Sayap Kiri) -->
-        <div class="dots-half dots-left">
-            <?php foreach ($tabs_left as $idx => $tab): ?>
+        <!-- Tombol Prev (muncul otomatis kalau track overflow) -->
+        <button class="dots-nav-btn btn-prev" id="dotsNavPrev" onclick="scrollDotsTrack(-1)" title="Sebelumnya">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <!-- [FIX v3-#1] Satu track tunggal berisi SEMUA tab, tanpa celah/jarak di tengah -->
+        <div class="carousel-indicators-track" id="dotsTrack">
+            <?php foreach ($tabs_all as $pos => $tab): ?>
                 <?php if ($tab['type'] === 'fasilitas_full'): ?>
-                    <div class="dot dot-fasilitas <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                    <div class="dot dot-fasilitas <?= ($tab['index'] === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
                         <div class="dot-label-row">
                             <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
                             <div class="fasilitas-controls-group">
@@ -786,7 +789,7 @@
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="dot <?= ($tab['index'] === 0 && $idx === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
+                    <div class="dot <?= ($tab['index'] === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
                         <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
                         <div class="dot-track"><div class="progress"></div></div>
                     </div>
@@ -794,30 +797,10 @@
             <?php endforeach; ?>
         </div>
 
-        <!-- CELAH TENGAH: Tempat Tombol Bulat Oranye Scroll Down Bebas Terbuka -->
-        <div class="dots-center-gap"></div>
-
-        <!-- SISI KANAN (Sayap Kanan) — Scrollable jika > 2 tabs -->
-        <div class="dots-half dots-right" id="dotsRightPanel">
-            <!-- Tombol Prev (muncul jika overflow) -->
-            <button class="dots-nav-btn btn-prev" id="dotsNavPrev" onclick="scrollDotsRight(-1)" title="Sebelumnya">
-                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-
-            <div class="dots-right-inner" id="dotsRightInner">
-                <?php foreach ($tabs_right as $idx => $tab): ?>
-                    <div class="dot" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
-                        <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
-                        <div class="dot-track"><div class="progress"></div></div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Tombol Next (muncul jika overflow) -->
-            <button class="dots-nav-btn btn-next" id="dotsNavNext" onclick="scrollDotsRight(1)" title="Berikutnya">
-                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-        </div>
+        <!-- Tombol Next (muncul otomatis kalau track overflow) -->
+        <button class="dots-nav-btn btn-next" id="dotsNavNext" onclick="scrollDotsTrack(1)" title="Berikutnya">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
     </div>
 </div>
 
@@ -1004,6 +987,10 @@
                 behavior: 'smooth'
             });
             updateDots(currentIndex);
+            // [FIX #1] Pastikan dot aktif selalu terlihat di dalam track gabungan (auto-scroll pagination)
+            if (typeof window._syncActiveDotIntoView === 'function') {
+                window._syncActiveDotIntoView(index);
+            }
         };
 
         window.goToSlide = goToSlide;
@@ -1033,89 +1020,69 @@
 </script>
 
 <script>
-    // ===== DOTS RIGHT: SCROLL OVERFLOW NAVIGATION =====
+    // [FIX #1 & #2] PAGINATION UNTUK SATU TRACK GABUNGAN (semua tab: Overview, Fasilitas,
+    // Prestasi, dan seluruh custom slide). Dot melebar/mengecil merata lewat CSS flex; ketika
+    // total lebar minimum tab melebihi ruang yang tersedia, track ini overflow secara native
+    // (overflow-x) dan panah kiri/kanan dipakai untuk scroll — berlaku untuk semua tab, bukan
+    // cuma slide yang baru ditambahkan.
     (function() {
         document.addEventListener('DOMContentLoaded', () => {
-            const panel     = document.getElementById('dotsRightPanel');
-            const inner     = document.getElementById('dotsRightInner');
-            const btnPrev   = document.getElementById('dotsNavPrev');
-            const btnNext   = document.getElementById('dotsNavNext');
+            const track   = document.getElementById('dotsTrack');
+            const btnPrev = document.getElementById('dotsNavPrev');
+            const btnNext = document.getElementById('dotsNavNext');
 
-            if (!panel || !inner) return;
-
-            let currentOffset = 0;
-
-            function getDotWidth() {
-                const firstDot = inner.querySelector('.dot');
-                if (!firstDot) return 0;
-                // width of dot + gap (12px)
-                return firstDot.offsetWidth + 12;
-            }
-
-            function getVisibleCount() {
-                const dw = getDotWidth();
-                if (dw <= 0) return 99;
-                return Math.floor(panel.offsetWidth / dw);
-            }
-
-            function getTotalDots() {
-                return inner.querySelectorAll('.dot').length;
-            }
+            if (!track || !btnPrev || !btnNext) return;
 
             function updateNav() {
-                const total   = getTotalDots();
-                const visible = getVisibleCount();
-                const needsScroll = total > visible;
+                const needsScroll = track.scrollWidth > track.clientWidth + 1;
+                const atStart = track.scrollLeft <= 1;
+                const atEnd = track.scrollLeft >= (track.scrollWidth - track.clientWidth - 1);
 
-                // Clamp offset
-                const maxOffset = Math.max(0, total - visible);
-                if (currentOffset > maxOffset) currentOffset = maxOffset;
+                const showPrev = needsScroll && !atStart;
+                const showNext = needsScroll && !atEnd;
 
-                // Translate inner
-                inner.style.transform = `translateX(-${currentOffset * getDotWidth()}px)`;
-
-                // Show/hide buttons
-                btnPrev.classList.toggle('visible', needsScroll && currentOffset > 0);
-                btnNext.classList.toggle('visible', needsScroll && currentOffset < maxOffset);
+                btnPrev.classList.toggle('visible', showPrev);
+                btnNext.classList.toggle('visible', showNext);
+                // [FIX v3-#2] Padding hanya ditambahkan saat tombol benar-benar tampil, supaya
+                // saat tombol tersembunyi dot pertama tetap flush di sisi kiri card.
+                track.classList.toggle('has-prev', showPrev);
+                track.classList.toggle('has-next', showNext);
             }
 
-            window.scrollDotsRight = function(dir) {
-                const visible  = getVisibleCount();
-                const total    = getTotalDots();
-                const maxOffset = Math.max(0, total - visible);
-                currentOffset = Math.max(0, Math.min(currentOffset + dir, maxOffset));
-                updateNav();
+            window.scrollDotsTrack = function(dir) {
+                // Geser sejauh kira-kira lebar satu dot + gap
+                const sampleDot = track.querySelector('.dot');
+                const step = (sampleDot ? sampleDot.offsetWidth : 180) + 12;
+                track.scrollBy({ left: dir * step, behavior: 'smooth' });
             };
 
-            // Also expose so goToSlide can scroll to active dot
-            window._syncDotsRightOffset = function(activeTabIndex) {
-                // Find the position of this dot in the inner list
-                const dots = Array.from(inner.querySelectorAll('.dot'));
-                const pos = dots.findIndex(d => parseInt(d.dataset.index) === activeTabIndex);
-                if (pos === -1) return;
-                const visible = getVisibleCount();
-                if (pos >= currentOffset + visible) {
-                    currentOffset = pos - visible + 1;
-                } else if (pos < currentOffset) {
-                    currentOffset = pos;
+            // Dipanggil dari goToSlide agar dot aktif selalu terlihat di dalam track
+            window._syncActiveDotIntoView = function(activeTabIndex) {
+                const activeDot = track.querySelector(`.dot[data-index="${activeTabIndex}"]`);
+                if (activeDot) {
+                    activeDot.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
                 }
-                updateNav();
             };
+            // Alias untuk kompatibilitas mundur, kalau ada view lain yang memanggil nama lama
+            window._syncDotsRightOffset = window._syncActiveDotIntoView;
 
-            updateNav();
+            track.addEventListener('scroll', updateNav);
             window.addEventListener('resize', updateNav);
+            updateNav();
         });
     })();
 </script>
 
-<!-- Modal Baca Selengkapnya -->
-<div id="readMoreModal" class="read-more-modal">
+<!-- [FIX #1] Modal Baca Selengkapnya — SATU-SATUNYA instance, dipindah ke luar #section-carousel,
+     ID duplikat pada versi sebelumnya (dua elemen #readMoreModal) dihapus karena itulah
+     penyebab tombol "Baca Selengkapnya" terasa tidak berfungsi. -->
+<div class="read-more-modal" id="readMoreModal">
     <div class="read-more-modal-content">
         <button class="read-more-close" onclick="closeReadMoreModal()">
             <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
-        <h2 id="readMoreTitle">Judul Slide</h2>
-        <div id="readMoreDesc">Isi deskripsi...</div>
+        <h2 id="readMoreTitle"></h2>
+        <div id="readMoreDesc"></div>
     </div>
 </div>
 
