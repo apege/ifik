@@ -7903,37 +7903,48 @@
         if (prodiSelect) prodiSelect.value = prodiKey;
         if (prodiBadge) prodiBadge.textContent = prodiKey;
 
-        // Fetch detail penilaian jika endpoint tersedia
-        const getDetailUrl = cfg.ajaxGetDetailPenilaianSidangUrl || 
-                             window.DASHBOARD_CONFIG?.ajaxGetDetailPenilaianSidangUrl || 
-                             'ajax_get_detail_penilaian_sidang';
+        // Ensure master rubrik is fresh
+        if (!state.masterRubrikList || state.masterRubrikList.length === 0) {
+            fetchMasterRubrikList(() => {
+                proceedLoadPenilaianDetail();
+            });
+        } else {
+            proceedLoadPenilaianDetail();
+        }
 
-        if (getDetailUrl) {
-            fetch(`${getDetailUrl}?nim=${encodeURIComponent(student.nim)}`)
-                .then(r => r.json())
-                .then(res => {
-                    if (res && res.status && res.data) {
-                        const d = res.data;
-                        if (d.catatan_koor && catatanEl) catatanEl.value = d.catatan_koor;
-                        if (d.status_kelulusan_sidang && statusKelulusanEl) statusKelulusanEl.value = d.status_kelulusan_sidang;
-                        setupPenilaianPeminatanOptions(prodiKey, d.peminatan || student.peminatan);
-                        renderPenilaianRubrik(d.detail_penilaian_parsed);
-                        calculatePenilaianScore();
-                    } else {
+        function proceedLoadPenilaianDetail() {
+            // Fetch detail penilaian jika endpoint tersedia
+            const getDetailUrl = cfg.ajaxGetDetailPenilaianSidangUrl || 
+                                 window.DASHBOARD_CONFIG?.ajaxGetDetailPenilaianSidangUrl || 
+                                 'ajax_get_detail_penilaian_sidang';
+
+            if (getDetailUrl) {
+                fetch(`${getDetailUrl}?nim=${encodeURIComponent(student.nim)}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res && res.status && res.data) {
+                            const d = res.data;
+                            if (d.catatan_koor && catatanEl) catatanEl.value = d.catatan_koor;
+                            if (d.status_kelulusan_sidang && statusKelulusanEl) statusKelulusanEl.value = d.status_kelulusan_sidang;
+                            setupPenilaianPeminatanOptions(prodiKey, d.peminatan || student.peminatan);
+                            renderPenilaianRubrik(d.detail_penilaian_parsed);
+                            calculatePenilaianScore();
+                        } else {
+                            setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
+                            renderPenilaianRubrik(null);
+                            calculatePenilaianScore();
+                        }
+                    })
+                    .catch(() => {
                         setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
                         renderPenilaianRubrik(null);
                         calculatePenilaianScore();
-                    }
-                })
-                .catch(() => {
-                    setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
-                    renderPenilaianRubrik(null);
-                    calculatePenilaianScore();
-                });
-        } else {
-            setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
-            renderPenilaianRubrik(null);
-            calculatePenilaianScore();
+                    });
+            } else {
+                setupPenilaianPeminatanOptions(prodiKey, student.peminatan);
+                renderPenilaianRubrik(null);
+                calculatePenilaianScore();
+            }
         }
 
         if (modal) {
@@ -7958,8 +7969,19 @@
         const peminatanSelect = document.getElementById('penilaianPeminatanSelect');
         if (!peminatanSelect) return;
 
-        const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
-        const peminatanList = Object.keys(prodiData.peminatan);
+        // Ambil daftar peminatan secara dinamis dari masterRubrikList
+        let peminatanList = [];
+        (state.masterRubrikList || []).forEach(m => {
+            if (m.prodi === prodiKey && m.peminatan && !peminatanList.includes(m.peminatan)) {
+                peminatanList.push(m.peminatan);
+            }
+        });
+
+        // Fallback ke preset jika masterRubrikList belum termuat
+        if (peminatanList.length === 0) {
+            const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+            peminatanList = Object.keys(prodiData.peminatan || {});
+        }
 
         let html = '';
         peminatanList.forEach(p => {
@@ -7992,44 +8014,70 @@
         if (!container) return;
 
         const prodiKey = detectProdiKey(prodiSelect ? prodiSelect.value : 'DKV');
-        const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
-        const peminatanKey = peminatanSelect ? peminatanSelect.value : Object.keys(prodiData.peminatan)[0];
-        const criteriaList = prodiData.peminatan[peminatanKey] || prodiData.peminatan[Object.keys(prodiData.peminatan)[0]];
+        const peminatanKey = peminatanSelect ? peminatanSelect.value : '';
+
+        // Ambil kriteria dinamis dari master rubrik yang aktif
+        let criteriaList = [];
+        const masterItem = (state.masterRubrikList || []).find(m => m.prodi === prodiKey && m.peminatan === peminatanKey);
+        
+        if (masterItem && Array.isArray(masterItem.kriteria) && masterItem.kriteria.length > 0) {
+            criteriaList = masterItem.kriteria;
+        } else {
+            const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+            criteriaList = prodiData.peminatan[peminatanKey] || prodiData.peminatan[Object.keys(prodiData.peminatan)[0]] || [];
+        }
 
         let html = '';
         criteriaList.forEach((crit, idx) => {
             let existingScore = '';
-            if (existingParsed && existingParsed.scores && typeof existingParsed.scores[crit.id] !== 'undefined') {
-                existingScore = existingParsed.scores[crit.id];
-            } else if (existingParsed && Array.isArray(existingParsed) && existingParsed[idx]) {
-                existingScore = existingParsed[idx].nilai;
+            const critId = crit.id || `k${idx + 1}`;
+            const critTitle = crit.title || crit.kriteria || `Penilaian ${idx + 1}`;
+            const critDesc = crit.desc || crit.deskripsi || 'Indikator penilaian kompetensi karya sidang tugas akhir.';
+            const critBobot = parseFloat(crit.bobot) || 25;
+
+            if (existingParsed && existingParsed.scores && typeof existingParsed.scores[critId] !== 'undefined') {
+                existingScore = existingParsed.scores[critId];
+            } else if (existingParsed && Array.isArray(existingParsed)) {
+                const found = existingParsed.find(ep => ep.id === critId || ep.kriteria === critTitle);
+                if (found && typeof found.nilai !== 'undefined') {
+                    existingScore = found.nilai;
+                } else if (existingParsed[idx]) {
+                    existingScore = existingParsed[idx].nilai;
+                }
             }
 
             html += `
-                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs hover:border-amber-300 transition-all space-y-2">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div class="flex items-start gap-2.5">
-                            <span class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-700 flex items-center justify-center font-black text-xs shrink-0 mt-0.5">${idx + 1}</span>
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs hover:border-amber-400 hover:shadow-md transition-all space-y-2.5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md shadow-amber-500/20 mt-0.5">
+                                ${idx + 1}
+                            </div>
                             <div>
-                                <h5 class="text-xs font-bold text-slate-900">${escapeHtml(crit.title)}</h5>
-                                <p class="text-[11px] text-slate-500 leading-snug mt-0.5">${escapeHtml(crit.desc)}</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
+                                        Penilaian #${idx + 1}
+                                    </span>
+                                    <h5 class="text-xs sm:text-sm font-extrabold text-slate-900">${escapeHtml(critTitle)}</h5>
+                                </div>
+                                <p class="text-[11px] text-slate-500 leading-relaxed mt-1">${escapeHtml(critDesc)}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[10.5px] font-bold">
-                                Bobot: <strong class="text-amber-700">${crit.bobot}%</strong>
+                            <span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                                Bobot: <strong class="text-amber-700">${critBobot}%</strong>
                             </span>
-                            <div class="w-24">
+                            <div class="w-28">
                                 <input type="number" 
                                        min="0" 
                                        max="100" 
                                        step="0.5" 
-                                       id="penilaian_score_${crit.id}" 
-                                       data-bobot="${crit.bobot}" 
-                                       data-crit-id="${crit.id}"
-                                       data-crit-title="${escapeHtml(crit.title)}"
+                                       id="penilaian_score_${critId}" 
+                                       data-bobot="${critBobot}" 
+                                       data-crit-id="${critId}"
+                                       data-crit-title="${escapeHtml(critTitle)}"
                                        value="${existingScore !== '' ? escapeHtml(existingScore) : ''}" 
-                                       placeholder="0 - 100" 
+                                       placeholder="Nilai (0-100)" 
                                        oninput="calculatePenilaianScore()" 
                                        class="rubrik-score-input w-full px-3 py-2 bg-slate-50 border border-slate-300 focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 rounded-xl text-center text-sm font-black text-slate-900 outline-none transition" 
                                        required>
