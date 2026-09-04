@@ -162,10 +162,10 @@ class AdminLayanan extends CI_Controller {
         $status      = trim($this->input->post('status') ?? ''); // 'Valid' atau 'Invalid'
         $catatan     = trim($this->input->post('catatan') ?? '');
 
-        if (empty($nim) || empty($kode_berkas) || empty($status)) {
+        if (empty($nim) || empty($kode_berkas)) {
             $this->output
                  ->set_content_type('application/json')
-                 ->set_output(json_encode(array('success' => false, 'message' => 'Parameter NIM, kode berkas, atau status tidak valid.')));
+                 ->set_output(json_encode(array('success' => false, 'message' => 'Parameter NIM atau kode berkas tidak valid.')));
             return;
         }
 
@@ -184,9 +184,11 @@ class AdminLayanan extends CI_Controller {
             return;
         }
 
-        // Standardize status
+        // Standardize status ('Valid', 'Invalid', or 'Pending')
         if ($status === 'Approved') $status = 'Valid';
         if ($status === 'Rejected') $status = 'Invalid';
+        if ($status !== 'Valid' && $status !== 'Invalid') $status = 'Pending';
+
 
         // Get file name
         $student_berkas_map = $this->AdminLayanan_model->get_student_berkas_map($nim);
@@ -384,9 +386,11 @@ class AdminLayanan extends CI_Controller {
         $data['detail']         = $detail;
         $data['syarat_berkas']  = $this->AdminLayanan_model->get_active_syarat_berkas();
         $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
-
+        
         $this->load->view('admin_layanan/detail_berkas', $data);
     }
+
+
 
     /**
      * Proses Validasi & Approval / Pengembalian Berkas ke Mahasiswa
@@ -404,14 +408,12 @@ class AdminLayanan extends CI_Controller {
         $berkas_valid  = $this->input->post('berkas_valid') ?: array();
         $berkas_kurang = $this->input->post('berkas_kurang') ?: array();
 
-        if ($action_submit === 'approve' || $action_submit === 'approved' || (empty($berkas_kurang) && !empty($action_submit))) {
-            $this->AdminLayanan_model->update_verifikasi($nim, 'Approved', $catatan_admin);
-        } elseif (empty($berkas_kurang) && empty($action_submit)) {
-            // Default to Approved if no berkas marked invalid/kurang
-            $this->AdminLayanan_model->update_verifikasi($nim, 'Approved', $catatan_admin);
+        if ($action_submit === 'reject') {
+            $this->AdminLayanan_model->update_verifikasi($nim, 'reject', $catatan_admin, null, $berkas_valid, $berkas_kurang);
         } else {
-            $this->AdminLayanan_model->update_verifikasi($nim, 'Rejected', $catatan_admin, null, $berkas_valid, $berkas_kurang);
+            $this->AdminLayanan_model->update_verifikasi($nim, 'submit', $catatan_admin, null, $berkas_valid, $berkas_kurang);
         }
+
 
         $res = $this->AdminLayanan_model->get_detail_pengajuan($nim);
 

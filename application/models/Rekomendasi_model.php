@@ -175,10 +175,12 @@ class Rekomendasi_model extends CI_Model {
 
     // Fetch all active main (Pop-up 1) options
     public function get_active_main_options() {
-        $this->db->where_in('category', ['main', 'sidang']);
+        $this->db->where('category', 'main');
         $this->db->where('is_active', 1);
         $this->db->order_by('sort_order', 'ASC');
         $options = $this->db->get('rekomen_jalur_options')->result_array();
+
+
         if (empty($options)) {
             // Fallback default
             return [
@@ -206,8 +208,9 @@ class Rekomendasi_model extends CI_Model {
 
     // Fetch all active non_sidang options with their dynamic fields
     public function get_active_non_sidang_options() {
-        $this->db->where('category', 'non_sidang');
+        $this->db->where_not_in('category', ['main']);
         $this->db->where('is_active', 1);
+
         $this->db->order_by('sort_order', 'ASC');
         $options = $this->db->get('rekomen_jalur_options')->result_array();
 
@@ -219,14 +222,17 @@ class Rekomendasi_model extends CI_Model {
         return $options;
     }
 
-    // Get single option by ID or Code
+    // Get single option by ID, Code, or Title
     public function get_option($id_or_code) {
+        $opt = null;
         if (is_numeric($id_or_code)) {
             $this->db->where('id', $id_or_code);
-        } else {
-            $this->db->where('code', $id_or_code);
+            $opt = $this->db->get('rekomen_jalur_options')->row_array();
         }
-        $opt = $this->db->get('rekomen_jalur_options')->row_array();
+        if (empty($opt)) {
+            $this->db->where('code', $id_or_code)->or_where('title', $id_or_code);
+            $opt = $this->db->get('rekomen_jalur_options')->row_array();
+        }
         if ($opt) {
             $this->db->where('jalur_id', $opt['id']);
             $this->db->order_by('sort_order', 'ASC');
@@ -234,6 +240,7 @@ class Rekomendasi_model extends CI_Model {
         }
         return $opt;
     }
+
 
     // Get latest submission for student
     public function get_latest_submission($nim) {
@@ -295,6 +302,18 @@ class Rekomendasi_model extends CI_Model {
         $this->db->where('jalur_id', $id)->delete('rekomen_jalur_fields');
         return $this->db->where('id', $id)->delete('rekomen_jalur_options');
     }
+
+    public function delete_category($categoryKey) {
+        if (empty($categoryKey) || in_array($categoryKey, ['main', 'sidang', 'non_sidang'])) return false;
+        
+        $options = $this->db->get_where('rekomen_jalur_options', ['category' => $categoryKey])->result_array();
+        foreach ($options as $opt) {
+            $this->delete_option($opt['id']);
+        }
+        $this->db->where('category', 'main')->where('category', $categoryKey)->delete('rekomen_jalur_options');
+        return true;
+    }
+
 
     public function save_field($data, $id = null) {
         if ($id) {
@@ -380,7 +399,42 @@ class Rekomendasi_model extends CI_Model {
                 ]);
             }
         }
+
+        // 3. Ensure rekomen_submission has a seed submission for testing if empty
+        if ($this->db->table_exists('rekomen_submission')) {
+            $sub = $this->db->get_where('rekomen_submission', ['nim' => $nim])->row_array();
+            if (!$sub) {
+                $form_json = json_encode([
+                    'eviden' => [
+                        'label' => 'Eviden / Sertifikat Prestasi (PDF/DOCX)',
+                        'file' => base_url('uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf'),
+                        'original_name' => 'Sertifikat_Prestasi_Juara1_Nasional.pdf'
+                    ],
+                    'persetujuan_pembimbing' => [
+                        'label' => 'Persetujuan Pembimbing (PDF/DOCX)',
+                        'file' => base_url('uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf'),
+                        'original_name' => 'Surat_Persetujuan_Pembimbing_Ekuivalensi.pdf'
+                    ],
+                    'catatan_alasan' => [
+                        'label' => 'Tanggapan / Alasan Rekomendasi Non-Sidang',
+                        'val' => 'Mahasiswa berprestasi Juara 1 Lomba Desain Nasional dan memiliki sertifikat HKI terdaftar.'
+                    ]
+                ]);
+
+                $this->db->insert('rekomen_submission', [
+                    'nim' => $nim,
+                    'recommendation_type' => 'non_sidang',
+                    'jalur_id' => 3,
+                    'jalur_title' => 'Prestasi',
+                    'form_data_json' => $form_json,
+                    'catatan_dosen' => 'Direkomendasikan Lulus Non-Sidang Jalur Prestasi Utama',
+                    'status' => 'Submitted',
+                    'created_by' => '19850101'
+                ]);
+            }
+        }
     }
 }
+
 
 

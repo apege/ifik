@@ -334,8 +334,9 @@
                                         </a>
                                     </div>
 
-                                    <!-- Inline Dropdown PDF Viewer Accordion (Buttery Smooth CSS Grid Animation) -->
-                                    <div id="inlinePdfWrapper_<?= $b['key']; ?>" class="grid grid-rows-[0fr] transition-all duration-500 ease-in-out opacity-0 overflow-hidden">
+                                     <!-- Inline Dropdown PDF Viewer Accordion (Smooth Slide & Fade Animation) -->
+                                     <div id="inlinePdfWrapper_<?= $b['key']; ?>" class="overflow-hidden transition-all duration-500 ease-in-out max-h-0 opacity-0">
+
                                         <div class="min-h-0 overflow-hidden">
                                             <div id="inlinePdfBox_<?= $b['key']; ?>" class="rounded-2xl border border-slate-200 shadow-inner bg-slate-100 mt-3 overflow-hidden">
                                                 <div class="p-2 px-3.5 bg-slate-900 text-white flex items-center justify-between text-xs">
@@ -530,34 +531,46 @@
             if (!wrapper) return;
 
             const defaultSamplePdf = '<?= base_url("uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf"); ?>';
-            const targetUrl = (fileUrl && fileUrl.match(/\.(pdf|png|jpg|jpeg)$/i)) ? fileUrl : defaultSamplePdf;
+            const targetUrl = (fileUrl && fileUrl.trim() !== '') ? fileUrl : defaultSamplePdf;
 
-            const isOpen = wrapper.classList.contains('grid-rows-[1fr]');
+            const isOpen = wrapper.classList.contains('is-preview-open');
 
             if (!isOpen) {
-                // Close any other open dropdowns first for clean accordion UX
+                // Close any other open dropdowns smoothly first
                 document.querySelectorAll('[id^="inlinePdfWrapper_"]').forEach(el => {
-                    el.classList.remove('grid-rows-[1fr]', 'opacity-100');
-                    el.classList.add('grid-rows-[0fr]', 'opacity-0');
+                    el.classList.remove('is-preview-open', 'opacity-100');
+                    el.classList.add('opacity-0');
+                    el.style.maxHeight = '0px';
                 });
                 document.querySelectorAll('[id^="iconPdf_"]').forEach(el => el.classList.remove('rotate-180'));
                 document.querySelectorAll('[id^="btnTogglePdf_"]').forEach(el => el.classList.remove('ring-2', 'ring-orange-500/40'));
 
                 if (iframe && (iframe.src === 'about:blank' || !iframe.src)) {
-                    iframe.src = targetUrl + '#view=FitH&zoom=100';
+                    if (targetUrl.match(/\.(docx|doc)$/i)) {
+                        iframe.src = 'https://docs.google.com/gview?url=' + encodeURIComponent(targetUrl) + '&embedded=true';
+                    } else {
+                        iframe.src = targetUrl + (targetUrl.includes('#') ? '' : '#view=FitH&zoom=100');
+                    }
                 }
 
-                wrapper.classList.remove('grid-rows-[0fr]', 'opacity-0');
-                wrapper.classList.add('grid-rows-[1fr]', 'opacity-100');
+                wrapper.classList.add('is-preview-open');
+                wrapper.classList.remove('opacity-0');
+                wrapper.classList.add('opacity-100');
+                wrapper.style.maxHeight = '530px';
+
                 if (icon) icon.classList.add('rotate-180');
                 if (btn) btn.classList.add('ring-2', 'ring-orange-500/40');
             } else {
-                wrapper.classList.remove('grid-rows-[1fr]', 'opacity-100');
-                wrapper.classList.add('grid-rows-[0fr]', 'opacity-0');
+                wrapper.classList.remove('is-preview-open', 'opacity-100');
+                wrapper.classList.add('opacity-0');
+                wrapper.style.maxHeight = '0px';
+
                 if (icon) icon.classList.remove('rotate-180');
                 if (btn) btn.classList.remove('ring-2', 'ring-orange-500/40');
             }
         }
+
+
 
         function openPdfModal(title, filename, key, fileUrl) {
             toggleInlinePdfPreview(key, fileUrl);
@@ -650,45 +663,78 @@
             updateCardState(card);
         }
 
+        function sendAjaxStatusUpdate(key, status, catatan = '') {
+            const formData = new FormData();
+            formData.append('nim', '<?= $detail['nim']; ?>');
+            formData.append('kode_berkas', key);
+            formData.append('status', status);
+            formData.append('catatan', catatan);
+
+            fetch('<?= site_url("adminlayanan/ajax_update_single_berkas"); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    console.log('Status ' + key + ' auto-saved as ' + status);
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
         function updateCardState(card) {
+            const key = card ? card.getAttribute('data-key') : '';
             const cbValid = card.querySelector('input[name="berkas_valid[]"]');
             const cbKurang = card.querySelector('input[name="berkas_kurang[]"]');
             const badge = card.querySelector('.doc-badge');
             const noteBox = card.querySelector('.catatan-doc-box');
             const noteInput = noteBox ? noteBox.querySelector('input') : null;
 
+            let targetStatus = 'Pending';
+
             card.classList.remove('border-emerald-200', 'bg-emerald-50/20', 'border-rose-200', 'bg-rose-50/30', 'border-slate-200', 'bg-white');
 
             if (cbValid && cbValid.checked) {
+                targetStatus = 'Valid';
                 card.classList.add('border-emerald-200', 'bg-emerald-50/20');
                 if (badge) {
-                    badge.className = 'doc-badge px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-                    badge.textContent = 'Valid';
+                    badge.className = 'doc-badge px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                    badge.innerHTML = '<i class="bi bi-check-circle-fill text-emerald-600"></i> Valid';
                 }
                 if (noteBox) noteBox.classList.add('hidden');
                 if (noteInput) noteInput.value = '';
             } else if (cbKurang && cbKurang.checked) {
+                targetStatus = 'Invalid';
                 card.classList.add('border-rose-200', 'bg-rose-50/30');
                 if (badge) {
-                    badge.className = 'doc-badge px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200';
-                    badge.textContent = 'Kurang/Revisi';
+                    badge.className = 'doc-badge px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
+                    badge.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-rose-600"></i> Kurang/Revisi';
                 }
                 if (noteBox) {
                     noteBox.classList.remove('hidden');
                     if (noteInput && !noteInput.value) noteInput.focus();
                 }
             } else {
+                targetStatus = 'Pending';
                 card.classList.add('border-slate-200', 'bg-white');
                 if (badge) {
-                    badge.className = 'doc-badge px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200';
+                    badge.className = 'doc-badge px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200';
                     badge.textContent = 'Belum Dicek';
                 }
                 if (noteBox) noteBox.classList.add('hidden');
                 if (noteInput) noteInput.value = '';
             }
+
+            if (key) {
+                const noteVal = noteInput ? noteInput.value : '';
+                sendAjaxStatusUpdate(key, targetStatus, noteVal);
+            }
+
             syncAllCatatanAdmin();
             updateActionButtonsUI();
         }
+
 
         function syncAllCatatanAdmin() {
             const compiledNotes = [];
@@ -898,32 +944,7 @@
 
             return confirm('Yakin seluruh 4 berkas mahasiswa ini telah lengkap dan valid? Pengajuan akan diteruskan ke Koordinator TA.');
         }
-        function toggleDocGrid(cols) {
-            const container = document.getElementById('docGridContainer');
-            const btnSingle = document.getElementById('btnLayoutSingle');
-            const btnGrid = document.getElementById('btnLayoutGrid');
-            if (!container) return;
 
-            if (cols === 1) {
-                container.className = 'grid grid-cols-1 gap-6';
-                if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
-        }
-        function toggleDocGrid(cols) {
-            const container = document.getElementById('docGridContainer');
-            const btnSingle = document.getElementById('btnLayoutSingle');
-            const btnGrid = document.getElementById('btnLayoutGrid');
-            if (!container) return;
-
-            if (cols === 1) {
-                container.className = 'grid grid-cols-1 gap-6';
-                if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
-                if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-all cursor-pointer';
-            } else {
-                container.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
-                if (btnGrid) btnGrid.className = 'px-2.5 py-1 rounded-lg font-bold bg-white text-orange-600 shadow-xs flex items-center gap-1 transition-all cursor-pointer';
-                if (btnSingle) btnSingle.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1 transition-all cursor-pointer';
-            }
-        }
 
         // Focus & highlight specific document card if requested via hash or URL param
         document.addEventListener('DOMContentLoaded', () => {

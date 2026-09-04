@@ -47,7 +47,15 @@ class AdminLayanan_model extends CI_Model {
                 UNIQUE KEY `nim_kode` (`nim`, `kode_berkas`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
         }
+
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            if (!$this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
+                $this->db->query("ALTER TABLE `pendaftaran_ta` ADD COLUMN `is_submitted` TINYINT(1) NOT NULL DEFAULT 1;");
+            }
+        }
     }
+
+
 
     public function get_all_syarat_berkas() {
         $this->_ensure_tables();
@@ -126,86 +134,61 @@ class AdminLayanan_model extends CI_Model {
             return false;
         }
 
-        $active_syarat = $this->get_active_syarat_berkas();
+        $active_syarat  = $this->get_active_syarat_berkas();
         $student_berkas = $this->get_student_berkas_map($nim);
 
-        // Check if explicit action string was passed (e.g. 'approve', 'Approved', 'reject', 'Rejected')
-        $is_explicit_approve = (is_string($status_input) && (strtolower($status_input) === 'approve' || strtolower($status_input) === 'approved'));
-        $is_explicit_reject  = (is_string($status_input) && (strtolower($status_input) === 'reject' || strtolower($status_input) === 'rejected'));
-
-        if ($is_explicit_approve) {
-            // Mark all active berkas for this student as Valid
-            foreach ($active_syarat as $sb) {
-                $kode = $sb['kode_berkas'];
-                $file_name = $student_berkas[$kode]['file_name'] ?? '';
-                if (empty($file_name) && isset($this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array()['file_' . $kode])) {
-                    $file_name = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array()['file_' . $kode];
-                }
-                if (empty($file_name)) {
-                    $file_name = 'berkas_' . $kode . '_' . $nim . '.pdf';
-                }
-                $this->save_student_berkas($nim, $kode, $file_name, 'Valid');
-            }
-
-            $data = array(
-                'status_approval_admin' => 'Approved',
-                'catatan_admin'         => $catatan ?: (is_string($extra_catatan) ? $extra_catatan : NULL),
-                'berkas_kurang'         => NULL,
-                'current_stage'         => 'Koordinator TA',
-                'status_ksm'            => 'Valid',
-                'status_transkrip'      => 'Valid',
-                'status_pernyataan'     => 'Valid',
-                'status_bebas_lab'      => 'Valid'
-            );
-
-            $this->db->where('nim', $nim);
-            return $this->db->update('pendaftaran_ta', $data);
-        }
-
-        // If array of status or berkas_valid / berkas_kurang passed
         $invalid_items = array();
-        $all_valid = true;
+        $has_invalid   = false;
+        $has_pending   = false;
 
-        if ($is_explicit_reject) {
-            $all_valid = false;
-        }
+        $is_explicit_approve = (is_string($status_input) && strtolower($status_input) === 'approved' && empty($berkas_valid) && empty($berkas_kurang));
 
         foreach ($active_syarat as $sb) {
             $kode = $sb['kode_berkas'];
-            
-            // Determine status for this berkas
-            $st = 'Valid';
-            if (is_array($status_input) && isset($status_input[$kode])) {
-                $st = $status_input[$kode];
+
+            if ($is_explicit_approve) {
+                $st = 'Valid';
             } elseif (in_array($kode, (array)$berkas_kurang)) {
                 $st = 'Invalid';
             } elseif (in_array($kode, (array)$berkas_valid)) {
                 $st = 'Valid';
+            } else {
+                $st = 'Pending';
             }
 
             $file_name = $student_berkas[$kode]['file_name'] ?? '';
-            if (empty($file_name) && isset($this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array()['file_' . $kode])) {
-                $file_name = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array()['file_' . $kode];
+            if (empty($file_name)) {
+                $p_row = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+                $file_name = $p_row['file_' . $kode] ?? ('berkas_' . $kode . '_' . $nim . '.pdf');
             }
 
-            if (!empty($file_name)) {
-                $this->save_student_berkas($nim, $kode, $file_name, $st);
+            $this->save_student_berkas($nim, $kode, $file_name, $st);
+
+            // Update legacy column if exists
+            if (in_array($kode, array('ksm', 'transkrip', 'pernyataan', 'bebas_lab'))) {
+                $this->db->where('nim', $nim)->update('pendaftaran_ta', array('status_' . $kode => $st));
             }
 
             if ($st === 'Invalid') {
-                $all_valid = false;
+                $has_invalid = true;
                 $invalid_items[] = $sb['nama_berkas'] . ' (Tidak Sesuai / Invalid)';
+            } elseif ($st === 'Pending') {
+                $has_pending = true;
             }
         }
 
-        if ($all_valid && !$is_explicit_reject) {
-            $status_approval = 'Approved';
-            $berkas_kurang_str = NULL;
-            $current_stage = 'Koordinator TA';
-        } else {
+        if ($has_invalid || (is_string($status_input) && strtolower($status_input) === 'reject')) {
             $status_approval = 'Rejected';
             $berkas_kurang_str = !empty($invalid_items) ? implode(', ', $invalid_items) : ($extra_catatan ?: 'Dokumen Persyaratan Perlu Revisi');
             $current_stage = 'Admin Layanan';
+        } elseif ($has_pending) {
+            $status_approval = 'Pending';
+            $berkas_kurang_str = NULL;
+            $current_stage = 'Admin Layanan';
+        } else {
+            $status_approval = 'Approved';
+            $berkas_kurang_str = NULL;
+            $current_stage = 'Koordinator TA';
         }
 
         $data = array(
@@ -218,6 +201,7 @@ class AdminLayanan_model extends CI_Model {
         $this->db->where('nim', $nim);
         return $this->db->update('pendaftaran_ta', $data);
     }
+
 
     public function reset_verifikasi_pending($nim) {
         if (!$this->db->table_exists('pendaftaran_ta')) {
@@ -276,7 +260,11 @@ class AdminLayanan_model extends CI_Model {
         $has_mhs = $this->db->table_exists('mahasiswa');
         $this->db->from('pendaftaran_ta p');
         if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->where('p.is_submitted', 1);
+        if ($this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
+            $this->db->where('p.is_submitted', 1);
+        }
+
+
 
         if ($filter_status && $filter_status !== 'all') {
             $this->db->where('p.status_approval_admin', $filter_status);
@@ -333,7 +321,11 @@ class AdminLayanan_model extends CI_Model {
         $this->db->from('pendaftaran_ta p');
         if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
         if ($has_kk)  $this->db->join('kelompok_keahlian kk', 'kk.id = p.id_kk', 'left');
-        $this->db->where('p.is_submitted', 1);
+        if ($this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
+            $this->db->where('p.is_submitted', 1);
+        }
+
+
 
         if ($filter_status && $filter_status !== 'all') {
             $this->db->where('p.status_approval_admin', $filter_status);
@@ -389,10 +381,10 @@ class AdminLayanan_model extends CI_Model {
         $has_mhs = $this->db->table_exists('mahasiswa');
         $this->db->select('p.nim, p.judul_1, p.status_approval_wali, p.status_approval_admin, m.nama_depan, m.nama_belakang, m.konsentrasi_dkv');
         $this->db->from('pendaftaran_ta p');
-        if ($has_mhs) {
-            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        if ($this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
+            $this->db->where('p.is_submitted', 1);
         }
-        $this->db->where('p.is_submitted', 1);
+
 
         $this->db->group_start();
         if ($has_mhs) {

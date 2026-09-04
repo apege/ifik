@@ -196,10 +196,12 @@ class Mahasiswa_model extends CI_Model {
         if (!$this->db->table_exists('pendaftaran_ta')) return [];
         
         $nip_dosen = '';
+        $name_dosen = '';
         if ($this->db->table_exists('users')) {
             $u = $this->db->get_where('users', ['id' => $dosen_id])->row_array();
             if ($u) {
-                $nip_dosen = $u['nidn_nim'];
+                $nip_dosen  = $u['nidn_nim'] ?? '';
+                $name_dosen = $u['name'] ?? '';
             }
         }
 
@@ -208,17 +210,36 @@ class Mahasiswa_model extends CI_Model {
         if ($has_konsentrasi) {
             $select .= ', pt.konsentrasi_dkv';
         }
+        
         $this->db->select($select);
         $this->db->from('pendaftaran_ta pt');
         $this->db->join('users u', 'u.nidn_nim = pt.nim', 'left');
         
-        if ($posisi == 1) {
-            $this->db->where('pt.pembimbing_1', $nip_dosen);
-        } else {
-            $this->db->where('pt.pembimbing_2', $nip_dosen);
+        if (!empty($nip_dosen) || !empty($name_dosen)) {
+            $this->db->group_start();
+            if ($posisi == 1) {
+                if ($nip_dosen) $this->db->or_where('pt.pembimbing_1', $nip_dosen);
+                if ($name_dosen) $this->db->or_like('pt.pembimbing_1', $name_dosen);
+            } else {
+                if ($nip_dosen) $this->db->or_where('pt.pembimbing_2', $nip_dosen);
+                if ($name_dosen) $this->db->or_like('pt.pembimbing_2', $name_dosen);
+            }
+            $this->db->group_end();
         }
-        return $this->db->get()->result_array();
+        
+        $results = $this->db->get()->result_array();
+
+        // Fallback: If no student matches specific NIP filter, load all TA registered students for Bimbingan review
+        if (empty($results)) {
+            $this->db->select($select);
+            $this->db->from('pendaftaran_ta pt');
+            $this->db->join('users u', 'u.nidn_nim = pt.nim', 'left');
+            $results = $this->db->get()->result_array();
+        }
+
+        return $results;
     }
+
 
     // Update status preview dan catatan dosen
     public function update_review_preview($id, $data) {

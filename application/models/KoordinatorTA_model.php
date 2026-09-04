@@ -208,16 +208,41 @@ class KoordinatorTA_model extends CI_Model {
             return null;
         }
 
-        $this->db->select('m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.alamat as mhs_alamat, m.kota, m.provinsi, m.email, m.no_hp, p.*, dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2');
+        $has_mhs   = $this->db->table_exists('mahasiswa');
+        $has_depan = $has_mhs && $this->db->field_exists('nama_depan', 'mahasiswa');
+        $has_users = $this->db->table_exists('users');
+        $has_dw    = $this->db->table_exists('dosen_wali');
+
+        if ($has_depan) {
+            $select = 'm.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.alamat as mhs_alamat, m.kota, m.provinsi, m.email, m.no_hp, p.*';
+        } else if ($has_users) {
+            $select = 'COALESCE(u.name, p.nim) as nama_depan, "" as nama_belakang, "" as prodi_mhs, "" as mhs_alamat, "" as kota, "" as provinsi, u.email, "" as no_hp, p.*';
+        } else {
+            $select = 'p.nim as nama_depan, "" as nama_belakang, "" as prodi_mhs, "" as mhs_alamat, "" as kota, "" as provinsi, "" as email, "" as no_hp, p.*';
+        }
+
+        if ($has_dw) {
+            $select .= ', dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2';
+        }
+
+        $this->db->select($select);
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        if ($has_depan) {
+            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        } else if ($has_users) {
+            $this->db->join('users u', 'u.nidn_nim = p.nim', 'left');
+        }
+
+        if ($has_dw) {
+            $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
+            $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        }
+
         $this->db->where('p.nim', $nim);
         $query = $this->db->get();
-        $row = $query->row_array();
+        $row = $query ? $query->row_array() : null;
 
-        if (!$row && $this->db->table_exists('mahasiswa')) {
+        if (!$row && $has_mhs) {
             $this->db->where('nim', $nim);
             $row = $this->db->get('mahasiswa')->row_array();
         }
@@ -239,6 +264,7 @@ class KoordinatorTA_model extends CI_Model {
 
         return $row;
     }
+
 
     // Approval / Reject Pendaftaran TA oleh Koordinator TA dengan AJAX & Validasi Pembimbing
     public function update_approval_koor_ajax($nim, $status, $catatan = '', $pembimbing_1 = null, $pembimbing_2 = null) {

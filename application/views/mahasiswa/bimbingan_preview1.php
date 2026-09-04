@@ -369,13 +369,11 @@
                     </h3>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" onclick="openRekomendasiModal('<?= $mahasiswa['nim'] ?? '1301210001' ?>', '<?= $latest_p3['id'] ?? '' ?>')" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-md transition flex items-center gap-2 cursor-pointer transform hover:scale-105 active:scale-95">
-                        <i class="bi bi-check2-square text-sm"></i> Rekomendasi Sidang/Non Sidang
-                    </button>
                     <span class="text-xs font-bold px-4 py-2 rounded-2xl bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs">
                         <i class="bi bi-cursor-fill text-orange-500 mr-1.5"></i> Klik kartu tahapan untuk berganti tab
                     </span>
                 </div>
+
             </div>
 
             <!-- 4 Milestone Tab Cards -->
@@ -812,10 +810,8 @@
                             Persetujuan Preview 3 oleh Pembimbing 1 akan membuka akses pendaftaran Sidang Tugas Akhir Anda.
                         </p>
                     </div>
-                    <button type="button" onclick="openRekomendasiModal('<?= $mahasiswa['nim'] ?? '1301210001' ?>', '<?= $latest_p3['id'] ?? '' ?>')" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-orange-500/20 transition flex items-center gap-2 cursor-pointer transform hover:scale-105 active:scale-95">
-                        <i class="bi bi-check2-square text-lg"></i> Rekomendasi Sidang/Non Sidang
-                    </button>
                 </div>
+
 
                 <?php if(!$is_p2_app): ?>
                 <div class="py-10 text-center bg-slate-50 border border-slate-200 rounded-3xl max-w-3xl">
@@ -861,13 +857,13 @@
                                 </div>
                                 <span id="fileNameP3" class="truncate font-mono">draft.pdf</span>
                             </div>
-                            <span id="fileSizeP3" class="text-xs text-emerald-800 font-bold shrink-0 ml-3 bg-white px-3 py-1 rounded-xl border border-emerald-200">2.4 MB</span>
-                        </div>
                     </div>
                     <div>
                         <label class="block text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2.5">Catatan Kelayakan Pra-Sidang</label>
                         <textarea name="catatan_mahasiswa" rows="3" class="w-full p-4 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium" placeholder="Uraikan kelengkapan naskah dan karya yang siap disidangkan..."></textarea>
                     </div>
+
+
                     <button type="submit" class="py-4 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition cursor-pointer">
                         <i class="bi bi-send-check-fill mr-2"></i> Submit Berkas Pra-Sidang (Preview 3)
                     </button>

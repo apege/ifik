@@ -471,7 +471,8 @@ class Mahasiswa extends CI_Controller {
     public function bimbingan() {
         $role_id = $this->session->userdata('role_id');
 
-        if ($role_id == 4) {
+        if (in_array($role_id, [1, 2, 3, 4])) {
+
             $dosen_id = $this->session->userdata('user_id');
             $posisi = $this->input->get('posisi') ?: 1;
             
@@ -567,11 +568,39 @@ class Mahasiswa extends CI_Controller {
             );
 
             $this->Mahasiswa_model->save_upload_preview($data_insert);
+
+            // Process optional Eviden Non-Sidang upload from student in Preview 3
+            if (!empty($_FILES['rekomen_eviden']['name'])) {
+                $ev_config['upload_path']   = './uploads/persyaratan_ta/';
+                $ev_config['allowed_types'] = 'pdf|docx|doc';
+                $ev_config['max_size']      = 10240;
+                $clean_tahap = str_replace(' ', '', strtoupper($tahap));
+                $ev_config['file_name']     = 'EVIDEN_' . $nim . '_' . time();
+
+                $this->upload->initialize($ev_config);
+                if ($this->upload->do_upload('rekomen_eviden')) {
+                    $ev_data = $this->upload->data();
+                    $ev_file = $ev_data['file_name'];
+                    $rek_title = trim($this->input->post('rekomen_title') ?? 'Jalur Ekuivalensi Prestasi');
+
+                    $this->load->model('Rekomendasi_model');
+                    $this->Rekomendasi_model->save_submission(array(
+                        'nim'                 => $nim,
+                        'recommendation_type' => 'non_sidang',
+                        'jalur_title'         => $rek_title,
+                        'form_data_json'      => json_encode(array('eviden' => $ev_file, 'uploaded_by' => 'mahasiswa')),
+                        'catatan_dosen'       => 'Mahasiswa mengajukan kelulusan jalur Non-Sidang dengan dokumen bukti pendukung.',
+                        'status'              => 'pending'
+                    ));
+                }
+            }
+
             $this->session->set_flashdata('success', "Draft Berkas {$tahap} berhasil diunggah! Menunggu peninjauan dari Dosen Penilai.");
         }
 
         redirect('mahasiswa/bimbingan');
     }
+
 
     // Fallback handler upload_preview1
     public function upload_preview1() {
@@ -782,10 +811,11 @@ class Mahasiswa extends CI_Controller {
         header('Content-Type: application/json');
         
         $role_id = $this->session->userdata('role_id');
-        if ($role_id != 4) {
+        if (!in_array($role_id, [1, 2, 3, 4])) {
             echo json_encode(['status' => false, 'message' => 'Unauthorized']);
             return;
         }
+
 
         try {
             $dosen_id = $this->session->userdata('user_id');
@@ -797,18 +827,33 @@ class Mahasiswa extends CI_Controller {
             $data = [];
             $total = count($students);
             
+            $this->load->model('Rekomendasi_model');
+
             foreach ($students as $student) {
                 $previews = $this->Mahasiswa_model->get_riwayat_preview($student['nim'], $tahap);
                 $latest = !empty($previews) ? $previews[0] : null;
+                
+                // Smart fallback: If current tab stage has no upload yet, fetch latest preview across any stage (P1/P2/P3)
+                if (empty($latest)) {
+                    $all_previews = $this->Mahasiswa_model->get_riwayat_preview($student['nim']);
+                    if (!empty($all_previews)) {
+                        $latest = $all_previews[0];
+                    }
+                }
+
+                $rekomen = $this->Rekomendasi_model->get_latest_submission($student['nim']);
                 
                 $data[] = [
                     'nim' => $student['nim'],
                     'nama_mahasiswa' => $student['nama_mahasiswa'] ?? $student['nim'],
                     'judul' => $student['judul'] ?? '-',
                     'konsentrasi_dkv' => $student['konsentrasi_dkv'] ?? '',
-                    'latest_preview' => $latest
+                    'latest_preview' => $latest,
+                    'rekomendasi' => $rekomen
                 ];
             }
+
+
 
             echo json_encode([
                 'status' => true,
@@ -1279,6 +1324,20 @@ class Mahasiswa extends CI_Controller {
         echo json_encode(['status' => 'error', 'message' => 'ID tidak ditemukan']);
         exit;
     }
+
+    // Delete Entire Category / Tab
+    public function ajax_delete_rekomen_category() {
+        $this->load->model('Rekomendasi_model');
+        $category = $this->input->post('category');
+        if ($category) {
+            $this->Rekomendasi_model->delete_category($category);
+            echo json_encode(['status' => 'success', 'message' => 'Tab Kategori beserta seluruh isinya berhasil dihapus!']);
+            exit;
+        }
+        echo json_encode(['status' => 'error', 'message' => 'Kategori tidak ditemukan']);
+        exit;
+    }
+
 
     // Add or Edit Form Field per Option
     public function ajax_save_rekomen_field() {
