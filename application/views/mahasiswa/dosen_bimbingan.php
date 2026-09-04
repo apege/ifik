@@ -153,12 +153,13 @@
                 </div>
                 <div class="w-full xl:w-[400px] bg-black/25 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl space-y-4 text-white">
                     <div class="flex gap-4">
-                        <a href="<?= site_url('mahasiswa/bimbingan?posisi=1') ?>" class="flex-1 py-3 px-4 rounded-2xl font-bold text-center border <?= $posisi == 1 ? 'bg-orange-500 border-orange-400 text-white shadow-lg' : 'bg-white/10 border-white/20 hover:bg-white/20' ?> transition">
+                        <a href="<?= site_url('dosen/bimbingan?posisi=1') ?>" class="flex-1 py-3 px-4 rounded-2xl font-bold text-center border <?= $posisi == 1 ? 'bg-orange-500 border-orange-400 text-white shadow-lg' : 'bg-white/10 border-white/20 hover:bg-white/20' ?> transition">
                             <i class="bi bi-person-fill mr-2"></i> Sebagai P1
                         </a>
-                        <a href="<?= site_url('mahasiswa/bimbingan?posisi=2') ?>" class="flex-1 py-3 px-4 rounded-2xl font-bold text-center border <?= $posisi == 2 ? 'bg-orange-500 border-orange-400 text-white shadow-lg' : 'bg-white/10 border-white/20 hover:bg-white/20' ?> transition">
+                        <a href="<?= site_url('dosen/bimbingan?posisi=2') ?>" class="flex-1 py-3 px-4 rounded-2xl font-bold text-center border <?= $posisi == 2 ? 'bg-orange-500 border-orange-400 text-white shadow-lg' : 'bg-white/10 border-white/20 hover:bg-white/20' ?> transition">
                             <i class="bi bi-person mr-2"></i> Sebagai P2
                         </a>
+
                     </div>
                 </div>
             </div>
@@ -229,14 +230,16 @@
                                     <th class="py-4 px-4 font-bold">Mahasiswa & Judul TA</th>
                                     <th class="py-4 px-4">Berkas Terbaru</th>
                                     <th class="py-4 px-4 text-center">Waktu Upload</th>
-                                    <th class="py-4 px-4 text-center">Status</th>
+                                    <th class="py-4 px-4 text-center">Status Review</th>
+                                    <th class="py-4 px-4 text-center">Rekomendasi</th>
                                     <th class="py-4 px-4 text-center">Komentar P2</th>
                                     <th class="py-4 px-4 pr-6 text-right">Aksi (Review)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 font-medium bg-white" id="bimbinganTableBody">
-                                <tr><td colspan="7" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2"></i> Memuat data...</td></tr>
+                                <tr><td colspan="8" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin mr-2"></i> Memuat data...</td></tr>
                             </tbody>
+
                         </table>
                     </div>
                 </div>
@@ -253,10 +256,10 @@
                         <p class="text-sm font-bold text-slate-800 mb-1" id="modalStudentName">Nama Mahasiswa (NIM)</p>
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Judul: <span id="modalJudul" class="text-slate-700 font-bold normal-case"></span></p>
                         <p class="text-sm text-slate-600 italic mb-3 border-l-2 border-orange-300 pl-3">Catatan Mahasiswa: "<span id="modalStudentNotes"></span>"</p>
-                        <button type="button" onclick="openPdfModal(document.getElementById('modalFileLink').href)" id="modalFileLink" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold hover:bg-orange-200 transition cursor-pointer"><i class="bi bi-file-earmark-pdf-fill"></i> Lihat File Preview (In-Page)</button>
                     </div>
-                    
+
                     <form id="formReview" action="<?= site_url('mahasiswa/review_preview') ?>" method="POST" class="space-y-4">
+
                         <input type="hidden" name="id_preview" id="modalIdPreview" value="">
                         <input type="hidden" name="posisi" value="<?= $posisi ?>">
                         
@@ -463,6 +466,18 @@
                 let previewHtml = `<span class="text-slate-400 italic text-xs">Belum ada berkas</span>`;
                 let timeHtml = `-`;
                 let statusBadge = `<span class="badge badge-secondary"><i class="bi bi-dash"></i> Kosong</span>`;
+                let rekomenBadge = `<button onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer whitespace-nowrap"><i class="bi bi-plus-circle-fill"></i> Rekomendasi</button>`;
+
+                if (mhs.rekomendasi) {
+                    if (mhs.rekomendasi.recommendation_type === 'sidang') {
+                        rekomenBadge = `<span onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-800 border border-purple-300 rounded-xl text-xs font-extrabold cursor-pointer hover:bg-purple-200 transition whitespace-nowrap shadow-2xs" title="Klik untuk ubah rekomendasi"><i class="bi bi-mortarboard-fill text-purple-600"></i> Sidang TA</span>`;
+                    } else if (mhs.rekomendasi.recommendation_type === 'non_sidang') {
+                        const titleText = mhs.rekomendasi.jalur_title || 'Non-Sidang';
+                        rekomenBadge = `<span onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-extrabold cursor-pointer hover:bg-amber-200 transition whitespace-nowrap shadow-2xs" title="Jalur: ${titleText} (Klik untuk ubah)"><i class="bi bi-award-fill text-amber-600 text-sm"></i> ${titleText}</span>`;
+                    }
+
+                }
+
                 let btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold cursor-not-allowed border border-slate-200">Belum ada file</button>`;
                 
                 if (mhs.latest_preview) {
@@ -478,8 +493,18 @@
                     else if (st === 'Revision') statusBadge = `<span class="badge badge-danger"><i class="bi bi-x-circle-fill"></i> Revisi</span>`;
                     else statusBadge = `<span class="badge badge-warning"><i class="bi bi-clock-fill"></i> Pending</span>`;
                     
-                    btnHtml = `<button onclick="openReviewModal(${index})" class="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 rounded-lg text-xs font-bold transition shadow-2xs"><i class="bi bi-pencil-square"></i> Review</button>`;
+                    btnHtml = `
+                        <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                            <button onclick="openReviewModal(${index})" class="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 rounded-lg text-xs font-bold transition shadow-2xs flex items-center gap-1">
+                                <i class="bi bi-pencil-square"></i> Review
+                            </button>
+                            <button onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="px-2.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg text-xs font-bold transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Rekomendasikan Sidang / Non-Sidang">
+                                <i class="bi bi-award-fill"></i> Rekomendasi
+                            </button>
+                        </div>
+                    `;
                 }
+
                 
                 let checkboxHtml = '';
                 if (mhs.latest_preview && mhs.latest_preview.status_pembimbing !== 'Approved') {
@@ -521,6 +546,7 @@
                         <td class="py-4 px-4">${previewHtml}</td>
                         <td class="py-4 px-4 text-center">${timeHtml}</td>
                         <td class="py-4 px-4 text-center">${statusBadge}</td>
+                        <td class="py-4 px-4 text-center">${rekomenBadge}</td>
                         <td class="py-4 px-4 text-center">${p2BtnHtml}</td>
                         <td class="py-4 px-4 pr-6 text-right">${btnHtml}</td>
                     </tr>
@@ -528,8 +554,9 @@
             });
             
             if(count === 0) {
-                html = `<tr><td colspan="7" class="text-center py-10 text-slate-500 font-medium">Tidak ada data mahasiswa ditemukan.</td></tr>`;
+                html = `<tr><td colspan="8" class="text-center py-10 text-slate-500 font-medium">Tidak ada data mahasiswa ditemukan.</td></tr>`;
             }
+
             
             tbody.innerHTML = html;
             rebindDosenCheckboxes();
@@ -547,6 +574,8 @@
             
             document.getElementById('modalFileLink').href = `<?= base_url('uploads/preview_ta/') ?>${latest.file_draft}`;
             document.getElementById('modalIdPreview').value = latest.id;
+
+
             
             // Populate form values
             if (document.getElementById('modalStatus')) {
@@ -1090,5 +1119,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Rekomendasi Sidang / Non-Sidang (Jalur Prestasi/Ekuivalensi) -->
+    <?php $this->load->view('partials/modal_rekomendasi_sidang'); ?>
 </body>
 </html>
+

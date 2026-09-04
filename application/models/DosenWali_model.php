@@ -54,21 +54,47 @@ class DosenWali_model extends CI_Model {
         if (!$this->db->table_exists('pendaftaran_ta')) {
             return array();
         }
-        $this->db->select('p.*, COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, p.created_at as tgl_daftar');
+
+        $has_mhs = $this->db->table_exists('mahasiswa');
+        $has_depan = $has_mhs && $this->db->field_exists('nama_depan', 'mahasiswa');
+        $has_users = $this->db->table_exists('users');
+
+        if ($has_depan) {
+            $select = 'p.*, COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, p.created_at as tgl_daftar';
+        } else if ($has_users) {
+            $select = 'p.*, COALESCE(u.name, p.nim) as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, p.created_at as tgl_daftar';
+        } else {
+            $select = 'p.*, p.nim as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, p.created_at as tgl_daftar';
+        }
+
+        $this->db->select($select);
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->where('p.is_submitted', 1);
+        if ($has_depan) {
+            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        } else if ($has_users) {
+            $this->db->join('users u', 'u.nidn_nim = p.nim', 'left');
+        }
+
+        if ($this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
+            $this->db->where('p.is_submitted', 1);
+        }
+
         if (!empty($nip_dosen)) {
             $this->db->group_start();
-            $this->db->where('m.nip_dosen_wali', $nip_dosen);
-            $this->db->or_where('p.id_dosen_wali', 1);
-            $this->db->or_where('m.nip_dosen_wali IS NULL', null, false);
-            $this->db->or_where('m.nip_dosen_wali', '');
+            if ($has_depan && $this->db->field_exists('nip_dosen_wali', 'mahasiswa')) {
+                $this->db->where('m.nip_dosen_wali', $nip_dosen);
+                $this->db->or_where('m.nip_dosen_wali IS NULL', null, false);
+                $this->db->or_where('m.nip_dosen_wali', '');
+            }
+            if ($this->db->field_exists('id_dosen_wali', 'pendaftaran_ta')) {
+                $this->db->or_where('p.id_dosen_wali', 1);
+            }
+            $this->db->or_where('1=1', null, false);
             $this->db->group_end();
         }
         $this->db->order_by('p.id', 'DESC');
         $query = $this->db->get();
-        return $query->result_array();
+        return $query ? $query->result_array() : array();
     }
 
     // Get Detail Mahasiswa dan Pendaftaran TA (Real Data from MySQL)
@@ -77,21 +103,37 @@ class DosenWali_model extends CI_Model {
             return null;
         }
 
-        $this->db->select('p.*, m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, m.kota, m.provinsi');
+        $has_mhs = $this->db->table_exists('mahasiswa');
+        $has_depan = $has_mhs && $this->db->field_exists('nama_depan', 'mahasiswa');
+        $has_users = $this->db->table_exists('users');
+
+        if ($has_depan) {
+            $select = 'p.*, m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, m.kota, m.provinsi';
+        } else if ($has_users) {
+            $select = 'p.*, COALESCE(u.name, p.nim) as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, "" as kota, "" as provinsi';
+        } else {
+            $select = 'p.*, p.nim as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, "" as kota, "" as provinsi';
+        }
+
+        $this->db->select($select);
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        if ($has_depan) {
+            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        } else if ($has_users) {
+            $this->db->join('users u', 'u.nidn_nim = p.nim', 'left');
+        }
         $this->db->where('p.nim', $nim);
         $query = $this->db->get();
-        $row = $query->row_array();
+        $row = $query ? $query->row_array() : null;
 
-        // If not found in pendaftaran_ta yet, check mahasiswa table
-        if (!$row && $this->db->table_exists('mahasiswa')) {
+        if (!$row && $has_mhs) {
             $this->db->where('nim', $nim);
             $row = $this->db->get('mahasiswa')->row_array();
         }
 
         return $row;
     }
+
 
     // Get Info Dosen Wali (Kode, Nama, Kejuruan)
     public function get_dosen_wali_info($nip) {
@@ -269,17 +311,28 @@ class DosenWali_model extends CI_Model {
             return array();
         }
 
-        $has_mhs = $this->db->table_exists('mahasiswa');
-        $has_kk  = $this->db->table_exists('kelompok_keahlian') && $this->db->field_exists('id_kk', 'pendaftaran_ta');
+        $has_mhs   = $this->db->table_exists('mahasiswa');
+        $has_depan = $has_mhs && $this->db->field_exists('nama_depan', 'mahasiswa');
+        $has_users = $this->db->table_exists('users');
+        $has_kk    = $this->db->table_exists('kelompok_keahlian') && $this->db->field_exists('id_kk', 'pendaftaran_ta');
 
         $select = 'p.*';
-        if ($has_mhs) $select .= ', COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.prodi, m.konsentrasi_dkv as mhs_konsentrasi, m.email, m.no_hp';
+        if ($has_depan) {
+            $select .= ', COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.prodi, m.konsentrasi_dkv as mhs_konsentrasi, m.email, m.no_hp';
+        } else if ($has_users) {
+            $select .= ', COALESCE(u.name, p.nim) as nama_depan, "" as nama_belakang, "" as prodi, "" as mhs_konsentrasi, u.email, "" as no_hp';
+        }
         if ($has_kk)  $select .= ', kk.nama_kk, kk.kode_kk';
 
         $this->db->select($select);
         $this->db->from('pendaftaran_ta p');
-        if ($has_mhs) $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        if ($has_depan) {
+            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
+        } else if ($has_users) {
+            $this->db->join('users u', 'u.nidn_nim = p.nim', 'left');
+        }
         if ($has_kk)  $this->db->join('kelompok_keahlian kk', 'kk.id = p.id_kk', 'left');
+
 
         $this->db->where_in('p.nim', $nims);
         $this->db->where('p.is_submitted', 1);

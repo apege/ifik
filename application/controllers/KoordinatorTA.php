@@ -38,6 +38,10 @@ class KoordinatorTA extends CI_Controller {
         $data['title'] = 'Detail & Approval Koordinator TA';
         $data['detail'] = $this->KoordinatorTA_model->get_detail_pendaftaran_mahasiswa($nim);
         $data['dosen_list'] = $this->KoordinatorTA_model->get_dosen_list();
+        $this->load->model('Rekomendasi_model');
+        $data['latest_rekomendasi'] = $this->Rekomendasi_model->get_latest_submission($nim);
+
+
 
         // Fallback POST standard
         if ($this->input->post('action')) {
