@@ -437,22 +437,46 @@
     <div class="footer-top-accent"></div>
 
     <div class="footer-content">
+<?php
+    $ci =& get_instance();
+    $ci->load->model('Footer_model');
+    $footer_settings = $ci->Footer_model->get_settings();
+
+    $f_badge     = !empty($footer_settings->brand_badge) ? $footer_settings->brand_badge : 'TELKOM UNIVERSITY';
+    $f_title     = !empty($footer_settings->brand_title) ? $footer_settings->brand_title : 'Fakultas Industri Kreatif';
+    $f_desc      = !empty($footer_settings->brand_desc) ? $footer_settings->brand_desc : 'Pusat unggulan pendidikan industri kreatif yang menghasilkan lulusan berkarakter, inovatif, dan siap bersaing di tingkat global.';
+    $f_insta     = !empty($footer_settings->instagram_url) ? $footer_settings->instagram_url : 'https://www.instagram.com/telkomuniversity/';
+    $f_yt        = !empty($footer_settings->youtube_url) ? $footer_settings->youtube_url : 'https://www.youtube.com/@TelkomUniversityOfficial';
+    $f_linkedin  = !empty($footer_settings->linkedin_url) ? $footer_settings->linkedin_url : 'https://www.linkedin.com/school/telkom-university/';
+    $f_alamat    = !empty($footer_settings->alamat_kampus) ? $footer_settings->alamat_kampus : 'Gedung Sebatik (FIK), Telkom University, Bandung, Jawa Barat 40287';
+    $f_email     = !empty($footer_settings->email_resmi) ? $footer_settings->email_resmi : 'fik@telkomuniversity.ac.id';
+    $f_telepon   = !empty($footer_settings->telepon) ? $footer_settings->telepon : '(022) 756 5923';
+    $f_maps_emb  = !empty($footer_settings->maps_embed_url) ? $footer_settings->maps_embed_url : 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.301384074211!2d107.63211517587637!3d-6.973715893026955!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e9ad2c8c67c5%3A0xf6031fa15c26e108!2sTelkom%20University%20Fakultas%20Industri%20Kreatif!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid';
+    $f_maps_link = !empty($footer_settings->maps_link_url) ? $footer_settings->maps_link_url : 'https://maps.google.com/?q=Telkom+University+Fakultas+Industri+Kreatif';
+    $f_copyright = !empty($footer_settings->copyright_text) ? $footer_settings->copyright_text : 'Fakultas Industri Kreatif - Telkom University. All rights reserved.';
+?>
         <!-- Kolom 1: Brand & Profil -->
         <div class="footer-col">
-            <div class="footer-brand-badge">Telkom University</div>
-            <h2>Fakultas Industri Kreatif</h2>
-            <p class="brand-desc">Pusat unggulan pendidikan industri kreatif yang menghasilkan lulusan berkarakter, inovatif, dan siap bersaing di tingkat global.</p>
+            <div class="footer-brand-badge"><?= htmlspecialchars($f_badge); ?></div>
+            <h2><?= htmlspecialchars($f_title); ?></h2>
+            <p class="brand-desc"><?= nl2br(htmlspecialchars($f_desc)); ?></p>
             
             <div class="footer-socials">
-                <a href="https://instagram.com" target="_blank" class="social-btn" title="Instagram">
+                <?php if (!empty($f_insta)): ?>
+                <a href="<?= htmlspecialchars($f_insta); ?>" target="_blank" rel="noopener noreferrer" class="social-btn" title="Instagram">
                     <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 </a>
-                <a href="https://youtube.com" target="_blank" class="social-btn" title="YouTube">
+                <?php endif; ?>
+                <?php if (!empty($f_yt)): ?>
+                <a href="<?= htmlspecialchars($f_yt); ?>" target="_blank" rel="noopener noreferrer" class="social-btn" title="YouTube">
                     <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                 </a>
-                <a href="https://linkedin.com" target="_blank" class="social-btn" title="LinkedIn">
+                <?php endif; ?>
+                <?php if (!empty($f_linkedin)): ?>
+                <a href="<?= htmlspecialchars($f_linkedin); ?>" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn">
                     <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                 </a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -465,7 +489,7 @@
                 <li><a href="<?= site_url('welcome') ?>"><span class="link-dash"></span> Center of Excelent</a></li>
                 <li><a href="<?= site_url('welcome') ?>"><span class="link-dash"></span> Ticketing</a></li>
                 <li><a href="<?= site_url('welcome') ?>"><span class="link-dash"></span> Galeri Karya FIK</a></li>
-                <li><a href="<?= site_url('import-email') ?>"><span class="link-dash"></span> Admin Panel</a></li>
+                <li><a href="<?= site_url('admin') ?>"><span class="link-dash"></span> Admin Panel</a></li>
             </ul>
         </div>
 
@@ -480,7 +504,7 @@
                     </div>
                     <div class="contact-text">
                         <label>Alamat Kampus</label>
-                        <span>Gedung Sebatik (FIK), Telkom University, Bandung, Jawa Barat 40287</span>
+                        <span><?= nl2br(htmlspecialchars($f_alamat)); ?></span>
                     </div>
                 </div>
 
@@ -490,7 +514,7 @@
                     </div>
                     <div class="contact-text">
                         <label>Email Resmi</label>
-                        <span>fik@telkomuniversity.ac.id</span>
+                        <span><a href="mailto:<?= htmlspecialchars($f_email); ?>" class="hover:underline text-slate-200"><?= htmlspecialchars($f_email); ?></a></span>
                     </div>
                 </div>
 
@@ -500,7 +524,7 @@
                     </div>
                     <div class="contact-text">
                         <label>Layanan Telepon</label>
-                        <span>(022) 756 5923</span>
+                        <span><a href="tel:<?= htmlspecialchars(preg_replace('/[^0-9+]/', '', $f_telepon)); ?>" class="hover:underline text-slate-200"><?= htmlspecialchars($f_telepon); ?></a></span>
                     </div>
                 </div>
 
@@ -510,9 +534,9 @@
         <!-- Kolom 4: Lokasi Kampus (Google Maps) -->
         <div class="footer-col">
             <span class="footer-col-title">Lokasi Kampus</span>
-            <a href="https://maps.google.com/?q=Telkom+University+Fakultas+Industri+Kreatif" target="_blank" class="footer-map-wrapper" title="Buka Telkom University Fakultas Industri Kreatif di Google Maps">
+            <a href="<?= htmlspecialchars($f_maps_link); ?>" target="_blank" rel="noopener noreferrer" class="footer-map-wrapper" title="Buka Telkom University Fakultas Industri Kreatif di Google Maps">
                 <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.301384074211!2d107.63211517587637!3d-6.973715893026955!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e9ad2c8c67c5%3A0xf6031fa15c26e108!2sTelkom%20University%20Fakultas%20Industri%20Kreatif!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid" 
+                    src="<?= htmlspecialchars($f_maps_emb); ?>" 
                     width="100%" 
                     height="180" 
                     style="border:0;" 
@@ -531,7 +555,7 @@
     <!-- Divider & Bottom Area -->
     <div class="footer-bottom-wrapper">
         <div class="footer-copyright">
-            &copy; <?= date('Y') ?> Fakultas Industri Kreatif - Telkom University. All rights reserved.
+            &copy; <?= date('Y'); ?> <?= htmlspecialchars($f_copyright); ?>
         </div>
         
         <!-- Kembali ke Atas Smooth Scroll -->

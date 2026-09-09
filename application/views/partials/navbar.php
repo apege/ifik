@@ -381,11 +381,11 @@
                         <?php endif; ?>
 
                         <?php if (in_array($role_id, [1, 2, 4]) || stripos($this->session->userdata('name') ?? '', 'dosen') !== false): ?>
-                        <a href="<?= site_url('dosenwali') ?>">
+                        <a href="<?= site_url('dosen/bimbingan') ?>">
                             <span class="btn-box">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
                             </span>
-                            <span>Portal Dosen Wali</span>
+                            <span>Portal Dosen</span>
                         </a>
                         <?php endif; ?>
 
@@ -435,6 +435,12 @@
                             </span>
                             <span>Pengaturan Header</span>
                         </a>
+                        <a href="<?= site_url('adminfooter') ?>">
+                            <span class="btn-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                            </span>
+                            <span>Pengaturan Footer</span>
+                        </a>
                         <?php endif; ?>
                     </div>
                 </li>
@@ -450,8 +456,8 @@
                         $user_portal_label = 'Mahasiswa';
                         
                         if ($user_role_id == 4 || stripos($user_name, 'dosen') !== false) {
-                            $user_portal_url = base_url('dosenwali');
-                            $user_portal_label = 'Dosen Wali';
+                            $user_portal_url = site_url('dosen/bimbingan');
+                            $user_portal_label = 'Dosen';
                         } elseif ($user_role_id == 6) {
                             $user_portal_url = base_url('koordinatorta');
                             $user_portal_label = 'Koordinator TA';

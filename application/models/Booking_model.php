@@ -28,7 +28,7 @@ class Booking_model extends CI_Model {
             $this->db->query("CREATE TABLE IF NOT EXISTS `ruangan` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `id_kategori` INT NOT NULL,
-                `kode_ruangan` VARCHAR(50) NOT NULL,
+                `kode_ruangan` VARCHAR(255) NOT NULL,
                 `nama_ruangan` VARCHAR(150) NOT NULL,
                 `kapasitas` INT DEFAULT 30,
                 `lokasi` VARCHAR(150) DEFAULT 'Gedung Sebatik (FIK)',
@@ -44,11 +44,14 @@ class Booking_model extends CI_Model {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
             $this->db->query("INSERT IGNORE INTO `ruangan` (`id`, `id_kategori`, `kode_ruangan`, `nama_ruangan`, `kapasitas`, `lokasi`, `status`) VALUES
-                (1, 1, 'LAB-MM', 'Lab Multimedia & 3D Design', 40, 'Gedung Sebatik Lt. 2', 'Tersedia'),
-                (2, 1, 'LAB-UIUX', 'Lab UI/UX & Web Development', 35, 'Gedung Sebatik Lt. 2', 'Tersedia'),
-                (3, 2, 'LAB-GRAFIS', 'Studio Desain Grafis & Seni', 30, 'Gedung Sebatik Lt. 1', 'Tersedia'),
+                (1, 1, 'LK.01.01, LK.01.02', 'Lab Multimedia & 3D Design', 40, 'Gedung Sebatik Lt. 2', 'Tersedia'),
+                (2, 1, 'LK.01.03', 'Lab UI/UX & Web Development', 35, 'Gedung Sebatik Lt. 2', 'Tersedia'),
+                (3, 2, 'LK.02.01', 'Studio Desain Grafis & Seni', 30, 'Gedung Sebatik Lt. 1', 'Tersedia'),
                 (4, 3, 'AUD-FIK', 'Auditorium FIK', 150, 'Gedung Sebatik Lt. 3', 'Tersedia')");
         } else {
+            // Auto-migrasi: pastikan kolom kode_ruangan dapat menampung multi-ruangan (VARCHAR 255)
+            $this->db->query("ALTER TABLE `ruangan` MODIFY COLUMN `kode_ruangan` VARCHAR(255) NOT NULL DEFAULT ''");
+
             // Auto-migrasi: pastikan seluruh kolom lengkap jika tabel dibuat dengan skema lama
             $fields = $this->db->list_fields('ruangan');
             $new_cols = array(

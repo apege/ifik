@@ -88,7 +88,7 @@
                 
                 <!-- Brand & Tombol Back -->
                 <div class="flex items-center gap-3 sm:gap-4">
-                    <a href="<?= site_url('dosenwali'); ?>" class="flex items-center gap-3 group" title="IFIK Portal - Dosen Wali">
+                    <a href="<?= site_url('dosen/wali'); ?>" class="flex items-center gap-3 group" title="IFIK Portal - Dosen Wali">
                         <div class="w-9 h-9 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-xl font-extrabold text-base flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                             I
                         </div>
@@ -102,7 +102,7 @@
                     <div class="hidden sm:block h-6 w-[1px] bg-slate-200"></div>
 
                     <!-- Tombol Kembali ke Dashboard -->
-                    <a href="<?= site_url('dosenwali'); ?>" 
+                    <a href="<?= site_url('dosen/wali'); ?>" 
                        class="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-orange-50 text-slate-700 hover:text-orange-600 border border-slate-200 hover:border-orange-300 text-xs font-bold transition-all shadow-2xs group cursor-pointer"
                        title="Kembali ke Dashboard Dosen Wali">
                         <i class="bi bi-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
@@ -234,24 +234,126 @@
                 </div>
             </div>
 
-            <!-- Kelompok Keahlian & Judul Section -->
-            <div class="mt-6 pt-5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Kelompok Keahlian (KK)</span>
-                    <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <i class="bi bi-diagram-3 text-orange-600"></i>
-                        <?= htmlspecialchars($detail['nama_kk'] ?? $detail['kode_kk'] ?? 'Visual Communication & Multimedia'); ?>
+            <!-- Kelompok Keahlian & Judul Section (Disatukan dengan Keputusan Approve / Reject) -->
+            <?php
+                $st_jenis = $detail['status_jenis_ta'] ?? 'Pending';
+                $st_judul = $detail['status_judul'] ?? 'Pending';
+                if ($st_jenis === 'Approved' && $st_judul === 'Approved') {
+                    $jj_status = 'Approved';
+                } elseif ($st_jenis === 'Rejected' || $st_judul === 'Rejected') {
+                    $jj_status = 'Rejected';
+                } else {
+                    $jj_status = 'Pending';
+                }
+                $jj_note = !empty($detail['catatan_judul']) ? $detail['catatan_judul'] : (!empty($detail['catatan_jenis_ta']) ? $detail['catatan_jenis_ta'] : '');
+                $is_jj_valid = ($jj_status === 'Approved');
+                $is_jj_invalid = ($jj_status === 'Rejected');
+                $jj_card_border = $is_jj_valid ? 'border-emerald-200 bg-emerald-50/20' : ($is_jj_invalid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-slate-50/60');
+            ?>
+            <div id="cardJudulJenis" class="mt-6 pt-5 border-t border-slate-100 rounded-2xl p-4 sm:p-5 border transition-all duration-200 <?= $jj_card_border; ?>">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-orange-600 flex items-center justify-center text-sm font-bold shadow-2xs">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Usulan Judul &amp; Skema Tugas Akhir</h3>
+                            <span class="text-[11px] text-slate-500">Verifikasi kesesuaian Kelompok Keahlian, Skema TA, dan Rencana Judul Tugas Akhir.</span>
+                        </div>
+                    </div>
+
+                    <!-- Status Badge Judul & Jenis -->
+                    <span id="badgeJudulJenis" class="doc-badge px-2.5 py-1 rounded-lg text-xs font-bold <?= $is_jj_valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($is_jj_invalid ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600 border border-slate-200'); ?>">
+                        <?= $is_jj_valid ? 'Valid / Disetujui' : ($is_jj_invalid ? 'Kurang / Revisi' : 'Belum Dicek'); ?>
                     </span>
-                    <div class="mt-1.5 text-[11px] text-slate-500 font-medium">
-                        Skema TA: <span class="font-bold text-orange-600"><?= htmlspecialchars($detail['jenis_ta'] ?? 'Reguler'); ?></span>
+                </div>
+
+                <!-- Grid Data: KK + Skema TA & Judul Rencana TA -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-3.5">
+                    <div class="bg-white/90 p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Kelompok Keahlian (KK)</span>
+                        <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="bi bi-diagram-3 text-orange-600"></i>
+                            <?= htmlspecialchars($detail['nama_kk'] ?? $detail['kode_kk'] ?? 'Visual Communication & Multimedia'); ?>
+                        </span>
+                        <div class="mt-1.5 text-[11px] text-slate-500 font-medium">
+                            Skema TA: <span class="font-bold text-orange-600"><?= htmlspecialchars($detail['jenis_ta'] ?? 'Reguler'); ?></span>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 bg-white/90 p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Judul Rencana Tugas Akhir</span>
+                        <p class="text-xs font-semibold text-slate-800 leading-relaxed"><?= htmlspecialchars($detail['judul_1'] ?? '-'); ?></p>
+                        <?php if(!empty($detail['judul_en'])): ?>
+                            <p class="text-[11px] text-slate-500 italic mt-1 leading-relaxed">"<?= htmlspecialchars($detail['judul_en']); ?>"</p>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <div class="md:col-span-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Judul Rencana Tugas Akhir</span>
-                    <p class="text-xs font-semibold text-slate-800 leading-relaxed"><?= htmlspecialchars($detail['judul_1'] ?? '-'); ?></p>
-                    <?php if(!empty($detail['judul_en'])): ?>
-                        <p class="text-[11px] text-slate-500 italic mt-1 leading-relaxed">"<?= htmlspecialchars($detail['judul_en']); ?>"</p>
+
+                <!-- Action Toggles (Approve / Reject untuk Judul & Jenis Disatukan) -->
+                <div class="pt-3 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-3">
+                    <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+                        <i class="bi bi-check2-circle text-orange-600"></i> Keputusan Judul &amp; Skema TA:
+                    </span>
+
+                    <div class="flex items-center gap-4">
+                        <!-- Pilihan Valid / Setujui -->
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-700 select-none hover:text-emerald-700 transition-colors">
+                            <input type="checkbox" id="cbJudulJenisValid"
+                                    <?= $is_jj_valid ? 'checked' : ''; ?>
+                                    <?= $isLocked ? 'disabled' : ''; ?>
+                                    onchange="handleJudulJenisCheck(this, 'valid')"
+                                    class="w-3.5 h-3.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
+                            <span class="text-[11px] text-emerald-700 font-medium">Valid (Setujui)</span>
+                        </label>
+
+                        <!-- Pilihan Kurang / Revisi (Reject) -->
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-700 select-none hover:text-rose-700 transition-colors">
+                            <input type="checkbox" id="cbJudulJenisKurang"
+                                    <?= $is_jj_invalid ? 'checked' : ''; ?>
+                                    <?= $isLocked ? 'disabled' : ''; ?>
+                                    onchange="handleJudulJenisCheck(this, 'kurang')"
+                                    class="w-3.5 h-3.5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 cursor-pointer">
+                            <span class="text-[11px] text-rose-600 font-medium">Kurang / Revisi</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Catatan Revisi Judul & Jenis (Muncul saat Kurang / Revisi) -->
+                <div id="catatanJudulJenisBox" class="mt-3 pt-3 border-t border-rose-200/60 space-y-2 <?= $is_jj_invalid ? '' : 'hidden'; ?>">
+                    <div class="flex items-center justify-between">
+                        <label for="catatan_judul_jenis" class="text-[11px] font-bold text-rose-700 flex items-center gap-1">
+                            <i class="bi bi-pencil-square"></i> Catatan Revisi Judul &amp; Skema TA (Wajib diisi):
+                        </label>
+                        <span class="text-[10px] text-slate-400">Pilih rekomendasi catatan atau ketik instruksi</span>
+                    </div>
+
+                    <?php if(!$isLocked): ?>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="setJudulJenisNote('Judul Tugas Akhir kurang spesifik / perlu diperjelas konteksnya')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[10px] font-medium transition-colors cursor-pointer">
+                            + Judul Kurang Spesifik
+                        </button>
+                        <button type="button" onclick="setJudulJenisNote('Skema / Jenis TA tidak sesuai dengan topik yang diusulkan')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[10px] font-medium transition-colors cursor-pointer">
+                            + Skema TA Tidak Sesuai
+                        </button>
+                        <button type="button" onclick="setJudulJenisNote('Topik dan usulan judul belum selaras dengan Kelompok Keahlian (KK)')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[10px] font-medium transition-colors cursor-pointer">
+                            + Belum Selaras dengan KK
+                        </button>
+                        <button type="button" onclick="setJudulJenisNote('Perbaiki tata bahasa &amp; padanan terjemahan bahasa Inggris pada judul')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[10px] font-medium transition-colors cursor-pointer">
+                            + Perbaiki Tata Bahasa
+                        </button>
+                    </div>
                     <?php endif; ?>
+
+                    <input type="text" id="catatan_judul_jenis"
+                            value="<?= htmlspecialchars($jj_note); ?>"
+                            placeholder="Tuliskan saran perbaikan spesifik untuk Judul &amp; Skema TA..."
+                            <?= $isLocked ? 'readonly' : ''; ?>
+                            oninput="handleJudulJenisNoteInput()"
+                            class="w-full px-3 py-1.5 bg-white border border-rose-300 rounded-xl text-xs font-medium text-slate-800 placeholder-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all shadow-2xs">
+
+                    <p id="err_judul_jenis" class="text-[11px] font-bold text-rose-600 flex items-center gap-1 hidden pt-1">
+                        <i class="bi bi-exclamation-circle-fill text-xs"></i> <span>Catatan belum ditambahkan. Wajib diisi alasan revisi Judul &amp; Skema TA.</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -259,6 +361,8 @@
         <!-- Document Verification Form -->
         <form method="POST" action="<?= site_url('dosenwali/detail_mahasiswa/' . $detail['nim']); ?>" id="formVerifikasi">
             <input type="hidden" name="status" id="formStatus" value="<?= $status_wali === 'Approved' ? 'Approved' : ($status_wali === 'Rejected' ? 'Rejected' : 'Pending'); ?>">
+            <input type="hidden" name="status_judul_jenis" id="inputStatusJudulJenis" value="<?= $jj_status; ?>">
+            <input type="hidden" name="catatan_judul_jenis" id="inputCatatanJudulJenis" value="<?= htmlspecialchars($jj_note); ?>">
             
             <div class="space-y-6">
 
@@ -480,7 +584,7 @@
 
                     <!-- Actions Bar -->
                     <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <a href="<?= site_url('dosenwali'); ?>" class="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors order-2 sm:order-1 flex items-center gap-1 hover:-translate-x-0.5">
+                        <a href="<?= site_url('dosen/wali'); ?>" class="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors order-2 sm:order-1 flex items-center gap-1 hover:-translate-x-0.5">
                             <i class="bi bi-arrow-left"></i> Kembali ke Daftar
                         </a>
 
@@ -709,6 +813,168 @@
             }
         }
 
+        // --- Keputusan Judul & Skema TA (Disatukan) ---
+        function handleJudulJenisCheck(cb, type) {
+            const card = document.getElementById('cardJudulJenis');
+            const badge = document.getElementById('badgeJudulJenis');
+            const cbValid = document.getElementById('cbJudulJenisValid');
+            const cbKurang = document.getElementById('cbJudulJenisKurang');
+            const noteBox = document.getElementById('catatanJudulJenisBox');
+            const noteInput = document.getElementById('catatan_judul_jenis');
+            const hiddenStatus = document.getElementById('inputStatusJudulJenis');
+            const hiddenCatatan = document.getElementById('inputCatatanJudulJenis');
+
+            if (type === 'valid') {
+                if (cb && cb.checked) {
+                    if (cbKurang) cbKurang.checked = false;
+                }
+            } else if (type === 'kurang') {
+                if (cb && cb.checked) {
+                    if (cbValid) cbValid.checked = false;
+                }
+            }
+
+            if (card) {
+                card.classList.remove('border-emerald-200', 'bg-emerald-50/20', 'border-rose-200', 'bg-rose-50/30', 'border-slate-200', 'bg-slate-50/60');
+            }
+
+            if (cbValid && cbValid.checked) {
+                if (card) card.classList.add('border-emerald-200', 'bg-emerald-50/20');
+                if (badge) {
+                    badge.className = 'doc-badge px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                    badge.textContent = 'Valid / Disetujui';
+                }
+                if (noteBox) noteBox.classList.add('hidden');
+                if (noteInput) {
+                    noteInput.value = '';
+                    clearJudulJenisError();
+                }
+                if (hiddenStatus) hiddenStatus.value = 'Approved';
+                if (hiddenCatatan) hiddenCatatan.value = '';
+                sendJudulJenisAjax('Approved', '');
+            } else if (cbKurang && cbKurang.checked) {
+                if (card) card.classList.add('border-rose-200', 'bg-rose-50/30');
+                if (badge) {
+                    badge.className = 'doc-badge px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200';
+                    badge.textContent = 'Kurang / Revisi';
+                }
+                if (noteBox) noteBox.classList.remove('hidden');
+                if (hiddenStatus) hiddenStatus.value = 'Rejected';
+                if (noteInput && !noteInput.value) {
+                    noteInput.focus();
+                }
+                const noteVal = noteInput ? noteInput.value.trim() : '';
+                if (hiddenCatatan) hiddenCatatan.value = noteVal;
+                if (noteVal) {
+                    sendJudulJenisAjax('Rejected', noteVal);
+                }
+            } else {
+                if (card) card.classList.add('border-slate-200', 'bg-slate-50/60');
+                if (badge) {
+                    badge.className = 'doc-badge px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200';
+                    badge.textContent = 'Belum Dicek';
+                }
+                if (noteBox) noteBox.classList.add('hidden');
+                if (noteInput) {
+                    noteInput.value = '';
+                    clearJudulJenisError();
+                }
+                if (hiddenStatus) hiddenStatus.value = 'Pending';
+                if (hiddenCatatan) hiddenCatatan.value = '';
+                sendJudulJenisAjax('Pending', '');
+            }
+
+            syncAllCatatanAdmin();
+            updateActionButtonsUI();
+        }
+
+        function handleJudulJenisNoteInput() {
+            const noteInput = document.getElementById('catatan_judul_jenis');
+            const hiddenCatatan = document.getElementById('inputCatatanJudulJenis');
+            const noteVal = noteInput ? noteInput.value.trim() : '';
+
+            if (hiddenCatatan) hiddenCatatan.value = noteVal;
+            if (noteVal) {
+                clearJudulJenisError();
+            }
+
+            syncAllCatatanAdmin();
+            updateActionButtonsUI();
+
+            if (window._jjAjaxTimer) clearTimeout(window._jjAjaxTimer);
+            window._jjAjaxTimer = setTimeout(() => {
+                const cbKurang = document.getElementById('cbJudulJenisKurang');
+                if (cbKurang && cbKurang.checked) {
+                    sendJudulJenisAjax('Rejected', noteVal);
+                }
+            }, 600);
+        }
+
+        function setJudulJenisNote(text) {
+            const cbKurang = document.getElementById('cbJudulJenisKurang');
+            const cbValid = document.getElementById('cbJudulJenisValid');
+            if (cbKurang) {
+                cbKurang.checked = true;
+                if (cbValid) cbValid.checked = false;
+                handleJudulJenisCheck(cbKurang, 'kurang');
+            }
+
+            const noteInput = document.getElementById('catatan_judul_jenis');
+            if (noteInput) {
+                if (noteInput.value.trim().length > 0) {
+                    if (!noteInput.value.includes(text)) {
+                        noteInput.value += ', ' + text;
+                    }
+                } else {
+                    noteInput.value = text;
+                }
+                clearJudulJenisError();
+                noteInput.focus();
+            }
+            handleJudulJenisNoteInput();
+        }
+
+        function clearJudulJenisError() {
+            const noteInput = document.getElementById('catatan_judul_jenis');
+            const errEl = document.getElementById('err_judul_jenis');
+            if (noteInput) {
+                noteInput.classList.remove('border-rose-600', 'ring-4', 'ring-rose-500/30', 'bg-rose-50/80');
+                noteInput.classList.add('border-rose-300');
+            }
+            if (errEl) {
+                errEl.classList.add('hidden');
+            }
+        }
+
+        function highlightJudulJenisError(msg) {
+            const noteInput = document.getElementById('catatan_judul_jenis');
+            const errEl = document.getElementById('err_judul_jenis');
+            if (noteInput) {
+                noteInput.classList.remove('border-rose-300');
+                noteInput.classList.add('border-rose-600', 'ring-4', 'ring-rose-500/30', 'bg-rose-50/80');
+            }
+            if (errEl) {
+                if (msg) {
+                    const s = errEl.querySelector('span');
+                    if (s) s.textContent = msg;
+                }
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function sendJudulJenisAjax(status, catatan) {
+            try {
+                const fd = new FormData();
+                fd.append('nim', '<?= $detail['nim']; ?>');
+                fd.append('status', status);
+                fd.append('catatan', catatan);
+                fetch('<?= site_url("dosenwali/update_judul_jenis_ajax"); ?>', {
+                    method: 'POST',
+                    body: fd
+                }).then(r => r.json()).then(d => {}).catch(e => {});
+            } catch(e) {}
+        }
+
         function handleValidCheck(cbValid) {
             const card = cbValid.closest('.doc-card');
             const key = card ? card.getAttribute('data-key') : '';
@@ -823,6 +1089,18 @@
 
         function syncAllCatatanAdmin() {
             const compiledNotes = [];
+
+            // 1. Catatan Usulan Judul & Skema TA
+            const cbJudulKurang = document.getElementById('cbJudulJenisKurang');
+            const noteJudulInput = document.getElementById('catatan_judul_jenis');
+            if (cbJudulKurang && cbJudulKurang.checked) {
+                const text = noteJudulInput ? noteJudulInput.value.trim() : '';
+                if (text) {
+                    compiledNotes.push('- Judul & Skema TA: ' + text);
+                }
+            }
+
+            // 2. Catatan Dokumen Berkas
             const labels = {
                 'ksm': 'KSM',
                 'transkrip': 'Transkrip Nilai',
@@ -885,7 +1163,8 @@
             const btnReject = document.getElementById('btnActionReject');
             if (!btnApprove || !btnReject) return;
 
-            const checkedKurangCount = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length;
+            const isJudulKurang = document.getElementById('cbJudulJenisKurang')?.checked;
+            const checkedKurangCount = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length + (isJudulKurang ? 1 : 0);
             const mainCatatan = document.getElementById('catatan_admin') ? document.getElementById('catatan_admin').value.trim() : '';
             const currentWaliStatus = '<?= $detail['status_approval_wali'] ?? 'Pending'; ?>';
 
@@ -897,7 +1176,7 @@
                 btnReject.value = 'reject';
                 btnReject.innerHTML = '<i class="bi bi-arrow-return-left"></i> Kembalikan ke Mahasiswa (Revisi)';
                 btnReject.className = 'btn-action-animated w-full sm:w-auto px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
-                btnReject.title = 'Kembalikan pengajuan ke mahasiswa untuk perbaikan berkas';
+                btnReject.title = 'Kembalikan pengajuan ke mahasiswa untuk perbaikan berkas / judul';
                 btnReject.onclick = function() { return confirmReject(); };
             } else if (mainCatatan.length > 0) {
                 btnReject.name = 'action';
@@ -911,17 +1190,17 @@
                 btnReject.value = 'reject';
                 btnReject.innerHTML = '<i class="bi bi-arrow-return-left"></i> Kembalikan ke Mahasiswa (Revisi)';
                 btnReject.className = 'w-full sm:w-auto px-4 py-2.5 bg-rose-50 text-rose-300 border border-rose-100 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 opacity-60 cursor-not-allowed transition-all';
-                btnReject.title = 'Centang minimal 1 berkas Kurang/Revisi atau tuliskan catatan perbaikan';
+                btnReject.title = 'Tandai minimal 1 bagian Kurang/Revisi atau tuliskan catatan perbaikan';
                 btnReject.onclick = function() { return confirmReject(); };
             }
 
             // 2. Dynamic Approve Button Logic
             if (checkedKurangCount > 0) {
                 btnApprove.className = 'w-full sm:w-auto px-5 py-2.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 opacity-60 cursor-not-allowed transition-all';
-                btnApprove.title = 'Tidak bisa disetujui karena terdapat berkas yang ditandai Kurang/Revisi!';
+                btnApprove.title = 'Tidak bisa disetujui karena terdapat berkas atau judul yang ditandai Kurang/Revisi!';
             } else {
                 btnApprove.className = 'btn-action-animated w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 cursor-pointer transition-all';
-                btnApprove.title = 'Semua berkas valid! Klik untuk menyetujui pengajuan.';
+                btnApprove.title = 'Semua berkas & judul valid! Klik untuk menyetujui pengajuan.';
             }
         }
 
@@ -947,6 +1226,15 @@
                 return false;
             }
 
+            // Tandai Usulan Judul & Skema TA sebagai Valid
+            const cbJudulValid = document.getElementById('cbJudulJenisValid');
+            const cbJudulKurang = document.getElementById('cbJudulJenisKurang');
+            if (cbJudulValid) {
+                cbJudulValid.checked = true;
+                if (cbJudulKurang) cbJudulKurang.checked = false;
+                handleJudulJenisCheck(cbJudulValid, 'valid');
+            }
+
             document.querySelectorAll('.doc-card').forEach(card => {
                 const cbValid = card.querySelector('input[name="berkas_valid[]"]');
                 const cbKurang = card.querySelector('input[name="berkas_kurang[]"]');
@@ -954,7 +1242,7 @@
                 if (cbKurang) cbKurang.checked = false;
                 updateCardState(card);
             });
-            showToast('Semua <?= $total_berkas_count; ?> berkas berhasil ditandai Valid!');
+            showToast('Semua berkas beserta Judul & Skema TA berhasil ditandai Valid!');
         }
 
         function simulateDownload() {
@@ -1009,23 +1297,38 @@
                 return false;
             }
 
-            const checkedCount = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length;
+            const isJudulKurang = document.getElementById('cbJudulJenisKurang')?.checked;
+            const checkedCount = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length + (isJudulKurang ? 1 : 0);
             const checkedValid = document.querySelectorAll('input[name="berkas_valid[]"]:checked').length;
             const catatan = document.getElementById('catatan_admin').value.trim();
 
-            if (checkedCount === 0 && checkedValid === <?= $total_berkas_count; ?>) {
+            if (checkedCount === 0 && checkedValid === <?= $total_berkas_count; ?> && !isJudulKurang) {
                 alert('Peringatan: Seluruh berkas telah dicentang Valid. Silakan gunakan tombol "Setujui Semua Berkas" jika semua berkas sudah sesuai!');
                 return false;
             }
 
             if (checkedCount === 0 && !catatan) {
-                alert('Peringatan: Silakan centang minimal 1 dokumen yang "Kurang / Revisi" atau tuliskan catatan instruksi revisi sebelum mengembalikan pengajuan ke mahasiswa!');
+                alert('Peringatan: Silakan tandai minimal 1 bagian (Judul & Skema TA atau Dokumen Berkas) yang "Kurang / Revisi" atau tuliskan catatan instruksi revisi sebelum mengembalikan pengajuan ke mahasiswa!');
                 return false;
             }
 
-            // Validasi jika ada dokumen yang ditandai Kurang/Revisi tetapi belum diberikan catatan
+            // Validasi jika ada dokumen atau Judul & Skema yang ditandai Kurang/Revisi tetapi belum diberikan catatan
             let emptyErrors = [];
             let firstEmptyInput = null;
+
+            if (isJudulKurang) {
+                const noteJudulInput = document.getElementById('catatan_judul_jenis');
+                const noteVal = noteJudulInput ? noteJudulInput.value.trim() : '';
+                if (!noteVal) {
+                    highlightJudulJenisError('Catatan belum ditambahkan. Wajib diisi alasan revisi untuk Judul & Skema TA.');
+                    emptyErrors.push('Usulan Judul & Skema TA');
+                    if (!firstEmptyInput) {
+                        firstEmptyInput = noteJudulInput;
+                    }
+                } else {
+                    clearJudulJenisError();
+                }
+            }
 
             document.querySelectorAll('.doc-card').forEach(card => {
                 const key = card.getAttribute('data-key');
@@ -1053,7 +1356,7 @@
                     firstEmptyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     setTimeout(() => firstEmptyInput.focus(), 300);
                 }
-                alert('⚠️ Peringatan: Terdapat ' + emptyErrors.length + ' berkas yang ditandai Kurang/Revisi tetapi belum diberikan catatan perbaikan:\n\n' +
+                alert('⚠️ Peringatan: Terdapat ' + emptyErrors.length + ' bagian yang ditandai Kurang/Revisi tetapi belum diberikan catatan perbaikan:\n\n' +
                       emptyErrors.map(e => '• ' + e).join('\n') + 
                       '\n\nHarap isi alasan revisi atau pilih salah satu opsi perbaikan sebelum mengembalikan pengajuan!');
                 return false;
@@ -1067,6 +1370,12 @@
         }
 
         function confirmApprove() {
+            const isJudulKurang = document.getElementById('cbJudulJenisKurang')?.checked;
+            if (isJudulKurang) {
+                alert('Peringatan: Usulan Judul & Skema TA masih ditandai "Kurang / Revisi". Harap perbaiki status atau gunakan tombol Kembalikan ke Mahasiswa!');
+                return false;
+            }
+
             const checkedKurang = document.querySelectorAll('input[name="berkas_kurang[]"]:checked').length;
             if (checkedKurang > 0) {
                 alert('Peringatan: Terdapat ' + checkedKurang + ' berkas yang masih ditandai "Kurang / Revisi". Harap perbaiki centang atau gunakan tombol Kembalikan ke Mahasiswa!');

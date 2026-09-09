@@ -973,11 +973,22 @@ class KoordinatorTA_model extends CI_Model {
             return array('status' => false, 'message' => 'Kode Ruangan dan Nama Ruangan wajib diisi!');
         }
 
-        // Cek duplikasi kode ruangan
-        $this->db->where('kode_ruangan', $kode_ruangan);
-        $exist = $this->db->get('ruangan')->row_array();
-        if ($exist) {
-            return array('status' => false, 'message' => "Kode ruangan '{$kode_ruangan}' sudah ada di sistem!");
+        // Cek duplikasi kode ruangan fisik (1 ruangan fisik = 1 fasilitas)
+        $existing_ruangan = $this->db->select('id, nama_ruangan, kode_ruangan')->get('ruangan')->result();
+        $canonicalize = function($str) {
+            return strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', (string)$str));
+        };
+        $target_canon = $canonicalize($kode_ruangan);
+        foreach ($existing_ruangan as $row) {
+            if (empty($row->kode_ruangan)) continue;
+            $row_rooms = array_filter(array_map('trim', explode(',', $row->kode_ruangan)));
+            foreach ($row_rooms as $r) {
+                $r_clean = strtoupper(trim($r));
+                $r_canon = $canonicalize($r);
+                if ($kode_ruangan === $r_clean || (!empty($target_canon) && $target_canon === $r_canon)) {
+                    return array('status' => false, 'message' => "Ruangan fisik '{$kode_ruangan}' sudah digunakan oleh fasilitas '{$row->nama_ruangan}'! Satu ruangan fisik hanya dapat digunakan oleh 1 fasilitas.");
+                }
+            }
         }
 
         $id_kategori = 1;

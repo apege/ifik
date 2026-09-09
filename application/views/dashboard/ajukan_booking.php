@@ -595,11 +595,13 @@
                             var html = '';
                             if (data.length === 1) {
                                 var room = data[0];
-                                html = '<option value="' + room.id + '" selected>' + room.kode_ruangan + ' - ' + room.nama_ruangan + '</option>';
+                                var roomLabel = room.kode_ruangan ? (room.nama_ruangan + ' (Ruang: ' + room.kode_ruangan + ')') : room.nama_ruangan;
+                                html = '<option value="' + room.id + '" selected>' + roomLabel + '</option>';
                             } else {
-                                html = '<option value="">Pilih Ruangan</option>';
+                                html = '<option value="">Pilih Fasilitas / Ruangan</option>';
                                 $.each(data, function(i, room) {
-                                    html += '<option value="' + room.id + '">' + room.kode_ruangan + ' - ' + room.nama_ruangan + '</option>';
+                                    var roomLabel = room.kode_ruangan ? (room.nama_ruangan + ' (Ruang: ' + room.kode_ruangan + ')') : room.nama_ruangan;
+                                    html += '<option value="' + room.id + '">' + roomLabel + '</option>';
                                 });
                             }
                             $('#ruanganSelectPublic').html(html).trigger('change');

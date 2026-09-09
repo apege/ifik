@@ -59,7 +59,7 @@ class DosenWali extends CI_Controller {
             $catatan = trim($this->input->post('catatan_wali') ?? '');
 
             if ($status === 'Rejected') {
-                if (empty($catatan) && empty($this->input->post('berkas_kurang'))) {
+                if (empty($catatan) && empty($this->input->post('berkas_kurang')) && ($this->input->post('status_judul_jenis') !== 'Rejected')) {
                     $this->session->set_flashdata('error', 'Alasan penolakan / catatan revisi wajib diisi jika memilih Reject!');
                     redirect('dosenwali/detail_mahasiswa/' . $nim);
                     return;
@@ -69,6 +69,14 @@ class DosenWali extends CI_Controller {
                 foreach ($submitted_kurang as $bk) {
                     if (empty(trim($submitted_notes[$bk] ?? ''))) {
                         $this->session->set_flashdata('error', 'Catatan revisi untuk setiap berkas yang ditandai Kurang/Revisi wajib diisi!');
+                        redirect('dosenwali/detail_mahasiswa/' . $nim);
+                        return;
+                    }
+                }
+                if ($this->input->post('status_judul_jenis') === 'Rejected') {
+                    $note_jj = trim($this->input->post('catatan_judul_jenis') ?? '');
+                    if (empty($note_jj)) {
+                        $this->session->set_flashdata('error', 'Catatan revisi untuk Usulan Judul & Skema TA wajib diisi jika ditandai Kurang/Revisi!');
                         redirect('dosenwali/detail_mahasiswa/' . $nim);
                         return;
                     }
@@ -88,6 +96,18 @@ class DosenWali extends CI_Controller {
                 } else if (in_array($bk, $berkas_valid_arr) || $status === 'Approved') {
                     $this->DosenWali_model->update_file_approval($nim, $bk, 'Approved', '');
                 }
+            }
+
+            // Simpan status usulan Judul & Skema TA (Disatukan)
+            $status_judul_jenis  = $this->input->post('status_judul_jenis');
+            $catatan_judul_jenis = trim($this->input->post('catatan_judul_jenis') ?? '');
+
+            if ($status_judul_jenis === 'Approved' || $status === 'Approved') {
+                $this->DosenWali_model->approve_jenis_ta($nim, 'Approved', '');
+                $this->DosenWali_model->update_judul_approval($nim, 'Approved', '');
+            } else if ($status_judul_jenis === 'Rejected') {
+                $this->DosenWali_model->approve_jenis_ta($nim, 'Rejected', $catatan_judul_jenis);
+                $this->DosenWali_model->update_judul_approval($nim, 'Rejected', $catatan_judul_jenis);
             }
 
             $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
@@ -271,6 +291,34 @@ class DosenWali extends CI_Controller {
             'status_judul' => $status_judul,
             'catatan_judul' => $catatan_judul,
             'message' => 'Status usulan judul Tugas Akhir berhasil diperbarui ke ' . $status_judul . '.'
+        ));
+    }
+
+    // AJAX Endpoint: Update Keputusan Usulan Judul & Skema TA Sekaligus (Disatukan)
+    public function update_judul_jenis_ajax() {
+        $nim = $this->input->post('nim');
+        $status = $this->input->post('status') ?? 'Pending';
+        $catatan = trim($this->input->post('catatan') ?? '');
+
+        if (!$nim || !$status) {
+            echo json_encode(array('success' => false, 'message' => 'Parameter tidak lengkap.'));
+            return;
+        }
+
+        if ($this->_is_stage_locked($nim)) {
+            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
+            return;
+        }
+
+        $note = ($status === 'Approved') ? '' : $catatan;
+        $res1 = $this->DosenWali_model->approve_jenis_ta($nim, $status, $note);
+        $res2 = $this->DosenWali_model->update_judul_approval($nim, $status, $note);
+
+        echo json_encode(array(
+            'success' => ($res1 && $res2),
+            'status' => $status,
+            'catatan' => $note,
+            'message' => 'Status Usulan Judul & Skema TA berhasil diperbarui ke ' . $status . '.'
         ));
     }
 

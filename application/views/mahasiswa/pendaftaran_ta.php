@@ -214,20 +214,12 @@
                                     </button>
 
                                     <div class="dropdown-menu hidden absolute left-0 right-0 top-full mt-2 bg-white backdrop-blur-xl border border-orange-200/90 rounded-2xl p-2 shadow-2xl z-[100] space-y-1">
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Proyek Akhir">
-                                            <span>Proyek Akhir</span>
+                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Pengkaryaan">
+                                            <span>Pengkaryaan</span>
                                             <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
                                         </div>
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Tugas Akhir Reguler">
-                                            <span>Tugas Akhir Reguler</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
-                                        </div>
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Tugas Akhir jalur Magang (MBKM)">
-                                            <span>Tugas Akhir jalur Magang (MBKM)</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
-                                        </div>
-                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Tugas Akhir jalur Prestasi / Lomba">
-                                            <span>Tugas Akhir jalur Prestasi / Lomba</span>
+                                        <div class="dropdown-option px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Penulisan">
+                                            <span>Penulisan</span>
                                             <i class="bi bi-check-lg text-orange-600 font-bold text-sm hidden check-icon"></i>
                                         </div>
                                     </div>
@@ -241,7 +233,7 @@
                                 </div>
                                 <div>
                                     <span class="text-[9px] font-bold uppercase tracking-wider text-orange-700 block">JENIS TUGAS AKHIR DIPILIH</span>
-                                    <span class="text-xs font-bold text-slate-900" id="previewTextJenisTA">Proyek Akhir</span>
+                                    <span class="text-xs font-bold text-slate-900" id="previewTextJenisTA">Pengkaryaan</span>
                                 </div>
                             </div>
 

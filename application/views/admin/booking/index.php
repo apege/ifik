@@ -297,7 +297,12 @@
             <?php foreach($peminjaman as $p): ?>
             <tr>
                 <td><?= $p->nama_lengkap ?></td>
-                <td><?= $p->kode_ruangan ?> - <?= $p->nama_ruangan ?></td>
+                <td>
+                    <div style="font-weight: 700; color: #0f172a;"><?= htmlspecialchars($p->nama_ruangan ?? '') ?></div>
+                    <?php if (!empty($p->kode_ruangan)): ?>
+                        <div style="font-size: 0.75rem; color: #ea580c; font-weight: 600; margin-top: 2px;">Ruang: <?= htmlspecialchars($p->kode_ruangan) ?></div>
+                    <?php endif; ?>
+                </td>
                 <td>
                     <?php 
                         if ($p->tanggal_mulai == $p->tanggal_selesai) {
@@ -555,14 +560,16 @@
                             if(data.length === 1) {
                                 // Hanya ada 1 ruangan, otomatis pilih dan beri style disabled
                                 let room = data[0];
-                                let html = `<option value="${room.id}" selected>${room.kode_ruangan} - ${room.nama_ruangan}</option>`;
+                                let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
+                                let html = `<option value="${room.id}" selected>${roomLabel}</option>`;
                                 $('#ruanganSelect').html(html);
                                 $('#ruanganSelect').css({'background-color': '#e2e8f0', 'pointer-events': 'none', 'color': '#64748b'});
                             } else {
                                 // Lebih dari 1 ruangan, munculkan dropdown normal
                                 let html = '<option value="">Pilih Ruangan</option>';
                                 $.each(data, function(i, room) {
-                                    html += `<option value="${room.id}">${room.kode_ruangan} - ${room.nama_ruangan}</option>`;
+                                    let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
+                                    html += `<option value="${room.id}">${roomLabel}</option>`;
                                 });
                                 $('#ruanganSelect').html(html);
                                 $('#ruanganSelect').css({'background-color': '#f8fafc', 'pointer-events': 'auto', 'color': 'var(--text-color)'});
@@ -570,7 +577,7 @@
                         }
                     });
                 } else {
-                    $('#ruanganSelect').html('<option value="">Pilih Ruangan</option>');
+                    $('#ruanganSelect').html('<option value="">Pilih Kategori Dahulu</option>');
                     $('#ruanganSelect').css({'background-color': '#f8fafc', 'pointer-events': 'auto', 'color': 'var(--text-color)'});
                 }
             });
@@ -772,8 +779,9 @@
                         <input type="text" name="nama_ruangan" placeholder="Contoh: Lab AR/VR &amp; Metaverse" required class="form-control">
                     </div>
                     <div class="form-group">
-                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Kode Ruangan *</label>
-                        <input type="text" name="kode_ruangan" placeholder="Contoh: LAB-VR" required class="form-control">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Ruangan Fisik (Nomor LK) *</label>
+                        <input type="text" name="kode_ruangan" placeholder="Contoh: LK.01.01, LK.01.02" required class="form-control">
+                        <small style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Dapat diisi lebih dari satu ruangan, pisahkan dengan koma.</small>
                     </div>
                     <div class="form-group">
                         <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Kategori Ruangan *</label>

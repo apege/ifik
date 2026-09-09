@@ -79,6 +79,51 @@ class Kelolaruangan extends CI_Controller {
         return null;
     }
 
+    /**
+     * Memeriksa apakah ada ruangan fisik yang sudah digunakan oleh fasilitas lain.
+     * 1 nomor ruangan fisik hanya boleh digunakan oleh 1 fasilitas.
+     * 
+     * @param array $rooms_to_check Daftar kode ruangan fisik (misal: ['LK 01', 'LK 02'])
+     * @param int|null $exclude_id ID fasilitas yang sedang diedit (diabaikan jika ada)
+     * @return array|null Info konflik ['code' => ..., 'occupied_by' => ...] atau null jika aman
+     */
+    private function _check_room_conflicts($rooms_to_check, $exclude_id = null)
+    {
+        $this->db->select('id, nama_ruangan, kode_ruangan');
+        if (!empty($exclude_id)) {
+            $this->db->where('id !=', $exclude_id);
+        }
+        $existing = $this->db->get('ruangan')->result();
+
+        $canonicalize = function($str) {
+            return strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', (string)$str));
+        };
+
+        foreach ($rooms_to_check as $target) {
+            $target_clean = strtoupper(trim($target));
+            $target_canon = $canonicalize($target);
+            if (empty($target_clean)) continue;
+
+            foreach ($existing as $row) {
+                if (empty($row->kode_ruangan)) continue;
+                $row_rooms = array_filter(array_map('trim', explode(',', $row->kode_ruangan)));
+                foreach ($row_rooms as $r) {
+                    $r_clean = strtoupper(trim($r));
+                    $r_canon = $canonicalize($r);
+
+                    if ($target_clean === $r_clean || (!empty($target_canon) && $target_canon === $r_canon)) {
+                        return [
+                            'code'        => $target_clean,
+                            'occupied_by' => $row->nama_ruangan
+                        ];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public function tambah()
     {
         if (ob_get_length()) ob_clean();
@@ -97,8 +142,22 @@ class Kelolaruangan extends CI_Controller {
         $spesifikasi_fasilitas = $this->input->post('spesifikasi_fasilitas', true);
         $tata_tertib     = $this->input->post('tata_tertib', true);
 
-        if (empty($nama_ruangan) || empty($kode_ruangan) || empty($id_kategori)) {
-            echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan, Kode Ruangan, dan Kategori!']);
+        // Format ruangan fisik (bisa satu atau lebih, dipisah koma)
+        $rooms = array_filter(array_map('trim', explode(',', (string)$kode_ruangan)));
+        $clean_kode_ruangan = !empty($rooms) ? implode(', ', array_map('strtoupper', $rooms)) : strtoupper(trim((string)$kode_ruangan));
+
+        if (empty($nama_ruangan) || empty($clean_kode_ruangan) || empty($id_kategori)) {
+            echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan/Lab, Ruangan Fisik (Nomor LK), dan Kategori!']);
+            return;
+        }
+
+        // Cek duplikasi ruangan fisik (1 ruangan fisik = 1 fasilitas)
+        $conflict = $this->_check_room_conflicts(!empty($rooms) ? $rooms : [$clean_kode_ruangan]);
+        if ($conflict) {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => "Ruangan fisik '{$conflict['code']}' sudah digunakan oleh fasilitas '{$conflict['occupied_by']}'! Satu nomor ruangan fisik hanya dapat digunakan oleh 1 fasilitas."
+            ]);
             return;
         }
 
@@ -108,7 +167,7 @@ class Kelolaruangan extends CI_Controller {
 
         $data_ruangan = array(
             'nama_ruangan'          => $nama_ruangan,
-            'kode_ruangan'          => strtoupper($kode_ruangan),
+            'kode_ruangan'          => $clean_kode_ruangan,
             'id_kategori'           => $id_kategori,
             'kapasitas'             => $kapasitas ? $kapasitas : 30,
             'lokasi'                => $lokasi ? $lokasi : 'Gedung Sebatik (FIK)',
@@ -155,8 +214,22 @@ class Kelolaruangan extends CI_Controller {
         $spesifikasi_fasilitas = $this->input->post('spesifikasi_fasilitas', true);
         $tata_tertib     = $this->input->post('tata_tertib', true);
 
-        if (empty($nama_ruangan) || empty($kode_ruangan) || empty($id_kategori)) {
-            echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan, Kode Ruangan, dan Kategori!']);
+        // Format ruangan fisik (bisa satu atau lebih, dipisah koma)
+        $rooms = array_filter(array_map('trim', explode(',', (string)$kode_ruangan)));
+        $clean_kode_ruangan = !empty($rooms) ? implode(', ', array_map('strtoupper', $rooms)) : strtoupper(trim((string)$kode_ruangan));
+
+        if (empty($nama_ruangan) || empty($clean_kode_ruangan) || empty($id_kategori)) {
+            echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan/Lab, Ruangan Fisik (Nomor LK), dan Kategori!']);
+            return;
+        }
+
+        // Cek duplikasi ruangan fisik dengan mengecualikan ID yang sedang diedit
+        $conflict = $this->_check_room_conflicts(!empty($rooms) ? $rooms : [$clean_kode_ruangan], $id);
+        if ($conflict) {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => "Ruangan fisik '{$conflict['code']}' sudah digunakan oleh fasilitas '{$conflict['occupied_by']}'! Satu nomor ruangan fisik hanya dapat digunakan oleh 1 fasilitas."
+            ]);
             return;
         }
 
@@ -166,7 +239,7 @@ class Kelolaruangan extends CI_Controller {
 
         $data_ruangan = array(
             'nama_ruangan'          => $nama_ruangan,
-            'kode_ruangan'          => strtoupper($kode_ruangan),
+            'kode_ruangan'          => $clean_kode_ruangan,
             'id_kategori'           => $id_kategori,
             'kapasitas'             => $kapasitas,
             'lokasi'                => $lokasi,

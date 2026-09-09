@@ -2,7 +2,7 @@
 $current_uri = uri_string();
 $active_bimbingan = (strpos($current_uri, 'bimbingan') !== false);
 $active_penguji = (strpos($current_uri, 'penguji') !== false);
-$active_wali = (strpos($current_uri, 'dosenwali') !== false);
+$active_wali = (strpos($current_uri, 'wali') !== false || strpos($current_uri, 'dosenwali') !== false);
 ?>
 
 <!-- Dosen Sidebar -->
@@ -43,7 +43,7 @@ $active_wali = (strpos($current_uri, 'dosenwali') !== false);
             Dosen Penguji
         </a>
 
-        <a href="<?= site_url('dosenwali') ?>" 
+        <a href="<?= site_url('dosen/wali') ?>" 
            class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_wali ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
             <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_wali ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
                 <i class="bi bi-people-fill text-lg"></i>

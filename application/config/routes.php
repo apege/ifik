@@ -75,6 +75,10 @@ $route['dosenpenguji'] = 'Mahasiswa/dosen_penguji';
 $route['mahasiswa/dosen_penguji'] = 'Mahasiswa/dosen_penguji';
 
 // Dosen Wali Routes
+$route['dosen/wali'] = 'DosenWali';
+$route['dosen/wali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
+$route['dosen/wali/(:any)'] = 'DosenWali/$1';
+$route['dosen/wali/(:any)/(:any)'] = 'DosenWali/$1/$2';
 
 $route['dosenwali'] = 'DosenWali';
 $route['dosenwali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
@@ -135,6 +139,9 @@ $route['ketuakk/submit_bulk_approval'] = 'KetuaKK/submit_bulk_approval';
 $route['admin'] = 'Admin/index';
 $route['admin/log_history'] = 'Admin/log_history';
 $route['log-history'] = 'Admin/log_history';
+$route['adminfooter'] = 'AdminFooter/index';
+$route['adminfooter/update_settings'] = 'AdminFooter/update_settings';
+$route['adminfooter/reset_defaults'] = 'AdminFooter/reset_defaults';
 
 // News / Berita Routes
 $route['news/detail/(:num)'] = 'News/detail/$1';

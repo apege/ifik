@@ -245,27 +245,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       border-radius: 18px;
       border: 1px solid var(--border-color);
       box-shadow: 0 8px 30px rgba(0,0,0,0.04);
-      overflow-x: auto;
+      overflow-x: hidden;
     }
     .table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
+      table-layout: auto;
     }
     .table th {
       background: #f8fafc;
-      padding: 16px 20px;
-      font-size: 0.74rem;
+      padding: 13px 14px;
+      font-size: 0.72rem;
       font-weight: 800;
       color: #475569;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.6px;
       border-bottom: 1px solid var(--border-color);
       white-space: nowrap;
     }
     .table td {
-      padding: 16px 20px;
-      font-size: 0.86rem;
+      padding: 13px 14px;
+      font-size: 0.84rem;
       color: #1e293b;
       border-bottom: 1px solid #f1f5f9;
       vertical-align: middle;
@@ -281,6 +282,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       font-weight: 800;
       border-radius: 6px;
       letter-spacing: 0.5px;
+    }
+    .code-badge-more {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .code-badge-more:hover {
+      background: #ffedd5;
+      color: #ea580c;
+      border-color: #fed7aa;
+      transform: scale(1.05);
     }
     .room-thumbnail {
       width: 48px;
@@ -679,11 +699,117 @@ defined('BASEPATH') OR exit('No direct script access allowed');
       text-overflow: ellipsis;
       pointer-events: none;
     }
+    .room-tags-box {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    .room-tags-box:focus-within {
+      border-color: #ea580c;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+    }
+    .room-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffedd5;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .room-tag-chip:hover {
+      background: #fed7aa;
+    }
+    .room-tag-remove {
+      background: none;
+      border: none;
+      color: #ea580c;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s;
+    }
+    .room-tag-remove:hover {
+      color: #dc2626;
+      transform: scale(1.2);
+    }
+    .floor-tab-btn {
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .floor-tab-btn:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .floor-tab-btn.active {
+      background: #ea580c;
+      color: #ffffff;
+      border-color: #ea580c;
+    }
+    .room-clickable-pill {
+      padding: 5px 11px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .room-clickable-pill:hover {
+      border-color: #f97316;
+      background: #fff7ed;
+      color: #ea580c;
+      transform: translateY(-1px);
+    }
+    .room-clickable-pill.selected {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      border-color: #ea580c;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+    }
+    .room-clickable-pill.occupied {
+      background: #f1f5f9;
+      color: #94a3b8;
+      border: 1.5px dashed #cbd5e1;
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+    .room-clickable-pill.occupied:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #dc2626;
+      transform: none;
+    }
   </style>
 </head>
 <body class="p-6 md:p-10">
 
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-7xl mx-auto">
     <!-- Top Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -961,20 +1087,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <table class="table" id="ruanganTable">
                 <thead>
                     <tr>
-                        <th>Foto</th>
-                        <th>Kode &amp; Nama Ruangan</th>
-                        <th>Kategori &amp; Tagline</th>
-                        <th>3D Model</th>
-                        <th>Fasilitas &amp; Jam</th>
-                        <th>Status</th>
-                        <th style="text-align: right;">Aksi</th>
+                        <th style="width: 58px; text-align: center;">Foto</th>
+                        <th style="min-width: 200px;">Laboratorium &amp; Ruangan Fisik</th>
+                        <th style="min-width: 150px;">Kategori &amp; Tagline</th>
+                        <th style="width: 95px; text-align: center;">3D Model</th>
+                        <th style="min-width: 140px;">Fasilitas &amp; Jam</th>
+                        <th style="width: 100px; text-align: center;">Status</th>
+                        <th style="width: 80px; text-align: right; white-space: nowrap;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($ruangan)): ?>
                         <?php foreach ($ruangan as $r): ?>
                             <tr>
-                                <td>
+                                <td style="text-align: center;">
                                     <?php if (isset($r->foto) && !empty($r->foto)): ?>
                                         <img src="<?= base_url($r->foto) ?>" alt="Foto" class="room-thumbnail">
                                     <?php else: ?>
@@ -982,9 +1108,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="code-badge"><?= htmlspecialchars(isset($r->kode_ruangan) ? $r->kode_ruangan : '') ?></span>
-                                    <div style="font-weight: 800; font-size: 0.95rem; margin-top: 4px;"><?= htmlspecialchars(isset($r->nama_ruangan) ? $r->nama_ruangan : '') ?></div>
-                                    <div style="font-size: 0.75rem; color: #64748b;">📍 <?= htmlspecialchars(isset($r->lokasi) ? $r->lokasi : '') ?></div>
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: #0f172a; line-height: 1.3;"><?= htmlspecialchars(isset($r->nama_ruangan) ? $r->nama_ruangan : '') ?></div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; margin-bottom: 4px; align-items: center;">
+                                        <?php 
+                                            $rawCodes = isset($r->kode_ruangan) ? trim($r->kode_ruangan) : '';
+                                            $roomCodes = array_filter(array_map('trim', explode(',', $rawCodes)));
+                                            $totalRooms = count($roomCodes);
+                                            if (!empty($roomCodes)):
+                                                $visibleRooms = array_slice($roomCodes, 0, 3);
+                                                $remainingRooms = $totalRooms - 3;
+                                                foreach ($visibleRooms as $rc):
+                                        ?>
+                                            <span class="code-badge" style="margin: 0; font-size: 0.72rem; letter-spacing: 0.02em;">🚪 <?= htmlspecialchars($rc) ?></span>
+                                        <?php 
+                                                endforeach;
+                                                if ($remainingRooms > 0):
+                                                    $allRoomsStr = implode(', ', $roomCodes);
+                                        ?>
+                                            <span class="code-badge-more" title="Semua ruangan: <?= htmlspecialchars($allRoomsStr) ?>" onclick="Swal.fire({title: 'Daftar Ruangan Fisik', html: '<div style=\'font-size:0.95rem; line-height:1.7; font-weight:700; color:#ea580c;\'><?= htmlspecialchars($allRoomsStr) ?></div>', icon: 'info'})">+<?= $remainingRooms ?> lainnya</span>
+                                        <?php 
+                                                endif;
+                                            else:
+                                        ?>
+                                            <span class="code-badge" style="margin: 0; font-size: 0.72rem; color: #94a3b8;">-</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div style="font-size: 0.74rem; color: #64748b;">📍 <?= htmlspecialchars(isset($r->lokasi) ? $r->lokasi : '') ?></div>
                                 </td>
                                 <td>
                                     <div style="font-weight: 700; color: #ea580c; font-size: 0.8rem;"><?= htmlspecialchars(isset($r->nama_kategori) && !empty($r->nama_kategori) ? $r->nama_kategori : 'Umum') ?></div>
@@ -1089,16 +1238,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                   <!-- Section 1: Data Utama Ruangan -->
                   <div class="form-grid-2">
                       <div class="form-group">
-                          <label>🏢 Nama Ruangan / Lab *</label>
+                          <label>🏢 Nama Fasilitas / Laboratorium *</label>
                           <input type="text" id="inputNama" name="nama_ruangan" placeholder="Contoh: Lab Multimedia & Game" required class="form-input">
                       </div>
-                      <div class="form-group">
-                          <label>🔑 Kode Ruangan *</label>
-                          <input type="text" id="inputKode" name="kode_ruangan" placeholder="Contoh: IK.02.17" required class="form-input">
-                      </div>
-                  </div>
-
-                  <div class="form-grid-2">
                       <div class="form-group">
                           <label>🏷️ Kategori Ruangan *</label>
                           <select id="inputKategori" name="id_kategori" required class="form-input">
@@ -1107,6 +1249,58 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                               <?php endforeach; ?>
                           </select>
                       </div>
+                  </div>
+
+                  <!-- Quick-Select Ruangan Fisik (Tombol Klik Cepat) -->
+                  <div class="form-group" style="margin-bottom: 20px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                          <label style="margin-bottom: 0; font-weight: 800; font-size: 0.82rem; color: #1e293b;">📍 Ruangan Fisik (Pilih Tombol Ruangan) *</label>
+                          <span id="selectedRoomsCount" style="font-size: 0.72rem; font-weight: 700; color: #ea580c; background: #fff7ed; padding: 2px 10px; border-radius: 999px; border: 1px solid #fed7aa;">0 ruangan dipilih</span>
+                      </div>
+
+                      <!-- Box Ruangan yang Dipilih -->
+                      <div class="room-tags-box" style="margin-bottom: 8px;">
+                          <div id="roomTagsList" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; align-items: center;">
+                              <!-- Chips render dynamically here -->
+                          </div>
+                          <input type="hidden" id="inputKode" name="kode_ruangan">
+                      </div>
+
+                      <!-- Panel Tombol Cepat Ruangan -->
+                      <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                          <div style="display: flex; gap: 14px; font-size: 0.72rem; color: #64748b; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                              <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block;"></span> Tersedia</span>
+                              <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #ea580c; display: inline-block;"></span> Dipilih</span>
+                              <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; border: 1px dashed #94a3b8; display: inline-block;"></span> 🔒 Terpakai Fasilitas Lain</span>
+                          </div>
+                          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                              <div style="display: flex; gap: 5px; flex-wrap: wrap;" id="floorTabs">
+                                  <button type="button" class="floor-tab-btn active" onclick="switchFloorTab('all')">Semua</button>
+                                  <button type="button" class="floor-tab-btn" onclick="switchFloorTab('lk1')">LK Lantai 1</button>
+                                  <button type="button" class="floor-tab-btn" onclick="switchFloorTab('lk2')">LK Lantai 2</button>
+                                  <button type="button" class="floor-tab-btn" onclick="switchFloorTab('lk3')">LK Lantai 3</button>
+                                  <button type="button" class="floor-tab-btn" onclick="switchFloorTab('ik')">Gedung IK</button>
+                              </div>
+                              <div style="display: flex; gap: 6px; align-items: center;">
+                                  <input type="text" id="filterRoomPillInput" placeholder="🔍 Cari nomor..." style="font-size: 0.75rem; padding: 4px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; width: 120px; outline: none;" oninput="filterRoomPills()">
+                              </div>
+                          </div>
+
+                          <!-- Clickable Pills Grid -->
+                          <div id="roomPillsGrid" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 140px; overflow-y: auto; padding: 2px;">
+                              <!-- Pills rendered dynamically by JS -->
+                          </div>
+
+                          <!-- Input Manual Cadangan (Jika Ada Ruangan Custom) -->
+                          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; gap: 8px;">
+                              <span style="font-size: 0.72rem; color: #64748b; white-space: nowrap;">Nomor lain?</span>
+                              <input type="text" id="inputTagRoom" placeholder="Ketik nomor custom (misal: LK.04.01)..." class="form-input" style="font-size: 0.75rem; padding: 6px 12px; flex: 1;" onkeydown="handleTagInputKey(event)">
+                              <button type="button" onclick="addRoomTagFromInput()" class="btn-brand" style="padding: 6px 14px; font-size: 0.75rem; font-weight: 700; border-radius: 8px; cursor: pointer; white-space: nowrap;">+ Tambah</button>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="form-grid-2">
                       <div class="form-group">
                           <label>🟢 Status Ketersediaan</label>
                           <select id="inputStatus" name="status" class="form-input">
@@ -1736,6 +1930,274 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           }
       }
 
+      // ==========================================
+      // MULTI-ROOM PHYSICAL PILLS LOGIC (OPSI 1)
+      // ==========================================
+      // Data seluruh ruangan yang sudah tersimpan untuk mendeteksi ketersediaan ruangan fisik
+      const ALL_EXISTING_ROOMS = <?= json_encode(array_map(function($item) {
+          return [
+              'id'           => (int)$item->id,
+              'nama_ruangan' => $item->nama_ruangan,
+              'kode_ruangan' => $item->kode_ruangan
+          ];
+      }, (isset($ruangan) && is_array($ruangan)) ? $ruangan : [])) ?>;
+
+      function canonicalizeRoomCode(str) {
+          return (str || '').toString().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      }
+
+      function getOccupiedRoomsMap(excludeId = null) {
+          const map = {};
+          (ALL_EXISTING_ROOMS || []).forEach(r => {
+              if (excludeId && parseInt(r.id) === parseInt(excludeId)) {
+                  return; // Lewati ruangan/fasilitas yang sedang diedit
+              }
+              if (!r.kode_ruangan) return;
+              const codes = r.kode_ruangan.split(',').map(s => s.trim()).filter(Boolean);
+              codes.forEach(c => {
+                  const upper = c.toUpperCase();
+                  const canon = canonicalizeRoomCode(c);
+                  const info = { id: r.id, name: r.nama_ruangan, code: upper };
+                  map[upper] = info;
+                  if (canon) map[canon] = info;
+              });
+          });
+          return map;
+      }
+
+      const PRESET_ROOMS = [
+          // LK Lantai 1
+          { code: 'LK.01.01', floor: 'lk1', name: 'LK 1.1' },
+          { code: 'LK.01.02', floor: 'lk1', name: 'LK 1.2' },
+          { code: 'LK.01.03', floor: 'lk1', name: 'LK 1.3' },
+          { code: 'LK.01.04', floor: 'lk1', name: 'LK 1.4' },
+          { code: 'LK.01.05', floor: 'lk1', name: 'LK 1.5' },
+          { code: 'LK.01.06', floor: 'lk1', name: 'LK 1.6' },
+          { code: 'LK.01.07', floor: 'lk1', name: 'LK 1.7' },
+          { code: 'LK.01.08', floor: 'lk1', name: 'LK 1.8' },
+          { code: 'LK.01.09', floor: 'lk1', name: 'LK 1.9' },
+          { code: 'LK.01.10', floor: 'lk1', name: 'LK 1.10' },
+          { code: 'LK.01.11', floor: 'lk1', name: 'LK 1.11' },
+          { code: 'LK.01.12', floor: 'lk1', name: 'LK 1.12' },
+
+          // LK Lantai 2
+          { code: 'LK.02.01', floor: 'lk2', name: 'LK 2.1' },
+          { code: 'LK.02.02', floor: 'lk2', name: 'LK 2.2' },
+          { code: 'LK.02.03', floor: 'lk2', name: 'LK 2.3' },
+          { code: 'LK.02.04', floor: 'lk2', name: 'LK 2.4' },
+          { code: 'LK.02.05', floor: 'lk2', name: 'LK 2.5' },
+          { code: 'LK.02.06', floor: 'lk2', name: 'LK 2.6' },
+          { code: 'LK.02.07', floor: 'lk2', name: 'LK 2.7' },
+          { code: 'LK.02.08', floor: 'lk2', name: 'LK 2.8' },
+          { code: 'LK.02.09', floor: 'lk2', name: 'LK 2.9' },
+          { code: 'LK.02.10', floor: 'lk2', name: 'LK 2.10' },
+          { code: 'LK.02.11', floor: 'lk2', name: 'LK 2.11' },
+          { code: 'LK.02.12', floor: 'lk2', name: 'LK 2.12' },
+
+          // LK Lantai 3
+          { code: 'LK.03.01', floor: 'lk3', name: 'LK 3.1' },
+          { code: 'LK.03.02', floor: 'lk3', name: 'LK 3.2' },
+          { code: 'LK.03.03', floor: 'lk3', name: 'LK 3.3' },
+          { code: 'LK.03.04', floor: 'lk3', name: 'LK 3.4' },
+          { code: 'LK.03.05', floor: 'lk3', name: 'LK 3.5' },
+          { code: 'LK.03.06', floor: 'lk3', name: 'LK 3.6' },
+          { code: 'LK.03.07', floor: 'lk3', name: 'LK 3.7' },
+          { code: 'LK.03.08', floor: 'lk3', name: 'LK 3.8' },
+          { code: 'LK.03.09', floor: 'lk3', name: 'LK 3.9' },
+          { code: 'LK.03.10', floor: 'lk3', name: 'LK 3.10' },
+          { code: 'LK.03.11', floor: 'lk3', name: 'LK 3.11' },
+          { code: 'LK.03.12', floor: 'lk3', name: 'LK 3.12' },
+
+          // Gedung IK
+          { code: 'IK.01.05', floor: 'ik', name: 'IK 1.5' },
+          { code: 'IK.01.06', floor: 'ik', name: 'IK 1.6' },
+          { code: 'IK.01.07', floor: 'ik', name: 'IK 1.7' },
+          { code: 'IK.01.08', floor: 'ik', name: 'IK 1.8' },
+          { code: 'IK.01.09', floor: 'ik', name: 'IK 1.9' },
+          { code: 'IK.01.10', floor: 'ik', name: 'IK 1.10' },
+          { code: 'IK.01.11', floor: 'ik', name: 'IK 1.11' },
+          { code: 'IK.01.12', floor: 'ik', name: 'IK 1.12' },
+          { code: 'IK.01.13', floor: 'ik', name: 'IK 1.13' },
+          { code: 'IK.01.14', floor: 'ik', name: 'IK 1.14' },
+          { code: 'IK.01.15', floor: 'ik', name: 'IK 1.15' },
+          { code: 'IK.01.16', floor: 'ik', name: 'IK 1.16' },
+          { code: 'IK.01.17', floor: 'ik', name: 'IK 1.17' },
+          { code: 'IK.01.18', floor: 'ik', name: 'IK 1.18' },
+          { code: 'IK.01.19', floor: 'ik', name: 'IK 1.19' },
+          { code: 'IK.01.20', floor: 'ik', name: 'IK 1.20' },
+          { code: 'IK.01.21', floor: 'ik', name: 'IK 1.21' },
+          { code: 'IK.01.22', floor: 'ik', name: 'IK 1.22' },
+          { code: 'IK.02.01', floor: 'ik', name: 'IK 2.1' },
+          { code: 'IK.02.02', floor: 'ik', name: 'IK 2.2' }
+      ];
+
+      let currentRoomTags = [];
+      let currentActiveFloor = 'all';
+      let currentSearchQuery = '';
+
+      function switchFloorTab(floor) {
+          currentActiveFloor = floor;
+          document.querySelectorAll('#floorTabs .floor-tab-btn').forEach(btn => {
+              btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${floor}'`));
+          });
+          renderRoomPillsGrid();
+      }
+
+      function filterRoomPills() {
+          const input = document.getElementById('filterRoomPillInput');
+          currentSearchQuery = input ? input.value.trim().toUpperCase() : '';
+          renderRoomPillsGrid();
+      }
+
+      function renderRoomPillsGrid() {
+          const container = document.getElementById('roomPillsGrid');
+          if (!container) return;
+
+          const currentEditId = isEditMode ? document.getElementById('ruanganId').value : null;
+          const occupiedMap = getOccupiedRoomsMap(currentEditId);
+
+          let filtered = PRESET_ROOMS;
+          if (currentActiveFloor !== 'all') {
+              filtered = filtered.filter(r => r.floor === currentActiveFloor);
+          }
+          if (currentSearchQuery) {
+              filtered = filtered.filter(r => r.code.toUpperCase().includes(currentSearchQuery) || r.name.toUpperCase().includes(currentSearchQuery));
+          }
+
+          container.innerHTML = '';
+          if (filtered.length === 0) {
+              container.innerHTML = '<span style="font-size: 0.75rem; color: #94a3b8; padding: 6px;">Tidak ada nomor ruangan yang cocok</span>';
+              return;
+          }
+
+          filtered.forEach(room => {
+              const codeUpper = room.code.toUpperCase();
+              const canon = canonicalizeRoomCode(room.code);
+              const occupiedInfo = occupiedMap[codeUpper] || (canon ? occupiedMap[canon] : null);
+              const isOccupied = !!occupiedInfo;
+              const isSelected = currentRoomTags.some(t => t.toUpperCase() === codeUpper || (canon && canonicalizeRoomCode(t) === canon));
+
+              const btn = document.createElement('button');
+              btn.type = 'button';
+
+              if (isOccupied) {
+                  btn.className = 'room-clickable-pill occupied';
+                  btn.innerHTML = `🔒 ${room.code} <span style="font-size:0.65rem; opacity:0.8;">(Terpakai)</span>`;
+                  btn.title = `Sudah digunakan oleh fasilitas: ${occupiedInfo.name}`;
+                  btn.onclick = () => {
+                      Swal.fire({
+                          title: 'Ruangan Tidak Tersedia',
+                          html: `Nomor ruangan fisik <b>${room.code}</b> sudah digunakan oleh fasilitas:<br><br><span style="color:#ea580c; font-weight:800; font-size:1.05rem;">${occupiedInfo.name}</span><br><br><small style="color:#64748b;">Satu ruangan fisik hanya dapat digunakan oleh 1 fasilitas/laboratorium.</small>`,
+                          icon: 'info',
+                          confirmButtonColor: '#ea580c'
+                      });
+                  };
+              } else {
+                  btn.className = `room-clickable-pill ${isSelected ? 'selected' : ''}`;
+                  btn.innerHTML = `${isSelected ? '✓' : '🚪'} ${room.code}`;
+                  btn.title = isSelected ? 'Klik untuk batal memilih ruangan ini' : 'Klik untuk memilih ruangan fisik ini';
+                  btn.onclick = () => toggleRoomPill(room.code);
+              }
+
+              container.appendChild(btn);
+          });
+      }
+
+      function toggleRoomPill(code) {
+          const idx = currentRoomTags.indexOf(code);
+          if (idx > -1) {
+              currentRoomTags.splice(idx, 1);
+          } else {
+              currentRoomTags.push(code);
+          }
+          renderRoomTags();
+          renderRoomPillsGrid();
+      }
+
+      function renderRoomTags() {
+          const list = document.getElementById('roomTagsList');
+          const hiddenInput = document.getElementById('inputKode');
+          const countBadge = document.getElementById('selectedRoomsCount');
+          if (!list || !hiddenInput) return;
+
+          list.innerHTML = '';
+          if (countBadge) {
+              countBadge.innerText = `${currentRoomTags.length} ruangan dipilih`;
+          }
+
+          if (currentRoomTags.length === 0) {
+              list.innerHTML = '<span style="font-size: 0.75rem; color: #94a3b8; font-style: italic;">Klik tombol ruangan di bawah untuk memilih</span>';
+              hiddenInput.value = '';
+              return;
+          }
+
+          currentRoomTags.forEach((tag, idx) => {
+              const chip = document.createElement('span');
+              chip.className = 'room-tag-chip';
+              chip.innerHTML = `🚪 ${tag} <button type="button" class="room-tag-remove" onclick="removeRoomTag(${idx})" title="Hapus ruangan">&times;</button>`;
+              list.appendChild(chip);
+          });
+
+          hiddenInput.value = currentRoomTags.join(', ');
+      }
+
+      function addRoomTagFromInput() {
+          const inp = document.getElementById('inputTagRoom');
+          if (!inp) return;
+          const val = inp.value.trim();
+          if (!val) return;
+
+          const currentEditId = isEditMode ? document.getElementById('ruanganId').value : null;
+          const occupiedMap = getOccupiedRoomsMap(currentEditId);
+
+          // Support multi-input via comma or single input
+          const items = val.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+          const conflicts = [];
+
+          items.forEach(item => {
+              const canon = canonicalizeRoomCode(item);
+              const occ = occupiedMap[item] || (canon ? occupiedMap[canon] : null);
+              if (occ) {
+                  conflicts.push(`Ruangan <b>${item}</b> sudah digunakan oleh <b>${occ.name}</b>`);
+                  return;
+              }
+
+              const isAlreadySelected = currentRoomTags.some(t => t.toUpperCase() === item || (canon && canonicalizeRoomCode(t) === canon));
+              if (!isAlreadySelected) {
+                  currentRoomTags.push(item);
+              }
+          });
+
+          if (conflicts.length > 0) {
+              Swal.fire({
+                  title: 'Ruangan Sudah Digunakan',
+                  html: `${conflicts.join('<br>')}<br><br><small style="color:#64748b;">Satu nomor ruangan fisik hanya dapat digunakan oleh 1 fasilitas.</small>`,
+                  icon: 'warning',
+                  confirmButtonColor: '#ea580c'
+              });
+          }
+
+          inp.value = '';
+          renderRoomTags();
+          renderRoomPillsGrid();
+          inp.focus();
+      }
+
+      function removeRoomTag(index) {
+          if (index >= 0 && index < currentRoomTags.length) {
+              currentRoomTags.splice(index, 1);
+              renderRoomTags();
+              renderRoomPillsGrid();
+          }
+      }
+
+      function handleTagInputKey(e) {
+          if (e.key === 'Enter') {
+              e.preventDefault();
+              addRoomTagFromInput();
+          }
+      }
+
       function openModalTambah() {
           isEditMode = false;
           document.body.style.overflow = 'hidden';
@@ -1745,6 +2207,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           document.getElementById('inputJamOperasional').value = 'Senin - Jumat | 08:00 - 17:00 WIB';
           document.getElementById('inputLokasi').value = 'Gedung Sebatik (FIK)';
           document.getElementById('inputKapasitas').value = '35';
+          currentRoomTags = [];
+          currentActiveFloor = 'all';
+          currentSearchQuery = '';
+          const filterInp = document.getElementById('filterRoomPillInput');
+          if (filterInp) filterInp.value = '';
+          const inpTag = document.getElementById('inputTagRoom');
+          if (inpTag) inpTag.value = '';
+          renderRoomTags();
+          renderRoomPillsGrid();
+          switchFloorTab('all');
           clearFileFoto();
           clearFileModel();
           document.getElementById('modalRuangan').classList.add('active');
@@ -1756,7 +2228,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           document.getElementById('modalTitle').innerText = '✏️ Edit Data Ruangan & Berkas';
           document.getElementById('ruanganId').value = data.id;
           document.getElementById('inputNama').value = data.nama_ruangan || '';
-          document.getElementById('inputKode').value = data.kode_ruangan || '';
+          
+          const raw = data.kode_ruangan || '';
+          currentRoomTags = raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+          currentActiveFloor = 'all';
+          currentSearchQuery = '';
+          const filterInp = document.getElementById('filterRoomPillInput');
+          if (filterInp) filterInp.value = '';
+          const inpTag = document.getElementById('inputTagRoom');
+          if (inpTag) inpTag.value = '';
+          renderRoomTags();
+          renderRoomPillsGrid();
+          switchFloorTab('all');
+
           document.getElementById('inputKategori').value = data.id_kategori || 1;
           document.getElementById('inputStatus').value = data.status || 'Tersedia';
           document.getElementById('inputTagline').value = data.tagline || '';
@@ -1797,6 +2281,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
       function handleFormSubmit(e) {
           e.preventDefault();
+          if (currentRoomTags.length === 0) {
+              Swal.fire('Perhatian', 'Harap pilih setidaknya satu ruangan fisik (klik tombol ruangan di bawah) sebelum menyimpan.', 'warning');
+              return;
+          }
+
+          // Validasi client-side: periksa apakah ada nomor ruangan fisik yang bentrok dengan fasilitas lain
+          const currentEditId = isEditMode ? document.getElementById('ruanganId').value : null;
+          const occupiedMap = getOccupiedRoomsMap(currentEditId);
+          const conflicts = [];
+          currentRoomTags.forEach(tag => {
+              const upper = tag.toUpperCase();
+              const canon = canonicalizeRoomCode(tag);
+              const occ = occupiedMap[upper] || (canon ? occupiedMap[canon] : null);
+              if (occ) {
+                  conflicts.push(`Ruangan <b>${upper}</b> sudah digunakan oleh <b>${occ.name}</b>`);
+              }
+          });
+
+          if (conflicts.length > 0) {
+              Swal.fire({
+                  title: 'Konflik Ruangan Fisik',
+                  html: `${conflicts.join('<br>')}<br><br><small style="color:#64748b;">Harap hapus nomor ruangan yang sudah terpakai sebelum menyimpan. 1 nomor ruangan fisik hanya untuk 1 fasilitas.</small>`,
+                  icon: 'error',
+                  confirmButtonColor: '#ea580c'
+              });
+              return;
+          }
+
           const form = document.getElementById('formRuangan');
           const formData = new FormData(form);
           const id = document.getElementById('ruanganId').value;
