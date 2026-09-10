@@ -183,6 +183,39 @@
             }
             .nav-item:hover .nav-dropdown { transform: translateX(-20px) translateY(0); }
         }
+
+        @media (max-width: 768px) {
+            .dashboard-topbar {
+                height: 52px;
+                padding: 0 12px;
+                justify-content: flex-start;
+            }
+            .nav-list {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                gap: 12px;
+                width: 100%;
+                padding-right: 12px;
+            }
+            .nav-list::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-item {
+                flex-shrink: 0;
+            }
+            .nav-link {
+                font-size: 0.72rem;
+                padding: 4px 6px;
+                white-space: nowrap;
+            }
+            .nav-link-login {
+                padding: 5px 10px;
+                flex-shrink: 0;
+            }
+        }
     </style>
 </head>
 <body>
