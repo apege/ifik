@@ -2478,7 +2478,7 @@
         const titleEl = document.getElementById('quickDocTitle');
 
         if (rejectBox) rejectBox.classList.add('hidden');
-        if (btnDetail) btnDetail.href = '<?= site_url("dosenwali/detail_mahasiswa/"); ?>' + mhs.nim;
+        if (btnDetail) btnDetail.href = '<?= site_url("dosen/wali/detail_mahasiswa/"); ?>' + mhs.nim;
 
         // Header icon & title
         if (iconEl) iconEl.className = 'fa-solid fa-file-pdf';

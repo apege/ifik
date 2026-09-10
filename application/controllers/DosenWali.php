@@ -7,6 +7,15 @@ class DosenWali extends CI_Controller {
         parent::__construct();
         $this->load->model('DosenWali_model');
         $this->load->helper(array('form', 'url'));
+
+        // Normalisasi URL: Jika diakses lewat /dosenwali via browser (bukan AJAX), arahkan ke /dosen/wali
+        if ($this->uri->segment(1) === 'dosenwali' && !$this->input->is_ajax_request()) {
+            $segments = $this->uri->segment_array();
+            array_shift($segments);
+            $subPath = !empty($segments) ? '/' . implode('/', $segments) : '';
+            redirect('dosen/wali' . $subPath, 'location', 301);
+            return;
+        }
     }
 
     private function _get_current_nip() {
@@ -47,7 +56,7 @@ class DosenWali extends CI_Controller {
         if ($this->input->post('action')) {
             if ($this->_is_stage_locked($nim)) {
                 $this->session->set_flashdata('error', 'Pendaftaran mahasiswa ini telah disetujui dan saat ini berada di tahap selanjutnya, sehingga tidak dapat diubah lagi.');
-                redirect('dosenwali/detail_mahasiswa/' . $nim);
+                redirect('dosen/wali/detail_mahasiswa/' . $nim);
                 return;
             }
 
@@ -61,7 +70,7 @@ class DosenWali extends CI_Controller {
             if ($status === 'Rejected') {
                 if (empty($catatan) && empty($this->input->post('berkas_kurang')) && ($this->input->post('status_judul_jenis') !== 'Rejected')) {
                     $this->session->set_flashdata('error', 'Alasan penolakan / catatan revisi wajib diisi jika memilih Reject!');
-                    redirect('dosenwali/detail_mahasiswa/' . $nim);
+                    redirect('dosen/wali/detail_mahasiswa/' . $nim);
                     return;
                 }
                 $submitted_kurang = $this->input->post('berkas_kurang') ?: array();
@@ -69,7 +78,7 @@ class DosenWali extends CI_Controller {
                 foreach ($submitted_kurang as $bk) {
                     if (empty(trim($submitted_notes[$bk] ?? ''))) {
                         $this->session->set_flashdata('error', 'Catatan revisi untuk setiap berkas yang ditandai Kurang/Revisi wajib diisi!');
-                        redirect('dosenwali/detail_mahasiswa/' . $nim);
+                        redirect('dosen/wali/detail_mahasiswa/' . $nim);
                         return;
                     }
                 }
@@ -77,7 +86,7 @@ class DosenWali extends CI_Controller {
                     $note_jj = trim($this->input->post('catatan_judul_jenis') ?? '');
                     if (empty($note_jj)) {
                         $this->session->set_flashdata('error', 'Catatan revisi untuk Usulan Judul & Skema TA wajib diisi jika ditandai Kurang/Revisi!');
-                        redirect('dosenwali/detail_mahasiswa/' . $nim);
+                        redirect('dosen/wali/detail_mahasiswa/' . $nim);
                         return;
                     }
                 }
@@ -124,7 +133,7 @@ class DosenWali extends CI_Controller {
             ));
 
             $this->session->set_flashdata('success', 'Status approval pendaftaran TA berhasil diperbarui!');
-            redirect('dosenwali/detail_mahasiswa/' . $nim);
+            redirect('dosen/wali/detail_mahasiswa/' . $nim);
             return;
         }
 
@@ -353,7 +362,7 @@ class DosenWali extends CI_Controller {
                 'judul'                  => $m['judul_1'] ?? '',
                 'status_approval_wali'   => $st,
                 'current_stage'          => $m['current_stage'] ?? 'Dosen Wali',
-                'detail_url'             => site_url('dosenwali/detail_mahasiswa/' . $m['nim']),
+                'detail_url'             => site_url('dosen/wali/detail_mahasiswa/' . $m['nim']),
                 'berkas_map'             => $m['berkas_map'] ?? []
             ];
 
@@ -483,7 +492,7 @@ class DosenWali extends CI_Controller {
 
         if (empty($nims)) {
             $this->session->set_flashdata('error', 'Tidak ada mahasiswa yang dipilih.');
-            redirect('dosenwali');
+            redirect('dosen/wali');
             return;
         }
 
@@ -547,7 +556,175 @@ class DosenWali extends CI_Controller {
             return;
         }
 
-        redirect('dosenwali');
+        redirect('dosen/wali');
+    }
+
+    /**
+     * Halaman Pengaturan Tanda Tangan Digital Dosen
+     */
+    public function tanda_tangan() {
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', 'Silakan login terlebih dahulu.');
+            redirect('login');
+            return;
+        }
+
+        $nip_dosen = $this->_get_current_nip();
+        $dosen_info = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
+        $tanda_tangan = $this->DosenWali_model->get_tanda_tangan($nip_dosen);
+
+        $data = [
+            'title'        => 'Pengaturan Tanda Tangan Digital Dosen',
+            'dosen_info'   => $dosen_info,
+            'nip'          => $nip_dosen,
+            'tanda_tangan' => $tanda_tangan
+        ];
+
+        $this->load->view('dosen_wali/tanda_tangan', $data);
+    }
+
+    /**
+     * Simpan Tanda Tangan Digital (via Canvas Base64 atau Upload File)
+     */
+    public function simpan_tanda_tangan() {
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', 'Silakan login terlebih dahulu.');
+            redirect('login');
+            return;
+        }
+
+        $nip_dosen = $this->_get_current_nip();
+        $tipe = $this->input->post('tipe'); // 'canvas' atau 'upload'
+
+        $uploadDir = FCPATH . 'uploads/signatures/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $filename = '';
+
+        if ($tipe === 'canvas') {
+            $signatureData = $this->input->post('signature_data');
+            if (empty($signatureData) || strpos($signatureData, 'data:image/png;base64,') !== 0) {
+                $this->session->set_flashdata('error', 'Silakan goreskan tanda tangan pada canvas terlebih dahulu.');
+                redirect('dosen/tanda-tangan');
+                return;
+            }
+
+            // Decode base64 image
+            $imageData = str_replace('data:image/png;base64,', '', $signatureData);
+            $imageData = str_replace(' ', '+', $imageData);
+            $decoded = base64_decode($imageData);
+
+            if (!$decoded) {
+                $this->session->set_flashdata('error', 'Format gambar tanda tangan tidak valid.');
+                redirect('dosen/tanda-tangan');
+                return;
+            }
+
+            $cleanNip = preg_replace('/[^a-zA-Z0-9_-]/', '', $nip_dosen);
+            $filename = 'ttd_' . $cleanNip . '_' . time() . '.png';
+            file_put_contents($uploadDir . $filename, $decoded);
+
+        } else {
+            // Upload file
+            if (empty($_FILES['file_ttd']['name'])) {
+                $this->session->set_flashdata('error', 'Pilih file gambar tanda tangan terlebih dahulu.');
+                redirect('dosen/tanda-tangan');
+                return;
+            }
+
+            $cleanNip = preg_replace('/[^a-zA-Z0-9_-]/', '', $nip_dosen);
+            $config = [
+                'upload_path'   => $uploadDir,
+                'allowed_types' => 'png|jpg|jpeg',
+                'max_size'      => 3072, // 3MB
+                'file_name'     => 'ttd_' . $cleanNip . '_' . time()
+            ];
+
+            $this->load->library('upload', $config);
+
+            if ($this->upload->do_upload('file_ttd')) {
+                $uploadData = $this->upload->data();
+                $filename = $uploadData['file_name'];
+            } else {
+                $err = $this->upload->display_errors('', '');
+                $this->session->set_flashdata('error', 'Gagal mengunggah file tanda tangan: ' . $err);
+                redirect('dosen/tanda-tangan');
+                return;
+            }
+        }
+
+        if (!empty($filename)) {
+            // Hapus file tanda tangan lama jika ada
+            $oldTtd = $this->DosenWali_model->get_tanda_tangan($nip_dosen);
+            if (!empty($oldTtd) && file_exists($uploadDir . $oldTtd)) {
+                @unlink($uploadDir . $oldTtd);
+            }
+
+            $this->DosenWali_model->save_tanda_tangan($nip_dosen, $filename);
+            $this->session->set_flashdata('success', 'Tanda tangan digital Anda berhasil disimpan dan siap digunakan!');
+        }
+
+        redirect('dosen/tanda-tangan');
+    }
+
+    /**
+     * Hapus Tanda Tangan Digital
+     */
+    public function hapus_tanda_tangan() {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+            return;
+        }
+
+        $nip_dosen = $this->_get_current_nip();
+        $oldTtd = $this->DosenWali_model->get_tanda_tangan($nip_dosen);
+
+        if (!empty($oldTtd)) {
+            $filePath = FCPATH . 'uploads/signatures/' . $oldTtd;
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            $this->DosenWali_model->delete_tanda_tangan($nip_dosen);
+            $this->session->set_flashdata('success', 'Tanda tangan digital berhasil dihapus.');
+        }
+
+        redirect('dosen/tanda-tangan');
+    }
+
+    /**
+     * Unduh File Tanda Tangan Digital (Format PNG Transparan)
+     */
+    public function download_tanda_tangan() {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+            return;
+        }
+
+        $nip_dosen = $this->_get_current_nip();
+        $dosen_info = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
+        $tanda_tangan = $this->DosenWali_model->get_tanda_tangan($nip_dosen);
+
+        if (empty($tanda_tangan)) {
+            $this->session->set_flashdata('error', 'Belum ada tanda tangan yang tersimpan untuk diunduh.');
+            redirect('dosen/tanda-tangan');
+            return;
+        }
+
+        $filePath = FCPATH . 'uploads/signatures/' . $tanda_tangan;
+        if (!file_exists($filePath)) {
+            $this->session->set_flashdata('error', 'File tanda tangan fisik tidak ditemukan di server.');
+            redirect('dosen/tanda-tangan');
+            return;
+        }
+
+        $this->load->helper('download');
+        $namaBersih = preg_replace('/[^a-zA-Z0-9_-]/', '_', $dosen_info['nama_dosen'] ?? 'dosen');
+        $cleanNip = preg_replace('/[^a-zA-Z0-9_-]/', '', $nip_dosen);
+        $downloadName = 'TTD_' . $namaBersih . '_' . $cleanNip . '.png';
+
+        force_download($downloadName, file_get_contents($filePath));
     }
 }
 

@@ -57,11 +57,10 @@ if (isset($navItems) && is_array($navItems) && !empty($navItems)) {
 
         case 4: // Dosen
             $defaultNavItems = [
-                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosenwali'), 'icon_3d' => 'assets/images/icons_3d/home.png', 'index' => 1],
-                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png', 'index' => 2],
-                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png', 'index' => 3],
-                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png', 'index' => 4],
-                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png', 'index' => 5],
+                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/home.png', 'index' => 1],
+                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png', 'index' => 2],
+                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png', 'index' => 3],
+                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png', 'index' => 4],
             ];
             break;
 

@@ -89,6 +89,27 @@ $route['dosenwali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
 $route['dosenwali/(:any)'] = 'DosenWali/$1';
 $route['dosenwali/(:any)/(:any)'] = 'DosenWali/$1/$2';
 
+// Dosen Tanda Tangan Digital Routes
+$route['dosen/tanda-tangan'] = 'DosenWali/tanda_tangan';
+$route['dosen/tanda-tangan/simpan'] = 'DosenWali/simpan_tanda_tangan';
+$route['dosen/tanda-tangan/hapus'] = 'DosenWali/hapus_tanda_tangan';
+$route['dosen/tanda-tangan/download'] = 'DosenWali/download_tanda_tangan';
+$route['dosen/wali/tanda-tangan'] = 'DosenWali/tanda_tangan';
+$route['dosen/wali/tanda-tangan/simpan'] = 'DosenWali/simpan_tanda_tangan';
+$route['dosen/wali/tanda-tangan/hapus'] = 'DosenWali/hapus_tanda_tangan';
+$route['dosen/wali/tanda-tangan/download'] = 'DosenWali/download_tanda_tangan';
+
+// Dosen Ticketing Routes
+$route['dosen/ticketing'] = 'DosenTicketing/input';
+$route['dosen/ticketing/input'] = 'DosenTicketing/input';
+$route['dosen/ticketing/simpan'] = 'DosenTicketing/simpan';
+$route['dosen/ticketing/riwayat'] = 'DosenTicketing/riwayat';
+$route['dosen/ticketing/detail/(:any)'] = 'DosenTicketing/detail/$1';
+$route['dosen/respon-ticketing'] = 'AdminLayananTicketing/index';
+$route['dosen/respon-ticketing/detail/(:any)'] = 'AdminLayananTicketing/detail/$1';
+$route['dosen/respon-ticketing/simpan_tanggapan'] = 'AdminLayananTicketing/simpan_tanggapan';
+$route['dosen/respon-ticketing/(:any)'] = 'AdminLayananTicketing/$1';
+
 // Koordinator TA Routes
 $route['koordinatorta'] = 'KoordinatorTA';
 $route['koordinatorta/detail_mahasiswa/(:any)'] = 'KoordinatorTA/detail_mahasiswa/$1';
@@ -130,6 +151,11 @@ $route['adminlayanan/detail_berkas/(:any)'] = 'AdminLayanan/detail_berkas/$1';
 $route['adminlayanan/submit_verifikasi/(:any)'] = 'AdminLayanan/submit_verifikasi/$1';
 $route['adminlayanan/submit_verifikasi_batch'] = 'AdminLayanan/submit_verifikasi_batch';
 $route['adminlayanan/get_batch_details'] = 'AdminLayanan/get_batch_details';
+
+// [TEMPORARY SIMULASI] Admin Layanan (LAA) Ticketing Simulation Routes
+$route['adminlayanan/ticketing'] = 'AdminLayananTicketing/index';
+$route['adminlayanan/ticketing/detail/(:any)'] = 'AdminLayananTicketing/detail/$1';
+$route['adminlayanan/ticketing/simpan_tanggapan'] = 'AdminLayananTicketing/simpan_tanggapan';
 
 
 // Ketua KK Routes

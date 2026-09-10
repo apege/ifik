@@ -359,7 +359,7 @@
         </div>
 
         <!-- Document Verification Form -->
-        <form method="POST" action="<?= site_url('dosenwali/detail_mahasiswa/' . $detail['nim']); ?>" id="formVerifikasi">
+        <form method="POST" action="<?= site_url('dosen/wali/detail_mahasiswa/' . $detail['nim']); ?>" id="formVerifikasi">
             <input type="hidden" name="status" id="formStatus" value="<?= $status_wali === 'Approved' ? 'Approved' : ($status_wali === 'Rejected' ? 'Rejected' : 'Pending'); ?>">
             <input type="hidden" name="status_judul_jenis" id="inputStatusJudulJenis" value="<?= $jj_status; ?>">
             <input type="hidden" name="catatan_judul_jenis" id="inputCatatanJudulJenis" value="<?= htmlspecialchars($jj_note); ?>">

@@ -651,4 +651,46 @@ class DosenWali_model extends CI_Model {
 
         return array('approved' => $appCount, 'rejected' => $rejCount);
     }
+
+    // Ambil nama file tanda tangan digital dosen
+    public function get_tanda_tangan($nip) {
+        if ($this->db->table_exists('dosen_wali') && $this->db->field_exists('tanda_tangan', 'dosen_wali')) {
+            $row = $this->db->get_where('dosen_wali', ['nip' => $nip])->row_array();
+            if (!empty($row['tanda_tangan'])) {
+                return $row['tanda_tangan'];
+            }
+        }
+        if ($this->db->table_exists('users') && $this->db->field_exists('tanda_tangan', 'users')) {
+            $row = $this->db->get_where('users', ['nidn_nim' => $nip])->row_array();
+            if (!empty($row['tanda_tangan'])) {
+                return $row['tanda_tangan'];
+            }
+        }
+        return null;
+    }
+
+    // Simpan file tanda tangan digital dosen ke database
+    public function save_tanda_tangan($nip, $filename) {
+        $saved = false;
+        if ($this->db->table_exists('dosen_wali') && $this->db->field_exists('tanda_tangan', 'dosen_wali')) {
+            $this->db->where('nip', $nip)->update('dosen_wali', ['tanda_tangan' => $filename]);
+            $saved = true;
+        }
+        if ($this->db->table_exists('users') && $this->db->field_exists('tanda_tangan', 'users')) {
+            $this->db->where('nidn_nim', $nip)->update('users', ['tanda_tangan' => $filename]);
+            $saved = true;
+        }
+        return $saved;
+    }
+
+    // Hapus tanda tangan digital dosen dari database
+    public function delete_tanda_tangan($nip) {
+        if ($this->db->table_exists('dosen_wali') && $this->db->field_exists('tanda_tangan', 'dosen_wali')) {
+            $this->db->where('nip', $nip)->update('dosen_wali', ['tanda_tangan' => null]);
+        }
+        if ($this->db->table_exists('users') && $this->db->field_exists('tanda_tangan', 'users')) {
+            $this->db->where('nidn_nim', $nip)->update('users', ['tanda_tangan' => null]);
+        }
+        return true;
+    }
 }

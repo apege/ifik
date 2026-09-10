@@ -1980,8 +1980,8 @@
             $backLabel = 'Dashboard Admin';
             break;
         case 4: // Dosen
-            $backUrl = site_url('dosenwali');
-            $backLabel = 'Menu Dosen Wali';
+            $backUrl = site_url('dosen/bimbingan');
+            $backLabel = 'Menu Dosen Pembimbing';
             break;
         case 6: // Koordinator TA
             $backUrl = site_url('koordinatorta');
@@ -2185,7 +2185,7 @@
                     switch ($sessionRoleId) {
                         case 3: // Kaur / Ka Lab
                             $navItems = [
-                                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Bimbingan TA', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
                                 ['heading' => 'Approval Peminjaman', 'href' => site_url('kaur/approval'), 'icon_3d' => 'assets/images/icons_3d/approval.png'],
                                 ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
                                 ['heading' => 'Respon Ticketing Lab', 'href' => site_url('kaur#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png'],
@@ -2221,8 +2221,7 @@
 
                         case 4: // Dosen
                             $navItems = [
-                                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosenwali'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
-                                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
                                 ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
                                 ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
                                 ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
