@@ -193,6 +193,17 @@ $route['kaur/surat/(:num)'] = 'Kaur/surat/$1';
 $route['laboran/surat/(:num)'] = 'Laboran/surat/$1';
 $route['kelolabooking/surat/(:num)'] = 'Kelolabooking/surat/$1';
 
+// Laboran Ticketing & Respon Routes
+$route['laboran/respon-ticketing'] = 'LaboranTicketing/index';
+$route['laboran/respon-ticketing/detail/(:any)'] = 'LaboranTicketing/detail/$1';
+$route['laboran/respon-ticketing/simpan_tanggapan'] = 'LaboranTicketing/simpan_tanggapan';
+$route['laboran/respon-ticketing/(:any)'] = 'LaboranTicketing/$1';
+$route['laboran/ticketing'] = 'LaboranTicketing/input';
+$route['laboran/ticketing/input'] = 'LaboranTicketing/input';
+$route['laboran/ticketing/simpan'] = 'LaboranTicketing/simpan';
+$route['laboran/ticketing/riwayat'] = 'LaboranTicketing/riwayat';
+$route['laboran/ticketing/detail/(:any)'] = 'LaboranTicketing/riwayat_detail/$1';
+
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
