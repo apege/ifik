@@ -609,6 +609,9 @@ class KoordinatorTA extends CI_Controller {
         $status_kelulusan = $this->input->post('status_kelulusan');
         $detail_penilaian = $this->input->post('detail_penilaian');
         $catatan          = $this->input->post('catatan');
+        $status_publish   = $this->input->post('status_publish') ?: 'Draft';
+        $tgl_publish      = $this->input->post('tgl_publish') ?: null;
+        $tahun_akademik   = $this->input->post('tahun_akademik') ?: null;
 
         if (empty($nim)) {
             echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib disertakan.'));
@@ -630,10 +633,48 @@ class KoordinatorTA extends CI_Controller {
             $grade,
             $status_kelulusan,
             $detail_penilaian,
-            $catatan
+            $catatan,
+            $status_publish,
+            $tgl_publish,
+            $tahun_akademik
         );
 
         echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Publish / Republish / Set Jadwal Publikasi Nilai Sidang
+    public function ajax_publish_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim            = $this->input->post('nim');
+        $status_publish = $this->input->post('status_publish') ?: 'Published';
+        $tgl_publish    = $this->input->post('tgl_publish') ?: null;
+        $catatan        = $this->input->post('catatan') ?: '';
+
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.'));
+            return;
+        }
+
+        $res = $this->KoordinatorTA_model->publish_penilaian_sidang_ajax($nim, $status_publish, $tgl_publish, $catatan);
+        echo json_encode($res);
+    }
+
+    // AJAX Endpoint: Ambil Riwayat Log Versi Penilaian Mahasiswa
+    public function ajax_get_history_penilaian_sidang() {
+        header('Content-Type: application/json');
+
+        $nim = $this->input->get('nim') ?: $this->input->post('nim');
+        if (empty($nim)) {
+            echo json_encode(array('status' => false, 'message' => 'NIM mahasiswa wajib diisi.'));
+            return;
+        }
+
+        $history = $this->KoordinatorTA_model->get_history_penilaian_sidang($nim);
+        echo json_encode(array(
+            'status' => true,
+            'data'   => $history
+        ));
     }
 
     // AJAX Endpoint: Ambil Detail Penilaian Sidang Mahasiswa
