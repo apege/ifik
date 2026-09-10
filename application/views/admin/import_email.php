@@ -224,6 +224,18 @@
             align-items: center;
             gap: 8px;
             z-index: 10;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 9999px;
+            padding: 0 4px 0 14px;
+            height: 44px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .extra-filter-row:hover, .extra-filter-row:focus-within {
+            border-color: #f97316;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.12);
         }
 
         .extra-filter-row.open-dropdown {
@@ -487,6 +499,239 @@
             animation: blurRevealChar 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             will-change: transform, filter, opacity;
         }
+
+        /* ============================================================
+           MOBILE RESPONSIVE OVERRIDES
+           ============================================================ */
+
+        /* Reduce body left-padding when sidebar collapses on mobile */
+        @media (max-width: 640px) {
+            body {
+                padding-left: 0 !important;
+                padding-bottom: 80px;
+            }
+
+            /* Header: give clear 70px left-padding for fixed floating hamburger button (at left:16px, w:38px) */
+            header.glass-header {
+                padding-left: 70px !important;
+                padding-right: 16px !important;
+                padding-top: 14px !important;
+                padding-bottom: 14px !important;
+            }
+
+            header .max-w-7xl > div {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            /* Header title: strictly stacked top-to-bottom */
+            .header-title-block {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 100% !important;
+            }
+
+            .header-title-block h1 {
+                font-size: 1.125rem !important;
+                line-height: 1.35 !important;
+                margin: 0 !important;
+            }
+
+            .header-title-block p {
+                font-size: 0.72rem !important;
+                line-height: 1.4 !important;
+                margin-top: 3px !important;
+            }
+
+            /* Header buttons: strictly side-by-side 2 columns */
+            .header-buttons-block {
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+
+            .header-buttons-block button {
+                width: 100% !important;
+                min-width: 0 !important;
+                justify-content: center;
+                height: 40px !important;
+                font-size: 0.8rem !important;
+                font-weight: 700 !important;
+                padding: 0 8px !important;
+                border-radius: 12px !important;
+                white-space: nowrap !important;
+            }
+
+            /* Multi-Search bar container: stack on mobile so search pill gets full 100% width */
+            .search-pill-container {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+
+            .unified-search-pill {
+                width: 100% !important;
+                flex-wrap: nowrap !important;
+                height: 44px !important;
+                padding: 0 4px 0 12px !important;
+                gap: 6px !important;
+                box-sizing: border-box !important;
+            }
+
+            .unified-divider {
+                display: block !important;
+                width: 1.5px !important;
+                height: 18px !important;
+                background-color: #cbd5e1 !important;
+                margin: 0 4px !important;
+                flex-shrink: 0 !important;
+            }
+
+            #label-filter-main-cat {
+                max-width: 110px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 0.75rem !important;
+            }
+
+            #mainSearchInput {
+                font-size: 0.8rem !important;
+            }
+
+            .btn-standalone-add {
+                width: 100% !important;
+                height: 38px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 0 14px !important;
+                font-size: 0.78rem !important;
+                border-radius: 12px !important;
+            }
+
+            /* Batch action buttons on mobile: 100% width with spacious padding */
+            .batch-actions-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .batch-actions-grid button {
+                width: 100% !important;
+                height: 42px !important;
+                justify-content: center !important;
+                padding: 0 16px !important;
+                font-size: 0.8rem !important;
+                font-weight: 700 !important;
+                border-radius: 12px !important;
+                white-space: nowrap !important;
+            }
+
+            /* Page size & tools on mobile */
+            .page-size-wrap-mobile {
+                width: 100% !important;
+                justify-content: space-between !important;
+                height: 38px !important;
+            }
+
+            .tools-grid-mobile {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .tools-grid-mobile button {
+                width: 100% !important;
+                height: 38px !important;
+                justify-content: center !important;
+                border-radius: 12px !important;
+            }
+
+            /* Extra rows card popover on mobile */
+            .extra-rows-card {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                border-radius: 16px !important;
+                margin-top: 8px !important;
+                padding: 10px 8px !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+            }
+
+            #additionalFilterRowsContainer {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+
+            /* Extra filter row on mobile: unified single-line pill */
+            .extra-filter-row {
+                width: 100% !important;
+                flex-wrap: nowrap !important;
+                height: 44px !important;
+                padding: 0 4px 0 10px !important;
+                gap: 4px !important;
+                box-sizing: border-box !important;
+                background: #ffffff !important;
+                border: 1.5px solid #cbd5e1 !important;
+                border-radius: 9999px !important;
+            }
+
+            .extra-filter-row [id^="label-filter-extra-cat-"] {
+                max-width: 78px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 0.75rem !important;
+            }
+
+            .extra-filter-row input {
+                font-size: 0.8rem !important;
+            }
+
+            /* Table / Card Container on mobile */
+            .table-rotating-border-inner {
+                overflow: hidden;
+            }
+
+            /* Stats Mobile Horizontal Snap Slider */
+            .stats-slider-container {
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+            }
+            .stats-slider-container::-webkit-scrollbar {
+                display: none !important;
+            }
+            .stats-slider-container {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+
+            /* Pagination bar: center on mobile */
+            #pagination-info-text {
+                text-align: center;
+            }
+        }
+
+        /* Tablet: allow table horizontal scroll too */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            header.glass-header {
+                padding-left: 24px !important;
+            }
+            .table-rotating-border-inner {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .col-tablet-hide {
+                display: none !important;
+            }
+        }
     </style>
 <body class="bg-slate-50 text-slate-800 antialiased pb-16 pl-14">
 
@@ -494,24 +739,24 @@
     <?php $this->load->view('components/curved_sidebar'); ?>
 
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 glass-header px-6 py-4 mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <div>
+    <header class="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 sm:py-4 mb-6 sm:mb-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-4 w-full sm:w-auto">
+                <div class="header-title-block flex flex-col w-full">
                     <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Import Email & Dispatcher Token</h1>
+                        <h1 class="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">Import Email & Dispatcher Token</h1>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Kelola impor Excel (XLSX), generate token 8 karakter, dan kirim email pemberitahuan.</p>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-1 leading-normal">Kelola impor Excel (XLSX), generate token 8 karakter, dan kirim email pemberitahuan.</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="downloadSampleTemplate('xlsx')" class="btn-gradient-base btn-gradient-slate-light h-10 px-4 text-xs flex items-center gap-2">
+            <div class="header-buttons-block grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto mt-2 sm:mt-0">
+                <button onclick="downloadSampleTemplate('xlsx')" class="btn-gradient-base btn-gradient-slate-light h-10 px-3 sm:px-4 text-xs font-bold flex items-center gap-2 justify-center">
                     <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i>
                     <span>Template XLSX</span>
                 </button>
-                <button onclick="openEmailTemplateModal()" class="btn-gradient-base btn-gradient-dark-obsidian h-10 px-4 text-xs flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-amber-400"></i>
+                <button onclick="openEmailTemplateModal()" class="btn-gradient-base btn-gradient-dark-obsidian h-10 px-3 sm:px-4 text-xs font-bold flex items-center gap-2 justify-center">
+                    <i class="fa-solid fa-sliders text-amber-400 text-sm"></i>
                     <span>Template Email</span>
                 </button>
             </div>
@@ -520,201 +765,212 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6">
 
-        <!-- Stats Overview Cards (Highlight Card Design) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <!-- 1. Total Accounts Card -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-brand-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-brand-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Akun</p>
-                            <h3 id="stat-total" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0</h3>
-                            <p id="stat-total-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">0 Dosen, 0 Mahasiswa</p>
+        <!-- Stats Overview Cards (Highlight Card Design & Mobile Snap Slider) -->
+        <div class="relative mb-6 sm:mb-8">
+            <div id="statsCardsSlider" class="stats-slider-container flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 overflow-x-auto sm:overflow-visible snap-x snap-mandatory py-1 scrollbar-none">
+                <!-- 1. Total Accounts Card -->
+                <div class="stats-slide-item min-w-[84vw] sm:min-w-0 snap-center shrink-0 group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
+                        <!-- Ambient Glow Effects -->
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-brand-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-brand-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                         </div>
-                        
-                        <!-- Glowing Halo Icon -->
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-users text-lg"></i>
+
+                        <!-- Content -->
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Akun</p>
+                                <h3 id="stat-total" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0</h3>
+                                <p id="stat-total-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">0 Dosen, 0 Mahasiswa</p>
+                            </div>
+                            
+                            <!-- Glowing Halo Icon -->
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-users text-lg"></i>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-brand-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <!-- Gradient Divider Line & Floating Pulse Dots -->
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-brand-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-brand-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                        <!-- Corner Accents -->
+                        <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                        <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-brand-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Token Generated Card -->
+                <div class="stats-slide-item min-w-[84vw] sm:min-w-0 snap-center shrink-0 group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+                        <!-- Ambient Glow Effects -->
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Token Generated</p>
+                                <h3 id="stat-token" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0 <span class="text-xs font-semibold text-cyan-600 font-normal">(0%)</span></h3>
+                                <p id="stat-token-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">0 akun sudah siap token</p>
+                            </div>
+                            
+                            <!-- Glowing Halo Icon -->
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-key text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gradient Divider Line & Floating Pulse Dots -->
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+
+                        <!-- Corner Accents -->
+                        <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                        <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-cyan-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- 3. Email Sent Card -->
+                <div class="stats-slide-item min-w-[84vw] sm:min-w-0 snap-center shrink-0 group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
+                        <!-- Ambient Glow Effects -->
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Email Terkirim</p>
+                                <h3 id="stat-sent" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0 <span class="text-xs font-semibold text-emerald-600 font-normal">(0%)</span></h3>
+                                <p id="stat-sent-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">0 email berhasil dikirim</p>
+                            </div>
+                            
+                            <!-- Glowing Halo Icon -->
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-paper-plane text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gradient Divider Line & Floating Pulse Dots -->
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+
+                        <!-- Corner Accents -->
+                        <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                        <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-emerald-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- 4. Email Pending Card -->
+                <div class="stats-slide-item min-w-[84vw] sm:min-w-0 snap-center shrink-0 group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+                        <!-- Ambient Glow Effects -->
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Belum Terkirim</p>
+                                <h3 id="stat-pending" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0</h3>
+                                <p id="stat-pending-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Memerlukan pengiriman</p>
+                            </div>
+                            
+                            <!-- Glowing Halo Icon -->
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-clock text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gradient Divider Line & Floating Pulse Dots -->
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+
+                        <!-- Corner Accents -->
+                        <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                        <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-amber-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 2. Token Generated Card -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Token Generated</p>
-                            <h3 id="stat-token" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0 <span class="text-xs font-semibold text-cyan-600 font-normal">(0%)</span></h3>
-                            <p id="stat-token-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">0 akun sudah siap token</p>
-                        </div>
-                        
-                        <!-- Glowing Halo Icon -->
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-key text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-cyan-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                </div>
-            </div>
-
-            <!-- 3. Email Sent Card -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Email Terkirim</p>
-                            <h3 id="stat-sent" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0 <span class="text-xs font-semibold text-emerald-600 font-normal">(0%)</span></h3>
-                            <p id="stat-sent-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">0 email berhasil dikirim</p>
-                        </div>
-                        
-                        <!-- Glowing Halo Icon -->
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-paper-plane text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-emerald-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                </div>
-            </div>
-
-            <!-- 4. Email Pending Card -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
-                    <!-- Ambient Glow Effects -->
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Belum Terkirim</p>
-                            <h3 id="stat-pending" class="text-2xl font-black text-slate-900 mt-1 tracking-tight">0</h3>
-                            <p id="stat-pending-desc" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Memerlukan pengiriman</p>
-                        </div>
-                        
-                        <!-- Glowing Halo Icon -->
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-clock text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Gradient Divider Line & Floating Pulse Dots -->
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-
-                    <!-- Corner Accents -->
-                    <div class="absolute top-0 left-0 w-10 h-10 bg-gradient-to-br from-white/80 to-transparent rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                    <div class="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-tl from-amber-500/10 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                </div>
+            <!-- Mobile Slider Indicator Bar & Dots -->
+            <div class="flex sm:hidden items-center justify-center gap-1.5 mt-2.5" id="statsSliderIndicators">
+                <button type="button" onclick="scrollToStatSlide(0)" class="stats-indicator-dot h-1.5 w-6 rounded-full bg-brand-500 transition-all duration-300 border-none cursor-pointer p-0" aria-label="Slide 1"></button>
+                <button type="button" onclick="scrollToStatSlide(1)" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-none cursor-pointer p-0" aria-label="Slide 2"></button>
+                <button type="button" onclick="scrollToStatSlide(2)" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-none cursor-pointer p-0" aria-label="Slide 3"></button>
+                <button type="button" onclick="scrollToStatSlide(3)" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-none cursor-pointer p-0" aria-label="Slide 4"></button>
             </div>
         </div>
 
         <!-- File Upload Drag & Drop Area -->
-        <div class="card-custom p-6 mb-8">
+        <div class="card-custom p-4 sm:p-6 mb-6 sm:mb-8">
             <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center text-sm font-bold">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs sm:text-sm font-bold shrink-0">
                         <i class="fa-solid fa-file-import"></i>
                     </div>
-                    <h2 class="text-base font-bold text-slate-900">Upload File Import Email (CSV / XLSX / XLS)</h2>
+                    <h2 class="text-sm sm:text-base font-bold text-slate-900 truncate">Upload File Import Email (CSV / XLSX / XLS)</h2>
                 </div>
-                <button onclick="openAddAccountModal()" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1.5">
+                <button onclick="openAddAccountModal()" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 shrink-0 ml-2">
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>Tambah Manual</span>
+                    <span class="hidden sm:inline">Tambah Manual</span>
+                    <span class="sm:hidden">+Tambah</span>
                 </button>
             </div>
 
-            <div id="drop-zone" class="drop-zone rounded-2xl p-8 text-center cursor-pointer relative overflow-hidden group">
+            <div id="drop-zone" class="drop-zone rounded-2xl p-5 sm:p-8 text-center cursor-pointer relative overflow-hidden group">
                 <!-- Interactive Elastic Mesh / Neural Grid Canvas -->
                 <canvas id="neural-dropzone-canvas" class="absolute inset-0 w-full h-full pointer-events-none rounded-2xl z-0"></canvas>
 
@@ -730,7 +986,7 @@
                         </p>
                         <p class="text-xs text-slate-500 mt-1">Mendukung format .CSV, .XLSX, .XLS hingga 10MB (Kolom: Nama, Email, Role, NIM/NIP)</p>
                     </div>
-                    <div class="flex items-center gap-3 mt-2">
+                    <div class="flex flex-wrap items-center gap-2 mt-2 justify-center">
                         <span class="px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
                             <i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Auto Detect Column Headers
                         </span>
@@ -743,7 +999,7 @@
         </div>
 
         <!-- Table Toolbar & Filters -->
-        <div class="card-custom p-5 mb-8 space-y-4">
+        <div class="card-custom p-3 sm:p-5 mb-6 sm:mb-8 space-y-4">
             <!-- Row 1: Unified Multi-Search Bar (Kalender Style) -->
             <div class="relative search-pill-container" id="multiSearchWrapper">
                 <!-- Main Search Pill -->
@@ -816,7 +1072,7 @@
 
                 <!-- Standalone Add Filter Button (+ 1/4) -->
                 <button type="button" id="standaloneAddBtn" onclick="toggleOrAddFilterRow(event)" class="btn-standalone-add" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
-                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span class="flex items-center gap-1.5 font-bold text-xs"><i class="fa-solid fa-filter text-[11px] text-brand-600"></i> <span class="sm:hidden">Filter Tambahan</span></span>
                     <span id="filterCountBadge" class="badge-standalone-count">1/4</span>
                 </button>
 
@@ -826,9 +1082,9 @@
                         <!-- Extra filter rows injected dynamically -->
                     </div>
                     
-                    <div class="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-2 text-xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 pt-2.5 mt-2 text-xs gap-2">
                         <span class="text-slate-400 text-[11px]">Gunakan kombinasi kriteria untuk mempersempit pencarian data akun.</span>
-                        <button type="button" onclick="resetImportMultiSearch()" class="text-rose-600 hover:text-rose-700 font-bold transition-colors">
+                        <button type="button" onclick="resetImportMultiSearch()" class="text-rose-600 hover:text-rose-700 font-bold transition-colors text-left sm:text-right cursor-pointer shrink-0">
                             Reset All Filters
                         </button>
                     </div>
@@ -836,9 +1092,9 @@
             </div>
 
             <!-- Row 2: Batch Actions, Page Size & Tools -->
-            <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <!-- Batch Actions Left -->
-                <div class="flex flex-wrap items-center gap-2.5">
+                <div class="batch-actions-grid sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
                     <button onclick="bulkGenerateTokenSelected()" class="btn-gradient-base btn-gradient-orange-solid h-9 px-3.5 text-xs flex items-center gap-2">
                         <i class="fa-solid fa-bolt text-xs"></i>
                         <span>Generate Token (Selected)</span>
@@ -847,40 +1103,46 @@
                         <i class="fa-solid fa-key text-brand-600 text-xs"></i>
                         <span>Generate All (Kosong)</span>
                     </button>
-                    <button onclick="bulkSendEmailSelected()" class="btn-gradient-base btn-gradient-emerald-solid h-9 px-3.5 text-xs flex items-center gap-2">
+                    <button onclick="bulkSendEmailSelected()" class="btn-gradient-base btn-gradient-emerald-solid btn-full-mobile h-9 px-3.5 text-xs flex items-center gap-2">
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                         <span>Kirim Email (Selected)</span>
                     </button>
                 </div>
 
                 <!-- Page Size & Tools Right -->
-                <div class="flex flex-wrap items-center gap-2.5">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 w-full sm:w-auto">
                     <!-- Page Size Selector Top -->
-                    <div class="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 px-2.5 h-9 rounded-xl shadow-2xs">
-                        <span class="font-medium">Tampilkan</span>
-                        <select onchange="changePageSize(this.value)" class="page-size-select h-6 px-1.5 text-xs font-bold bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <span class="font-medium">data/hal</span>
-                        <span class="text-slate-300">|</span>
-                        <span>Total: <strong class="total-rows-count text-slate-900 font-bold">0</strong></span>
-                        <span class="selected-rows-count hidden text-brand-600 font-bold ml-1">(0 terpilih)</span>
+                    <div class="page-size-wrap-mobile flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 border border-slate-200 px-3 h-9 rounded-xl shadow-2xs">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-medium">Tampilkan</span>
+                            <select onchange="changePageSize(this.value)" class="page-size-select h-6 px-1.5 text-xs font-bold bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500 cursor-pointer">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="font-medium">data/hal</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-slate-300">|</span>
+                            <span>Total: <strong class="total-rows-count text-slate-900 font-bold">0</strong></span>
+                            <span class="selected-rows-count hidden text-brand-600 font-bold ml-1">(0 terpilih)</span>
+                        </div>
                     </div>
 
                     <div class="h-6 w-px bg-slate-200 mx-0.5 hidden sm:block"></div>
 
                     <!-- Tools Right -->
-                    <button onclick="exportData('xlsx')" class="btn-gradient-base btn-gradient-emerald-soft h-9 px-3.5 text-xs flex items-center gap-2" title="Export to Excel XLSX">
-                        <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i>
-                        <span>Export Excel</span>
-                    </button>
-                    <button onclick="bulkDeleteSelected()" class="btn-gradient-base btn-gradient-rose-soft h-9 px-3.5 text-xs flex items-center gap-2" title="Hapus Selected">
-                        <i class="fa-solid fa-trash-can text-sm text-rose-600"></i>
-                        <span>Hapus</span>
-                    </button>
+                    <div class="tools-grid-mobile sm:flex sm:items-center sm:gap-2.5">
+                        <button onclick="exportData('xlsx')" class="btn-gradient-base btn-gradient-emerald-soft h-9 px-3.5 text-xs flex items-center gap-2" title="Export to Excel XLSX">
+                            <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i>
+                            <span>Export Excel</span>
+                        </button>
+                        <button onclick="bulkDeleteSelected()" class="btn-gradient-base btn-gradient-rose-soft h-9 px-3.5 text-xs flex items-center gap-2" title="Hapus Selected">
+                            <i class="fa-solid fa-trash-can text-sm text-rose-600"></i>
+                            <span>Hapus</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -888,27 +1150,35 @@
         <!-- Accounts Table with Rotating Conic-Gradient Border -->
         <div class="table-rotating-border-wrap">
             <span class="table-rotating-border-spin"></span>
-            <div class="table-rotating-border-inner overflow-x-auto">
-                <table class="table-custom-rounded text-left text-xs w-full">
-                    <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
-                        <tr>
-                            <th class="py-3.5 px-2 w-10 text-center">
-                                <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
-                            </th>
-                            <th class="py-3.5 px-2 w-10 text-center whitespace-nowrap">No</th>
-                            <th class="py-3.5 px-4 w-[28%] whitespace-nowrap">Akun / Pengguna</th>
-                            <th class="py-3.5 px-3 w-[14%] whitespace-nowrap text-center">NIM / NIP / ID</th>
-                            <th class="py-3.5 px-3 w-[16%] whitespace-nowrap text-center">Token Access</th>
-                            <th class="py-3.5 px-3 w-[12%] whitespace-nowrap text-center">Status Token</th>
-                            <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center">Status Email</th>
-                            <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center">Tgl Import</th>
-                            <th class="py-3.5 px-2 w-12 text-center whitespace-nowrap">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="accounts-table-body" class="divide-y divide-slate-100 bg-white font-medium">
-                        <!-- Rows rendered dynamically via JS -->
-                    </tbody>
-                </table>
+            <div class="table-rotating-border-inner">
+                <!-- Desktop Table View (>= 640px) -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="table-custom-rounded text-left text-xs w-full">
+                        <thead class="bg-white text-slate-700 font-semibold text-xs border-b border-slate-200/90">
+                            <tr>
+                                <th class="py-3.5 px-2 w-10 text-center">
+                                    <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+                                </th>
+                                <th class="py-3.5 px-2 w-10 text-center whitespace-nowrap">No</th>
+                                <th class="py-3.5 px-4 w-[28%] whitespace-nowrap">Akun / Pengguna</th>
+                                <th class="py-3.5 px-3 w-[14%] whitespace-nowrap text-center col-mobile-hide">NIM / NIP / ID</th>
+                                <th class="py-3.5 px-3 w-[16%] whitespace-nowrap text-center">Token Access</th>
+                                <th class="py-3.5 px-3 w-[12%] whitespace-nowrap text-center">Status Token</th>
+                                <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center">Status Email</th>
+                                <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center col-mobile-hide">Tgl Import</th>
+                                <th class="py-3.5 px-2 w-12 text-center whitespace-nowrap">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accounts-table-body" class="divide-y divide-slate-100 bg-white font-medium">
+                            <!-- Rows rendered dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card List View (< 640px) -->
+                <div id="accounts-cards-mobile" class="sm:hidden p-3 space-y-3 bg-slate-50/50">
+                    <!-- Cards rendered dynamically via JS -->
+                </div>
             </div>
         </div>
 
@@ -921,6 +1191,35 @@
                 <!-- Pagination buttons rendered via JS -->
             </div>
         </div>
+
+        <!-- Floating Mobile Bulk Action Bar (Appears when >= 1 account is checked) -->
+        <div id="floating-mobile-bulk-bar" class="fixed bottom-4 inset-x-3 sm:hidden z-50 transform translate-y-32 transition-transform duration-300 ease-out pointer-events-none">
+            <div class="bg-slate-900/95 text-white backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-2xl border border-slate-700/80 flex items-center justify-between gap-2 pointer-events-auto">
+                <!-- Left: Selected Count & Deselect Button -->
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="inline-flex items-center justify-center bg-brand-500 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg shadow-xs shrink-0">
+                        <span id="floating-selected-count">0</span>&nbsp;Terpilih
+                    </span>
+                    <button type="button" onclick="deselectAllAccounts()" class="text-[11px] text-slate-300 hover:text-white underline cursor-pointer truncate">
+                        Batal
+                    </button>
+                </div>
+
+                <!-- Right: Quick Bulk Action Buttons -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="bulkGenerateTokenSelected()" class="btn-gradient-base btn-gradient-orange-solid h-8 px-2.5 text-xs flex items-center gap-1.5 rounded-lg font-bold shadow-xs cursor-pointer" title="Generate Token Selected">
+                        <i class="fa-solid fa-bolt text-[11px]"></i>
+                        <span class="text-[11px]">Token</span>
+                    </button>
+                    <button type="button" onclick="bulkSendEmailSelected()" class="btn-gradient-base btn-gradient-emerald-solid h-8 px-2.5 text-xs flex items-center gap-1.5 rounded-lg font-bold shadow-xs cursor-pointer" title="Kirim Email Selected">
+                        <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                        <span class="text-[11px]">Kirim</span>
+                    </button>
+                    <button type="button" onclick="bulkDeleteSelected()" class="h-8 w-8 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 flex items-center justify-center text-xs cursor-pointer transition-all shrink-0" title="Hapus Akun Selected">
+                        <i class="fa-regular fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
     </main>
@@ -1315,7 +1614,56 @@
                     fetchUsersFromBackend(true);
                 }
             });
+
+            // Initialize mobile stats card slider listener
+            initStatsSliderListener();
         });
+
+        // Mobile Stats Slider Controls
+        function scrollToStatSlide(index) {
+            const slider = document.getElementById('statsCardsSlider');
+            if (!slider) return;
+            const items = slider.querySelectorAll('.stats-slide-item');
+            if (items[index]) {
+                const targetLeft = items[index].offsetLeft - (slider.clientWidth - items[index].clientWidth) / 2;
+                slider.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+                updateStatsIndicators(index);
+            }
+        }
+
+        function updateStatsIndicators(activeIndex) {
+            const dots = document.querySelectorAll('#statsSliderIndicators .stats-indicator-dot');
+            dots.forEach((dot, idx) => {
+                if (idx === activeIndex) {
+                    dot.classList.remove('w-2', 'bg-slate-300');
+                    dot.classList.add('w-6', 'bg-brand-500');
+                } else {
+                    dot.classList.remove('w-6', 'bg-brand-500');
+                    dot.classList.add('w-2', 'bg-slate-300');
+                }
+            });
+        }
+
+        function initStatsSliderListener() {
+            const slider = document.getElementById('statsCardsSlider');
+            if (!slider) return;
+            slider.addEventListener('scroll', () => {
+                const items = slider.querySelectorAll('.stats-slide-item');
+                const scrollLeft = slider.scrollLeft;
+                const containerCenter = scrollLeft + slider.clientWidth / 2;
+                let closestIdx = 0;
+                let minDiff = Infinity;
+                items.forEach((item, idx) => {
+                    const itemCenter = item.offsetLeft + item.clientWidth / 2;
+                    const diff = Math.abs(containerCenter - itemCenter);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestIdx = idx;
+                    }
+                });
+                updateStatsIndicators(closestIdx);
+            }, { passive: true });
+        }
 
         // 1. GENERATE 8-CHARACTER TOKEN UTILITY (Huruf Besar, Huruf Kecil, Simbol, Angka)
         function generate8CharToken() {
@@ -2298,6 +2646,7 @@
 
         function renderTable() {
             const tbody = document.getElementById('accounts-table-body');
+            const mobileCardsContainer = document.getElementById('accounts-cards-mobile');
             const filtered = getFilteredAccounts();
 
             document.querySelectorAll('.total-rows-count').forEach(el => el.innerText = filtered.length);
@@ -2319,19 +2668,40 @@
             }
 
             if (pageData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="p-8 text-center text-slate-400">
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="p-8 text-center text-slate-400">
+                                <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
+                                <p class="font-medium text-xs">Tidak ada data akun yang ditemukan.</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+                if (mobileCardsContainer) {
+                    mobileCardsContainer.innerHTML = `
+                        <div class="p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200/80">
                             <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
                             <p class="font-medium text-xs">Tidak ada data akun yang ditemukan.</p>
-                        </td>
-                    </tr>
-                `;
+                        </div>
+                    `;
+                }
                 renderPagination(0);
                 return;
             }
 
             let html = '';
+            let mobileHtml = `
+                <!-- Mobile Select All Header Bar -->
+                <div class="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                    <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                        <input type="checkbox" id="select-all-mobile" onchange="toggleSelectAll(this)" class="rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+                        <span>Pilih Semua Akun</span>
+                    </label>
+                    <span class="text-[11px] text-slate-400 font-medium">Halaman <strong class="text-slate-700 font-bold">${state.currentPage}</strong> / ${totalPages}</span>
+                </div>
+            `;
+
             pageData.forEach((acc, idx) => {
                 const isSelected = state.selectedIds.some(sid => sid == acc.id);
                 const rowNo = startIdx + idx + 1;
@@ -2406,6 +2776,7 @@
                     </span>`;
                 }
 
+                // 1. Desktop Table Row
                 html += `
                     <tr class="hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-orange-50/40' : ''}">
                         <td class="py-2.5 px-2 text-center">
@@ -2428,11 +2799,11 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-2.5 px-3 text-center font-normal text-xs text-slate-600 whitespace-nowrap">${acc.nim_nip || '-'}</td>
+                        <td class="py-2.5 px-3 text-center font-normal text-xs text-slate-600 whitespace-nowrap col-mobile-hide">${acc.nim_nip || '-'}</td>
                         <td class="py-2.5 px-3 text-center whitespace-nowrap">${tokenHtml}</td>
                         <td class="py-2.5 px-3 text-center whitespace-nowrap">${tokenStatusBadge}</td>
                         <td class="py-2.5 px-3 text-center whitespace-nowrap">${emailBadge}</td>
-                        <td class="py-2.5 px-3 text-center text-slate-500 font-normal text-[11px] whitespace-nowrap">${acc.date_imported || '-'}</td>
+                        <td class="py-2.5 px-3 text-center text-slate-500 font-normal text-[11px] whitespace-nowrap col-mobile-hide">${acc.date_imported || '-'}</td>
                         <td class="py-2.5 px-2 text-center whitespace-nowrap relative">
                             <div class="inline-block text-left">
                                 <button onclick="toggleActionDropdown(event, '${acc.id}')" class="action-dropdown-btn w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer border border-transparent hover:border-slate-200" title="Pilihan Aksi">
@@ -2467,11 +2838,91 @@
                         </td>
                     </tr>
                 `;
+
+                // 2. Mobile Responsive Card
+                mobileHtml += `
+                    <div class="bg-white border ${isSelected ? 'border-brand-500 bg-orange-50/20 ring-1 ring-brand-500/30' : 'border-slate-200/80'} rounded-2xl p-3.5 shadow-2xs transition-all space-y-3">
+                        <!-- Card Header: Checkbox + No + Name/Email + Role Badge + Action Menu -->
+                        <div class="flex items-start justify-between gap-2.5 pb-2.5 border-b border-slate-100">
+                            <div class="flex items-start gap-2.5 min-w-0">
+                                <input type="checkbox" value="${acc.id}" ${isSelected ? 'checked' : ''} onchange="toggleSelectRow('${acc.id}', this.checked)" class="mt-0.5 rounded text-brand-600 focus:ring-brand-500 cursor-pointer shrink-0">
+                                <span class="text-xs font-bold text-slate-400 shrink-0">#${rowNo}</span>
+                                <div class="min-w-0">
+                                    <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5 truncate">
+                                        <span class="truncate" title="${acc.name}">${acc.name}</span>
+                                        ${acc.password_changed ? '<i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0" title="Password diubah mandiri oleh pengguna"></i>' : ''}
+                                    </div>
+                                    <div class="text-xs text-slate-500 font-normal truncate mt-0.5" title="${acc.email}">
+                                        ${acc.email}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <span class="inline-block px-2 py-0.5 text-[10px] font-semibold border rounded-md ${roleClass}">${acc.role}</span>
+                                <div class="relative">
+                                    <button onclick="toggleActionDropdown(event, '${acc.id}', 'mob')" class="action-dropdown-btn w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer border border-slate-200/60" title="Pilihan Aksi">
+                                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                    </button>
+                                    <div id="action-dropdown-mob-${acc.id}" class="action-dropdown-menu hidden fixed z-50 w-44 bg-white rounded-xl shadow-xl border border-slate-200/90 py-1 text-xs text-slate-700 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100 text-left">
+                                        <div class="p-1 space-y-0.5">
+                                            ${!acc.password_changed ? `
+                                            <button onclick="sendIndividualEmail('${acc.id}'); closeAllActionDropdowns();" class="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-medium transition-colors text-left cursor-pointer">
+                                                <i class="fa-solid fa-paper-plane text-emerald-600 w-4 text-center"></i>
+                                                <span>Kirim Email</span>
+                                            </button>
+                                            <button onclick="openEditAccountModal('${acc.id}'); closeAllActionDropdowns();" class="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-blue-50 text-slate-700 hover:text-blue-600 font-medium transition-colors text-left cursor-pointer">
+                                                <i class="fa-regular fa-pen-to-square text-blue-600 w-4 text-center"></i>
+                                                <span>Ubah Data</span>
+                                            </button>
+                                            ` : `
+                                            <div class="px-3 py-1.5 text-[11px] text-indigo-600 flex items-center gap-2 bg-indigo-50/60 rounded-lg cursor-pointer" onclick="showProtectedAccountInfo('${acc.id}'); closeAllActionDropdowns();" title="Password telah diubah mandiri oleh pengguna (Terkunci)">
+                                                <i class="fa-solid fa-user-shield text-indigo-500 w-4 text-center"></i>
+                                                <span>Akun Terproteksi</span>
+                                            </div>
+                                            `}
+                                        </div>
+                                        <div class="p-1">
+                                            <button onclick="deleteSingleAccount('${acc.id}'); closeAllActionDropdowns();" class="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-medium transition-colors text-left cursor-pointer">
+                                                <i class="fa-regular fa-trash-can text-rose-500 w-4 text-center"></i>
+                                                <span>Hapus Akun</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Details Grid: NIM/NIP & Tgl Import -->
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex flex-col gap-0.5 bg-slate-50/80 p-2 rounded-xl border border-slate-100">
+                                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">NIM / NIP</span>
+                                <span class="font-medium text-slate-700 font-mono text-[11px] truncate">${acc.nim_nip || '-'}</span>
+                            </div>
+                            <div class="flex flex-col gap-0.5 bg-slate-50/80 p-2 rounded-xl border border-slate-100">
+                                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Tgl Import</span>
+                                <span class="font-medium text-slate-700 text-[11px] truncate">${acc.date_imported || '-'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Bar: Status Badges + Token Button -->
+                        <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                ${tokenStatusBadge}
+                                ${emailBadge}
+                            </div>
+                            <div class="shrink-0">
+                                ${tokenHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
 
-            tbody.innerHTML = html;
+            if (tbody) tbody.innerHTML = html;
+            if (mobileCardsContainer) mobileCardsContainer.innerHTML = mobileHtml;
             renderPagination(totalPages);
-            updateSelectedCounter();
+            updateSelectAllState();
         }
 
         function renderPagination(totalPages) {
@@ -2538,9 +2989,13 @@
         }
 
         // Action Dropdown Helpers (Fixed Positioning without clipping)
-        function toggleActionDropdown(e, id) {
+        function toggleActionDropdown(e, id, prefix = '') {
             e.stopPropagation();
-            const menu = document.getElementById(`action-dropdown-${id}`);
+            const menuId = prefix ? `action-dropdown-${prefix}-${id}` : `action-dropdown-${id}`;
+            let menu = document.getElementById(menuId);
+            if (!menu && e.currentTarget && e.currentTarget.parentElement) {
+                menu = e.currentTarget.parentElement.querySelector('.action-dropdown-menu');
+            }
             if (!menu) return;
 
             const isCurrentlyOpen = !menu.classList.contains('hidden');
@@ -2655,11 +3110,11 @@
         }
 
         function getPlaceholderForCategory(cat) {
-            if (cat === 'name') return 'Ketik nama lengkap lalu tekan Enter atau klik Cari...';
-            if (cat === 'nim_nip') return 'Ketik NIM / NIP lalu tekan Enter atau klik Cari...';
-            if (cat === 'email_addr') return 'Ketik email Telkom lalu tekan Enter atau klik Cari...';
-            if (cat === 'token_code') return 'Ketik kode token lalu tekan Enter atau klik Cari...';
-            return 'Ketik kata kunci lalu tekan Enter atau klik Cari...';
+            if (cat === 'name') return 'Cari nama...';
+            if (cat === 'nim_nip') return 'Cari NIM / NIP...';
+            if (cat === 'email_addr') return 'Cari email...';
+            if (cat === 'token_code') return 'Cari token...';
+            return 'Cari kata kunci...';
         }
 
         function executeSearch() {
@@ -2708,80 +3163,78 @@
 
             const container = document.getElementById('additionalFilterRowsContainer');
             const rowDiv = document.createElement('div');
-            rowDiv.className = 'extra-filter-row';
+            rowDiv.className = 'extra-filter-row unified-search-pill';
             rowDiv.id = `extraRow_${rowId}`;
 
             rowDiv.innerHTML = `
-                <div class="unified-search-pill">
-                    <!-- Extra Category Dropdown -->
-                    <div class="relative custom-dropdown-container">
-                        <input type="hidden" id="extraCatSelect_${rowId}" class="extra-cat-select" value="${defaultCrit}">
-                        <button type="button" onclick="toggleCustomDropdown('extra-cat-${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-brand-600 focus:outline-none">
-                            <span id="label-filter-extra-cat-${rowId}">${defaultLabel}</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-extra-cat-${rowId}"></i>
-                        </button>
-                        <div id="menu-filter-extra-cat-${rowId}" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
-                            <div onclick="selectExtraCategory(${rowId}, 'query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'query' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>🔍 Kata Kunci (Semua)</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'query' ? '' : 'hidden'}"></i>
-                            </div>
-                            <div onclick="selectExtraCategory(${rowId}, 'name', '🏷️ Nama Lengkap', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'name' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>🏷️ Nama Lengkap</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'name' ? '' : 'hidden'}"></i>
-                            </div>
-                            <div onclick="selectExtraCategory(${rowId}, 'nim_nip', '🆔 NIM / NIP / ID', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'nim_nip' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>🆔 NIM / NIP / ID</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'nim_nip' ? '' : 'hidden'}"></i>
-                            </div>
-                            <div onclick="selectExtraCategory(${rowId}, 'email_addr', '📧 Email Telkom', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'email_addr' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>📧 Email Telkom</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'email_addr' ? '' : 'hidden'}"></i>
-                            </div>
-                            <div onclick="selectExtraCategory(${rowId}, 'role', '👤 Peran / Role', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'role' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>👤 Peran / Role</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'role' ? '' : 'hidden'}"></i>
-                            </div>
-                            <div onclick="selectExtraCategory(${rowId}, 'token', '⚡ Status Token', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'token' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>⚡ Status Token</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'token' ? '' : 'hidden'}"></i>
-                            </div>
-                            <div onclick="selectExtraCategory(${rowId}, 'email', '✉️ Status Email', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'email' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
-                                <span>✉️ Status Email</span>
-                                <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'email' ? '' : 'hidden'}"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="unified-divider"></div>
-
-                    <!-- Extra Text Input Container -->
-                    <div id="extraValueContainer_${rowId}" class="${isTextCategory(defaultCrit) ? 'flex-1 flex items-center relative min-w-0' : 'hidden flex-1 items-center relative min-w-0'}">
-                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
-                        <input type="text" id="extraInput_${rowId}" onkeydown="if(event.key==='Enter') executeSearch()" placeholder="${getPlaceholderForCategory(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
-                    </div>
-
-                    <!-- Extra Custom Select Container -->
-                    <div id="extraCustomSelectWrap_${rowId}" class="${!isTextCategory(defaultCrit) ? 'flex-1 relative custom-dropdown-container' : 'hidden flex-1 relative custom-dropdown-container'}">
-                        <input type="hidden" id="extraValueVal_${rowId}" value="">
-                        <button type="button" onclick="toggleCustomDropdown('extra-val-${rowId}', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
-                            <span id="label-filter-extra-val-${rowId}" class="flex items-center gap-1.5 truncate">Pilih opsi...</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-extra-val-${rowId}"></i>
-                        </button>
-                        <div id="menu-filter-extra-val-${rowId}" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
-                            <!-- Injected dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Search Button inside extra pill -->
-                    <button type="button" onclick="executeSearch()" class="btn-gradient-base btn-gradient-orange-solid h-7 px-3 text-xs flex items-center gap-1.5 rounded-lg shadow-xs font-semibold cursor-pointer shrink-0 ml-1.5" title="Klik untuk Cari data (atau tekan Enter)">
-                        <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
-                        <span>Cari</span>
+                <!-- Extra Category Dropdown -->
+                <div class="relative custom-dropdown-container shrink-0">
+                    <input type="hidden" id="extraCatSelect_${rowId}" class="extra-cat-select" value="${defaultCrit}">
+                    <button type="button" onclick="toggleCustomDropdown('extra-cat-${rowId}', event)" class="flex items-center gap-1 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-brand-600 focus:outline-none">
+                        <span id="label-filter-extra-cat-${rowId}" class="max-w-[78px] sm:max-w-none truncate">${defaultLabel}</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-extra-cat-${rowId}"></i>
                     </button>
+                    <div id="menu-filter-extra-cat-${rowId}" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                        <div onclick="selectExtraCategory(${rowId}, 'query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'query' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>🔍 Kata Kunci (Semua)</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'query' ? '' : 'hidden'}"></i>
+                        </div>
+                        <div onclick="selectExtraCategory(${rowId}, 'name', '🏷️ Nama Lengkap', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'name' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>🏷️ Nama Lengkap</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'name' ? '' : 'hidden'}"></i>
+                        </div>
+                        <div onclick="selectExtraCategory(${rowId}, 'nim_nip', '🆔 NIM / NIP / ID', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'nim_nip' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>🆔 NIM / NIP / ID</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'nim_nip' ? '' : 'hidden'}"></i>
+                        </div>
+                        <div onclick="selectExtraCategory(${rowId}, 'email_addr', '📧 Email Telkom', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'email_addr' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>📧 Email Telkom</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'email_addr' ? '' : 'hidden'}"></i>
+                        </div>
+                        <div onclick="selectExtraCategory(${rowId}, 'role', '👤 Peran / Role', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'role' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>👤 Peran / Role</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'role' ? '' : 'hidden'}"></i>
+                        </div>
+                        <div onclick="selectExtraCategory(${rowId}, 'token', '⚡ Status Token', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'token' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>⚡ Status Token</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'token' ? '' : 'hidden'}"></i>
+                        </div>
+                        <div onclick="selectExtraCategory(${rowId}, 'email', '✉️ Status Email', this)" class="dropdown-item px-3 py-2 rounded-lg cursor-pointer flex items-center justify-between font-medium ${defaultCrit === 'email' ? 'active bg-orange-50 text-brand-600' : 'text-slate-700 hover:bg-orange-50 hover:text-brand-600'}">
+                            <span>✉️ Status Email</span>
+                            <i class="fa-solid fa-check text-xs check-icon ${defaultCrit === 'email' ? '' : 'hidden'}"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Remove Row Button (x) -->
-                <button type="button" onclick="removeExtraFilterRow(${rowId}, event)" class="btn-remove-row" title="Hapus Baris Filter Ini">
-                    <i class="fa-solid fa-xmark text-sm"></i>
+                <div class="unified-divider"></div>
+
+                <!-- Extra Text Input Container -->
+                <div id="extraValueContainer_${rowId}" class="${isTextCategory(defaultCrit) ? 'flex-1 flex items-center relative min-w-0' : 'hidden flex-1 items-center relative min-w-0'}">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-1.5 shrink-0"></i>
+                    <input type="text" id="extraInput_${rowId}" onkeydown="if(event.key==='Enter') executeSearch()" placeholder="${getPlaceholderForCategory(defaultCrit)}" class="w-full text-xs font-medium bg-transparent border-none focus:outline-none text-slate-800">
+                </div>
+
+                <!-- Extra Custom Select Container -->
+                <div id="extraCustomSelectWrap_${rowId}" class="${!isTextCategory(defaultCrit) ? 'flex-1 relative custom-dropdown-container min-w-0' : 'hidden flex-1 relative custom-dropdown-container min-w-0'}">
+                    <input type="hidden" id="extraValueVal_${rowId}" value="">
+                    <button type="button" onclick="toggleCustomDropdown('extra-val-${rowId}', event)" class="w-full py-1 text-xs font-semibold text-slate-800 flex items-center justify-between cursor-pointer focus:outline-none">
+                        <span id="label-filter-extra-val-${rowId}" class="flex items-center gap-1.5 truncate">Pilih opsi...</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow transition-transform duration-200" id="arrow-filter-extra-val-${rowId}"></i>
+                    </button>
+                    <div id="menu-filter-extra-val-${rowId}" class="custom-dropdown-menu hidden absolute top-full left-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-1 space-y-0.5 text-xs">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Search Button inside extra pill -->
+                <button type="button" onclick="executeSearch()" class="btn-gradient-base btn-gradient-orange-solid h-7 px-2.5 sm:px-3 text-xs flex items-center gap-1 rounded-lg shadow-xs font-semibold cursor-pointer shrink-0 ml-1" title="Klik untuk Cari data (atau tekan Enter)">
+                    <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
+                    <span class="hidden xs:inline sm:inline">Cari</span>
+                </button>
+
+                <!-- Remove Row Button inside extra pill -->
+                <button type="button" onclick="removeExtraFilterRow(${rowId}, event)" class="h-7 w-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center cursor-pointer shrink-0 ml-0.5 transition-all" title="Hapus Baris Filter Ini">
+                    <i class="fa-solid fa-xmark text-xs"></i>
                 </button>
             `;
 
@@ -3029,21 +3482,47 @@
         }
 
         function updateSelectedCounter() {
+            const count = state.selectedIds.length;
             document.querySelectorAll('.selected-rows-count').forEach(counter => {
-                if (state.selectedIds.length > 0) {
-                    counter.innerText = `(${state.selectedIds.length} terpilih)`;
+                if (count > 0) {
+                    counter.innerText = `(${count} terpilih)`;
                     counter.classList.remove('hidden');
                 } else {
                     counter.classList.add('hidden');
                 }
             });
+
+            // Update & Animate Floating Mobile Bulk Action Bar
+            const floatingBar = document.getElementById('floating-mobile-bulk-bar');
+            const floatingCount = document.getElementById('floating-selected-count');
+            if (floatingBar) {
+                if (count > 0) {
+                    if (floatingCount) floatingCount.innerText = count;
+                    floatingBar.classList.remove('translate-y-32', 'pointer-events-none');
+                    floatingBar.classList.add('translate-y-0', 'pointer-events-auto');
+                } else {
+                    floatingBar.classList.remove('translate-y-0', 'pointer-events-auto');
+                    floatingBar.classList.add('translate-y-32', 'pointer-events-none');
+                }
+            }
+        }
+
+        function deselectAllAccounts() {
+            state.selectedIds = [];
+            renderTable();
+            updateSelectAllState();
         }
 
         function updateSelectAllState() {
             const filtered = getFilteredAccounts();
+            const isAllSelected = filtered.length > 0 && filtered.every(a => state.selectedIds.some(sid => sid == a.id));
             const selectAllCb = document.getElementById('select-all');
             if (selectAllCb) {
-                selectAllCb.checked = filtered.length > 0 && filtered.every(a => state.selectedIds.some(sid => sid == a.id));
+                selectAllCb.checked = isAllSelected;
+            }
+            const selectAllMobileCb = document.getElementById('select-all-mobile');
+            if (selectAllMobileCb) {
+                selectAllMobileCb.checked = isAllSelected;
             }
             updateSelectedCounter();
         }
@@ -3091,15 +3570,39 @@
                 return;
             }
 
-            const targetAccounts = state.accounts.filter(a => state.selectedIds.some(sid => sid == a.id) && !a.password_changed);
+            const selectedAccounts = state.accounts.filter(a => state.selectedIds.some(sid => sid == a.id));
+            const targetAccounts = selectedAccounts.filter(a => !a.token && !a.password_changed);
+            const alreadyReadyAccounts = selectedAccounts.filter(a => a.token && !a.password_changed);
+            const protectedAccounts = selectedAccounts.filter(a => a.password_changed);
+
             if (targetAccounts.length === 0) {
-                Swal.fire('Info', 'Semua akun yang dipilih telah mengubah password mandiri (Protected).', 'info');
+                if (alreadyReadyAccounts.length > 0 && protectedAccounts.length === 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Token Sudah Ada',
+                        html: `Semua <b>${selectedAccounts.length}</b> akun yang dipilih sudah memiliki token akses yang aktif (Ready).<br><span class="text-xs text-slate-500 mt-2 block">Token tidak digenerate ulang agar token pengguna yang sudah ada tidak berubah.</span>`,
+                        confirmButtonColor: '#ea580c'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Tidak Dapat Digenerate',
+                        html: 'Semua akun yang dipilih telah memiliki token atau telah mengubah password mandiri (Protected).',
+                        confirmButtonColor: '#ea580c'
+                    });
+                }
                 return;
+            }
+
+            let infoNote = '';
+            const skippedCount = selectedAccounts.length - targetAccounts.length;
+            if (skippedCount > 0) {
+                infoNote = `<p class="text-xs text-slate-500 mt-2"><i>Catatan: ${skippedCount} akun lainnya dilewati karena sudah memiliki token / protected.</i></p>`;
             }
 
             Swal.fire({
                 title: 'Generate Token?',
-                html: `Membuat token 8 karakter untuk <b>${targetAccounts.length}</b> akun terpilih...`,
+                html: `Membuat token 8 karakter baru untuk <b>${targetAccounts.length}</b> akun yang belum memiliki token...${infoNote}`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#ea580c',
@@ -3131,6 +3634,13 @@
                             if (res.accounts) state.accounts = res.accounts;
                             renderStats();
                             renderTable();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Token Berhasil Dibuat',
+                                html: `Berhasil mengenerate token untuk <b>${targetAccounts.length}</b> akun.`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
                         }
                     });
                 }
