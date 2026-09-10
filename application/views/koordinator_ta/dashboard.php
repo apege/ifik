@@ -2333,11 +2333,19 @@
                 <!-- 1. Student & Schedule Info Card -->
                 <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
-                        <div>
-                            <h4 id="penilaianNamaMhs" class="text-sm font-extrabold text-slate-900">-</h4>
-                            <p class="text-xs font-mono font-bold text-slate-500" id="penilaianNimMhs">-</p>
+                        <div class="flex items-center gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 id="penilaianNamaMhs" class="text-sm font-extrabold text-slate-900">-</h4>
+                                    <span id="penilaianVersiBadge" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-800 border border-indigo-200">v1</span>
+                                </div>
+                                <p class="text-xs font-mono font-bold text-slate-500" id="penilaianNimMhs">-</p>
+                            </div>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap text-[11px]">
+                            <button type="button" onclick="openHistoryPenilaianModal()" class="px-3 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
+                                <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Riwayat Versi Nilai
+                            </button>
                             <span id="penilaianJadwalPill" class="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold flex items-center gap-1.5 shadow-2xs">
                                 <i class="fa-solid fa-calendar-day text-amber-500"></i> <span id="penilaianTglText">Belum Ada Jadwal</span>
                             </span>
@@ -2368,8 +2376,8 @@
                     </div>
                 </div>
 
-                <!-- 2. Prodi & Peminatan Selector -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- 2. Prodi, Peminatan & Tahun Akademik Selector -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
                             Program Studi (Prodi) <span class="text-rose-500">*</span>
@@ -2390,19 +2398,52 @@
                             <!-- Injected dynamically via JS based on selected prodi -->
                         </select>
                     </div>
+
+                    <div>
+                        <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
+                            Tahun Akademik <span class="text-rose-500">*</span>
+                        </label>
+                        <?php
+                            $cYear = (int)date('Y');
+                            $cMonth = (int)date('n');
+                            $defaultActiveTa = ($cMonth >= 8) ? "{$cYear}/" . ($cYear + 1) : ($cYear - 1) . "/{$cYear}";
+                        ?>
+                        <div class="relative">
+                            <input type="text" 
+                                   name="tahun_akademik" 
+                                   id="penilaianTahunAkademik" 
+                                   list="listTahunAkademik" 
+                                   value="<?= $defaultActiveTa; ?>" 
+                                   placeholder="Contoh: 2026/2027" 
+                                   class="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-2xs"
+                                   required>
+                            <datalist id="listTahunAkademik">
+                                <?php for ($y = $cYear + 3; $y >= $cYear - 5; $y--): 
+                                    $optTa = "{$y}/" . ($y + 1);
+                                ?>
+                                    <option value="<?= $optTa; ?>"><?= $optTa; ?><?= ($optTa === $defaultActiveTa) ? ' (Aktif)' : ''; ?></option>
+                                <?php endfor; ?>
+                            </datalist>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3. Dynamic Rubrik & Soal Penilaian List -->
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
                         <label class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
                             <i class="fa-solid fa-list-check text-amber-600"></i> Rubrik Soal &amp; Kriteria Penilaian:
                         </label>
-                        <span class="text-[11px] font-semibold text-slate-400">Total Bobot: <strong class="text-slate-700">100%</strong></span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="btnSyncTemplateRubrik" onclick="syncWithMasterRubrikPrompt()" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Terapkan ulang kriteria dari Master Rubrik terbaru">
+                                <i class="fa-solid fa-arrows-rotate text-amber-600"></i> Sinkron Master Rubrik
+                            </button>
+                            <span class="text-[11px] font-semibold text-slate-400">Total Bobot: <strong class="text-slate-700" id="penilaianTotalBobotLabel">100%</strong></span>
+                        </div>
                     </div>
 
                     <div id="penilaianRubrikContainer" class="space-y-3">
-                        <!-- Injected dynamically based on Prodi & Peminatan -->
+                        <!-- Injected dynamically based on Prodi & Peminatan / Saved Snapshot -->
                     </div>
                 </div>
 
@@ -2440,24 +2481,132 @@
                     </div>
                 </div>
 
-                <!-- 5. Catatan / Rekomendasi Dewan Penguji & Koordinator -->
+                <!-- 5. Publication Controls (Mekanisme Publish / Republish & Start Date) -->
+                <div class="bg-gradient-to-br from-indigo-50/50 via-slate-50 to-white rounded-2xl p-5 border border-indigo-100 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-indigo-100/80 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-bullhorn text-indigo-600"></i>
+                            <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Pengaturan Publikasi Nilai (Publish &amp; Republish)</h4>
+                        </div>
+                        <span id="currentPublishStatusPill" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                            Draft (Privat)
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Mode Publish -->
+                        <div>
+                            <label class="text-[11px] font-extrabold text-slate-700 block mb-1.5 uppercase tracking-wider">
+                                Status Publikasi <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 cursor-pointer transition text-xs font-semibold text-slate-800">
+                                    <input type="radio" name="status_publish" value="Draft" id="publishRadioDraft" checked onchange="onPublishModeChange('Draft')" class="text-indigo-600 focus:ring-indigo-500">
+                                    <div>
+                                        <span class="font-bold text-slate-900 block">Simpan sebagai Draft</span>
+                                        <span class="text-[10px] text-slate-500 font-normal">Hanya terlihat oleh Koordinator TA, belum dibagikan ke mahasiswa.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50/60 cursor-pointer transition text-xs font-semibold text-slate-800">
+                                    <input type="radio" name="status_publish" value="Published" id="publishRadioInstant" onchange="onPublishModeChange('Published')" class="text-emerald-600 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="font-bold text-emerald-900 block">Publikasikan Sekarang (Live)</span>
+                                        <span class="text-[10px] text-emerald-700 font-normal">Nilai langsung dapat dilihat oleh mahasiswa &amp; dosen.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-sky-200 bg-sky-50/30 hover:bg-sky-50/60 cursor-pointer transition text-xs font-semibold text-slate-800">
+                                    <input type="radio" name="status_publish" value="Scheduled" id="publishRadioScheduled" onchange="onPublishModeChange('Scheduled')" class="text-sky-600 focus:ring-sky-500">
+                                    <div>
+                                        <span class="font-bold text-sky-900 block">Jadwalkan Publikasi (Start Date)</span>
+                                        <span class="text-[10px] text-sky-700 font-normal">Nilai baru akan terbuka otomatis setelah tanggal &amp; waktu yang ditentukan.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Start Date Input (Flatpickr) -->
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-700 block mb-1.5 uppercase tracking-wider">
+                                    Tanggal &amp; Jam Mulai Rilis (Start Date)
+                                </label>
+                                <div class="relative">
+                                    <input type="datetime-local" name="tgl_publish" id="penilaianTglPublish" class="w-full px-3.5 py-3 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-2xs">
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-1" id="publishDateHint">Hanya aktif saat mode "Jadwalkan Publikasi" dipilih.</p>
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 text-[11px] text-amber-900">
+                                <div class="flex items-start gap-2">
+                                    <i class="fa-solid fa-shield-halved text-amber-600 mt-0.5 shrink-0"></i>
+                                    <span class="font-medium leading-relaxed">
+                                        <strong>Proteksi Snapshot Riwayat:</strong> Setiap kali nilai disimpan/diterbitkan, sistem mencatat versi riwayat baru. Format penilaian mahasiswa ini diisolasi sehingga aman dari perubahan/penghapusan master kriteria di masa mendatang.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Catatan / Rekomendasi Dewan Penguji & Koordinator -->
                 <div>
                     <label class="text-xs font-extrabold uppercase tracking-wider text-slate-700 block mb-1.5">
-                        Catatan Revisi / Rekomendasi Dewan Penguji &amp; Koordinator (Opsional)
+                        Catatan Revisi / Berita Acara Dewan Penguji &amp; Koordinator (Opsional)
                     </label>
                     <textarea name="catatan_sidang" id="penilaianCatatan" rows="2" placeholder="Masukkan poin-poin revisi naskah/karya atau catatan berita acara sidang..." class="w-full text-xs p-3 border border-slate-300 rounded-xl bg-white focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none shadow-2xs"></textarea>
                 </div>
 
                 <!-- Footer Actions -->
-                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
                     <button type="button" onclick="closeModalPenilaianSidang()" class="px-5 py-3 bg-white border border-slate-300 text-slate-700 font-bold text-xs sm:text-sm rounded-2xl hover:bg-slate-50 transition cursor-pointer">
                         Batal
                     </button>
-                    <button type="submit" id="btnSubmitPenilaianSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-floppy-disk text-xs sm:text-sm"></i> Simpan Penilaian Sidang TA
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" id="btnSubmitPenilaianSidang" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-floppy-disk text-xs sm:text-sm"></i> Simpan Penilaian Sidang TA
+                        </button>
+                    </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 4B: RIWAYAT VERSI PENILAIAN SIDANG TA (HISTORY) -->
+    <!-- ========================================================= -->
+    <div id="modalHistoryPenilaianSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalHistoryPenilaian()"></div>
+
+        <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[88vh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 via-slate-50 to-white shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-800 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-600/25 shrink-0">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900">Riwayat Versi Penilaian Sidang</h3>
+                        <p class="text-xs text-slate-500 mt-0.5" id="historyStudentSubtitle">Arsip log perubahan nilai mahasiswa lintas tahun &amp; versi.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalHistoryPenilaian()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Body: Timeline List -->
+            <div id="historyPenilaianContainer" class="p-6 sm:p-7 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Injected dynamically via JS -->
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
+                <button type="button" onclick="closeModalHistoryPenilaian()" class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-100 transition cursor-pointer">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
 
@@ -2837,7 +2986,9 @@
             ajaxHapusRuanganUrl: "<?= site_url('koordinatorta/ajax_hapus_ruangan'); ?>",
             ajaxGetRuanganUrl: "<?= site_url('koordinatorta/ajax_get_ruangan_list'); ?>",
             ajaxSimpanPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_simpan_penilaian_sidang'); ?>",
+            ajaxPublishPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_publish_penilaian_sidang'); ?>",
             ajaxGetDetailPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_get_detail_penilaian_sidang'); ?>",
+            ajaxGetHistoryPenilaianSidangUrl: "<?= site_url('koordinatorta/ajax_get_history_penilaian_sidang'); ?>",
             ajaxGetAllMasterRubrikUrl: "<?= site_url('koordinatorta/ajax_get_all_master_rubrik'); ?>",
             ajaxSimpanMasterRubrikUrl: "<?= site_url('koordinatorta/ajax_simpan_master_rubrik'); ?>",
             ajaxTerapkanRubrikMassalUrl: "<?= site_url('koordinatorta/ajax_terapkan_rubrik_massal'); ?>",

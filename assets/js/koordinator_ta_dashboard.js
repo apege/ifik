@@ -5816,8 +5816,24 @@
             const peminatanBadge = row.peminatan
                 ? `<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[8.5px] font-extrabold uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200 mt-0.5 block max-w-fit">${escapeHtml(row.peminatan)}</span>`
                 : '';
+
+            let publishBadge = '';
+            if (hasNilai) {
+                const pubStatus = row.status_publish_sidang || 'Draft';
+                if (pubStatus === 'Published') {
+                    publishBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[8.5px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 mt-0.5 shadow-2xs" title="Nilai Terpublikasi (${escapeHtml(row.tgl_publish_sidang || 'Live')})"><i class="fa-solid fa-globe text-[8px]"></i> Terbit</span>`;
+                } else if (pubStatus === 'Scheduled') {
+                    publishBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[8.5px] font-extrabold bg-sky-100 text-sky-800 border border-sky-300 mt-0.5 shadow-2xs" title="Terjadwal Rilis: ${escapeHtml(row.tgl_publish_sidang || '')}"><i class="fa-solid fa-clock text-[8px]"></i> Terjadwal</span>`;
+                } else {
+                    publishBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[8.5px] font-extrabold bg-slate-100 text-slate-600 border border-slate-300 mt-0.5 shadow-2xs" title="Nilai Masih Draft (Privat)"><i class="fa-solid fa-eye-slash text-[8px]"></i> Draft</span>`;
+                }
+            }
+
             const nilaiBadge = hasNilai
-                ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 mt-0.5" title="Status: ${escapeHtml(row.status_kelulusan_sidang || 'Lulus')}"><i class="fa-solid fa-award text-emerald-600 text-[9px]"></i> ${escapeHtml(row.nilai_akhir_sidang)} (${escapeHtml(row.grade_sidang || 'A')})</span>`
+                ? `<div class="flex items-center gap-1 flex-wrap mt-0.5">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs" title="Status: ${escapeHtml(row.status_kelulusan_sidang || 'Lulus')}"><i class="fa-solid fa-award text-emerald-600 text-[9px]"></i> ${escapeHtml(row.nilai_akhir_sidang)} (${escapeHtml(row.grade_sidang || 'A')})</span>
+                    ${publishBadge}
+                   </div>`
                 : `<span class="text-[9.5px] text-slate-400 italic block mt-0.5">Belum dinilai</span>`;
 
             html += `
@@ -8792,7 +8808,90 @@
     };
 
     // =========================================================
-    // MODAL FORM PENILAIAN INDIVIDUAL (MENYESUAIKAN DENGAN MASTER RUBRIK)
+    // PUBLICATION MODE HELPER (DRAFT / PUBLISHED / SCHEDULED)
+    // =========================================================
+    window.onPublishModeChange = function (mode) {
+        const dateInput = document.getElementById('penilaianTglPublish');
+        const pillEl = document.getElementById('currentPublishStatusPill');
+        const dateHint = document.getElementById('publishDateHint');
+
+        if (mode === 'Draft') {
+            if (dateInput) {
+                dateInput.disabled = true;
+                dateInput.value = '';
+                dateInput.classList.add('bg-slate-100', 'text-slate-400');
+                dateInput.classList.remove('bg-white', 'text-slate-800');
+            }
+            if (pillEl) {
+                pillEl.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200';
+                pillEl.innerHTML = '<i class="fa-solid fa-eye-slash mr-1"></i> Draft (Privat)';
+            }
+            if (dateHint) dateHint.textContent = 'Nilai hanya disimpan untuk Koordinator TA dan belum dirilis.';
+        } else if (mode === 'Published') {
+            if (dateInput) {
+                dateInput.disabled = true;
+                const now = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                dateInput.value = nowStr;
+                dateInput.classList.add('bg-emerald-50/50', 'text-emerald-900');
+                dateInput.classList.remove('bg-slate-100', 'text-slate-400');
+            }
+            if (pillEl) {
+                pillEl.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs';
+                pillEl.innerHTML = '<i class="fa-solid fa-globe mr-1"></i> Publikasikan Sekarang (Live)';
+            }
+            if (dateHint) dateHint.textContent = 'Nilai langsung terbit dan dapat dilihat oleh mahasiswa & dosen pembimbing.';
+        } else if (mode === 'Scheduled') {
+            if (dateInput) {
+                dateInput.disabled = false;
+                if (!dateInput.value) {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    tomorrow.setHours(9, 0, 0, 0);
+                    const pad = n => String(n).padStart(2, '0');
+                    dateInput.value = `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth()+1)}-${pad(tomorrow.getDate())}T${pad(tomorrow.getHours())}:${pad(tomorrow.getMinutes())}`;
+                }
+                dateInput.classList.remove('bg-slate-100', 'text-slate-400');
+                dateInput.classList.add('bg-white', 'text-slate-800');
+                dateInput.focus();
+            }
+            if (pillEl) {
+                pillEl.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800 border border-sky-300 shadow-2xs';
+                pillEl.innerHTML = '<i class="fa-solid fa-clock mr-1"></i> Terjadwal Otomatis';
+            }
+            if (dateHint) dateHint.textContent = 'Nilai otomatis terbuka untuk mahasiswa setelah waktu di atas tercapai.';
+        }
+    };
+
+    // Prompt to sync with master rubric template
+    window.syncWithMasterRubrikPrompt = function () {
+        Swal.fire({
+            title: 'Sinkronkan Master Rubrik?',
+            text: 'Daftar kriteria penilaian akan diatur ulang mengikuti template Master Rubrik terbaru untuk Prodi & Peminatan ini.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Sinkronkan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#d97706',
+            cancelButtonColor: '#64748b'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                renderPenilaianRubrik(null);
+                calculatePenilaianScore();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tersinkron',
+                    text: 'Template master rubrik terbaru telah diterapkan pada formulir ini.',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+            }
+        });
+    };
+
+    // =========================================================
+    // MODAL FORM PENILAIAN INDIVIDUAL (MENYESUAIKAN DENGAN MASTER RUBRIK & SNAPSHOT)
     // =========================================================
     window.openModalPenilaianSidang = function (nim) {
         const student = (state.sidangList || []).find(s => String(s.nim) === String(nim));
@@ -8813,11 +8912,14 @@
         const prodiBadge = document.getElementById('penilaianProdiBadge');
         const catatanEl = document.getElementById('penilaianCatatan');
         const statusKelulusanEl = document.getElementById('penilaianStatusKelulusan');
+        const versiBadgeEl = document.getElementById('penilaianVersiBadge');
+        const tahunAkademikEl = document.getElementById('penilaianTahunAkademik');
 
         if (inputNim) inputNim.value = student.nim;
         if (namaMhsEl) namaMhsEl.textContent = student.nama_lengkap || student.nama || `Mahasiswa ${student.nim}`;
         if (nimMhsEl) nimMhsEl.textContent = `NIM: ${student.nim}`;
         if (judulEl) judulEl.textContent = student.judul_1 || '-';
+        if (versiBadgeEl) versiBadgeEl.textContent = `v${student.versi_penilaian || 1}`;
         if (tglTextEl) {
             tglTextEl.textContent = student.tgl_sidang ? `${student.tgl_sidang} (${(student.jam_mulai_sidang || '').substring(0,5)} WIB)` : 'Belum Ada Jadwal';
         }
@@ -8839,6 +8941,29 @@
         if (prodiSelect) prodiSelect.value = prodiKey;
         if (prodiBadge) prodiBadge.textContent = prodiKey;
 
+        // Reset publication radio & input
+        const currentPub = student.status_publish_sidang || 'Draft';
+        if (currentPub === 'Published') {
+            const rad = document.getElementById('publishRadioInstant');
+            if (rad) rad.checked = true;
+            onPublishModeChange('Published');
+        } else if (currentPub === 'Scheduled') {
+            const rad = document.getElementById('publishRadioScheduled');
+            if (rad) rad.checked = true;
+            onPublishModeChange('Scheduled');
+            const dateInp = document.getElementById('penilaianTglPublish');
+            if (dateInp && student.tgl_publish_sidang) {
+                dateInp.value = student.tgl_publish_sidang.replace(' ', 'T').substring(0, 16);
+            }
+        } else {
+            const rad = document.getElementById('publishRadioDraft');
+            if (rad) rad.checked = true;
+            onPublishModeChange('Draft');
+        }
+
+        // Setup dynamic Tahun Akademik options
+        setupTahunAkademikOptions(student.tahun_akademik);
+
         // Ensure master rubrik is fresh
         if (!state.masterRubrikList || state.masterRubrikList.length === 0) {
             fetchMasterRubrikList(() => {
@@ -8849,7 +8974,6 @@
         }
 
         function proceedLoadPenilaianDetail() {
-            // Fetch detail penilaian jika endpoint tersedia
             const getDetailUrl = cfg.ajaxGetDetailPenilaianSidangUrl || 
                                  window.DASHBOARD_CONFIG?.ajaxGetDetailPenilaianSidangUrl || 
                                  'ajax_get_detail_penilaian_sidang';
@@ -8862,6 +8986,32 @@
                             const d = res.data;
                             if (d.catatan_koor && catatanEl) catatanEl.value = d.catatan_koor;
                             if (d.status_kelulusan_sidang && statusKelulusanEl) statusKelulusanEl.value = d.status_kelulusan_sidang;
+                            if (d.versi_penilaian && versiBadgeEl) versiBadgeEl.textContent = `v${d.versi_penilaian}`;
+                            if (d.tahun_akademik) {
+                                setupTahunAkademikOptions(d.tahun_akademik);
+                            }
+
+                            // Update publish state from server
+                            if (d.status_publish_sidang) {
+                                if (d.status_publish_sidang === 'Published') {
+                                    const rad = document.getElementById('publishRadioInstant');
+                                    if (rad) rad.checked = true;
+                                    onPublishModeChange('Published');
+                                } else if (d.status_publish_sidang === 'Scheduled') {
+                                    const rad = document.getElementById('publishRadioScheduled');
+                                    if (rad) rad.checked = true;
+                                    onPublishModeChange('Scheduled');
+                                    const dateInp = document.getElementById('penilaianTglPublish');
+                                    if (dateInp && d.tgl_publish_sidang) {
+                                        dateInp.value = d.tgl_publish_sidang.replace(' ', 'T').substring(0, 16);
+                                    }
+                                } else {
+                                    const rad = document.getElementById('publishRadioDraft');
+                                    if (rad) rad.checked = true;
+                                    onPublishModeChange('Draft');
+                                }
+                            }
+
                             setupPenilaianPeminatanOptions(prodiKey, d.peminatan || student.peminatan);
                             renderPenilaianRubrik(d.detail_penilaian_parsed);
                             calculatePenilaianScore();
@@ -8901,11 +9051,42 @@
         }
     };
 
+    function setupTahunAkademikOptions(selectedYear) {
+        const input = document.getElementById('penilaianTahunAkademik');
+        const datalist = document.getElementById('listTahunAkademik');
+        if (!input) return;
+
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth() + 1;
+        const defaultActive = (curMonth >= 8) ? `${curYear}/${curYear + 1}` : `${curYear - 1}/${curYear}`;
+        const activeTarget = selectedYear || defaultActive;
+
+        input.value = activeTarget;
+
+        if (datalist) {
+            const yearList = [];
+            for (let y = curYear + 3; y >= curYear - 5; y--) {
+                yearList.push(`${y}/${y + 1}`);
+            }
+
+            if (activeTarget && !yearList.includes(activeTarget)) {
+                yearList.unshift(activeTarget);
+            }
+
+            let html = '';
+            yearList.forEach(ta => {
+                const isCur = (ta === defaultActive) ? ' (Aktif)' : '';
+                html += `<option value="${escapeHtml(ta)}">${escapeHtml(ta)}${isCur}</option>`;
+            });
+            datalist.innerHTML = html;
+        }
+    }
+
     function setupPenilaianPeminatanOptions(prodiKey, selectedPeminatan) {
         const peminatanSelect = document.getElementById('penilaianPeminatanSelect');
         if (!peminatanSelect) return;
 
-        // Ambil daftar peminatan secara dinamis dari masterRubrikList
         let peminatanList = [];
         (state.masterRubrikList || []).forEach(m => {
             if (m.prodi === prodiKey && m.peminatan && !peminatanList.includes(m.peminatan)) {
@@ -8913,7 +9094,6 @@
             }
         });
 
-        // Fallback ke preset jika masterRubrikList belum termuat
         if (peminatanList.length === 0) {
             const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
             peminatanList = Object.keys(prodiData.peminatan || {});
@@ -8947,37 +9127,52 @@
         const container = document.getElementById('penilaianRubrikContainer');
         const prodiSelect = document.getElementById('penilaianProdiSelect');
         const peminatanSelect = document.getElementById('penilaianPeminatanSelect');
+        const totalBobotLabel = document.getElementById('penilaianTotalBobotLabel');
         if (!container) return;
 
         const prodiKey = detectProdiKey(prodiSelect ? prodiSelect.value : 'DKV');
         const peminatanKey = peminatanSelect ? peminatanSelect.value : '';
 
-        // Ambil kriteria dinamis dari master rubrik yang aktif
         let criteriaList = [];
-        const masterItem = (state.masterRubrikList || []).find(m => m.prodi === prodiKey && m.peminatan === peminatanKey);
-        
-        if (masterItem && Array.isArray(masterItem.kriteria) && masterItem.kriteria.length > 0) {
-            criteriaList = masterItem.kriteria;
+
+        // SELF-CONTAINED SNAPSHOT CHECK:
+        // If existingParsed has its own snapshot criteria, use it directly!
+        // This ensures deleting a criterion in the master rubric NEVER breaks existing student evaluations.
+        if (existingParsed && existingParsed.criteria && Array.isArray(existingParsed.criteria) && existingParsed.criteria.length > 0) {
+            criteriaList = existingParsed.criteria;
+        } else if (existingParsed && Array.isArray(existingParsed) && existingParsed.length > 0 && (existingParsed[0].kriteria || existingParsed[0].title)) {
+            criteriaList = existingParsed;
         } else {
-            const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
-            criteriaList = prodiData.peminatan[peminatanKey] || prodiData.peminatan[Object.keys(prodiData.peminatan)[0]] || [];
+            // Load from Master Rubrik
+            const masterItem = (state.masterRubrikList || []).find(m => m.prodi === prodiKey && m.peminatan === peminatanKey);
+            if (masterItem && Array.isArray(masterItem.kriteria) && masterItem.kriteria.length > 0) {
+                criteriaList = masterItem.kriteria;
+            } else {
+                const prodiData = RUBRIK_PENILAIAN_PRODI[prodiKey] || RUBRIK_PENILAIAN_PRODI['DKV'];
+                criteriaList = prodiData.peminatan[peminatanKey] || prodiData.peminatan[Object.keys(prodiData.peminatan)[0]] || [];
+            }
         }
 
+        let totalCalculatedBobot = 0;
         let html = '';
+
         criteriaList.forEach((crit, idx) => {
             let existingScore = '';
             const critId = crit.id || `k${idx + 1}`;
             const critTitle = crit.title || crit.kriteria || `Penilaian ${idx + 1}`;
             const critDesc = crit.desc || crit.deskripsi || 'Indikator penilaian kompetensi karya sidang tugas akhir.';
             const critBobot = parseFloat(crit.bobot) || 25;
+            totalCalculatedBobot += critBobot;
 
-            if (existingParsed && existingParsed.scores && typeof existingParsed.scores[critId] !== 'undefined') {
+            if (typeof crit.nilai !== 'undefined' && crit.nilai !== null && crit.nilai !== '') {
+                existingScore = crit.nilai;
+            } else if (existingParsed && existingParsed.scores && typeof existingParsed.scores[critId] !== 'undefined') {
                 existingScore = existingParsed.scores[critId];
             } else if (existingParsed && Array.isArray(existingParsed)) {
-                const found = existingParsed.find(ep => ep.id === critId || ep.kriteria === critTitle);
+                const found = existingParsed.find(ep => ep.id === critId || (ep.kriteria && ep.kriteria === critTitle));
                 if (found && typeof found.nilai !== 'undefined') {
                     existingScore = found.nilai;
-                } else if (existingParsed[idx]) {
+                } else if (existingParsed[idx] && typeof existingParsed[idx].nilai !== 'undefined') {
                     existingScore = existingParsed[idx].nilai;
                 }
             }
@@ -8992,7 +9187,7 @@
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200">
-                                        Penilaian #${idx + 1}
+                                        Kriteria #${idx + 1}
                                     </span>
                                     <h5 class="text-xs sm:text-sm font-extrabold text-slate-900">${escapeHtml(critTitle)}</h5>
                                 </div>
@@ -9012,6 +9207,7 @@
                                        data-bobot="${critBobot}" 
                                        data-crit-id="${critId}"
                                        data-crit-title="${escapeHtml(critTitle)}"
+                                       data-crit-desc="${escapeHtml(critDesc)}"
                                        value="${existingScore !== '' ? escapeHtml(existingScore) : ''}" 
                                        placeholder="Nilai (0-100)" 
                                        oninput="calculatePenilaianScore()" 
@@ -9023,6 +9219,11 @@
                 </div>
             `;
         });
+
+        if (totalBobotLabel) {
+            totalBobotLabel.textContent = `${totalCalculatedBobot}%`;
+            totalBobotLabel.className = (totalCalculatedBobot === 100) ? 'text-slate-700 font-extrabold' : 'text-rose-600 font-extrabold';
+        }
 
         container.innerHTML = html;
     };
@@ -9103,9 +9304,14 @@
         const nim = document.getElementById('penilaianNim')?.value;
         const prodi = document.getElementById('penilaianProdiSelect')?.value;
         const peminatan = document.getElementById('penilaianPeminatanSelect')?.value;
+        const tahunAkademik = document.getElementById('penilaianTahunAkademik')?.value || '2026/2027';
         const statusKelulusan = document.getElementById('penilaianStatusKelulusan')?.value;
         const catatan = document.getElementById('penilaianCatatan')?.value;
         const calc = calculatePenilaianScore();
+
+        // Publish Mode & Start Date
+        const statusPublish = document.querySelector('input[name="status_publish"]:checked')?.value || 'Draft';
+        const tglPublishInp = document.getElementById('penilaianTglPublish')?.value || '';
 
         if (!nim) {
             Swal.fire({ icon: 'error', title: 'Error', text: 'NIM mahasiswa tidak valid.' });
@@ -9123,7 +9329,8 @@
             }
             details.push({
                 id: inp.getAttribute('data-crit-id'),
-                kriteria: inp.getAttribute('data-crit-title'),
+                title: inp.getAttribute('data-crit-title'),
+                desc: inp.getAttribute('data-crit-desc') || '',
                 bobot: parseFloat(inp.getAttribute('data-bobot')),
                 nilai: isNaN(val) ? 0 : val
             });
@@ -9138,20 +9345,32 @@
             return;
         }
 
+        if (statusPublish === 'Scheduled' && !tglPublishInp) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Jadwal Publikasi Belum Dipilih',
+                text: 'Silakan tentukan tanggal dan jam mulai rilis publikasi nilai.'
+            });
+            return;
+        }
+
         const btn = document.getElementById('btnSubmitPenilaianSidang');
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Menyimpan...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Menyimpan & Mengunci Versi...';
         }
 
         const formData = new FormData();
         formData.append('nim', nim);
         formData.append('prodi', prodi);
         formData.append('peminatan', peminatan);
+        formData.append('tahun_akademik', tahunAkademik);
         formData.append('nilai_akhir', calc.score.toFixed(2));
         formData.append('grade', calc.grade);
         formData.append('status_kelulusan', statusKelulusan);
         formData.append('detail_penilaian', JSON.stringify(details));
+        formData.append('status_publish', statusPublish);
+        formData.append('tgl_publish', tglPublishInp.replace('T', ' '));
         formData.append('catatan', catatan || '');
 
         const targetUrl = cfg.ajaxSimpanPenilaianSidangUrl || 
@@ -9180,15 +9399,22 @@
                     mhs.nilai_akhir_sidang = calc.score.toFixed(2);
                     mhs.grade_sidang = calc.grade;
                     mhs.status_kelulusan_sidang = statusKelulusan;
+                    mhs.status_publish_sidang = statusPublish;
+                    mhs.tgl_publish_sidang = tglPublishInp ? tglPublishInp.replace('T', ' ') : null;
+                    mhs.versi_penilaian = res.versi_penilaian || ((mhs.versi_penilaian || 1) + 1);
                 }
 
                 closeModalPenilaianSidang();
                 renderSidangTable();
 
+                const pubText = statusPublish === 'Published' 
+                    ? 'Nilai langsung dipublikasikan ke mahasiswa.' 
+                    : (statusPublish === 'Scheduled' ? `Nilai dijadwalkan terbit pada ${tglPublishInp.replace('T', ' ')}.` : 'Nilai disimpan sebagai draft privat.');
+
                 Swal.fire({
                     icon: 'success',
-                    title: 'Penilaian Disimpan!',
-                    text: res.message || 'Penilaian akhir sidang tugas akhir berhasil disimpan.',
+                    title: 'Penilaian Berhasil Disimpan!',
+                    html: `<strong>${escapeHtml(res.message || 'Data penilaian tersimpan dengan aman.')}</strong><br><span class="text-xs text-slate-500 mt-1 block">${pubText}</span>`,
                     confirmButtonColor: '#d97706'
                 });
             } else {
@@ -9209,6 +9435,154 @@
                 btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-xs sm:text-sm"></i> Simpan Penilaian Sidang TA';
             }
         });
+    };
+
+    // =========================================================
+    // MODAL AUDIT LOG & RIWAYAT VERSI PENILAIAN SIDANG
+    // =========================================================
+    window.openHistoryPenilaianModal = function (nimArg) {
+        const nim = nimArg || document.getElementById('penilaianNim')?.value;
+        if (!nim) {
+            Swal.fire({ icon: 'warning', title: 'Pilih Mahasiswa', text: 'NIM mahasiswa tidak ditemukan.' });
+            return;
+        }
+
+        const modal = document.getElementById('modalHistoryPenilaianSidang');
+        const container = document.getElementById('historyPenilaianContainer');
+        const subTitle = document.getElementById('historyStudentSubtitle');
+        const student = (state.sidangList || []).find(s => String(s.nim) === String(nim));
+
+        if (subTitle && student) {
+            subTitle.innerHTML = `Mahasiswa: <strong>${escapeHtml(student.nama_lengkap || student.nama || student.nim)}</strong> (${escapeHtml(student.nim)}) &bull; Prodi ${escapeHtml(student.prodi || 'DKV')}`;
+        }
+
+        if (container) {
+            container.innerHTML = `
+                <div class="py-12 text-center text-slate-400 space-y-2">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-600"></i>
+                    <p class="text-xs font-semibold">Memuat riwayat versi penilaian...</p>
+                </div>
+            `;
+        }
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.style.display = 'flex';
+        }
+
+        const historyUrl = cfg.ajaxGetHistoryPenilaianSidangUrl || 
+                           window.DASHBOARD_CONFIG?.ajaxGetHistoryPenilaianSidangUrl || 
+                           'ajax_get_history_penilaian_sidang';
+
+        fetch(`${historyUrl}?nim=${encodeURIComponent(nim)}`)
+            .then(r => r.json())
+            .then(res => {
+                if (!container) return;
+
+                if (!res || !res.status || !Array.isArray(res.data) || res.data.length === 0) {
+                    container.innerHTML = `
+                        <div class="py-12 text-center text-slate-400 space-y-2">
+                            <i class="fa-solid fa-folder-open text-3xl text-slate-300"></i>
+                            <p class="text-xs font-semibold text-slate-500">Belum ada riwayat penilaian tersimpan untuk mahasiswa ini.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                res.data.forEach((ver, vIdx) => {
+                    const parsed = ver.detail_penilaian_parsed || {};
+                    const criteria = parsed.criteria || [];
+                    const pubStatus = ver.status_publish || 'Draft';
+
+                    let pubBadge = '';
+                    if (pubStatus === 'Published') {
+                        pubBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-globe mr-1"></i> Live</span>`;
+                    } else if (pubStatus === 'Scheduled') {
+                        pubBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-sky-100 text-sky-800 border border-sky-300"><i class="fa-solid fa-clock mr-1"></i> Jadwal: ${escapeHtml(ver.tgl_publish || '')}</span>`;
+                    } else {
+                        pubBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 text-slate-600 border border-slate-300"><i class="fa-solid fa-eye-slash mr-1"></i> Draft</span>`;
+                    }
+
+                    let criteriaRows = '';
+                    if (Array.isArray(criteria) && criteria.length > 0) {
+                        criteria.forEach((c, cIdx) => {
+                            criteriaRows += `
+                                <div class="flex items-center justify-between py-1 px-2.5 rounded-lg bg-slate-50 border border-slate-200/70 text-[11px]">
+                                    <div class="truncate max-w-[70%]">
+                                        <span class="font-bold text-slate-700">${cIdx + 1}. ${escapeHtml(c.title || c.kriteria || 'Kriteria')}</span>
+                                        <span class="text-[10px] text-slate-400 ml-1">(${c.bobot || 0}%)</span>
+                                    </div>
+                                    <span class="font-mono font-black text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">${c.nilai || 0}</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    html += `
+                        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs hover:border-indigo-300 hover:shadow-md transition-all space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                                <div class="flex items-center gap-2.5 flex-wrap">
+                                    <span class="px-2.5 py-1 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-xs">
+                                        Versi #${ver.versi || (res.data.length - vIdx)}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-800">T.A: ${escapeHtml(ver.tahun_akademik || '2026/2027')}</span>
+                                    <span class="text-[11px] text-slate-500 font-medium"><i class="fa-solid fa-calendar-check text-slate-400 mr-1"></i> ${escapeHtml(ver.created_at || '-')}</span>
+                                    ${pubBadge}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-slate-500">Nilai Akhir:</span>
+                                    <span class="text-base font-black text-slate-900 font-mono">${escapeHtml(ver.nilai_akhir || '0')}</span>
+                                    <span class="px-2 py-0.5 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">${escapeHtml(ver.grade || '-')}</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status &amp; Penilai:</span>
+                                    <p class="font-semibold text-slate-700">Status: <strong class="text-slate-900">${escapeHtml(ver.status_kelulusan || 'Lulus')}</strong></p>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Penilai: ${escapeHtml(ver.dinilai_oleh || 'Koordinator TA')}</p>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Catatan / Revisi:</span>
+                                    <p class="text-[11px] text-slate-600 italic leading-relaxed bg-slate-50 p-2 rounded-xl border border-slate-200/60">${escapeHtml(ver.catatan || 'Tidak ada catatan khusus.')}</p>
+                                </div>
+                            </div>
+
+                            ${criteriaRows ? `
+                                <div class="pt-2 border-t border-slate-100">
+                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">Snapshot Kriteria &amp; Nilai Versi Ini:</span>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        ${criteriaRows}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            })
+            .catch(err => {
+                if (container) {
+                    container.innerHTML = `
+                        <div class="py-10 text-center text-rose-500 space-y-2">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                            <p class="text-xs font-bold">Gagal memuat riwayat: ${escapeHtml(err.message || 'Error koneksi')}</p>
+                        </div>
+                    `;
+                }
+            });
+    };
+
+    window.closeModalHistoryPenilaian = function () {
+        const modal = document.getElementById('modalHistoryPenilaianSidang');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            modal.style.display = 'none';
+        }
     };
     let activeTooltipTimer = null;
 
