@@ -497,47 +497,7 @@
 
 
 
-    /* --- RESPONSIVE DESIGN FOR LIST --- */
-    @media (max-width: 1200px) {
-        .about-container h1 {
-            font-size: 2.2rem;
-        }
-        .room-item {
-            flex-wrap: wrap;
-        }
-        .room-item-left {
-            flex: 1 1 100%;
-            margin-bottom: 10px;
-        }
-        .room-item-tags {
-            flex: 1 1 40%;
-        }
-        .room-item-date {
-            flex: 1 1 30%;
-            text-align: left;
-        }
-        .room-item-action {
-            flex: 1 1 20%;
-        }
-    }
 
-    @media (max-width: 900px) {
-        .about-container {
-            width: 90%;
-            margin: 0 auto;
-            margin-top: 15vh;
-            padding: 30px 20px;
-        }
-        .room-item-tags, .room-item-date, .room-item-action {
-            flex: 1 1 100%;
-            justify-content: flex-start;
-            text-align: left;
-            margin-top: 10px;
-        }
-        .room-item-action {
-            justify-content: flex-start;
-        }
-    } /* Tutup media query max-width: 900px */
 
     /* =========================================
        GOOGLE CALENDAR FULLSCREEN CLONE (THEME ADAPTED)
@@ -1062,7 +1022,7 @@
 }
 
 /* Responsive Max-Height Adjustment for Laptops & Small Displays */
-@media (max-height: 850px) {
+@media (max-height: 850px) and (min-width: 901px) {
     .about-container {
         padding: 24px 30px 18px 30px;
         border-radius: 24px;
@@ -1078,5 +1038,346 @@
     .room-icon {
         width: 42px;
         height: 42px;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN: TABLET (<= 1024px)
+   ========================================================= */
+@media (max-width: 1024px) {
+    .about-container {
+        width: 94%;
+        padding: 24px 24px 20px 24px;
+        border-radius: 24px;
+        max-height: calc(100vh - 50px);
+    }
+    .about-container h1 {
+        font-size: 1.7rem;
+        margin-bottom: 12px;
+    }
+    .room-column-header {
+        grid-template-columns: 180px 150px 130px 1fr 140px;
+        gap: 10px;
+        font-size: 0.7rem;
+    }
+    .room-item {
+        grid-template-columns: 180px 150px 130px 1fr 140px;
+        gap: 10px;
+        padding: 10px 0;
+        min-height: 60px;
+    }
+    .room-icon {
+        width: 38px;
+        height: 38px;
+    }
+    .room-item-tags {
+        width: 145px;
+    }
+    .tag {
+        width: 140px;
+        padding: 0 8px;
+        font-size: 0.72rem;
+        height: 25px;
+    }
+    .room-item-date {
+        font-size: 0.82rem;
+    }
+    .room-item-desc {
+        padding: 0 4px 0 10px;
+    }
+    .room-desc-text {
+        font-size: 0.76rem;
+    }
+    .room-item-action {
+        width: 140px;
+    }
+    .landing-status-badge {
+        width: 135px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN: MOBILE (<= 768px)
+   ========================================================= */
+/* =========================================================
+   RESPONSIVE DESIGN: MOBILE (<= 768px)
+   ========================================================= */
+@media (max-width: 768px) {
+    #section-about {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+        padding: 70px 0 40px 0;
+        box-sizing: border-box;
+        align-items: center;
+        display: flex;
+    }
+
+    .about-container {
+        width: 92%;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 20px 16px 16px 16px;
+        border-radius: 20px;
+        max-height: none;
+        height: auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-sizing: border-box;
+    }
+
+    .btn-fullscreen {
+        top: 16px;
+        right: 16px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+    .btn-fullscreen svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    .about-container h1 {
+        font-size: 1.25rem;
+        margin-bottom: 14px;
+        letter-spacing: -0.3px;
+        padding-right: 44px;
+    }
+
+    /* Hide standard desktop table column header on mobile */
+    .room-column-header {
+        display: none !important;
+    }
+
+    .room-list-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        max-height: calc(100vh - 160px);
+        overflow-y: auto;
+        padding: 2px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(234, 88, 12, 0.4) transparent;
+    }
+    .room-list-wrapper::-webkit-scrollbar {
+        width: 4px;
+    }
+    .room-list-wrapper::-webkit-scrollbar-thumb {
+        background: rgba(234, 88, 12, 0.4);
+        border-radius: 4px;
+    }
+
+    /* Transform each item into an aesthetic modern mobile card */
+    .room-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px 10px;
+        padding: 14px 14px;
+        background: #ffffff;
+        border: 1px solid rgba(234, 88, 12, 0.16);
+        border-radius: 16px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+        min-height: auto;
+        box-sizing: border-box;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .room-item:active, .room-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(234, 88, 12, 0.12);
+    }
+
+    /* Row 1 Left: Room Icon + Name */
+    .room-item-left {
+        grid-column: 1 / 2;
+        order: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .room-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border-width: 1.5px;
+        flex-shrink: 0;
+    }
+    .room-icon svg {
+        width: 17px;
+        height: 17px;
+    }
+    .room-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .room-info h3 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        line-height: 1.25;
+        color: #1e293b;
+        margin: 0;
+        word-break: break-word;
+        white-space: normal;
+    }
+    .room-info p {
+        font-size: 0.76rem;
+        color: #64748b;
+        margin: 2px 0 0 0;
+        line-height: 1.25;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    /* Row 1 Right: Status Badge */
+    .room-item-action {
+        grid-column: 2 / 3;
+        order: 2;
+        width: auto;
+        justify-content: flex-end;
+        align-items: flex-start;
+        flex-shrink: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+    .landing-status-badge {
+        width: auto;
+        height: 24px;
+        padding: 2px 10px;
+        font-size: 0.70rem;
+        font-weight: 700;
+        border-radius: 999px;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    /* Row 2: User & Time Tags (Compact Badges Side-by-Side) */
+    .room-item-tags {
+        grid-column: 1 / 3;
+        order: 3;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        width: 100%;
+        gap: 6px;
+        margin-top: 2px;
+    }
+    .tag {
+        width: auto;
+        flex: 0 0 auto;
+        max-width: 100%;
+        height: 26px;
+        padding: 0 10px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        border-radius: 999px;
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
+    .tag .tag-user-name {
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Row 3: Date */
+    .room-item-date {
+        grid-column: 1 / 3;
+        order: 4;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-align: left;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 1px;
+    }
+    .room-item-date::before {
+        content: '📅 ';
+        font-size: 0.74rem;
+    }
+
+    /* Row 4: Description (Up to 2 lines, smoothly wrapped) */
+    .room-item-desc {
+        grid-column: 1 / 3;
+        order: 5;
+        padding: 0;
+        width: 100%;
+        font-size: 0.76rem;
+        margin-top: 1px;
+    }
+    .room-desc-text {
+        font-size: 0.76rem;
+        color: #64748b;
+        line-height: 1.35;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Hide desktop tooltips on touch devices */
+    .room-hover-tooltip,
+    .desc-hover-tooltip {
+        display: none !important;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN: EXTRA SMALL MOBILE (<= 420px)
+   ========================================================= */
+@media (max-width: 420px) {
+    .about-container {
+        width: 95%;
+        padding: 16px 12px 14px 12px;
+        border-radius: 16px;
+    }
+    .about-container h1 {
+        font-size: 1.15rem;
+    }
+    .room-item {
+        padding: 12px 10px;
+        gap: 6px 8px;
+    }
+    .room-icon {
+        width: 32px;
+        height: 32px;
+    }
+    .room-info h3 {
+        font-size: 0.88rem;
+    }
+    .room-info p {
+        font-size: 0.72rem;
+    }
+    .landing-status-badge {
+        font-size: 0.68rem;
+        padding: 2px 8px;
+        height: 22px;
+    }
+    .room-item-tags {
+        gap: 5px;
+    }
+    .tag {
+        height: 24px;
+        padding: 0 8px;
+        font-size: 0.70rem;
+    }
+    .tag .tag-user-name {
+        max-width: 130px;
+    }
+    .room-item-date {
+        font-size: 0.72rem;
+    }
+    .room-desc-text {
+        font-size: 0.72rem;
     }
 }
