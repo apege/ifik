@@ -504,19 +504,10 @@
            MOBILE RESPONSIVE OVERRIDES
            ============================================================ */
 
-        /* Reduce body left-padding when sidebar collapses on mobile */
+        /* Mobile responsive adjustments */
         @media (max-width: 640px) {
             body {
-                padding-left: 0 !important;
                 padding-bottom: 80px;
-            }
-
-            /* Header: give clear 70px left-padding for fixed floating hamburger button (at left:16px, w:38px) */
-            header.glass-header {
-                padding-left: 70px !important;
-                padding-right: 16px !important;
-                padding-top: 14px !important;
-                padding-bottom: 14px !important;
             }
 
             header .max-w-7xl > div {
@@ -721,9 +712,6 @@
 
         /* Tablet: allow table horizontal scroll too */
         @media (min-width: 641px) and (max-width: 1024px) {
-            header.glass-header {
-                padding-left: 24px !important;
-            }
             .table-rotating-border-inner {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -733,14 +721,14 @@
             }
         }
     </style>
-<body class="bg-slate-50 text-slate-800 antialiased pb-16 pl-14">
+<body class="bg-slate-50 text-slate-800 antialiased pb-16">
 
     <!-- Auto Role-Aware Curved Animated Sidebar -->
     <?php $this->load->view('components/curved_sidebar'); ?>
 
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 sm:py-4 mb-6 sm:mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+    <header class="sticky top-0 z-40 glass-header px-4 sm:px-8 py-3.5 sm:py-4 mb-6 sm:mb-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pl-12 sm:pl-14">
             <div class="flex items-center gap-4 w-full sm:w-auto">
                 <div class="header-title-block flex flex-col w-full">
                     <div class="flex items-center gap-2">
@@ -1166,7 +1154,7 @@
                                 <th class="py-3.5 px-3 w-[12%] whitespace-nowrap text-center">Status Token</th>
                                 <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center">Status Email</th>
                                 <th class="py-3.5 px-3 w-[13%] whitespace-nowrap text-center col-mobile-hide">Tgl Import</th>
-                                <th class="py-3.5 px-2 w-12 text-center whitespace-nowrap">Aksi</th>
+                                <th class="py-3.5 px-3 w-20 text-center whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="accounts-table-body" class="divide-y divide-slate-100 bg-white font-medium">
@@ -2806,8 +2794,9 @@
                         <td class="py-2.5 px-3 text-center text-slate-500 font-normal text-[11px] whitespace-nowrap col-mobile-hide">${acc.date_imported || '-'}</td>
                         <td class="py-2.5 px-2 text-center whitespace-nowrap relative">
                             <div class="inline-block text-left">
-                                <button onclick="toggleActionDropdown(event, '${acc.id}')" class="action-dropdown-btn w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer border border-transparent hover:border-slate-200" title="Pilihan Aksi">
-                                    <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                <button onclick="toggleActionDropdown(event, '${acc.id}')" class="action-dropdown-btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-white hover:text-brand-600 border border-slate-200 hover:border-brand-300 shadow-2xs hover:shadow-xs transition-all cursor-pointer" title="Menu Opsi / Aksi Akun">
+                                    <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-xs"></i>
+                                    <span>Aksi</span>
                                 </button>
                                 <div id="action-dropdown-${acc.id}" class="action-dropdown-menu hidden fixed z-50 w-44 bg-white rounded-xl shadow-xl border border-slate-200/90 py-1 text-xs text-slate-700 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100 text-left">
                                     <div class="p-1 space-y-0.5">
@@ -2861,8 +2850,9 @@
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <span class="inline-block px-2 py-0.5 text-[10px] font-semibold border rounded-md ${roleClass}">${acc.role}</span>
                                 <div class="relative">
-                                    <button onclick="toggleActionDropdown(event, '${acc.id}', 'mob')" class="action-dropdown-btn w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer border border-slate-200/60" title="Pilihan Aksi">
-                                        <i class="fa-solid fa-ellipsis-vertical text-xs"></i>
+                                    <button onclick="toggleActionDropdown(event, '${acc.id}', 'mob')" class="action-dropdown-btn inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-white hover:text-brand-600 border border-slate-200 hover:border-brand-300 shadow-2xs transition-all cursor-pointer" title="Menu Opsi / Aksi Akun">
+                                        <i class="fa-solid fa-ellipsis-vertical text-slate-400 text-xs"></i>
+                                        <span>Aksi</span>
                                     </button>
                                     <div id="action-dropdown-mob-${acc.id}" class="action-dropdown-menu hidden fixed z-50 w-44 bg-white rounded-xl shadow-xl border border-slate-200/90 py-1 text-xs text-slate-700 divide-y divide-slate-100 animate-in fade-in zoom-in-95 duration-100 text-left">
                                         <div class="p-1 space-y-0.5">
@@ -3797,7 +3787,29 @@
                 return;
             }
 
-            startEmailDispatchSimulation([acc]);
+            Swal.fire({
+                title: 'Konfirmasi Pengiriman Email',
+                html: `
+                    <div class="text-left text-xs space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 mt-2">
+                        <p class="text-slate-700">Kirim email berisi token akses resmi ke akun pengguna:</p>
+                        <div class="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
+                            <div class="font-bold text-slate-900 text-sm">${acc.name} <span class="text-[11px] font-semibold text-brand-600">(${acc.role})</span></div>
+                            <div class="text-slate-500 font-mono text-xs flex items-center gap-1.5"><i class="fa-regular fa-envelope text-slate-400"></i> ${acc.email}</div>
+                            <div class="text-emerald-700 font-mono text-xs flex items-center gap-1.5"><i class="fa-solid fa-key text-emerald-500"></i> Token: <span class="font-bold">${acc.token}</span></div>
+                        </div>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1.5"></i> Ya, Kirim Sekarang',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    startEmailDispatchSimulation([acc]);
+                }
+            });
         }
 
         function bulkSendEmailSelected() {
@@ -3839,12 +3851,12 @@
             if (emptyTokenAccounts.length > 0) {
                 Swal.fire({
                     title: 'Sebagian Token Belum Siap',
-                    html: `Dari <b>${selectedAccounts.length}</b> akun yang dipilih, terdapat <b>${emptyTokenAccounts.length}</b> akun yang tokennya masih kosong.<br><br>Apakah Anda ingin mengirimkan email hanya ke <b>${readyToSend.length}</b> akun yang tokennya sudah ready?`,
+                    html: `Dari <b>${selectedAccounts.length}</b> akun yang dipilih, terdapat <b>${emptyTokenAccounts.length}</b> akun yang tokennya masih kosong.<br><br>Apakah Anda ingin mengirimkan email notifikasi ke <b>${readyToSend.length}</b> akun yang tokennya sudah ready?`,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#ea580c',
+                    confirmButtonColor: '#059669',
                     cancelButtonColor: '#64748b',
-                    confirmButtonText: `Kirim ke ${readyToSend.length} Akun`,
+                    confirmButtonText: `<i class="fa-solid fa-paper-plane mr-1.5"></i> Ya, Kirim (${readyToSend.length} Akun)`,
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -3854,7 +3866,29 @@
                 return;
             }
 
-            startEmailDispatchSimulation(readyToSend);
+            Swal.fire({
+                title: 'Konfirmasi Kirim Email Massal',
+                html: `
+                    <div class="text-left text-xs space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200 mt-2">
+                        <p class="text-slate-700">Apakah Anda yakin ingin mengirimkan email token akses ke <b>${readyToSend.length} akun</b> yang dipilih?</p>
+                        <div class="p-2.5 bg-white rounded-lg border border-slate-200 text-slate-600 space-y-1">
+                            <div>• Jumlah Akun: <b class="text-slate-900">${readyToSend.length} pengguna</b></div>
+                            <div>• Token Status: <b class="text-emerald-600">Ready (Siap Kirim)</b></div>
+                            <div>• Pengirim: <span class="font-mono text-[11px] text-slate-500">layanan-ta@telkomuniversity.ac.id</span></div>
+                        </div>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: `<i class="fa-solid fa-paper-plane mr-1.5"></i> Ya, Kirim (${readyToSend.length} Akun)`,
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    startEmailDispatchSimulation(readyToSend);
+                }
+            });
         }
 
         function startEmailDispatchSimulation(targetList) {
