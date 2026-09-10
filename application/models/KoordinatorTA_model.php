@@ -296,7 +296,6 @@ class KoordinatorTA_model extends CI_Model {
         return $row;
     }
 
-
     // Approval / Reject Pendaftaran TA oleh Koordinator TA dengan AJAX & Validasi Pembimbing
     public function update_approval_koor_ajax($nim, $status, $catatan = '', $pembimbing_1 = null, $pembimbing_2 = null) {
         if (!$this->db->table_exists('pendaftaran_ta')) {
@@ -400,15 +399,15 @@ class KoordinatorTA_model extends CI_Model {
             m.nama_belakang, 
             m.prodi, 
             m.konsentrasi_dkv, 
-            m.email as m_email, 
-            m.no_hp as m_no_hp,
+            m.email, 
+            m.no_hp,
             m.nip_dosen_wali,
             COALESCE(dw.nama_dosen, dw_alt.nama_dosen, "Dosen Wali") as nama_dosen_wali,
             COALESCE(dw1.nama_dosen, u1.name, p.pembimbing_1) as nama_pembimbing_1,
             COALESCE(dw2.nama_dosen, u2.name, p.pembimbing_2) as nama_pembimbing_2
         ');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(prodi) as prodi, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(email) as m_email, MIN(no_hp) as m_no_hp, MIN(nip_dosen_wali) as nip_dosen_wali FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(prodi) as prodi, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(email) as email, MIN(no_hp) as no_hp, MIN(nip_dosen_wali) as nip_dosen_wali FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
         $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw', 'dw.nip = m.nip_dosen_wali', 'left');
         $this->db->join('dosen_wali dw_alt', 'dw_alt.id = p.id_dosen_wali', 'left');
         $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
@@ -426,9 +425,6 @@ class KoordinatorTA_model extends CI_Model {
             }
             if (empty($row['nama_dosen_wali'])) {
                 $row['nama_dosen_wali'] = 'Dosen Wali';
-            }
-            if (empty($row['email'])) {
-                $row['email'] = !empty($row['m_email']) ? $row['m_email'] : '';
             }
             if (empty($row['email'])) {
                 $fn = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($row['nama_depan']));

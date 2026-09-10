@@ -174,6 +174,13 @@ class Booking_model extends CI_Model {
         return $this->db->delete('peminjaman');
     }
 
+    public function batch_delete_booking($ids)
+    {
+        if (empty($ids) || !is_array($ids)) return false;
+        $this->db->where_in('id', $ids);
+        return $this->db->delete('peminjaman');
+    }
+
     public function get_approved_bookings()
     {
         $this->db->select('peminjaman.*, ruangan.nama_ruangan, ruangan.kode_ruangan, ruangan.id_kategori, ruangan.lokasi, ruangan.kapasitas, kategori_ruangan.nama_kategori');

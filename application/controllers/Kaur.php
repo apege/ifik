@@ -111,6 +111,23 @@ class Kaur extends CI_Controller {
         }
     }
 
+    public function batch_delete()
+    {
+        header('Content-Type: application/json');
+        $ids = $this->input->post('ids');
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => 'error', 'message' => 'Pilih setidaknya satu data peminjaman!']);
+            return;
+        }
+
+        $delete = $this->Booking_model->batch_delete_booking($ids);
+        if ($delete) {
+            echo json_encode(['status' => 'success', 'message' => count($ids) . ' data peminjaman berhasil dihapus!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data terpilih']);
+        }
+    }
+
     public function surat($id)
     {
         // Get booking detail with room and category info
