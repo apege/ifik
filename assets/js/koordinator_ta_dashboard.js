@@ -691,6 +691,31 @@
             state.selectedStudents.delete(nim);
         }
 
+        // Sync all matching checkboxes (both desktop and mobile)
+        document.querySelectorAll(`.row-select-checkbox[value="${nim}"]`).forEach(el => {
+            el.checked = cb.checked;
+            const card = el.closest('.mobile-student-card');
+            if (card) {
+                if (cb.checked) {
+                    card.classList.add('border-orange-500', 'ring-2', 'ring-orange-400', 'bg-orange-50/20');
+                    card.classList.remove('border-slate-200/90');
+                } else {
+                    card.classList.remove('border-orange-500', 'ring-2', 'ring-orange-400', 'bg-orange-50/20');
+                    card.classList.add('border-slate-200/90');
+                }
+            }
+            const row = el.closest('tr');
+            if (row) {
+                if (cb.checked) {
+                    row.classList.add('bg-orange-100/60', 'border-l-4', 'border-l-orange-600');
+                    row.classList.remove('hover:bg-slate-50/80');
+                } else {
+                    row.classList.remove('bg-orange-100/60', 'border-l-4', 'border-l-orange-600');
+                    row.classList.add('hover:bg-slate-50/80');
+                }
+            }
+        });
+
         const pageCheckboxes = document.querySelectorAll('.row-select-checkbox:not(:disabled)');
         const allChecked = pageCheckboxes.length > 0 && Array.from(pageCheckboxes).every(c => c.checked);
         const selectAllEl = document.getElementById('selectAllCheckbox');
@@ -701,7 +726,19 @@
 
     window.clearAllSelection = function () {
         state.selectedStudents.clear();
-        document.querySelectorAll('.row-select-checkbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.row-select-checkbox').forEach(cb => {
+            cb.checked = false;
+            const card = cb.closest('.mobile-student-card');
+            if (card) {
+                card.classList.remove('border-orange-500', 'ring-2', 'ring-orange-400', 'bg-orange-50/20');
+                card.classList.add('border-slate-200/90');
+            }
+            const row = cb.closest('tr');
+            if (row) {
+                row.classList.remove('bg-orange-100/60', 'border-l-4', 'border-l-orange-600');
+                row.classList.add('hover:bg-slate-50/80');
+            }
+        });
         const selectAllEl = document.getElementById('selectAllCheckbox');
         if (selectAllEl) selectAllEl.checked = false;
         updateFloatingBar();
@@ -724,20 +761,21 @@
                 let chipsHtml = '';
                 let idx = 0;
                 state.selectedStudents.forEach(st => {
-                    if (idx < 3) {
+                    if (idx < 2) {
                         chipsHtml += `
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 text-white rounded-lg text-xs font-semibold backdrop-blur-md">
-                                <i class="fa-solid fa-user-graduate text-[10px]"></i> ${escapeHtml(st.name.split(' ')[0])} (${st.nim})
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-white/15 border border-white/10 text-white rounded-md text-[11px] font-semibold backdrop-blur-md max-w-[140px] truncate">
+                                <i class="fa-solid fa-user-graduate text-[9px] shrink-0 text-orange-300"></i>
+                                <span class="truncate">${escapeHtml(st.name.split(' ')[0])} (${st.nim})</span>
                             </span>
                         `;
                     }
                     idx++;
                 });
 
-                if (count > 3) {
+                if (count > 2) {
                     chipsHtml += `
-                        <span class="inline-flex items-center px-2 py-1 bg-white/30 text-white rounded-lg text-xs font-bold">
-                            +${count - 3} lainnya
+                        <span class="inline-flex items-center px-1.5 py-0.5 bg-white/25 text-white rounded-md text-[10px] font-bold shrink-0">
+                            +${count - 2} lainnya
                         </span>
                     `;
                 }
@@ -1560,9 +1598,9 @@
             let navHtml = '';
             students.forEach((st, idx) => {
                 navHtml += `
-                    <a href="#p1_student_block_${idx}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-orange-600 border border-slate-700/80 hover:border-orange-500 text-slate-200 hover:text-white transition-all shadow-xs whitespace-nowrap flex items-center gap-2 shrink-0 active:scale-95">
-                        <span class="w-5 h-5 rounded-lg bg-orange-500 text-white flex items-center justify-center text-[10px] font-black shadow-xs">${idx + 1}</span>
-                        <span>${escapeHtml((st.nama || '').split(' ')[0])}</span>
+                    <a href="#p1_student_block_${idx}" class="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-orange-600 border border-slate-700/80 hover:border-orange-500 text-slate-200 hover:text-white transition-all shadow-xs whitespace-nowrap flex items-center gap-1.5 sm:gap-2 shrink-0 active:scale-95">
+                        <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg bg-orange-500 text-white flex items-center justify-center text-[9px] sm:text-[10px] font-black shadow-xs">${idx + 1}</span>
+                        <span class="truncate max-w-[80px] sm:max-w-none">${escapeHtml((st.nama || '').split(' ')[0])}</span>
                     </a>
                 `;
             });
@@ -1641,11 +1679,11 @@
             docKeys.forEach(k => {
                 const f = (st.files && st.files[k]) ? st.files[k] : { title: k.toUpperCase(), name: `${k}_${st.nim}.pdf`, url: '#', status: 'Valid' };
                 docsHtml += `
-                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-2.5">
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-2xs flex flex-col justify-between space-y-2 sm:space-y-2.5">
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center justify-between mb-1.5 gap-2">
                                 <span class="font-bold text-slate-800 text-xs truncate" title="${escapeHtml(f.title)}">${escapeHtml(f.title)}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                                     <i class="fa-solid fa-check text-[9px] mr-0.5"></i> Valid
                                 </span>
                             </div>
@@ -1653,13 +1691,13 @@
 
                             <!-- Live Embedded PDF View Frame -->
                             <div class="rounded-xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100 mb-1.5">
-                                <div class="p-1.5 px-3 bg-slate-800 text-white flex items-center justify-between text-[10px]">
-                                    <span class="font-mono text-slate-300 truncate max-w-[170px]"><i class="fa-solid fa-file-pdf text-rose-400 mr-1"></i> ${escapeHtml(f.name)}</span>
-                                    <button type="button" onclick="openP1PdfModal('${f.url}', '${escapeHtml(f.title)} - ${escapeHtml(st.nama)}')" class="text-orange-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer">
-                                        <i class="fa-solid fa-expand text-[9px]"></i> Layar Penuh
+                                <div class="p-1.5 px-2.5 sm:px-3 bg-slate-800 text-white flex items-center justify-between text-[10px] gap-2">
+                                    <span class="font-mono text-slate-300 truncate max-w-[140px] sm:max-w-[170px]"><i class="fa-solid fa-file-pdf text-rose-400 mr-1"></i> ${escapeHtml(f.name)}</span>
+                                    <button type="button" onclick="openP1PdfModal('${f.url}', '${escapeHtml(f.title)} - ${escapeHtml(st.nama)}')" class="text-orange-300 hover:text-white font-bold flex items-center gap-1 cursor-pointer shrink-0 active:scale-95">
+                                        <i class="fa-solid fa-expand text-[9px]"></i> <span class="hidden sm:inline">Layar Penuh</span><span class="sm:hidden">Buka</span>
                                     </button>
                                 </div>
-                                <iframe src="${f.url}#view=FitH&zoom=100&toolbar=1" class="w-full h-[320px] border-none bg-slate-100" loading="lazy"></iframe>
+                                <iframe src="${f.url}#view=FitH&zoom=100&toolbar=1" class="w-full h-[180px] sm:h-[320px] border-none bg-slate-100" loading="lazy"></iframe>
                             </div>
                         </div>
                     </div>
@@ -1668,45 +1706,45 @@
 
             allHtml += `
                 <!-- Student Block ${stIdx + 1} -->
-                <div id="p1_student_block_${stIdx}" class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-300 shadow-md space-y-5 scroll-mt-6">
+                <div id="p1_student_block_${stIdx}" class="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 border border-slate-200 sm:border-slate-300 shadow-sm sm:shadow-md space-y-4 sm:space-y-5 scroll-mt-4 sm:scroll-mt-6">
                     
                     <!-- 1. Header Mahasiswa Info Card -->
-                    <div class="bg-slate-900 text-white rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-                        <div class="flex items-center gap-3.5">
-                            <div class="w-11 h-11 rounded-2xl bg-orange-500 text-white font-black text-base flex items-center justify-center shadow-md shrink-0">
+                    <div class="bg-slate-900 text-white rounded-xl sm:rounded-2xl p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 shadow-sm">
+                        <div class="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0">
+                            <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-orange-500 text-white font-black text-sm sm:text-base flex items-center justify-center shadow-md shrink-0">
                                 ${stIdx + 1}
                             </div>
-                            <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h4 class="font-extrabold text-white text-base tracking-tight">${escapeHtml(st.nama)}</h4>
-                                    <span class="px-2.5 py-0.5 rounded-full bg-orange-600/60 border border-orange-400/40 text-[10px] font-mono font-bold text-orange-200">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                    <h4 class="font-extrabold text-white text-sm sm:text-base tracking-tight leading-snug">${escapeHtml(st.nama)}</h4>
+                                    <span class="px-2 py-0.5 rounded-full bg-orange-600/60 border border-orange-400/40 text-[10px] font-mono font-bold text-orange-200">
                                         NIM: ${escapeHtml(st.nim)}
                                     </span>
-                                    <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-400/40 text-[10px] font-bold text-indigo-200">
+                                    <span class="px-2 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-400/40 text-[10px] font-bold text-indigo-200">
                                         ${escapeHtml(st.prodi || 'Informatika')}
                                     </span>
                                 </div>
-                                <p class="text-xs text-slate-400 mt-1 flex items-center gap-3 flex-wrap">
+                                <div class="text-[11px] sm:text-xs text-slate-400 mt-1 sm:mt-1.5 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-wrap">
                                     <span><i class="fa-solid fa-user-tie text-orange-400 mr-1"></i> Wali: <strong>${escapeHtml(st.nama_dosen_wali || 'Dosen Wali')}</strong></span>
-                                    <span><i class="fa-solid fa-envelope text-slate-500 mr-1"></i> ${escapeHtml(st.email || '-')}</span>
-                                </p>
+                                    <span class="truncate max-w-[200px] sm:max-w-none"><i class="fa-solid fa-envelope text-slate-500 mr-1"></i> ${escapeHtml(st.email || '-')}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
+                        <div class="flex items-center gap-2 shrink-0 self-start md:self-center">
+                            <span class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-[11px] sm:text-xs font-bold flex items-center gap-1.5">
                                 <i class="fa-solid fa-circle-check text-emerald-400"></i> Lolos Wali &amp; LAA
                             </span>
                         </div>
                     </div>
 
                     <!-- 2. Usulan Judul TA (Utama, Bahasa Inggris & Alternatif) -->
-                    <div class="p-4 bg-orange-50/40 border border-orange-200/80 rounded-2xl space-y-3">
+                    <div class="p-3 sm:p-4 bg-orange-50/40 border border-orange-200/80 rounded-xl sm:rounded-2xl space-y-2.5 sm:space-y-3">
                         <div>
                             <span class="text-[10px] font-extrabold uppercase tracking-wider text-orange-700 block mb-1 flex items-center gap-1.5">
                                 <i class="fa-solid fa-star text-amber-500"></i> Usulan Judul 1 (Utama):
                             </span>
-                            <p class="text-xs font-bold text-slate-900 leading-relaxed bg-white p-3 rounded-xl border border-orange-200/90 shadow-2xs">
+                            <p class="text-xs font-bold text-slate-900 leading-relaxed bg-white p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-orange-200/90 shadow-2xs">
                                 ${escapeHtml(st.judul_1 || '-')}
                             </p>
                         </div>
@@ -1715,20 +1753,20 @@
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 block mb-1 flex items-center gap-1.5">
                                     <i class="fa-solid fa-language text-indigo-500"></i> Judul Tugas Akhir (Bahasa Inggris):
                                 </span>
-                                <p class="text-xs font-semibold italic text-slate-700 leading-relaxed bg-white/95 p-3 rounded-xl border border-indigo-100 shadow-2xs">
+                                <p class="text-xs font-semibold italic text-slate-700 leading-relaxed bg-white/95 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-indigo-100 shadow-2xs">
                                     "${escapeHtml(st.judul_en)}"
                                 </p>
                             </div>
                         ` : ''}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs">
                             ${st.judul_2 ? `
-                                <div class="bg-white/90 p-2.5 rounded-xl border border-slate-200">
+                                <div class="bg-white/90 p-2 sm:p-2.5 rounded-lg sm:rounded-xl border border-slate-200">
                                     <span class="text-[9px] font-bold text-slate-500 uppercase block mb-0.5">Judul Alternatif 2:</span>
                                     <p class="text-[11px] text-slate-700 font-medium">${escapeHtml(st.judul_2)}</p>
                                 </div>
                             ` : ''}
                             ${st.judul_3 ? `
-                                <div class="bg-white/90 p-2.5 rounded-xl border border-slate-200">
+                                <div class="bg-white/90 p-2 sm:p-2.5 rounded-lg sm:rounded-xl border border-slate-200">
                                     <span class="text-[9px] font-bold text-slate-500 uppercase block mb-0.5">Judul Alternatif 3:</span>
                                     <p class="text-[11px] text-slate-700 font-medium">${escapeHtml(st.judul_3)}</p>
                                 </div>
@@ -1738,25 +1776,25 @@
 
                     <!-- 3. Empat Berkas Persyaratan PDF (2x2 Grid) -->
                     <div>
-                        <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center justify-between mb-2.5 sm:mb-3">
                             <h5 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                                 <i class="fa-solid fa-folder-open text-orange-600"></i> 4 Berkas Persyaratan TA (Telah Diverifikasi LAA):
                             </h5>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                             ${docsHtml}
                         </div>
                     </div>
 
                     <!-- 4. Individual Plotting Dosen Pembimbing (Khusus Mahasiswa Ini) -->
-                    <div class="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/30 rounded-2xl border-2 border-indigo-200/90 shadow-sm space-y-4">
+                    <div class="p-3.5 sm:p-5 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/30 rounded-xl sm:rounded-2xl border-2 border-indigo-200/90 shadow-sm space-y-3 sm:space-y-4">
                         <div class="flex items-center justify-between">
-                            <h5 class="text-xs font-black text-indigo-950 uppercase tracking-wider flex items-center gap-2">
+                            <h5 class="text-xs font-black text-indigo-950 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
                                 <i class="fa-solid fa-chalkboard-user text-indigo-600 text-sm"></i>
                                 Plotting Dosen Pembimbing Mahasiswa #${stIdx + 1} (${escapeHtml((st.nama || '').split(' ')[0])})
                             </h5>
-                            <span class="text-[10px] text-indigo-600 font-bold bg-indigo-100/70 px-2.5 py-0.5 rounded-full">
-                                Disesuaikan per individu
+                            <span class="text-[10px] text-indigo-600 font-bold bg-indigo-100/70 px-2 sm:px-2.5 py-0.5 rounded-full">
+                                Individu
                             </span>
                         </div>
 
@@ -1767,7 +1805,7 @@
                             </div>
                         ` : ''}
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <!-- Slot 1: Pembimbing 1 -->
                             <div class="relative z-30" id="p1_wrapper_${stIdx}_1">
                                 <label class="text-xs font-bold text-slate-700 block mb-1.5">
@@ -1775,7 +1813,7 @@
                                 </label>
 
                                 <!-- Chip Preview -->
-                                <div id="p1_chip_${stIdx}_1" class="${p1Obj ? '' : 'hidden'} p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
+                                <div id="p1_chip_${stIdx}_1" class="${p1Obj ? '' : 'hidden'} p-2 sm:p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
                                     <div class="flex items-center gap-2 min-w-0">
                                         <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</div>
                                         <span id="p1_chip_name_${stIdx}_1" class="text-xs sm:text-sm font-bold text-indigo-950 truncate">${p1Obj ? escapeHtml(p1Obj.nama_dosen + ' (' + p1Obj.nip + ')') : ''}</span>
@@ -1785,12 +1823,12 @@
 
                                 <!-- Search Input Container -->
                                 <div id="p1_search_container_${stIdx}_1" class="${p1Obj ? 'hidden' : ''} relative">
-                                    <div class="flex items-center border border-slate-300 rounded-xl px-3.5 py-2.5 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
+                                    <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 sm:py-2.5 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
                                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
                                         <input type="text" id="p1_search_${stIdx}_1" onfocus="openP1MultiDosenDropdown(${stIdx}, 1)" onclick="openP1MultiDosenDropdown(${stIdx}, 1)" oninput="filterP1MultiDosen(${stIdx}, 1)" placeholder="Cari nama / NIP pembimbing 1..." class="w-full text-xs sm:text-sm font-semibold bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400" autocomplete="off">
                                         <button type="button" id="p1_clear_${stIdx}_1" onclick="clearP1MultiDosen(${stIdx}, 1)" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
                                     </div>
-                                    <div id="p1_dropdown_${stIdx}_1" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[150] max-h-56 overflow-y-auto custom-scrollbar p-1.5 divide-y divide-slate-100"></div>
+                                    <div id="p1_dropdown_${stIdx}_1" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[150] max-h-48 sm:max-h-56 overflow-y-auto custom-scrollbar p-1.5 divide-y divide-slate-100"></div>
                                 </div>
                             </div>
 
@@ -1801,7 +1839,7 @@
                                 </label>
 
                                 <!-- Chip Preview -->
-                                <div id="p1_chip_${stIdx}_2" class="${p2Obj ? '' : 'hidden'} p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
+                                <div id="p1_chip_${stIdx}_2" class="${p2Obj ? '' : 'hidden'} p-2 sm:p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl flex items-center justify-between shadow-2xs">
                                     <div class="flex items-center gap-2 min-w-0">
                                         <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</div>
                                         <span id="p1_chip_name_${stIdx}_2" class="text-xs sm:text-sm font-bold text-indigo-950 truncate">${p2Obj ? escapeHtml(p2Obj.nama_dosen + ' (' + p2Obj.nip + ')') : ''}</span>
@@ -1811,12 +1849,12 @@
 
                                 <!-- Search Input Container -->
                                 <div id="p1_search_container_${stIdx}_2" class="${p2Obj ? 'hidden' : ''} relative">
-                                    <div class="flex items-center border border-slate-300 rounded-xl px-3.5 py-2.5 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
+                                    <div class="flex items-center border border-slate-300 rounded-xl px-3 py-2 sm:py-2.5 bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 shadow-2xs">
                                         <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2 shrink-0"></i>
                                         <input type="text" id="p1_search_${stIdx}_2" onfocus="openP1MultiDosenDropdown(${stIdx}, 2)" onclick="openP1MultiDosenDropdown(${stIdx}, 2)" oninput="filterP1MultiDosen(${stIdx}, 2)" placeholder="Cari nama / NIP pembimbing 2..." class="w-full text-xs sm:text-sm font-semibold bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400" autocomplete="off">
                                         <button type="button" id="p1_clear_${stIdx}_2" onclick="clearP1MultiDosen(${stIdx}, 2)" class="hidden text-slate-400 hover:text-slate-600 text-xs ml-1 shrink-0"><i class="fa-solid fa-circle-xmark"></i></button>
                                     </div>
-                                    <div id="p1_dropdown_${stIdx}_2" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[150] max-h-56 overflow-y-auto custom-scrollbar p-1.5 divide-y divide-slate-100"></div>
+                                    <div id="p1_dropdown_${stIdx}_2" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[150] max-h-48 sm:max-h-56 overflow-y-auto custom-scrollbar p-1.5 divide-y divide-slate-100"></div>
                                 </div>
                             </div>
                         </div>
@@ -1828,7 +1866,7 @@
                                    value="${escapeHtml(st.catatan_koor || '')}" 
                                    oninput="if(window.p1BatchStudents[${stIdx}]) window.p1BatchStudents[${stIdx}].catatan_koor = this.value"
                                    placeholder="Tuliskan catatan / arahan spesifik untuk mahasiswa ini..." 
-                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs">
+                                   class="w-full px-3 py-2 sm:py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs">
                         </div>
                     </div>
 
@@ -2172,6 +2210,7 @@
     // =========================================================
     function renderTable() {
         const tbody = document.getElementById('tableBodyMhs');
+        const mobileContainer = document.getElementById('mobileStudentCards');
         const filtered = getFilteredMahasiswa();
 
         const totalRecords = filtered.length;
@@ -2196,11 +2235,20 @@
                     </td>
                 </tr>
             `;
+            if (mobileContainer) {
+                mobileContainer.innerHTML = `
+                    <div class="p-8 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs text-slate-400">
+                        <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300 block"></i>
+                        <p class="font-medium text-xs">Tidak ada data pengajuan yang ditemukan.</p>
+                    </div>
+                `;
+            }
             renderPagination(totalPages);
             return;
         }
 
         let html = '';
+        let mobileHtml = '';
         pageData.forEach((mhs, idx) => {
             const stKoor = mhs.status_approval_koor || 'Pending';
             const stWali = mhs.status_approval_wali || 'Pending';
@@ -2383,9 +2431,86 @@
                     </td>
                 </tr>
             `;
+
+            // Mobile Card Markup
+            mobileHtml += `
+                <div class="mobile-student-card bg-white rounded-2xl border ${isSelected ? 'border-orange-500 ring-2 ring-orange-400 bg-orange-50/20' : 'border-slate-200/90'} p-4 shadow-sm space-y-3 transition-all">
+                    <!-- Top Bar: Selection Checkbox + NIM & Name + Status Badge -->
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                            <div class="pt-0.5 shrink-0">
+                                ${isEligibleForKoor ? `
+                                    <input type="checkbox" 
+                                        class="row-select-checkbox w-4 h-4 rounded text-orange-600 focus:ring-orange-500 border-slate-300 cursor-pointer" 
+                                        value="${mhs.nim}" 
+                                        data-name="${escapeHtml(fullName)}" 
+                                        data-judul="${escapeHtml(judul)}"
+                                        data-stage="${escapeHtml(stage)}"
+                                        data-status="${escapeHtml(stKoor)}"
+                                        ${isSelected ? 'checked' : ''}
+                                        onchange="toggleRowSelect(this)">
+                                ` : `
+                                    <input type="checkbox" 
+                                        disabled 
+                                        class="w-4 h-4 rounded text-slate-300 border-slate-200 cursor-not-allowed bg-slate-100 opacity-40" 
+                                        title="${escapeHtml(disabledTitle)}">
+                                `}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-mono font-bold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">${mhs.nim}</span>
+                                    ${stageBadgeHtml}
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-sm mt-1 leading-snug truncate" title="${escapeHtml(fullName)}">
+                                    ${escapeHtml(fullName)}
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${statusBadgeHtml}
+                        </div>
+                    </div>
+
+                    <!-- Judul TA Box -->
+                    <div class="bg-slate-50/80 border border-slate-100 rounded-xl p-3 space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-bookmark text-orange-500"></i>
+                            <span>Usulan Judul TA (Utama)</span>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-700 leading-snug">
+                            ${escapeHtml(judul)}
+                        </p>
+                        ${mhs.judul_2 ? `
+                            <div class="pt-1.5 border-t border-slate-200/60 mt-1">
+                                <span class="text-[10px] font-medium text-slate-400">Alternatif:</span>
+                                <p class="text-[11px] text-slate-500 line-clamp-1 italic">${escapeHtml(mhs.judul_2)}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Dosen Pembimbing & Detail Info -->
+                    <div class="pt-1 border-t border-slate-100 text-xs">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Dosen Pembimbing:</span>
+                        ${pembimbingHtml}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                        <button type="button" onclick="openHistoryPlottingModal('Pembimbing', '${mhs.nim}')" class="h-9 px-3 rounded-xl bg-slate-100 hover:bg-orange-50 hover:text-orange-600 text-slate-600 border border-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition cursor-pointer shrink-0" title="Riwayat Plotting">
+                            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            <span>Histori</span>
+                        </button>
+                        <a href="${cfg.detailUrlPrefix}${mhs.nim}" class="flex-1 h-9 px-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm shadow-orange-500/25 transition">
+                            <span>Detail & Approval</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
         });
 
         tbody.innerHTML = html;
+        if (mobileContainer) mobileContainer.innerHTML = mobileHtml;
 
         const selectableCheckboxes = document.querySelectorAll('.row-select-checkbox:not(:disabled)');
         const selectAllEl = document.getElementById('selectAllCheckbox');
@@ -2871,6 +2996,7 @@
 
     function renderP2Table() {
         const tbody = document.getElementById('tableBodyP2');
+        const mobileContainer = document.getElementById('mobileP2Cards');
         if (!tbody) return;
 
         const filtered = getFilteredP2Mahasiswa();
@@ -2901,11 +3027,20 @@
                     </td>
                 </tr>
             `;
+            if (mobileContainer) {
+                mobileContainer.innerHTML = `
+                    <div class="py-12 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs text-slate-400">
+                        <i class="fa-solid fa-chalkboard-user text-3xl mb-2 text-slate-300 block"></i>
+                        <p class="font-medium text-xs">Tidak ada data mahasiswa preview 2 yang ditemukan.</p>
+                    </div>
+                `;
+            }
             renderP2Pagination(totalPages);
             return;
         }
 
         let html = '';
+        let mobileHtml = '';
         pageData.forEach((mhs, idx) => {
             const fullName = `${mhs.nama_depan || ''} ${mhs.nama_belakang || ''}`.trim();
             const judul = mhs.judul_1 || 'Belum Menentukan Judul';
@@ -3034,9 +3169,88 @@
                     </td>
                 </tr>
             `;
+
+            // Mobile Card Markup
+            mobileHtml += `
+                <div class="mobile-p2-card bg-white rounded-2xl border ${isSelected ? 'border-indigo-500 ring-2 ring-indigo-400 bg-indigo-50/20' : 'border-slate-200/90'} p-4 shadow-sm space-y-3 transition-all">
+                    <!-- Top Bar: Selection Checkbox + NIM & Name + Status Badge -->
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                            <div class="pt-0.5 shrink-0">
+                                <input type="checkbox" 
+                                    class="row-select-p2 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer" 
+                                    value="${mhs.nim}" 
+                                    data-name="${escapeHtml(fullName)}" 
+                                    data-judul="${escapeHtml(judul)}"
+                                    data-pemb1="${escapeHtml(pemb1)}"
+                                    data-pemb2="${escapeHtml(pemb2)}"
+                                    data-peng1="${escapeHtml(peng1)}"
+                                    data-peng2="${escapeHtml(peng2)}"
+                                    data-status="${escapeHtml(statusP2)}"
+                                    ${isSelected ? 'checked' : ''}
+                                    onchange="toggleRowSelectP2(this)">
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono font-bold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">${mhs.nim}</span>
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-sm mt-1 leading-snug truncate" title="${escapeHtml(fullName)}">
+                                    ${escapeHtml(fullName)}
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${statusBadge}
+                        </div>
+                    </div>
+
+                    <!-- Judul TA Box -->
+                    <div class="bg-slate-50/80 border border-slate-100 rounded-xl p-3 space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-bookmark text-indigo-500"></i>
+                            <span>Usulan Judul TA</span>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">
+                            ${escapeHtml(judul)}
+                        </p>
+                    </div>
+
+                    <!-- Pembimbing & Penguji Grid -->
+                    <div class="grid grid-cols-2 gap-2.5 pt-1 border-t border-slate-100 text-xs">
+                        <div class="bg-orange-50/40 border border-orange-100/80 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider block mb-1">
+                                <i class="fa-solid fa-user-tie text-[9px] mr-1"></i>Pembimbing
+                            </span>
+                            ${pembimbingHtml}
+                        </div>
+                        <div class="bg-indigo-50/40 border border-indigo-100/80 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block mb-1">
+                                <i class="fa-solid fa-user-check text-[9px] mr-1"></i>Penguji
+                            </span>
+                            ${pengujiHtml}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                        <button type="button" onclick="openHistoryPengujiModal('${mhs.nim}')" class="h-9 px-3 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 border border-slate-200 flex items-center justify-center gap-1.5 text-xs font-bold transition cursor-pointer shrink-0" title="Riwayat Penguji">
+                            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            <span>Histori</span>
+                        </button>
+                        <button type="button" onclick="openP2SingleModal('${mhs.nim}')" class="flex-1 h-9 px-3 ${(() => {
+                            const isReady = (peng1 && peng2) || (statusP2 === 'Penguji Ditetapkan');
+                            return isReady ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700';
+                        })()} text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm transition cursor-pointer">
+                            <span>${((peng1 && peng2) || (statusP2 === 'Penguji Ditetapkan')) ? 'Ubah Dosen Penguji' : 'Plot Dosen Penguji'}</span>
+                            <i class="fa-solid ${((peng1 && peng2) || (statusP2 === 'Penguji Ditetapkan')) ? 'fa-pen-to-square' : 'fa-arrow-right'} text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
         });
 
         tbody.innerHTML = html;
+        if (mobileContainer) mobileContainer.innerHTML = mobileHtml;
 
         const selectAllEl = document.getElementById('selectAllCheckboxP2');
         if (selectAllEl) {
@@ -3169,6 +3383,7 @@
             cb.checked = el.checked;
             const nim = cb.value;
             const row = cb.closest('tr');
+            const card = cb.closest('.mobile-p2-card');
             if (el.checked) {
                 state.p2SelectedStudents.set(nim, {
                     nim: nim,
@@ -3181,11 +3396,19 @@
                     row.classList.add('bg-indigo-50/70', 'border-l-4', 'border-l-indigo-600');
                     row.classList.remove('hover:bg-slate-50/80');
                 }
+                if (card) {
+                    card.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-400', 'bg-indigo-50/20');
+                    card.classList.remove('border-slate-200/90');
+                }
             } else {
                 state.p2SelectedStudents.delete(nim);
                 if (row) {
                     row.classList.remove('bg-indigo-50/70', 'border-l-4', 'border-l-indigo-600');
                     row.classList.add('hover:bg-slate-50/80');
+                }
+                if (card) {
+                    card.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-400', 'bg-indigo-50/20');
+                    card.classList.add('border-slate-200/90');
                 }
             }
         });
@@ -3215,6 +3438,21 @@
             }
         }
 
+        // Sync all checkboxes and cards with this nim
+        document.querySelectorAll(`.row-select-p2[value="${nim}"]`).forEach(c => {
+            c.checked = el.checked;
+            const card = c.closest('.mobile-p2-card');
+            if (card) {
+                if (el.checked) {
+                    card.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-400', 'bg-indigo-50/20');
+                    card.classList.remove('border-slate-200/90');
+                } else {
+                    card.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-400', 'bg-indigo-50/20');
+                    card.classList.add('border-slate-200/90');
+                }
+            }
+        });
+
         const pageCheckboxes = document.querySelectorAll('.row-select-p2');
         const allChecked = pageCheckboxes.length > 0 && Array.from(pageCheckboxes).every(c => c.checked);
         const selectAllEl = document.getElementById('selectAllCheckboxP2');
@@ -3236,20 +3474,21 @@
                 let chipsHtml = '';
                 let idx = 0;
                 state.p2SelectedStudents.forEach(st => {
-                    if (idx < 3) {
+                    if (idx < 2) {
                         chipsHtml += `
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 text-white rounded-lg text-xs font-semibold backdrop-blur-md">
-                                <i class="fa-solid fa-user-graduate text-[10px]"></i> ${escapeHtml(st.name.split(' ')[0])} (${st.nim})
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-white/15 border border-white/10 text-white rounded-md text-[11px] font-semibold backdrop-blur-md max-w-[140px] truncate">
+                                <i class="fa-solid fa-user-graduate text-[9px] shrink-0 text-indigo-300"></i>
+                                <span class="truncate">${escapeHtml(st.name.split(' ')[0])} (${st.nim})</span>
                             </span>
                         `;
                     }
                     idx++;
                 });
 
-                if (count > 3) {
+                if (count > 2) {
                     chipsHtml += `
-                        <span class="inline-flex items-center px-2 py-1 bg-white/30 text-white rounded-lg text-xs font-bold">
-                            +${count - 3} lainnya
+                        <span class="inline-flex items-center px-1.5 py-0.5 bg-white/25 text-white rounded-md text-[10px] font-bold shrink-0">
+                            +${count - 2} lainnya
                         </span>
                     `;
                 }
@@ -3271,6 +3510,11 @@
             if (row) {
                 row.classList.remove('bg-indigo-50/70', 'border-l-4', 'border-l-indigo-600');
                 row.classList.add('hover:bg-slate-50/80');
+            }
+            const card = cb.closest('.mobile-p2-card');
+            if (card) {
+                card.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-400', 'bg-indigo-50/20');
+                card.classList.add('border-slate-200/90');
             }
         });
         const selectAllEl = document.getElementById('selectAllCheckboxP2');
@@ -5706,6 +5950,7 @@
 
     window.renderSidangTable = function () {
         const tbody = document.getElementById('tbodySidang');
+        const mobileContainer = document.getElementById('mobileSidangCards');
         const selectAllCheckbox = document.getElementById('selectAllCheckboxSidang');
         const toolbarTotalEl = document.getElementById('sidangToolbarTotalCount');
         const pStart = document.getElementById('sidangPageStart');
@@ -5738,6 +5983,17 @@
                     </td>
                 </tr>
             `;
+            if (mobileContainer) {
+                mobileContainer.innerHTML = `
+                    <div class="py-12 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs text-slate-400">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300"></i>
+                            <span class="text-xs font-semibold text-slate-500">Tidak ada data mahasiswa sidang yang sesuai filter</span>
+                            <button type="button" onclick="resetSidangMultiSearch()" class="mt-2 text-xs font-bold text-amber-600 hover:underline">Reset Filter</button>
+                        </div>
+                    </div>
+                `;
+            }
             if (pStart) pStart.innerText = '0';
             if (pEnd) pEnd.innerText = '0';
             if (pTot) pTot.innerText = '0';
@@ -5751,6 +6007,7 @@
         }
 
         let html = '';
+        let mobileHtml = '';
         let allPageSelected = pageItems.length > 0;
         let anyPageSelected = false;
 
@@ -5914,9 +6171,95 @@
                     </td>
                 </tr>
             `;
+
+            // Mobile Card Markup
+            mobileHtml += `
+                <div class="mobile-sidang-card bg-white rounded-2xl border ${isChecked ? 'border-amber-500 ring-2 ring-amber-400 bg-amber-50/20' : 'border-slate-200/90'} p-4 shadow-sm space-y-3 transition-all">
+                    <!-- Top Bar: Selection Checkbox + NIM & Name + Status Badge -->
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                            <div class="pt-0.5 shrink-0">
+                                <input type="checkbox" 
+                                    class="row-select-sidang w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 cursor-pointer" 
+                                    value="${row.nim}" 
+                                    ${isChecked ? 'checked' : ''}
+                                    onchange="toggleRowSelectSidang(this)">
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-mono font-bold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">${row.nim}</span>
+                                    ${peminatanBadge}
+                                </div>
+                                <h4 class="font-bold text-slate-800 text-sm mt-1 leading-snug truncate cursor-pointer hover:text-amber-600" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" title="${escapeHtml(fullName)}">
+                                    ${escapeHtml(fullName)}
+                                </h4>
+                                ${nilaiBadge}
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${statusBadge}
+                        </div>
+                    </div>
+
+                    <!-- Judul TA Box -->
+                    <div class="bg-slate-50/80 border border-slate-100 rounded-xl p-3 space-y-1">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-bookmark text-amber-600"></i>
+                            <span>Usulan Judul TA</span>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">
+                            ${escapeHtml(judul)}
+                        </p>
+                    </div>
+
+                    <!-- Waktu & Ruangan Sidang Banner -->
+                    <div class="rounded-xl p-2.5 ${isTerjadwal ? 'bg-amber-50/60 border border-amber-200/80 text-amber-950' : 'bg-slate-50 border border-slate-200/60 text-slate-500'} flex items-center justify-between gap-2 flex-wrap text-xs">
+                        <div class="space-y-0.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider ${isTerjadwal ? 'text-amber-700' : 'text-slate-400'} block">Waktu Sidang:</span>
+                            ${waktuDisplay}
+                        </div>
+                        <div class="space-y-0.5 text-right">
+                            <span class="text-[10px] font-bold uppercase tracking-wider ${isTerjadwal ? 'text-cyan-700' : 'text-slate-400'} block">Ruangan:</span>
+                            ${ruanganDisplay}
+                        </div>
+                    </div>
+
+                    <!-- Pembimbing & Penguji Grid -->
+                    <div class="grid grid-cols-2 gap-2.5 pt-1 border-t border-slate-100 text-xs">
+                        <div class="bg-orange-50/30 border border-orange-100/70 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider block mb-1">
+                                <i class="fa-solid fa-user-tie text-[9px] mr-1"></i>Pembimbing
+                            </span>
+                            ${pembimbingHtml}
+                        </div>
+                        <div class="bg-indigo-50/30 border border-indigo-100/70 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block mb-1">
+                                <i class="fa-solid fa-user-check text-[9px] mr-1"></i>Penguji
+                            </span>
+                            ${pengujiHtml}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                        <button type="button" onclick="openHistorySidangModal('${escapeHtml(row.nim)}')" class="h-9 px-2.5 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-600 border border-slate-200 flex items-center justify-center gap-1 text-xs font-bold transition cursor-pointer shrink-0" title="Histori Sidang">
+                            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                        </button>
+                        <button type="button" onclick="openModalPenilaianSidang('${escapeHtml(row.nim)}')" class="h-9 px-3 rounded-xl ${hasNilai ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-700 border border-slate-200'} flex items-center justify-center gap-1.5 text-xs font-bold transition cursor-pointer shrink-0" title="Penilaian Sidang">
+                            <i class="fa-solid ${hasNilai ? 'fa-award text-xs text-emerald-600' : 'fa-clipboard-check text-xs'}"></i>
+                            <span>${hasNilai ? 'Nilai (' + escapeHtml(row.grade_sidang || 'A') + ')' : 'Nilai'}</span>
+                        </button>
+                        <button type="button" onclick="openModalSingleSidang('${escapeHtml(row.nim)}')" class="flex-1 h-9 px-3 ${isTerjadwal ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700' : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'} text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer">
+                            <span>${isTerjadwal ? 'Ubah Jadwal' : 'Jadwalkan'}</span>
+                            <i class="fa-solid ${isTerjadwal ? 'fa-pen-to-square' : 'fa-calendar-plus'} text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
         });
 
         tbody.innerHTML = html;
+        if (mobileContainer) mobileContainer.innerHTML = mobileHtml;
 
         if (selectAllCheckbox) {
             selectAllCheckbox.checked = allPageSelected && pageItems.length > 0;
@@ -6010,6 +6353,21 @@
             }
         }
 
+        // Sync all checkboxes and cards with this nim
+        document.querySelectorAll(`.row-select-sidang[value="${nim}"]`).forEach(c => {
+            c.checked = checkbox.checked;
+            const card = c.closest('.mobile-sidang-card');
+            if (card) {
+                if (checkbox.checked) {
+                    card.classList.add('border-amber-500', 'ring-2', 'ring-amber-400', 'bg-amber-50/20');
+                    card.classList.remove('border-slate-200/90');
+                } else {
+                    card.classList.remove('border-amber-500', 'ring-2', 'ring-amber-400', 'bg-amber-50/20');
+                    card.classList.add('border-slate-200/90');
+                }
+            }
+        });
+
         const pageCheckboxes = document.querySelectorAll('.row-select-sidang');
         const allChecked = pageCheckboxes.length > 0 && Array.from(pageCheckboxes).every(c => c.checked);
         const selectAllEl = document.getElementById('selectAllCheckboxSidang');
@@ -6027,6 +6385,7 @@
             const nim = cb.value;
             const student = (state.sidangList || []).find(s => s.nim == nim);
             const row = cb.closest('tr');
+            const card = cb.closest('.mobile-sidang-card');
 
             if (isChecked) {
                 if (student) state.sidangSelectedStudents.set(nim, student);
@@ -6034,11 +6393,19 @@
                     row.classList.add('bg-amber-50/70', 'border-l-4', 'border-l-amber-600');
                     row.classList.remove('hover:bg-slate-50/80');
                 }
+                if (card) {
+                    card.classList.add('border-amber-500', 'ring-2', 'ring-amber-400', 'bg-amber-50/20');
+                    card.classList.remove('border-slate-200/90');
+                }
             } else {
                 state.sidangSelectedStudents.delete(nim);
                 if (row) {
                     row.classList.remove('bg-amber-50/70', 'border-l-4', 'border-l-amber-600');
                     row.classList.add('hover:bg-slate-50/80');
+                }
+                if (card) {
+                    card.classList.remove('border-amber-500', 'ring-2', 'ring-amber-400', 'bg-amber-50/20');
+                    card.classList.add('border-slate-200/90');
                 }
             }
         });
@@ -6054,6 +6421,11 @@
             if (row) {
                 row.classList.remove('bg-amber-50/70', 'border-l-4', 'border-l-amber-600');
                 row.classList.add('hover:bg-slate-50/80');
+            }
+            const card = cb.closest('.mobile-sidang-card');
+            if (card) {
+                card.classList.remove('border-amber-500', 'ring-2', 'ring-amber-400', 'bg-amber-50/20');
+                card.classList.add('border-slate-200/90');
             }
         });
         const selectAll = document.getElementById('selectAllCheckboxSidang');
@@ -9681,6 +10053,66 @@
         }
     };
 
+    /**
+     * Mobile Stats Card Horizontal Slider Controls
+     */
+    window.scrollToStatSlideTab = function(sliderId, indicatorsId, index, activeColorClass) {
+        const slider = document.getElementById(sliderId);
+        if (!slider) return;
+        const items = slider.querySelectorAll('.stats-slide-item');
+        if (items[index]) {
+            items[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            window.updateStatsIndicatorsTab(indicatorsId, index, activeColorClass);
+        }
+    };
+
+    window.updateStatsIndicatorsTab = function(indicatorsId, activeIndex, activeColorClass) {
+        const container = document.getElementById(indicatorsId);
+        if (!container) return;
+        const dots = container.querySelectorAll('.stats-indicator-dot');
+        dots.forEach((dot, idx) => {
+            if (idx === activeIndex) {
+                dot.className = `stats-indicator-dot h-1.5 w-6 rounded-full ${activeColorClass} transition-all duration-300 border-0 p-0`;
+            } else {
+                dot.className = 'stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0';
+            }
+        });
+    };
+
+    function initStatsSliderListeners() {
+        const sliders = [
+            { id: 'statsCardsSliderTab1', ind: 'statsSliderIndicatorsTab1', color: 'bg-brand-500' },
+            { id: 'statsCardsSliderTab2', ind: 'statsSliderIndicatorsTab2', color: 'bg-indigo-600' },
+            { id: 'statsCardsSliderTab3', ind: 'statsSliderIndicatorsTab3', color: 'bg-amber-600' }
+        ];
+
+        sliders.forEach(s => {
+            const el = document.getElementById(s.id);
+            if (!el) return;
+            let scrollTimeout;
+            el.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const items = el.querySelectorAll('.stats-slide-item');
+                    if (!items.length) return;
+                    const scrollLeft = el.scrollLeft;
+                    const containerCenter = scrollLeft + el.clientWidth / 2;
+                    let closestIndex = 0;
+                    let minDiff = Infinity;
+                    items.forEach((item, idx) => {
+                        const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+                        const diff = Math.abs(containerCenter - itemCenter);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestIndex = idx;
+                        }
+                    });
+                    window.updateStatsIndicatorsTab(s.ind, closestIndex, s.color);
+                }, 50);
+            }, { passive: true });
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         updateFilterBadge();
         renderTable();
@@ -9692,6 +10124,7 @@
         initP2SlotDragEvents();
         initSidangDatePickers();
         fetchMasterRubrikList();
+        initStatsSliderListeners();
         startRealtimeSync();
     });
 
