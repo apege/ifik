@@ -271,8 +271,10 @@ class Mahasiswa_model extends CI_Model {
         
         $results = $this->db->get()->result_array();
 
-        // Fallback: If no student matches specific NIP filter, load all TA registered students for Bimbingan review
-        if (empty($results)) {
+        // Fallback hanya untuk Pembimbing (posisi 1 atau 2):
+        // jika tidak ada mahasiswa yang match, kembalikan semua mahasiswa TA.
+        // Untuk Penguji (posisi 3 atau 4), tidak ada fallback agar tampil kosong.
+        if (empty($results) && in_array($posisi, [1, 2])) {
             $this->db->select($select);
             $this->db->from('pendaftaran_ta pt');
             $this->db->join('users u', 'u.nidn_nim = pt.nim', 'left');

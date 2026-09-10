@@ -622,21 +622,23 @@ class Mahasiswa extends CI_Controller {
         
         $pembimbing_penguji = $this->Mahasiswa_model->get_pembimbing_penguji($nim);
 
-        
         // Riwayat tiap tahapan preview
         $data['riwayat_preview1'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
         $data['riwayat_preview2'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 2');
         $data['riwayat_preview3'] = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 3');
+        $data['riwayat_sidang']   = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Sidang');
 
         // Total upload count
         $data['upload_count_p1'] = count($data['riwayat_preview1']);
         $data['upload_count_p2'] = count($data['riwayat_preview2']);
         $data['upload_count_p3'] = count($data['riwayat_preview3']);
+        $data['upload_count_sidang'] = count($data['riwayat_sidang']);
 
         // Status terbaru
         $data['latest_p1'] = $data['riwayat_preview1'][0] ?? null;
         $data['latest_p2'] = $data['riwayat_preview2'][0] ?? null;
         $data['latest_p3'] = $data['riwayat_preview3'][0] ?? null;
+        $data['latest_sidang'] = $data['riwayat_sidang'][0] ?? null;
 
         // Ambil Data Pembimbing & Penguji Asli dari Database
         $data['pembimbing_1'] = !empty($pembimbing_penguji['pembimbing_1']) ? $pembimbing_penguji['pembimbing_1'] : '';
@@ -766,10 +768,134 @@ class Mahasiswa extends CI_Controller {
         $this->upload_preview();
     }
 
+    // ============================================================
+    // UPLOAD PREVIEW 3 (3 FILE) - AJAX & FALLBACK
+    // ============================================================
+    public function upload_preview3() {
+        $this->upload_preview3_ajax();
+    }
+
+    public function upload_preview3_ajax() {
+        header('Content-Type: application/json');
+
+        $nim = $this->_get_current_nim();
+        $tahap = 'Preview 3';
+
+        $upload_dir = './uploads/preview_ta/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config = [
+            'upload_path'   => $upload_dir,
+            'allowed_types' => 'pdf|doc|docx',
+            'max_size'      => 10240, // 10MB
+        ];
+
+        $this->load->library('upload');
+
+        // Upload file sitasi
+        $config['file_name'] = 'PREVIEW3_SITASI_' . $nim . '_' . time();
+        $file_sitasi = $this->_do_upload('file_sitasi', $config);
+
+        // Upload file bimbingan
+        $config['file_name'] = 'PREVIEW3_BIMBINGAN_' . $nim . '_' . time();
+        $file_bimbingan = $this->_do_upload('file_bimbingan', $config);
+
+        // Upload file persyaratan
+        $config['file_name'] = 'PREVIEW3_PERSYARATAN_' . $nim . '_' . time();
+        $file_persyaratan = $this->_do_upload('file_persyaratan', $config);
+
+        if (!$file_sitasi || !$file_bimbingan || !$file_persyaratan) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Gagal upload. Pastikan ketiga file terisi dan format PDF/DOC/DOCX maksimal 10MB. ' . $this->upload->display_errors('', '')
+            ]);
+            return;
+        }
+
+        $catatan = trim($this->input->post('catatan_mahasiswa') ?? '');
+
+        $data_insert = [
+            'nim'                => $nim,
+            'tahap_preview'      => $tahap,
+            'file_draft'         => $file_sitasi, // WAJIB: kolom file_draft NOT NULL
+            'file_sitasi'        => $file_sitasi,
+            'file_bimbingan'     => $file_bimbingan,
+            'file_persyaratan'   => $file_persyaratan,
+            'catatan_mahasiswa'  => $catatan,
+            'status_pembimbing'  => 'Pending',
+            'created_at'         => date('Y-m-d H:i:s')
+        ];
+
+        $this->Mahasiswa_model->save_upload_preview($data_insert);
+
+        echo json_encode([
+            'status'  => true,
+            'message' => 'Berkas Preview 3 berhasil diunggah. Menunggu review Pembimbing 1.'
+        ]);
+    }
+
+    // ============================================================
+    // UPLOAD SIDANG (1 FILE) - AJAX & FALLBACK
+    // ============================================================
+    public function upload_sidang() {
+        $this->upload_sidang_ajax();
+    }
+
+    public function upload_sidang_ajax() {
+        header('Content-Type: application/json');
+
+        $nim = $this->_get_current_nim();
+
+        $upload_dir = './uploads/sidang/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+
+        $config = [
+            'upload_path'   => $upload_dir,
+            'allowed_types' => 'pdf|doc|docx',
+            'max_size'      => 10240, // 10MB
+            'file_name'     => 'SIDANG_' . $nim . '_' . time(),
+        ];
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload('file_sidang')) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Gagal upload berkas sidang: ' . $this->upload->display_errors('', '')
+            ]);
+            return;
+        }
+
+        $upload_data = $this->upload->data();
+        $file_sidang = $upload_data['file_name'];
+        $catatan = trim($this->input->post('catatan_sidang') ?? '');
+
+        $data_insert = [
+            'nim'                => $nim,
+            'tahap_preview'      => 'Sidang',
+            'file_draft'         => $file_sidang, // dipakai sebagai fallback di view
+            'catatan_mahasiswa'  => $catatan,
+            'status_pembimbing'  => 'Pending',
+            'created_at'         => date('Y-m-d H:i:s')
+        ];
+
+        $this->Mahasiswa_model->save_upload_preview($data_insert);
+
+        echo json_encode([
+            'status'  => true,
+            'message' => 'Berkas Sidang Akhir berhasil diunggah.'
+        ]);
+    }
+
     // Endpoint for Dosen to submit review
     public function review_preview() {
-        $role_id = $this->session->userdata('role_id');
-        if ($role_id != 4) {
+        $role_id = (int) $this->session->userdata('role_id');
+        // Izinkan role_id 1 (Admin) dan 4 (Dosen)
+        if ($role_id != 4 && $role_id != 1) {
             redirect('mahasiswa/bimbingan');
             return;
         }
@@ -792,6 +918,18 @@ class Mahasiswa extends CI_Controller {
             );
             $this->Mahasiswa_model->update_review_preview($id, $data);
             $this->session->set_flashdata('success', 'Komentar Pembimbing 2 berhasil disimpan.');
+        } else if ($posisi == 3) {
+            $data = array(
+                'catatan_penguji_1' => $catatan
+            );
+            $this->Mahasiswa_model->update_review_preview($id, $data);
+            $this->session->set_flashdata('success', 'Catatan Penguji 1 berhasil disimpan.');
+        } else if ($posisi == 4) {
+            $data = array(
+                'catatan_penguji_2' => $catatan
+            );
+            $this->Mahasiswa_model->update_review_preview($id, $data);
+            $this->session->set_flashdata('success', 'Catatan Penguji 2 berhasil disimpan.');
         }
 
         redirect('mahasiswa/bimbingan?posisi=' . $posisi);
@@ -1104,13 +1242,6 @@ class Mahasiswa extends CI_Controller {
             $previews = $this->Mahasiswa_model->get_riwayat_preview($student['nim'], $tahap);
             $latest = !empty($previews) ? $previews[0] : null;
             
-            // Smart fallback: If current tab stage has no upload yet, fetch latest preview across any stage (P1/P2/P3)
-            if (empty($latest)) {
-                $all_previews = $this->Mahasiswa_model->get_riwayat_preview($student['nim']);
-                if (!empty($all_previews)) {
-                    $latest = $all_previews[0];
-                }
-            }
 
             $rekomen = $this->Rekomendasi_model->get_latest_submission($student['nim']);
             
@@ -1218,8 +1349,9 @@ class Mahasiswa extends CI_Controller {
     // AJAX Endpoint: Review dosen tanpa reload
     public function review_preview_ajax() {
         header('Content-Type: application/json');
-        $role_id = $this->session->userdata('role_id');
-        if ($role_id != 4) {
+        $role_id = (int) $this->session->userdata('role_id');
+        // Izinkan role_id 1 (Admin) dan 4 (Dosen)
+        if ($role_id != 4 && $role_id != 1) {
             echo json_encode(['status' => false, 'message' => 'Unauthorized']);
             return;
         }
@@ -1271,8 +1403,9 @@ class Mahasiswa extends CI_Controller {
     // AJAX Endpoint: Review massal dosen
     public function review_preview_batch_ajax() {
         header('Content-Type: application/json');
-        $role_id = $this->session->userdata('role_id');
-        if ($role_id != 4) {
+        $role_id = (int) $this->session->userdata('role_id');
+        // Izinkan role_id 1 (Admin) dan 4 (Dosen)
+        if ($role_id != 4 && $role_id != 1) {
             echo json_encode(['status' => false, 'message' => 'Unauthorized']);
             return;
         }
@@ -1336,8 +1469,9 @@ class Mahasiswa extends CI_Controller {
         header('X-Accel-Buffering: no'); 
         session_write_close(); // FIX FOR MAX EXECUTION TIME
 
-        $role_id = $this->session->userdata('role_id');
-        if ($role_id != 4) {
+        $role_id = (int) $this->session->userdata('role_id');
+        // Izinkan role_id 1 (Admin) dan 4 (Dosen)
+        if ($role_id != 4 && $role_id != 1) {
             echo "data: " . json_encode(['status' => false, 'message' => 'Unauthorized']) . "\n\n";
             ob_flush(); flush(); exit;
         }
@@ -1393,17 +1527,21 @@ class Mahasiswa extends CI_Controller {
             $riwayat_p1 = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 1');
             $riwayat_p2 = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 2');
             $riwayat_p3 = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Preview 3');
+            $riwayat_sidang = $this->Mahasiswa_model->get_riwayat_preview($nim, 'Sidang');
 
             $data = [
                 'riwayat_p1' => $riwayat_p1,
                 'riwayat_p2' => $riwayat_p2,
                 'riwayat_p3' => $riwayat_p3,
+                'riwayat_sidang' => $riwayat_sidang,
                 'latest_p1' => $riwayat_p1[0] ?? null,
                 'latest_p2' => $riwayat_p2[0] ?? null,
                 'latest_p3' => $riwayat_p3[0] ?? null,
+                'latest_sidang' => $riwayat_sidang[0] ?? null,
                 'upload_count_p1' => count($riwayat_p1),
                 'upload_count_p2' => count($riwayat_p2),
                 'upload_count_p3' => count($riwayat_p3),
+                'upload_count_sidang' => count($riwayat_sidang),
                 'is_p1_app' => (bool)(($riwayat_p1[0]['status_pembimbing'] ?? null) == 'Approved'),
                 'is_p2_app' => (bool)(($riwayat_p2[0]['status_pembimbing'] ?? null) == 'Approved'),
                 'is_p3_app' => (bool)(($riwayat_p3[0]['status_pembimbing'] ?? null) == 'Approved'),
@@ -1675,4 +1813,3 @@ class Mahasiswa extends CI_Controller {
         exit;
     }
 }
-

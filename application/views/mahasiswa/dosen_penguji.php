@@ -4,25 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Dashboard Dosen Penguji — IFIK Portal'; ?></title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Google Fonts Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('assets/css/style.css'); ?>?v=<?= time(); ?>">
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- TinyMCE -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         body, button, input, textarea, select {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         }
 
-        /* Unified Multi-Search Pill Component */
         .search-pill-container { position: relative; display: flex; align-items: center; gap: 8px; width: 100%; }
         .unified-search-pill {
             display: flex; align-items: center; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px;
@@ -58,7 +52,6 @@
         }
         .btn-search-cari:hover { transform: scale(1.03); box-shadow: 0 4px 14px rgba(234,88,12,0.4); }
 
-        /* Rotating Border Table */
         @keyframes spinRotatingBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .table-rotating-border-wrap {
             position: relative; border-radius: 16px; padding: 2px; overflow: hidden;
@@ -80,289 +73,270 @@
         .badge-danger { background-color: #ffe4e6; color: #9f1239; border-color: #fb7185; }
         .badge-secondary { background-color: #f1f5f9; color: #475569; border-color: #cbd5e1; }
 
-        /* Hover Preview Panel */
+        /* Pagination */
+        .pagination-btn {
+            width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 10px; border: 1.5px solid #e2e8f0; background: #fff; color: #475569;
+            font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: all 0.15s ease;
+        }
+        .pagination-btn:hover:not(:disabled):not(.active) { background: #fff7ed; border-color: #fed7aa; color: #ea580c; }
+        .pagination-btn.active {
+            background: linear-gradient(135deg, #ea580c, #f97316); border-color: #ea580c;
+            color: #fff; box-shadow: 0 3px 10px rgba(234,88,12,0.3); cursor: default;
+        }
+        .pagination-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .pagination-ellipsis { padding: 0 4px; color: #94a3b8; font-weight: 800; font-size: 0.75rem; }
+
+        @media (max-width: 768px) {
+            .table-rotating-border-inner { overflow-x: visible !important; }
+            .table-custom-rounded thead { display: none !important; }
+            .table-custom-rounded,
+            .table-custom-rounded tbody { display: block !important; width: 100% !important; }
+            .table-custom-rounded tr {
+                display: block !important;
+                margin: 0 0 0.85rem 0 !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 16px !important;
+                padding: 0.85rem 0.75rem 0.6rem !important;
+                background: #fff !important;
+                box-shadow: 0 4px 14px -4px rgba(15,23,42,0.08) !important;
+                position: relative !important;
+            }
+            .table-custom-rounded tbody tr:last-child { margin-bottom: 0 !important; }
+            .table-custom-rounded tbody tr:hover { background: #fff !important; }
+            .table-custom-rounded td {
+                display: block !important;
+                width: 100% !important;
+                padding: 0.45rem 0.4rem !important;
+                text-align: left !important;
+                border-bottom: 1px dashed #f1f5f9 !important;
+                position: relative !important;
+                padding-left: 40% !important;
+                min-height: 36px !important;
+                font-size: 0.8rem !important;
+                vertical-align: top !important;
+            }
+            .table-custom-rounded td:last-child { border-bottom: none !important; padding-bottom: 0.2rem !important; }
+            .table-custom-rounded td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0.4rem;
+                top: 0.5rem;
+                width: 36%;
+                font-weight: 800;
+                font-size: 0.62rem;
+                text-transform: uppercase;
+                color: #64748b;
+                letter-spacing: 0.05em;
+                line-height: 1.2;
+            }
+            .table-custom-rounded td.dosen-cb-cell {
+                position: absolute !important;
+                top: 0.7rem !important;
+                right: 0.7rem !important;
+                width: auto !important;
+                padding: 0 !important;
+                border: none !important;
+                padding-left: 0 !important;
+                min-height: 0 !important;
+                z-index: 2 !important;
+            }
+            .table-custom-rounded td.dosen-cb-cell::before { display: none !important; }
+            .table-custom-rounded td.mhs-info-cell {
+                padding: 0.2rem 2.6rem 0.6rem 0.4rem !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                margin-bottom: 0.3rem;
+            }
+            .table-custom-rounded td.mhs-info-cell::before { display: none !important; }
+            .table-custom-rounded td.aksi-cell {
+                text-align: right !important;
+                padding: 0.6rem 0.4rem 0.2rem !important;
+                padding-left: 0.4rem !important;
+                border-top: 1px solid #f1f5f9 !important;
+                border-bottom: none !important;
+                margin-top: 0.3rem;
+            }
+            .table-custom-rounded td.aksi-cell::before { display: none !important; }
+            .table-custom-rounded td[colspan] {
+                display: block !important;
+                padding: 2rem 1rem !important;
+                padding-left: 1rem !important;
+                text-align: center !important;
+                border: none !important;
+                min-height: 0 !important;
+            }
+            .table-custom-rounded td[colspan]::before { display: none !important; }
+            .table-custom-rounded tbody tr:has(td[colspan]) {
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+            }
+            .table-custom-rounded td .badge { font-size: 0.7rem; }
+            .table-custom-rounded td button { font-size: 0.7rem !important; }
+            .table-custom-rounded td.aksi-cell > div { justify-content: flex-end !important; flex-wrap: wrap; }
+        }
+
         #hoverPreviewPanel {
-            position: fixed;
-            z-index: 999;
-            width: 520px;
-            max-width: 95vw;
-            background: #fff;
+            position: fixed; z-index: 999; width: 520px; max-width: 95vw; background: #fff;
             border-radius: 20px;
             box-shadow: 0 24px 64px -12px rgba(234,88,12,0.18), 0 8px 24px rgba(71,85,105,0.10);
-            border: 1.5px solid #fed7aa;
-            overflow: hidden;
-            display: none;
-            pointer-events: auto;
-            transition: opacity 0.18s, transform 0.18s;
+            border: 1.5px solid #fed7aa; overflow: hidden; display: none;
+            pointer-events: auto; transition: opacity 0.18s, transform 0.18s;
         }
         #hoverPreviewPanel.visible { display: block; }
         #hoverPreviewPanel .panel-header {
             background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-            color: #fff;
-            padding: 14px 18px;
-            font-weight: 800;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #fff; padding: 14px 18px; font-weight: 800; font-size: 13px;
+            display: flex; align-items: center; gap: 8px;
         }
         #hoverPreviewPanel .pdf-frame-wrap {
-            background: #f1f5f9;
-            border-bottom: 1px solid #e2e8f0;
-            height: 200px;
-            position: relative;
-            overflow: hidden;
+            background: #f1f5f9; border-bottom: 1px solid #e2e8f0; height: 200px;
+            position: relative; overflow: hidden;
         }
-        #hoverPreviewPanel .pdf-frame-wrap iframe {
-            width: 100%; height: 100%; border: none;
-        }
+        #hoverPreviewPanel .pdf-frame-wrap iframe { width: 100%; height: 100%; border: none; }
         #hoverPreviewPanel .pdf-no-file {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 600;
-            flex-direction: column;
-            gap: 8px;
+            display: flex; align-items: center; justify-content: center; height: 200px;
+            color: #94a3b8; font-size: 13px; font-weight: 600;
+            flex-direction: column; gap: 8px;
         }
-        #hoverPreviewPanel .panel-body { 
-            padding: 16px 18px 18px; 
-            max-height: 400px;
-            overflow-y: auto;
-        }
+        #hoverPreviewPanel .panel-body { padding: 16px 18px 18px; max-height: 400px; overflow-y: auto; }
         #hoverPreviewPanel .panel-label {
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #94a3b8;
-            margin-bottom: 6px;
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 6px;
         }
 
-        /* ==========================================================
-           FLOATING NON-BLOCKING PREVIEW (Layout Kiri 30% - Kanan 70%)
-           ========================================================== */
-        @keyframes popInCard {
-            0% { opacity: 0; transform: scale(0.9) translateY(24px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes fadeInSlideRight {
-            0% { opacity: 0; transform: scale(0.95) translateX(60px); }
-            100% { opacity: 1; transform: scale(1) translateX(0); }
-        }
-        @keyframes fadeInDownSmooth {
-            0% { opacity: 0; transform: translateY(-16px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        .animate-pop-in {
-            animation: popInCard 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
-        }
-        .animate-preview-in {
-            animation: fadeInSlideRight 1.1s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
-        }
-        .animate-bar-in {
-            animation: fadeInDownSmooth 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
-        }
+        @keyframes popInCard { 0% { opacity: 0; transform: scale(0.9) translateY(24px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes fadeInSlideRight { 0% { opacity: 0; transform: scale(0.95) translateX(60px); } 100% { opacity: 1; transform: scale(1) translateX(0); } }
+        @keyframes fadeInDownSmooth { 0% { opacity: 0; transform: translateY(-16px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-pop-in { animation: popInCard 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; }
+        .animate-preview-in { animation: fadeInSlideRight 1.1s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; }
+        .animate-bar-in { animation: fadeInDownSmooth 0.8s cubic-bezier(0.2, 0.9, 0.2, 1) forwards; }
 
-        /* Container utama floating: flex row, pop up kiri, preview kanan */
         #lihatBerkasContainer {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 50;
-            display: none;
-            align-items: stretch;
-            justify-content: center;
-            padding: 1rem;
-            gap: 1.5rem;
-            overflow: hidden;
-            background: rgba(15, 23, 42, 0.15);
-            backdrop-filter: blur(0.5px);
+            position: fixed; inset: 0; pointer-events: none; z-index: 50; display: none;
+            align-items: stretch; justify-content: center; padding: 1rem; gap: 1.5rem;
+            overflow: hidden; background: rgba(15, 23, 42, 0.15); backdrop-filter: blur(0.5px);
         }
-        #lihatBerkasContainer.active {
-            display: flex;
-        }
+        #lihatBerkasContainer.active { display: flex; }
 
-        /* Wrapper kiri: daftar mahasiswa (30% lebar) - pointer-events auto agar scroll berfungsi */
         #wrapperDaftarMhs {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 30%;
-            min-width: 320px;
-            max-width: 420px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            flex-shrink: 0;
-            padding: 0.25rem;
-            max-height: 90vh;
-            pointer-events: auto;
+            display: flex; flex-direction: column; gap: 1rem;
+            width: 30%; min-width: 320px; max-width: 420px;
+            overflow-y: auto; overflow-x: hidden; flex-shrink: 0;
+            padding: 0.25rem; max-height: 90vh; pointer-events: none;
         }
-        #wrapperDaftarMhs::-webkit-scrollbar {
-            width: 4px;
-        }
-        #wrapperDaftarMhs::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.5);
-            border-radius: 9999px;
-        }
+        #wrapperDaftarMhs::-webkit-scrollbar { width: 4px; }
+        #wrapperDaftarMhs::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); border-radius: 9999px; }
 
-        /* Wrapper kanan: preview (70% lebar) - pointer-events auto agar scroll horizontal berfungsi */
         #wrapperPreviewBerkas {
-            display: none;
-            flex: 1;
-            overflow-x: auto;
-            overflow-y: hidden;
-            gap: 1rem;
-            padding: 0.25rem;
-            align-items: stretch;
-            max-height: 90vh;
-            pointer-events: auto;
+            display: none; flex: 1; overflow-x: auto; overflow-y: hidden; gap: 1rem;
+            padding: 0.25rem; align-items: stretch; max-height: 90vh; pointer-events: none;
         }
-        #wrapperPreviewBerkas.active {
-            display: flex;
-        }
-        #wrapperPreviewBerkas::-webkit-scrollbar {
-            height: 4px;
-        }
-        #wrapperPreviewBerkas::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.5);
-            border-radius: 9999px;
-        }
+        #wrapperPreviewBerkas.active { display: flex; }
+        #wrapperPreviewBerkas::-webkit-scrollbar { height: 4px; }
+        #wrapperPreviewBerkas::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); border-radius: 9999px; }
 
-        /* Kartu mahasiswa */
         .student-card-item {
-            pointer-events: auto;
-            background: white;
-            border-radius: 1.5rem;
+            pointer-events: auto; background: white; border-radius: 1.5rem;
             box-shadow: 0 20px 40px -12px rgba(0,0,0,0.25);
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            width: 100%;
-            max-height: 90vh;
+            border: 1px solid #e2e8f0; overflow: hidden; display: flex;
+            flex-direction: column; flex-shrink: 0; width: 100%; max-height: 90vh;
         }
 
-        /* Kartu preview */
         .preview-card-item {
-            pointer-events: auto;
-            background: white;
-            border-radius: 1.5rem;
+            pointer-events: auto; background: white; border-radius: 1.5rem;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            width: 520px;
-            max-width: 70vw;
-            height: 85vh;
-            max-height: 90vh;
+            border: 1px solid #e2e8f0; overflow: hidden; display: flex;
+            flex-direction: column; flex-shrink: 0;
+            width: 520px; max-width: 70vw; height: 85vh; max-height: 90vh;
         }
         .preview-card-item .preview-body {
-            flex: 1;
-            min-height: 0;
-            position: relative;
-            background: #e2e8f0;
-            overflow: hidden;
+            flex: 1; min-height: 0; position: relative; background: #e2e8f0; overflow: hidden;
         }
         .preview-card-item .preview-body iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            position: relative;
-            z-index: 10;
+            width: 100%; height: 100%; border: 0; position: relative; z-index: 10;
         }
         .preview-card-item .preview-body .loader {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
-            background: #e2e8f0;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            font-weight: 600;
-            gap: 0.5rem;
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            z-index: 5; background: #e2e8f0; color: #94a3b8;
+            font-size: 0.75rem; font-weight: 600; gap: 0.5rem;
         }
-        .preview-card-item .preview-body .loader i {
-            font-size: 1.5rem;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .preview-card-item .preview-header {
-            flex-shrink: 0;
-        }
-        .preview-card-item .preview-footer {
-            flex-shrink: 0;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
+        .preview-card-item .preview-body .loader i { font-size: 1.5rem; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .preview-card-item .preview-header { flex-shrink: 0; }
+        .preview-card-item .preview-footer { flex-shrink: 0; gap: 0.5rem; flex-wrap: wrap; }
         .btn-3d-orange {
-            background: linear-gradient(135deg, #ea580c, #f97316);
-            color: #fff;
-            border: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(234,88,12,0.3);
+            background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; border: none;
+            transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(234,88,12,0.3);
         }
-        .btn-3d-orange:hover {
-            transform: scale(1.03);
-            box-shadow: 0 6px 20px rgba(234,88,12,0.4);
-        }
+        .btn-3d-orange:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(234,88,12,0.4); }
 
-        /* Modal komentar TinyMCE */
         #commentActionModal {
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(4px);
-            padding: 1rem;
+            position: fixed; inset: 0; z-index: 1000; display: none;
+            align-items: center; justify-content: center;
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); padding: 1rem;
         }
-        #commentActionModal.active {
-            display: flex;
-        }
+        #commentActionModal.active { display: flex; }
         #commentActionModal .modal-box {
-            background: white;
-            border-radius: 2rem;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
+            background: white; border-radius: 2rem; max-width: 600px; width: 100%;
+            max-height: 90vh; overflow: hidden;
             box-shadow: 0 40px 80px -20px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
         #commentActionModal .modal-header {
-            padding: 1.25rem 1.5rem;
-            background: #1e293b;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
+            padding: 1.25rem 1.5rem; background: #1e293b; color: white;
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+            transition: background 0.25s ease;
         }
-        #commentActionModal .modal-body {
-            padding: 1.5rem;
-            overflow-y: auto;
-            flex: 1;
-        }
+        /* Tema warna header modal sesuai aksi / role */
+        #commentActionModal .modal-header.p1-approve-theme { background: linear-gradient(135deg, #047857, #10b981); }
+        #commentActionModal .modal-header.p1-revision-theme { background: linear-gradient(135deg, #9f1239, #f43f5e); }
+        #commentActionModal .modal-header.u1-theme { background: linear-gradient(135deg, #047857, #10b981); }
+        #commentActionModal .modal-header.u2-theme { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+        #commentActionModal .modal-header.p2-theme { background: linear-gradient(135deg, #4338ca, #6366f1); }
+        #commentActionModal .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
         #commentActionModal .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            flex-shrink: 0;
+            padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0;
+            display: flex; justify-content: flex-end; gap: 0.75rem; flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            #lihatBerkasContainer {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                justify-content: flex-start !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                padding: 0.75rem !important;
+                gap: 0.75rem !important;
+                background: rgba(15, 23, 42, 0.25) !important;
+            }
+            #wrapperDaftarMhs {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                overflow-y: visible !important;
+                padding: 0 !important;
+            }
+            #wrapperPreviewBerkas {
+                width: 100% !important;
+                flex: none !important;
+                max-height: none !important;
+                overflow-x: auto !important;
+                overflow-y: visible !important;
+                padding: 0 !important;
+            }
+            .preview-card-item {
+                width: 86vw !important;
+                max-width: 86vw !important;
+                height: 55vh !important;
+                max-height: 55vh !important;
+            }
+            .student-card-item {
+                max-height: none !important;
+            }
         }
     </style>
 </head>
@@ -383,7 +357,6 @@
             </div>
         <?php endif; ?>
 
-        <!-- Hero Card Dosen -->
         <div class="bg-gradient-to-r from-[#9a3412] via-[#ea580c] to-[#c2410c] rounded-3xl p-7 sm:p-9 relative overflow-hidden shadow-2xl text-white">
             <div class="relative z-10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8">
                 <div class="space-y-4 max-w-3xl">
@@ -416,14 +389,11 @@
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="flex flex-wrap gap-4 border-b border-slate-200 pb-4">
-                <button onclick="switchDosenTab('preview1')" id="dosenTab1" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-orange-100 text-orange-700 border border-orange-300">Preview 1</button>
-                <button onclick="switchDosenTab('preview2')" id="dosenTab2" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200">Preview 2</button>
+                <button onclick="switchDosenTab('preview2')" id="dosenTab2" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-orange-100 text-orange-700 border border-orange-300">Preview 2</button>
                 <button onclick="switchDosenTab('preview3')" id="dosenTab3" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200">Preview 3</button>
             </div>
 
-            <!-- Filter Cards -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4 mb-2" id="filterCardsContainer">
                 <div onclick="setDosenFilter('all')" id="fCard_all" class="p-3 rounded-xl border border-orange-300 bg-orange-50 cursor-pointer transition text-center shadow-xs">
                     <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Semua</div>
@@ -447,9 +417,7 @@
                 </div>
             </div>
 
-            <!-- Unified Table Container -->
             <div id="dosenTableContainer" class="space-y-4">
-                <!-- Search Pill -->
                 <div class="relative search-pill-container" id="multiSearchWrapper">
                     <div class="unified-search-pill" style="position: relative;">
                         <div class="relative" id="searchCatWrap">
@@ -478,8 +446,23 @@
                     </div>
                 </div>
 
-                <!-- Table with Rotating Conic-Gradient Border -->
-                <div class="table-rotating-border-wrap mt-4">
+                <!-- PAGINATION (DIPINDAH KE ATAS TABEL) -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1 px-1" id="paginationControls">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <label class="text-[11px] font-bold text-slate-600 whitespace-nowrap">Tampilkan:</label>
+                        <select id="perPageSelect" onchange="changePerPage()" class="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-bold bg-white focus:ring-orange-500 focus:border-orange-500 cursor-pointer">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="all">Semua</option>
+                        </select>
+                        <span class="text-[11px] text-slate-500 font-medium" id="paginationInfo"></span>
+                    </div>
+                    <div class="flex items-center gap-1 flex-wrap" id="paginationButtons"></div>
+                </div>
+
+                <div class="table-rotating-border-wrap mt-2">
                     <span class="table-rotating-border-spin"></span>
                     <div class="table-rotating-border-inner overflow-x-auto">
                         <table class="table-custom-rounded text-left text-sm w-full">
@@ -504,7 +487,6 @@
                 </div>
             </div>
 
-            <!-- Modal Review -->
             <div id="reviewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeReviewModal()"></div>
                 <div class="relative bg-white rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl transform transition-all">
@@ -518,12 +500,9 @@
                     </div>
 
                     <form id="formReview" action="<?= site_url('mahasiswa/review_preview') ?>" method="POST" class="space-y-4">
-
                         <input type="hidden" name="id_preview" id="modalIdPreview" value="">
                         <input type="hidden" name="posisi" value="<?= $model_posisi ?>">
                         
-
-
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Catatan / Feedback Anda</label>
                             <textarea name="catatan_pembimbing" id="modalCatatan" rows="4" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm font-medium" placeholder="Tuliskan feedback atau arahan revisi di sini..."></textarea>
@@ -536,21 +515,17 @@
                 </div>
             </div>
 
-            <!-- Floating Non-Blocking Container: Kiri Pop Up (30%), Kanan Preview (70%) -->
             <div id="lihatBerkasContainer" class="fixed inset-0 pointer-events-none z-50 flex items-stretch p-3 sm:p-5 gap-4 overflow-hidden" style="display: none;">
-                <!-- KIRI: Daftar Mahasiswa (30%) -->
                 <div id="wrapperDaftarMhs" class="flex flex-col gap-3 w-[30%] min-w-[320px] max-w-[420px] overflow-y-auto flex-shrink-0"></div>
-                <!-- KANAN: Preview (70%) dengan scroll horizontal -->
                 <div id="wrapperPreviewBerkas" class="flex-1 overflow-x-auto overflow-y-hidden gap-4 flex items-stretch hidden"></div>
             </div>
 
-            <!-- Modal Komentar TinyMCE untuk ACC / Revisi -->
             <div id="commentActionModal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-4">
                 <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeCommentActionModal()"></div>
                 <div class="modal-box relative">
-                    <div class="modal-header">
+                    <div class="modal-header" id="commentActionHeader">
                         <h3 class="text-sm font-extrabold flex items-center gap-2">
-                            <i class="bi bi-chat-text text-orange-400"></i>
+                            <i class="bi bi-chat-text text-orange-400" id="commentActionIcon"></i>
                             <span id="commentActionTitle">Beri Komentar</span>
                         </h3>
                         <button type="button" onclick="closeCommentActionModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
@@ -573,7 +548,6 @@
         </div>
     </main>
 
-    <!-- Hover Preview Panel -->
     <div id="hoverPreviewPanel">
         <div class="panel-header">
             <i class="bi bi-person-circle"></i>
@@ -587,7 +561,6 @@
         </div>
     </div>
 
-    <!-- Comment Modal (Unified 4-tab) -->
     <div id="commentModal" class="hidden fixed inset-0 z-[200] items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeCommentModal()"></div>
         <div class="relative bg-white rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
@@ -597,7 +570,6 @@
             </h3>
             <p class="text-xs text-slate-500 font-semibold mb-4" id="commentModalName">Nama Mahasiswa</p>
             
-            <!-- Tabs for 4 roles -->
             <div class="flex flex-wrap gap-1.5 mb-4 border-b border-slate-200 pb-3" id="commentTabsContainer">
                 <button onclick="switchCommentTab('p1')" id="commentTabP1" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-orange-100 text-orange-700 border border-orange-300 transition">Pembimbing 1</button>
                 <button onclick="switchCommentTab('p2')" id="commentTabP2" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition">Pembimbing 2</button>
@@ -609,7 +581,6 @@
         </div>
     </div>
 
-    <!-- Floating Batch Action Bar -->
     <div id="dosenBatchActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white px-5 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 hidden flex-wrap items-center gap-4 transition-all duration-300">
         <div class="flex items-center gap-2">
             <span class="w-7 h-7 rounded-lg bg-orange-500 text-white font-black text-xs flex items-center justify-center shadow-xs" id="dosenSelectedCountBadge">0</span>
@@ -629,7 +600,6 @@
         </div>
     </div>
 
-    <!-- Multi-Student Batch Review Modal Popup -->
     <div id="dosenBatchReviewModal" class="hidden fixed inset-0 z-[100] overflow-y-auto p-4 sm:p-6">
         <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeDosenBatchModal()"></div>
         <div class="relative bg-white rounded-3xl w-full max-w-6xl mx-auto flex flex-col overflow-hidden shadow-2xl my-4 sm:my-8">
@@ -656,17 +626,25 @@
         // ============================================================
         // GLOBAL VARIABLES
         // ============================================================
-        let currentTahap = 'Preview 1';
+        let currentTahap = 'Preview 2';
         let bimbinganData = [];
         let currentDosenFilter = 'all';
         let searchCategory = 'all';
         let activeKeyword = '';
 
+        // Pagination
+        let currentPage = 1;
+        let perPage = 25;
+
         window.activeLihatBerkasIndices = [];
         window.activePreviews = [];
 
-        // Variabel untuk modal komentar
-        let pendingAction = null; // { nim, fileIndex, action }
+        let pendingAction = null;
+
+        // Model posisi (3 = U1, 4 = U2) & Display posisi (1 = U1, 2 = U2)
+        const MODEL_POSISI = <?= (int) $model_posisi ?>;
+        const DISPLAY_POSISI = <?= (int) $posisi ?>;
+        const IS_U1 = MODEL_POSISI === 3;
 
         // ============================================================
         // SEARCH FUNCTIONS
@@ -684,6 +662,7 @@
         }
         function doSearch() {
             activeKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            currentPage = 1;
             renderTable();
         }
 
@@ -698,19 +677,73 @@
             }
             tinymce.init({
                 selector: '#commentActionTextarea',
-                menubar: false,
-                statusbar: false,
+                menubar: false, statusbar: false,
                 plugins: 'lists link',
                 toolbar: 'bold italic underline | bullist numlist | link',
-                height: 200,
-                skin: 'oxide',
+                height: 200, skin: 'oxide',
                 setup: function (editor) {
                     commentEditor = editor;
-                    editor.on('change', function () {
-                        tinymce.triggerSave();
-                    });
+                    editor.on('change', function () { tinymce.triggerSave(); });
                 }
             });
+        }
+
+        // ============================================================
+        // PAGINATION
+        // ============================================================
+        function changePerPage() {
+            const val = document.getElementById('perPageSelect').value;
+            perPage = val === 'all' ? 999999 : parseInt(val);
+            currentPage = 1;
+            renderTable();
+        }
+        function goToPage(page) {
+            if (page < 1) return;
+            currentPage = page;
+            renderTable();
+            const top = document.getElementById('dosenTableContainer');
+            if (top) top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function renderPagination(totalItems, startIdx, endIdx) {
+            const info = document.getElementById('paginationInfo');
+            const btns = document.getElementById('paginationButtons');
+            if (!info || !btns) return;
+
+            if (totalItems === 0) {
+                info.textContent = 'Tidak ada data';
+                btns.innerHTML = '';
+                return;
+            }
+
+            info.textContent = `Menampilkan ${startIdx + 1}-${endIdx} dari ${totalItems}`;
+
+            if (perPage >= 999999) { btns.innerHTML = ''; return; }
+
+            const totalPages = Math.ceil(totalItems / perPage);
+            let html = '';
+
+            html += `<button class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>`;
+
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            if (endPage - startPage + 1 < maxButtons) startPage = Math.max(1, endPage - maxButtons + 1);
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) html += `<span class="pagination-ellipsis">…</span>`;
+            }
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="pagination-ellipsis">…</span>`;
+                html += `<button class="pagination-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+
+            btns.innerHTML = html;
         }
 
         // ============================================================
@@ -730,17 +763,15 @@
             let btnClassInactive = 'px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'.split(' ');
             let btnClassActive = 'px-5 py-2.5 rounded-xl font-bold text-sm bg-orange-100 text-orange-700 border border-orange-300'.split(' ');
 
-            ['dosenTab1', 'dosenTab2', 'dosenTab3'].forEach(id => {
+            ['dosenTab2', 'dosenTab3'].forEach(id => {
                 let el = document.getElementById(id);
-                el.classList.remove(...btnClassActive);
-                el.classList.add(...btnClassInactive);
+                if (el) {
+                    el.classList.remove(...btnClassActive);
+                    el.classList.add(...btnClassInactive);
+                }
             });
 
-            if(tab === 'preview1') {
-                currentTahap = 'Preview 1';
-                document.getElementById('dosenTab1').classList.remove(...btnClassInactive);
-                document.getElementById('dosenTab1').classList.add(...btnClassActive);
-            } else if(tab === 'preview2') {
+            if(tab === 'preview2') {
                 currentTahap = 'Preview 2';
                 document.getElementById('dosenTab2').classList.remove(...btnClassInactive);
                 document.getElementById('dosenTab2').classList.add(...btnClassActive);
@@ -749,12 +780,12 @@
                 document.getElementById('dosenTab3').classList.remove(...btnClassInactive);
                 document.getElementById('dosenTab3').classList.add(...btnClassActive);
             }
+            currentPage = 1;
             fetchBimbinganData();
         }
 
         function fetchBimbinganData(silent = false) {
             const tbody = document.getElementById('bimbinganTableBody');
-            const posisi = <?= $posisi ?>;
             if(!silent) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-slate-500"><i class="bi bi-arrow-repeat animate-spin text-xl"></i> Memuat data...</td></tr>';
             
             fetch(`<?= site_url('mahasiswa/ajax_get_dosen_bimbingan') ?>?model_posisi=<?= $model_posisi ?>&tahap=${encodeURIComponent(currentTahap)}`)
@@ -790,6 +821,7 @@
 
         function setDosenFilter(filter) {
             currentDosenFilter = filter;
+            currentPage = 1;
             ['all', 'approved', 'pending', 'revision', 'empty'].forEach(f => {
                 let card = document.getElementById('fCard_' + f);
                 card.classList.remove('border-orange-300', 'bg-orange-50', 'shadow-xs');
@@ -821,16 +853,14 @@
         }
 
         // ============================================================
-        // RENDER TABLE
+        // RENDER TABLE (with pagination)
         // ============================================================
         function renderTable() {
             const tbody = document.getElementById('bimbinganTableBody');
             const keyword = activeKeyword;
 
-            let html = '';
-            let count = 0;
-
-            bimbinganData.forEach((mhs, index) => {
+            const filteredData = [];
+            bimbinganData.forEach((mhs, originalIndex) => {
                 let match = false;
                 if (!keyword) {
                     match = true;
@@ -845,7 +875,7 @@
                             mhs.nama_mahasiswa.toLowerCase().includes(keyword) ||
                             (mhs.judul && mhs.judul.toLowerCase().includes(keyword));
                 }
-                if(!match) return;
+                if (!match) return;
 
                 if (currentDosenFilter !== 'all') {
                     if (currentDosenFilter === 'empty' && mhs.latest_preview) return;
@@ -857,29 +887,34 @@
                         if (currentDosenFilter === 'pending' && (st === 'Approved' || st === 'Revision')) return;
                     }
                 }
+                filteredData.push({ mhs, originalIndex });
+            });
 
-                count++;
-                
+            const totalItems = filteredData.length;
+
+            let startIdx = 0;
+            let endIdx = totalItems;
+            if (perPage < 999999 && totalItems > 0) {
+                const totalPages = Math.ceil(totalItems / perPage);
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
+                startIdx = (currentPage - 1) * perPage;
+                endIdx = Math.min(startIdx + perPage, totalItems);
+            }
+            const pageData = filteredData.slice(startIdx, endIdx);
+
+            let html = '';
+            pageData.forEach(({ mhs, originalIndex }) => {
+                const index = originalIndex;
+
                 let previewHtml = `<span class="text-slate-400 italic text-xs">Belum ada berkas</span>`;
                 let timeHtml = `-`;
                 let statusBadge = `<span class="badge badge-secondary"><i class="bi bi-dash"></i> Kosong</span>`;
-                let rekomenBadge = `<button onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer whitespace-nowrap"><i class="bi bi-plus-circle-fill"></i> Rekomendasi</button>`;
-
-                if (mhs.rekomendasi) {
-                    if (mhs.rekomendasi.recommendation_type === 'sidang') {
-                        rekomenBadge = `<span onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-800 border border-purple-300 rounded-xl text-xs font-extrabold cursor-pointer hover:bg-purple-200 transition whitespace-nowrap shadow-2xs" title="Klik untuk ubah rekomendasi"><i class="bi bi-mortarboard-fill text-purple-600"></i> Sidang TA</span>`;
-                    } else if (mhs.rekomendasi.recommendation_type === 'non_sidang') {
-                        const titleText = mhs.rekomendasi.jalur_title || 'Non-Sidang';
-                        rekomenBadge = `<span onclick="openRekomendasiModal('${mhs.nim}', '${mhs.latest_preview ? mhs.latest_preview.id : ''}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl text-xs font-extrabold cursor-pointer hover:bg-amber-200 transition whitespace-nowrap shadow-2xs" title="Jalur: ${titleText} (Klik untuk ubah)"><i class="bi bi-award-fill text-amber-600 text-sm"></i> ${titleText}</span>`;
-                    }
-                }
 
                 let btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs font-bold cursor-not-allowed border border-slate-200">Belum ada file</button>`;
                 
                 if (mhs.latest_preview) {
                     const latest = mhs.latest_preview;
-                    const fileUrl = `<?= base_url('uploads/preview_ta/') ?>${latest.file_draft}`;
-                    
                     const btnClass = latest.file_missing ? 'bg-rose-100 text-rose-700 opacity-80' : 'btn-3d-orange scale-95 hover:scale-100';
                     const icon = latest.file_missing ? 'bi-exclamation-triangle-fill' : 'fa-solid fa-folder-open';
                     const label = latest.file_missing ? 'File Hilang' : 'Lihat Berkas';
@@ -895,7 +930,7 @@
                     else if (st === 'Revision') statusBadge = `<span class="badge badge-danger"><i class="bi bi-x-circle-fill"></i> Revisi</span>`;
                     else statusBadge = `<span class="badge badge-warning"><i class="bi bi-clock-fill"></i> Pending</span>`;
                     
-                    let aksiBtnText = <?= $posisi ?> == 1 ? 'Review' : 'Komentari';
+                    let aksiBtnText = DISPLAY_POSISI == 2 ? 'Review' : 'Komentari';
                     
                     if (latest.file_missing) {
                         btnHtml = `<button disabled class="px-3 py-1.5 bg-slate-100 text-rose-500 rounded-lg text-xs font-bold cursor-not-allowed border border-rose-200 whitespace-nowrap" title="File fisik tidak ditemukan"><i class="bi bi-exclamation-triangle"></i> File Hilang</button>`;
@@ -941,8 +976,8 @@
 
                 html += `
                     <tr class="hover:bg-slate-50 transition-colors" data-index="${index}">
-                        <td class="py-4 px-4 text-center">${checkboxHtml}</td>
-                        <td class="py-4 px-4">
+                        <td class="dosen-cb-cell py-4 px-4 text-center">${checkboxHtml}</td>
+                        <td class="mhs-info-cell py-4 px-4">
                             <div class="relative inline-block group">
                                 <span
                                     class="font-bold text-slate-900 cursor-pointer hover:text-orange-600 transition-colors underline decoration-dotted decoration-orange-300 underline-offset-2"
@@ -953,20 +988,21 @@
                             <div class="text-xs text-slate-500 font-mono mt-0.5">${mhs.nim}</div>
                             <div class="text-[11px] text-slate-600 mt-1 line-clamp-1 italic">${mhs.judul || '-'}</div>
                         </td>
-                        <td class="py-4 px-4">${previewHtml}</td>
-                        <td class="py-4 px-4 text-center">${timeHtml}</td>
-                        <td class="py-4 px-4 text-center">${statusBadge}</td>
-                        <td class="py-4 px-4 text-center">${commentBtnHtml}</td>
-                        <td class="py-4 px-4 pr-6 text-right">${btnHtml}</td>
+                        <td data-label="Berkas" class="py-4 px-4">${previewHtml}</td>
+                        <td data-label="Waktu Upload" class="py-4 px-4 text-center">${timeHtml}</td>
+                        <td data-label="Status" class="py-4 px-4 text-center">${statusBadge}</td>
+                        <td data-label="Komentar" class="py-4 px-4 text-center">${commentBtnHtml}</td>
+                        <td class="aksi-cell py-4 px-4 pr-6 text-right">${btnHtml}</td>
                     </tr>
                 `;
             });
             
-            if(count === 0) {
+            if(pageData.length === 0) {
                 html = `<tr><td colspan="7" class="text-center py-10 text-slate-500 font-medium">Tidak ada data mahasiswa ditemukan.</td></tr>`;
             }
 
             tbody.innerHTML = html;
+            renderPagination(totalItems, startIdx, endIdx);
             rebindDosenCheckboxes();
             updateTableButtonHighlights();
         }
@@ -991,7 +1027,7 @@
                 document.getElementById('modalStatus').value = latest.status_pembimbing || 'Pending';
             }
             
-            let catatanDosen = <?= $posisi ?> === 1 ? (latest.catatan_penguji_1 || '') : (latest.catatan_penguji_2 || '');
+            let catatanDosen = DISPLAY_POSISI === 1 ? (latest.catatan_penguji_1 || '') : (latest.catatan_penguji_2 || '');
             
             if (tinymce.get('modalCatatan')) {
                 tinymce.get('modalCatatan').setContent(catatanDosen);
@@ -1029,8 +1065,7 @@
                 const formData = new FormData(this);
                 
                 fetch(this.action + '_ajax', {
-                    method: 'POST',
-                    body: formData,
+                    method: 'POST', body: formData,
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(res => res.json())
@@ -1059,7 +1094,7 @@
         let dosenEventSource = null;
         function startDosenSSE() {
             if (dosenEventSource) dosenEventSource.close();
-            const posisi = <?= $posisi ?>;
+            const posisi = DISPLAY_POSISI;
             dosenEventSource = new EventSource(`<?= site_url('mahasiswa/sse_dosen_bimbingan') ?>?posisi=${posisi}`);
             
             dosenEventSource.onmessage = function(event) {
@@ -1151,7 +1186,7 @@
         }
 
         function renderBatchModal(checkedCbs) {
-            const posisi = <?= $posisi ?>;
+            const posisi = DISPLAY_POSISI;
             let html = '';
 
             checkedCbs.forEach((cb, i) => {
@@ -1223,16 +1258,12 @@
             tinymce.remove('.batch-textarea');
             tinymce.init({
                 selector: '.batch-textarea',
-                menubar: false,
-                statusbar: false,
+                menubar: false, statusbar: false,
                 plugins: 'lists link',
                 toolbar: 'bold italic underline | bullist numlist | link',
-                height: 200,
-                skin: 'oxide',
+                height: 200, skin: 'oxide',
                 setup: function (editor) {
-                    editor.on('change', function () {
-                        tinymce.triggerSave();
-                    });
+                    editor.on('change', function () { tinymce.triggerSave(); });
                 }
             });
         }
@@ -1253,8 +1284,7 @@
             if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Menyimpan...'; }
 
             fetch('<?= site_url('mahasiswa/review_preview_ajax') ?>', {
-                method: 'POST',
-                body: fd,
+                method: 'POST', body: fd,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(r => r.json())
@@ -1300,11 +1330,10 @@
                     const ids = Array.from(checkedCbs).map(cb => cb.value);
                     const formData = new FormData();
                     ids.forEach(id => formData.append('ids[]', id));
-                    formData.append('posisi', <?= $posisi ?>);
+                    formData.append('posisi', DISPLAY_POSISI);
 
                     fetch('<?= site_url("mahasiswa/review_preview_batch_ajax") ?>', {
-                        method: 'POST',
-                        body: formData,
+                        method: 'POST', body: formData,
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
                     })
                     .then(res => res.json())
@@ -1325,9 +1354,7 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            startDosenSSE();
-        });
+        document.addEventListener('DOMContentLoaded', () => { startDosenSSE(); });
 
         // ============================================================
         // HOVER PREVIEW PANEL
@@ -1344,9 +1371,7 @@
                 const mhs = bimbinganData[index];
                 if (!mhs) return;
 
-                const posisi = <?= $posisi ?>;
                 const latest = mhs.latest_preview;
-
                 document.getElementById('hoverPanelName').textContent = mhs.nama_mahasiswa + ' (' + mhs.nim + ')';
 
                 const pdfWrap = document.getElementById('hoverPdfWrap');
@@ -1360,22 +1385,12 @@
                 const formWrap = document.getElementById('hoverFormWrap');
                 if (!latest) {
                     formWrap.innerHTML = `<p class="text-xs text-slate-500 italic">Tidak ada berkas untuk dikomentari.</p>`;
-                } else if (posisi === 1) {
-                    formWrap.innerHTML = `
-                        <div class="panel-label">Status Penilaian (P1)</div>
-                        <select id="hoverStatusSelect" class="w-full mb-3 p-2.5 rounded-xl border border-slate-300 focus:ring-orange-500 focus:border-orange-500 text-sm font-semibold">
-                            <option value="Approved" ${latest.status_pembimbing==='Approved'?'selected':''}>Disetujui (ACC)</option>
-                            <option value="Revision" ${latest.status_pembimbing==='Revision'?'selected':''}>Perlu Revisi</option>
-                        </select>
-                        <div class="panel-label">Komentar / Feedback</div>
-                        <textarea id="hoverCatatanTA" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 text-sm font-medium resize-none focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-500" placeholder="Tuliskan feedback...">${latest.catatan_pembimbing || ''}</textarea>
-                        <button onclick="submitHoverReview(${latest.id}, 1)" class="mt-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-md transition cursor-pointer"><i class="bi bi-send-fill mr-1"></i> Simpan Review</button>
-                    `;
                 } else {
+                    const catCurrent = IS_U1 ? latest.catatan_penguji_1 : latest.catatan_penguji_2;
                     formWrap.innerHTML = `
-                        <div class="panel-label">Komentar untuk P1</div>
-                        <textarea id="hoverCatatanTA" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 text-sm font-medium resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-500" placeholder="Tuliskan komentar untuk Pembimbing 1...">${latest.catatan_pembimbing_2 || ''}</textarea>
-                        <button onclick="submitHoverReview(${latest.id}, 2)" class="mt-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-xs shadow-md transition cursor-pointer"><i class="bi bi-send-fill mr-1"></i> Simpan Komentar</button>
+                        <div class="panel-label">Komentar untuk Penguji ${DISPLAY_POSISI}</div>
+                        <textarea id="hoverCatatanTA" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 text-sm font-medium resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-500" placeholder="Tuliskan komentar untuk penguji...">${catCurrent || ''}</textarea>
+                        <button onclick="submitHoverReview(${latest.id}, ${MODEL_POSISI})" class="mt-2 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-xs shadow-md transition cursor-pointer"><i class="bi bi-send-fill mr-1"></i> Simpan Komentar</button>
                     `;
                 }
 
@@ -1384,9 +1399,7 @@
                 let top = rect.bottom + window.scrollY + 8;
 
                 const panelW = 520;
-                if (left + panelW > window.innerWidth - 16) {
-                    left = window.innerWidth - panelW - 16;
-                }
+                if (left + panelW > window.innerWidth - 16) left = window.innerWidth - panelW - 16;
                 if (left < 8) left = 8;
 
                 const panelEstH = 480;
@@ -1401,16 +1414,12 @@
                 tinymce.remove('#hoverCatatanTA');
                 tinymce.init({
                     selector: '#hoverCatatanTA',
-                    menubar: false,
-                    statusbar: false,
+                    menubar: false, statusbar: false,
                     plugins: 'lists link',
                     toolbar: 'bold italic underline | bullist numlist | link',
-                    height: 150,
-                    skin: 'oxide',
+                    height: 150, skin: 'oxide',
                     setup: function (editor) {
-                        editor.on('change', function () {
-                            tinymce.triggerSave();
-                        });
+                        editor.on('change', function () { tinymce.triggerSave(); });
                     }
                 });
             }, 350);
@@ -1418,28 +1427,23 @@
 
         function scheduleHidePanel() {
             clearTimeout(hoverShowTimer);
-            hoverHideTimer = setTimeout(() => {
-                panel.classList.remove('visible');
-            }, 300);
+            hoverHideTimer = setTimeout(() => { panel.classList.remove('visible'); }, 300);
         }
 
         panel.addEventListener('mouseenter', () => clearTimeout(hoverHideTimer));
         panel.addEventListener('mouseleave', scheduleHidePanel);
 
-        function submitHoverReview(idPreview, posisi) {
+        function submitHoverReview(idPreview, posisiSubmit) {
             tinymce.triggerSave();
             const catatan = document.getElementById('hoverCatatanTA')?.value || '';
-            const status = posisi === 1 ? (document.getElementById('hoverStatusSelect')?.value || 'Pending') : null;
 
             const fd = new FormData();
             fd.append('id_preview', idPreview);
-            fd.append('posisi', posisi);
+            fd.append('posisi', posisiSubmit);
             fd.append('catatan_pembimbing', catatan);
-            if (status) fd.append('status_pembimbing', status);
 
             fetch('<?= site_url('mahasiswa/review_preview_ajax') ?>', {
-                method: 'POST',
-                body: fd,
+                method: 'POST', body: fd,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(r => r.json())
@@ -1458,7 +1462,6 @@
         // ============================================================
         // COMMENT MODAL
         // ============================================================
-        // Unified comment modal data store
         let _commentData = { p1: '', p2: '', u1: '', u2: '' };
         let _activeCommentTab = 'p1';
 
@@ -1471,7 +1474,6 @@
             document.getElementById('commentModalName').textContent = name;
             document.getElementById('commentModalTitle').innerHTML = '<i class="bi bi-chat-quote-fill text-violet-500"></i> Komentar Dosen';
             
-            // Default to first tab that has content, or p1
             if (_commentData.p1.trim()) _activeCommentTab = 'p1';
             else if (_commentData.p2.trim()) _activeCommentTab = 'p2';
             else if (_commentData.u1.trim()) _activeCommentTab = 'u1';
@@ -1499,21 +1501,15 @@
             
             for (const [key, elId] of Object.entries(tabs)) {
                 const el = document.getElementById(elId);
-                if (el) {
-                    el.className = activeClasses + ' ' + (key === tab ? colors[key].active : colors[key].inactive);
-                }
+                if (el) el.className = activeClasses + ' ' + (key === tab ? colors[key].active : colors[key].inactive);
             }
             
             const labels = { p1: 'Pembimbing 1', p2: 'Pembimbing 2', u1: 'Penguji 1', u2: 'Penguji 2' };
             const comment = _commentData[tab] || '';
-            if (comment.trim()) {
-                content.innerHTML = comment;
-            } else {
-                content.innerHTML = `<em class="text-slate-400">Belum ada komentar dari ${labels[tab]}.</em>`;
-            }
+            if (comment.trim()) content.innerHTML = comment;
+            else content.innerHTML = `<em class="text-slate-400">Belum ada komentar dari ${labels[tab]}.</em>`;
         }
 
-        // Legacy compat
         function showCommentModal(comment, name, pos) {
             const p1 = pos === 1 ? comment : '';
             const p2 = pos === 2 ? comment : '';
@@ -1527,45 +1523,83 @@
         }
 
         // ============================================================
-        // FUNGSI UNTUK ACC / REVISI (digunakan di pop up dan preview)
+        // COMMENT ACTION MODAL — dipakai untuk Komentar (U1/U2) & ACC/Revisi
         // ============================================================
         function handleFileAction(nim, fileIndex, action) {
+            // action: 'Comment' | 'Approved' | 'Revision'
             pendingAction = { nim, fileIndex, action };
             const mhs = bimbinganData.find(m => m.nim === nim);
             if (!mhs) return;
             const preview = mhs.riwayat_previews[fileIndex];
             if (!preview) return;
 
-            const title = action === 'Approved' ? 'Setujui Berkas' : 'Revisi Berkas';
-            const subtitle = action === 'Approved' 
-                ? 'Berikan komentar persetujuan (opsional)' 
-                : 'Berikan saran revisi (opsional)';
+            const header = document.getElementById('commentActionHeader');
+            const iconEl = document.getElementById('commentActionIcon');
+            const titleEl = document.getElementById('commentActionTitle');
+            const subtitleEl = document.getElementById('commentActionSubtitle');
+            const submitBtn = document.getElementById('commentActionSubmit');
 
-            document.getElementById('commentActionTitle').textContent = title;
-            document.getElementById('commentActionSubtitle').textContent = subtitle;
-            
-            const currentComment = preview.catatan_pembimbing || '';
-            if (commentEditor) {
-                commentEditor.setContent(currentComment);
+            // Reset kelas tema
+            if (header) header.classList.remove('p1-approve-theme', 'p1-revision-theme', 'u1-theme', 'u2-theme', 'p2-theme');
+
+            let currentComment = '';
+
+            if (action === 'Comment') {
+                // Penguji (U1 atau U2) - hanya simpan komentar, status tidak berubah
+                if (IS_U1) {
+                    if (header) header.classList.add('u1-theme');
+                    if (iconEl) iconEl.className = 'bi bi-chat-dots-fill text-emerald-100';
+                    currentComment = preview.catatan_penguji_1 || '';
+                } else {
+                    if (header) header.classList.add('u2-theme');
+                    if (iconEl) iconEl.className = 'bi bi-chat-dots-fill text-purple-100';
+                    currentComment = preview.catatan_penguji_2 || '';
+                }
+                if (titleEl) titleEl.textContent = `Komentar Penguji ${DISPLAY_POSISI}`;
+                if (subtitleEl) subtitleEl.textContent = 'Catatan ini bersifat opsional dan tidak mengubah status review mahasiswa.';
+                if (submitBtn) {
+                    submitBtn.className = IS_U1
+                        ? 'px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold shadow-md transition flex items-center gap-2 cursor-pointer'
+                        : 'px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 text-white font-bold shadow-md transition flex items-center gap-2 cursor-pointer';
+                    submitBtn.innerHTML = '<i class="bi bi-chat-dots-fill"></i> Simpan Komentar';
+                }
+            } else if (action === 'Approved') {
+                if (header) header.classList.add('p1-approve-theme');
+                if (iconEl) iconEl.className = 'bi bi-check-circle-fill text-emerald-100';
+                if (titleEl) titleEl.textContent = 'Setujui Berkas';
+                if (subtitleEl) subtitleEl.textContent = 'Berikan komentar persetujuan (opsional).';
+                currentComment = IS_U1 ? (preview.catatan_penguji_1 || '') : (preview.catatan_penguji_2 || '');
+                if (submitBtn) {
+                    submitBtn.className = 'px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold shadow-md transition flex items-center gap-2 cursor-pointer';
+                    submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> Simpan & Setujui';
+                }
             } else {
-                document.getElementById('commentActionTextarea').value = currentComment;
+                if (header) header.classList.add('p1-revision-theme');
+                if (iconEl) iconEl.className = 'bi bi-exclamation-triangle-fill text-rose-100';
+                if (titleEl) titleEl.textContent = 'Revisi Berkas';
+                if (subtitleEl) subtitleEl.textContent = 'Berikan saran revisi (opsional).';
+                currentComment = IS_U1 ? (preview.catatan_penguji_1 || '') : (preview.catatan_penguji_2 || '');
+                if (submitBtn) {
+                    submitBtn.className = 'px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold shadow-md transition flex items-center gap-2 cursor-pointer';
+                    submitBtn.innerHTML = '<i class="bi bi-send-fill"></i> Simpan & Minta Revisi';
+                }
             }
 
-            document.getElementById('commentActionModal').classList.add('active');
-            document.getElementById('commentActionModal').style.display = 'flex';
+            if (commentEditor) commentEditor.setContent(currentComment);
+            else document.getElementById('commentActionTextarea').value = currentComment;
 
-            document.getElementById('commentActionSubmit').onclick = function() {
-                submitFileAction();
-            };
+            const modal = document.getElementById('commentActionModal');
+            modal.classList.add('active');
+            modal.style.display = 'flex';
 
-            if (!commentEditor) {
-                initCommentTinyMCE();
-            }
+            submitBtn.onclick = function() { submitFileAction(); };
+            if (!commentEditor) initCommentTinyMCE();
         }
 
         function closeCommentActionModal() {
-            document.getElementById('commentActionModal').classList.remove('active');
-            document.getElementById('commentActionModal').style.display = 'none';
+            const modal = document.getElementById('commentActionModal');
+            modal.classList.remove('active');
+            modal.style.display = 'none';
             pendingAction = null;
         }
 
@@ -1573,12 +1607,7 @@
             if (!pendingAction) return;
             const { nim, fileIndex, action } = pendingAction;
             
-            let comment = '';
-            if (commentEditor) {
-                comment = commentEditor.getContent();
-            } else {
-                comment = document.getElementById('commentActionTextarea').value;
-            }
+            let comment = commentEditor ? commentEditor.getContent() : document.getElementById('commentActionTextarea').value;
 
             const mhs = bimbinganData.find(m => m.nim === nim);
             if (!mhs) return;
@@ -1589,17 +1618,22 @@
 
             const fd = new FormData();
             fd.append('id_preview', idPreview);
-            fd.append('posisi', <?= $posisi ?>);
-            fd.append('status_pembimbing', action);
             fd.append('catatan_pembimbing', comment);
 
+            // Untuk Comment mode (penguji): kirim model_posisi (3 atau 4), TIDAK kirim status
+            // Untuk Approved/Revision: kirim juga status_pembimbing
+            fd.append('posisi', MODEL_POSISI);
+            if (action !== 'Comment') {
+                fd.append('status_pembimbing', action);
+            }
+
             const btn = document.getElementById('commentActionSubmit');
+            const originalBtnHtml = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Menyimpan...';
 
             fetch('<?= site_url('mahasiswa/review_preview_ajax') ?>', {
-                method: 'POST',
-                body: fd,
+                method: 'POST', body: fd,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(r => r.json())
@@ -1607,57 +1641,79 @@
                 if (data.status) {
                     showToast(data.message, 'success');
                     closeCommentActionModal();
-                    
-                    preview.status_pembimbing = action;
-                    if (action === 'Approved') {
-                        preview.catatan_pembimbing = comment;
+
+                    if (action === 'Comment') {
+                        // Update kolom komentar sesuai role, status tidak berubah
+                        if (IS_U1) preview.catatan_penguji_1 = comment;
+                        else preview.catatan_penguji_2 = comment;
+
+                        // Refresh tampilan tanpa menutup panel
+                        refreshLihatBerkasView();
+                        fetchBimbinganData(true);
                     } else {
-                        preview.catatan_pembimbing = comment;
+                        preview.status_pembimbing = action;
+                        if (IS_U1) preview.catatan_penguji_1 = comment;
+                        else preview.catatan_penguji_2 = comment;
+
+                        closeStudentAndPreview(nim);
+                        refreshLihatBerkasView();
+                        fetchBimbinganData(true);
                     }
-                    
-                    closeStudentAndPreview(nim);
-                    refreshLihatBerkasView();
-                    fetchBimbinganData(true);
                 } else {
                     showToast(data.message || 'Gagal menyimpan', 'error');
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-check-lg"></i> Simpan & Proses';
+                    btn.innerHTML = originalBtnHtml;
                 }
             })
             .catch(err => {
                 console.error(err);
                 showToast('Kesalahan koneksi', 'error');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> Simpan & Proses';
+                btn.innerHTML = originalBtnHtml;
             });
         }
 
         function closeStudentAndPreview(nim) {
             let foundIndex = -1;
-            let foundDataIndex = -1;
             window.activeLihatBerkasIndices.forEach((dataIdx, idx) => {
                 const mhs = bimbinganData[dataIdx];
-                if (mhs && mhs.nim === nim) {
-                    foundIndex = idx;
-                    foundDataIndex = dataIdx;
-                }
+                if (mhs && mhs.nim === nim) foundIndex = idx;
             });
 
             if (foundIndex !== -1) {
                 window.activeLihatBerkasIndices.splice(foundIndex, 1);
                 window.activePreviews = window.activePreviews.filter(p => p.nim !== nim);
                 
-                if (window.activeLihatBerkasIndices.length === 0) {
-                    closeLihatBerkasPanel();
-                } else {
-                    refreshLihatBerkasView();
-                }
+                if (window.activeLihatBerkasIndices.length === 0) closeLihatBerkasPanel();
+                else refreshLihatBerkasView();
                 updateTableButtonHighlights();
             }
         }
 
         // ============================================================
-        // FLOATING NON-BLOCKING: LIHAT & PREVIEW BERKAS (KIRI 30%, KANAN 70%)
+        // HELPERS: Multi-file Preview 3
+        // ============================================================
+        function getPreviewFiles(preview) {
+            if (!preview) return [];
+            if (currentTahap === 'Preview 3') {
+                const files = [];
+                if (preview.file_sitasi) files.push({ type: 'sitasi', label: 'File Sitasi', file: preview.file_sitasi, icon: 'bi-quote' });
+                if (preview.file_bimbingan) files.push({ type: 'bimbingan', label: 'File Bimbingan', file: preview.file_bimbingan, icon: 'bi-file-earmark-check-fill' });
+                if (preview.file_persyaratan) files.push({ type: 'persyaratan', label: 'File Persyaratan', file: preview.file_persyaratan, icon: 'bi-signpost-split-fill' });
+                if (files.length === 0 && preview.file_draft) files.push({ type: 'draft', label: 'File Draft', file: preview.file_draft, icon: 'bi-file-earmark-pdf' });
+                return files;
+            }
+            if (preview.file_draft) return [{ type: 'draft', label: 'File Draft', file: preview.file_draft, icon: 'bi-file-earmark-pdf' }];
+            return [];
+        }
+
+        function isPreviewItemActive(nim, fileIndex, fileType) {
+            return window.activePreviews.some(p => p.nim === nim && p.fileIndex === fileIndex && (p.fileType || 'draft') === fileType);
+        }
+        function previewItemKey(nim, fileIndex, fileType) { return `${nim}_${fileIndex}_${fileType}`; }
+
+        // ============================================================
+        // FLOATING NON-BLOCKING: LIHAT & PREVIEW BERKAS
         // ============================================================
         function refreshLihatBerkasView() {
             updateLihatBerkasLayout();
@@ -1670,25 +1726,42 @@
             const container = document.getElementById('lihatBerkasContainer');
             const wrapperDaftar = document.getElementById('wrapperDaftarMhs');
             const wrapperPreview = document.getElementById('wrapperPreviewBerkas');
-
             if (!container || !wrapperDaftar || !wrapperPreview) return;
 
+            const isMobile = window.innerWidth <= 768;
             const isPreviewActive = window.activePreviews && window.activePreviews.length > 0;
 
             container.style.display = 'flex';
-            container.style.flexDirection = 'row';
-            container.style.alignItems = 'stretch';
-            container.style.justifyContent = 'center';
-            container.style.overflow = 'hidden';
+            if (isMobile) {
+                container.style.flexDirection = 'column';
+                container.style.alignItems = 'stretch';
+                container.style.justifyContent = 'flex-start';
+                container.style.overflowY = 'auto';
+                container.style.overflowX = 'hidden';
+            } else {
+                container.style.flexDirection = 'row';
+                container.style.alignItems = 'stretch';
+                container.style.justifyContent = 'center';
+                container.style.overflowY = 'hidden';
+                container.style.overflowX = 'hidden';
+            }
 
-            wrapperDaftar.className = 'flex flex-col gap-3 w-[30%] min-w-[320px] max-w-[420px] overflow-y-auto flex-shrink-0';
+            if (isMobile) {
+                wrapperDaftar.className = 'flex flex-col gap-3 w-full overflow-y-auto flex-shrink-0';
+            } else {
+                wrapperDaftar.className = 'flex flex-col gap-3 w-[30%] min-w-[320px] max-w-[420px] overflow-y-auto flex-shrink-0';
+            }
 
             if (isPreviewActive) {
                 wrapperPreview.classList.add('active');
-                wrapperPreview.className = 'flex-1 overflow-x-auto overflow-y-hidden gap-4 flex items-stretch';
+                if (isMobile) {
+                    wrapperPreview.className = 'flex w-full overflow-x-auto overflow-y-visible gap-3 flex-row items-stretch flex-shrink-0';
+                } else {
+                    wrapperPreview.className = 'flex-1 overflow-x-auto overflow-y-hidden gap-4 flex items-stretch';
+                }
             } else {
                 wrapperPreview.classList.remove('active');
-                wrapperPreview.className = 'flex-1 overflow-x-auto overflow-y-hidden gap-4 flex items-stretch hidden';
+                wrapperPreview.className = 'hidden';
             }
         }
 
@@ -1702,7 +1775,6 @@
             }
 
             const totalActive = window.activeLihatBerkasIndices.length;
-
             let headerSummaryBar = '';
             if (totalActive > 1) {
                 headerSummaryBar = `
@@ -1711,9 +1783,7 @@
                             <i class="bi bi-people-fill text-orange-400 text-xs"></i>
                             <span class="text-xs font-bold">${totalActive} Mahasiswa <span class="text-slate-400 font-normal text-[10px]">(Maks. 4)</span></span>
                         </div>
-                        <button type="button" onclick="closeLihatBerkasPanel()" class="text-[11px] text-slate-300 hover:text-rose-400 font-bold transition cursor-pointer">
-                            Tutup Semua
-                        </button>
+                        <button type="button" onclick="closeLihatBerkasPanel()" class="text-[11px] text-slate-300 hover:text-rose-400 font-bold transition cursor-pointer">Tutup Semua</button>
                     </div>
                 `;
             }
@@ -1722,7 +1792,6 @@
             window.activeLihatBerkasIndices.forEach((index, cardIdx) => {
                 const mhs = bimbinganData[index];
                 if (!mhs) return;
-                // HANYA 2 FILE TERBARU
                 const fileList = (mhs.riwayat_previews || []).slice(0, 2);
                 const cardNum = cardIdx + 1;
 
@@ -1731,69 +1800,99 @@
                     itemsHtml = `<div class="p-3 text-center text-slate-400 text-xs">Tidak ada riwayat berkas.</div>`;
                 } else {
                     fileList.forEach((preview, idx) => {
-                        const fileUrl = `<?= base_url('uploads/preview_ta/') ?>${preview.file_draft}`;
-                        const fileName = preview.file_draft;
+                        const files = getPreviewFiles(preview);
                         const status = preview.status_pembimbing || 'Pending';
-                        const isPreviewActive = window.activePreviews.some(p => p.nim === mhs.nim && p.fileIndex === idx);
+
+                        // Komentar penguji saat ini
+                        const currentComment = IS_U1 ? (preview.catatan_penguji_1 || '') : (preview.catatan_penguji_2 || '');
+                        const hasComment = currentComment.trim().length > 0;
+                        const commentLabel = hasComment ? 'Edit Komentar' : 'Komentari';
+                        const commentIcon = hasComment ? 'bi-chat-dots-fill' : 'bi-chat-dots';
+                        const commentBtnClass = IS_U1
+                            ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-300'
+                            : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300';
 
                         let statusBadge = '';
-                        if (status === 'Approved') {
-                            statusBadge = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Disetujui</span>';
-                        } else if (status === 'Revision') {
-                            statusBadge = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Revisi</span>';
-                        } else {
-                            statusBadge = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Pending</span>';
-                        }
+                        if (status === 'Approved') statusBadge = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Disetujui</span>';
+                        else if (status === 'Revision') statusBadge = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Revisi</span>';
+                        else statusBadge = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Pending</span>';
 
-                        const activeCardBorder = isPreviewActive 
-                            ? 'ring-2 ring-orange-500 border-orange-300 bg-orange-50/45' 
-                            : 'border-slate-200 bg-white hover:border-slate-300';
+                        // Tombol komentar penguji (U1 / U2)
+                        const commentBtn = `
+                            <button onclick="event.stopPropagation(); handleFileAction('${mhs.nim}', ${idx}, 'Comment')"
+                                    class="px-2.5 py-1 rounded-lg ${commentBtnClass} border text-[10px] font-bold transition cursor-pointer flex items-center gap-1"
+                                    title="Beri komentar sebagai Penguji ${DISPLAY_POSISI}">
+                                <i class="bi ${commentIcon} text-[10px]"></i>
+                                <span>${commentLabel}</span>
+                            </button>
+                        `;
 
                         let actionButtons = '';
                         if (status === 'Approved') {
-                            actionButtons = `<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-bold">✓ Disetujui</span>`;
+                            actionButtons = `<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-bold">✓ Disetujui</span>` + commentBtn;
                         } else {
-                            actionButtons = `
-                                <button onclick="handleFileAction('${mhs.nim}', ${idx}, 'Approved')" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border border-emerald-300 text-[10px] font-bold transition cursor-pointer">ACC</button>
-                                <button onclick="handleFileAction('${mhs.nim}', ${idx}, 'Revision')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 text-[10px] font-bold transition cursor-pointer">Revisi</button>
-                            `;
+                            actionButtons = commentBtn;
                         }
 
-                        const previewBtnStyle = isPreviewActive 
-                            ? 'bg-orange-600 text-white border-orange-600 shadow-xs ring-2 ring-orange-400' 
-                            : 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200 shadow-2xs';
-
                         itemsHtml += `
-                            <div class="p-2 px-2.5 rounded-xl border shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-2 ${activeCardBorder}">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-1.5">
-                                        <i class="bi bi-file-earmark-pdf text-orange-500 text-xs shrink-0"></i>
-                                        <span class="font-bold text-slate-800 text-[11px] truncate">File #${idx+1}</span>
-                                        ${statusBadge}
-                                    </div>
-                                    <p class="text-[10px] font-mono text-slate-400 truncate mt-0.5" title="${fileName}">
-                                        <i class="bi bi-file-pdf text-rose-500 mr-1 text-[9px]"></i>${fileName}
-                                    </p>
-                                    <p class="text-[9px] text-slate-400 mt-0.5"><i class="bi bi-clock mr-0.5"></i> ${new Date(preview.created_at).toLocaleString('id-ID')}</p>
+                            <div class="mb-1.5 flex items-center justify-between gap-2 px-1">
+                                <div class="flex items-center gap-1.5">
+                                    <i class="bi bi-folder2-open text-orange-500 text-xs"></i>
+                                    <span class="text-[11px] font-bold text-slate-700">Pengajuan #${idx+1}</span>
+                                    ${statusBadge}
                                 </div>
-                                <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
-                                    <div class="flex items-center gap-1">${actionButtons}</div>
-                                    <button type="button" 
-                                            onclick="event.stopPropagation(); previewBerkasItem('${mhs.nim}', ${idx})" 
-                                            class="w-7 h-7 rounded-lg border text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95 ${previewBtnStyle}" 
-                                            title="${isPreviewActive ? 'Tutup Pratinjau Ini' : 'Pratinjau Berkas'}">
-                                        <i class="bi bi-eye text-xs"></i>
-                                    </button>
-                                    <a href="${fileUrl}" 
-                                       download="${fileName}" 
-                                       target="_blank" 
-                                       class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs active:scale-95" 
-                                       title="Unduh Berkas">
-                                        <i class="bi bi-download text-xs"></i>
-                                    </a>
-                                </div>
+                                <div class="flex items-center gap-1">${actionButtons}</div>
                             </div>
                         `;
+
+                        if (files.length === 0) {
+                            itemsHtml += `<div class="p-2 text-center text-slate-400 text-[11px] italic">Tidak ada file pada pengajuan ini.</div>`;
+                        } else {
+                            files.forEach((f) => {
+                                const fileUrl = `<?= base_url('uploads/preview_ta/') ?>${f.file}`;
+                                const fileName = f.file;
+                                const isPreviewActive = isPreviewItemActive(mhs.nim, idx, f.type);
+
+                                const activeCardBorder = isPreviewActive
+                                    ? 'ring-2 ring-orange-500 border-orange-300 bg-orange-50/45'
+                                    : 'border-slate-200 bg-white hover:border-slate-300';
+
+                                const previewBtnStyle = isPreviewActive
+                                    ? 'bg-orange-600 text-white border-orange-600 shadow-xs ring-2 ring-orange-400'
+                                    : 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200 shadow-2xs';
+
+                                const previewBtnLabel = isPreviewActive ? 'Tutup' : 'Lihat';
+                                const previewBtnIcon = isPreviewActive ? 'bi-x-circle-fill' : 'bi-eye-fill';
+
+                                itemsHtml += `
+                                    <div class="p-2 px-2.5 rounded-xl border shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-2 ${activeCardBorder}">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <i class="bi ${f.icon} text-orange-500 text-xs shrink-0"></i>
+                                                <span class="font-bold text-slate-800 text-[11px] truncate">${f.label}</span>
+                                            </div>
+                                            <p class="text-[10px] font-mono text-slate-400 truncate mt-0.5" title="${fileName}">
+                                                <i class="bi bi-file-pdf text-rose-500 mr-1 text-[9px]"></i>${fileName}
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <button type="button"
+                                                    onclick="event.stopPropagation(); previewBerkasItem('${mhs.nim}', ${idx}, '${f.type}')"
+                                                    class="px-2.5 h-7 rounded-lg border text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 whitespace-nowrap ${previewBtnStyle}"
+                                                    title="${isPreviewActive ? 'Tutup Pratinjau Ini' : 'Pratinjau Berkas'}">
+                                                <i class="bi ${previewBtnIcon} text-[11px]"></i>
+                                                <span>${previewBtnLabel}</span>
+                                            </button>
+                                            <a href="${fileUrl}" download="${fileName}" target="_blank"
+                                               class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs active:scale-95"
+                                               title="Unduh Berkas">
+                                                <i class="bi bi-download text-xs"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
                     });
                 }
 
@@ -1801,9 +1900,7 @@
                     <div class="student-card-item pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden flex flex-col shrink-0 w-full animate-pop-in" id="cardMhs_${mhs.nim}">
                         <div class="p-2.5 px-3.5 bg-slate-900 text-white flex items-center justify-between gap-2 shrink-0 border-b border-slate-800">
                             <div class="flex items-center gap-2 min-w-0">
-                                <div class="w-6 h-6 rounded-lg bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-[11px] shrink-0 shadow-2xs">
-                                    ${cardNum}
-                                </div>
+                                <div class="w-6 h-6 rounded-lg bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-[11px] shrink-0 shadow-2xs">${cardNum}</div>
                                 <div class="min-w-0 flex items-center gap-2">
                                     <h4 class="text-xs font-bold text-white truncate max-w-[150px] sm:max-w-[180px]">${mhs.nama_mahasiswa}</h4>
                                     <span class="px-1.5 py-0.2 rounded bg-white/10 text-orange-300 font-mono text-[10px] font-bold">${mhs.nim}</span>
@@ -1813,10 +1910,7 @@
                                 <i class="bi bi-x-lg"></i>
                             </button>
                         </div>
-
-                        <div class="p-2.5 space-y-1.5 bg-slate-50/50 overflow-y-auto">
-                            ${itemsHtml}
-                        </div>
+                        <div class="p-2.5 space-y-1.5 bg-slate-50/50 overflow-y-auto">${itemsHtml}</div>
                     </div>
                 `;
             });
@@ -1835,45 +1929,66 @@
             }
 
             wrapper.classList.add('active');
-
             let html = '';
             window.activePreviews.forEach((p, idx) => {
                 const mhs = bimbinganData.find(m => m.nim === p.nim);
                 if (!mhs) return;
                 const preview = mhs.riwayat_previews[p.fileIndex];
                 if (!preview) return;
-                const fileUrl = `<?= base_url('uploads/preview_ta/') ?>${preview.file_draft}`;
-                const fileName = preview.file_draft;
+
+                const fileType = p.fileType || 'draft';
+                const files = getPreviewFiles(preview);
+                const fileObj = files.find(f => f.type === fileType) || files[0];
+                if (!fileObj) return;
+
+                const fileUrl = `<?= base_url('uploads/preview_ta/') ?>${fileObj.file}`;
+                const fileName = fileObj.file;
+                const fileLabel = fileObj.label;
                 const fullName = mhs.nama_mahasiswa || 'Mahasiswa';
                 const slotNum = idx + 1;
                 const status = preview.status_pembimbing || 'Pending';
+                const uniqueKey = previewItemKey(p.nim, p.fileIndex, fileType);
 
-                // Tombol ACC/Revisi untuk preview footer
+                // Cek komentar penguji
+                const currentComment = IS_U1 ? (preview.catatan_penguji_1 || '') : (preview.catatan_penguji_2 || '');
+                const hasComment = currentComment.trim().length > 0;
+                const commentLabel = hasComment ? 'Edit Komentar' : 'Komentari';
+                const commentIcon = hasComment ? 'bi-chat-dots-fill' : 'bi-chat-dots';
+                const commentBtnClass = IS_U1
+                    ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-300'
+                    : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300';
+
+                const commentBtn = `
+                    <button onclick="handleFileAction('${p.nim}', ${p.fileIndex}, 'Comment')"
+                            class="px-3 py-1.5 rounded-lg ${commentBtnClass} border text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                            title="Beri komentar sebagai Penguji ${DISPLAY_POSISI}">
+                        <i class="bi ${commentIcon}"></i>
+                        <span>${commentLabel}</span>
+                    </button>
+                `;
+
                 let actionButtons = '';
                 if (status === 'Approved') {
-                    actionButtons = `<span class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold">✓ Disetujui</span>`;
+                    actionButtons = `<span class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold">✓ Disetujui</span>` + commentBtn;
                 } else {
-                    actionButtons = `
-                        <button onclick="handleFileAction('${p.nim}', ${p.fileIndex}, 'Approved')" class="px-3 py-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border border-emerald-300 text-xs font-bold transition cursor-pointer">ACC</button>
-                        <button onclick="handleFileAction('${p.nim}', ${p.fileIndex}, 'Revision')" class="px-3 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 text-xs font-bold transition cursor-pointer">Revisi</button>
-                    `;
+                    actionButtons = commentBtn;
                 }
 
                 html += `
-                    <div class="preview-card-item pointer-events-auto bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col shrink-0 animate-preview-in" id="previewCard_${p.nim}_${p.fileIndex}">
+                    <div class="preview-card-item pointer-events-auto bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col shrink-0 animate-preview-in" id="previewCard_${uniqueKey}">
                         <div class="preview-header p-2.5 px-3.5 bg-slate-900 text-white flex items-center justify-between gap-2.5 shrink-0 border-b border-slate-800">
                             <div class="flex items-center gap-2 min-w-0">
                                 <div class="preview-slot-badge w-7 h-7 rounded-lg bg-rose-600/30 border border-rose-500/50 text-rose-400 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                                     ${window.activePreviews.length > 1 ? slotNum : '<i class="bi bi-file-pdf"></i>'}
                                 </div>
                                 <div class="min-w-0">
-                                    <h4 class="text-xs font-bold text-white truncate max-w-[190px] sm:max-w-[240px]">File #${p.fileIndex+1}</h4>
+                                    <h4 class="text-xs font-bold text-white truncate max-w-[190px] sm:max-w-[240px]">${fileLabel} · Pengajuan #${p.fileIndex + 1}</h4>
                                     <p class="text-[10px] text-slate-300 font-medium truncate">${fullName} · <span class="font-mono text-slate-400">${fileName}</span></p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1 shrink-0">
-                                <button type="button" onclick="togglePreviewIframeInteraction('${p.nim}', ${p.fileIndex})" id="btnPreviewInteract_${p.nim}_${p.fileIndex}" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Kursor Terkunci (Normal). Klik untuk aktifkan scroll">
-                                    <i class="bi bi-arrow-pointer" id="iconPreviewInteract_${p.nim}_${p.fileIndex}"></i>
+                                <button type="button" onclick="togglePreviewIframeInteraction('${p.nim}', ${p.fileIndex}, '${fileType}')" id="btnPreviewInteract_${uniqueKey}" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Kursor Terkunci (Normal). Klik untuk aktifkan scroll">
+                                    <i class="bi bi-arrow-pointer" id="iconPreviewInteract_${uniqueKey}"></i>
                                 </button>
                                 <a href="${fileUrl}" target="_blank" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Buka di tab baru">
                                     <i class="bi bi-box-arrow-up-right"></i>
@@ -1885,24 +2000,21 @@
                         </div>
 
                         <div class="preview-body" style="height: 85vh; min-height: 300px; max-height: 90vh;">
-                            <div class="loader" id="previewLoader_${p.nim}_${p.fileIndex}">
+                            <div class="loader" id="previewLoader_${uniqueKey}">
                                 <i class="bi bi-arrow-repeat"></i> Memuat dokumen...
                             </div>
-                            <iframe id="iframePreviewBerkas_${p.nim}_${p.fileIndex}" 
+                            <iframe id="iframePreviewBerkas_${uniqueKey}" 
                                     src="${fileUrl}#toolbar=0&navpanes=0" 
                                     class="w-full h-full border-0 relative z-10 pointer-events-none"
-                                    onload="document.getElementById('previewLoader_${p.nim}_${p.fileIndex}').style.display='none'"
+                                    onload="document.getElementById('previewLoader_${uniqueKey}').style.display='none'"
                                     title="Pratinjau Berkas"></iframe>
                         </div>
 
                         <div class="preview-footer p-2 px-3 bg-white flex items-center justify-between text-xs shrink-0 gap-2 border-t border-slate-200">
-                            <div class="flex items-center gap-1.5">
-                                ${actionButtons}
-                            </div>
+                            <div class="flex items-center gap-1.5">${actionButtons}</div>
                             <div class="flex items-center gap-1.5">
                                 <a href="${fileUrl}" download="${fileName}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs text-[11px]">
-                                    <i class="bi bi-download"></i>
-                                    <span>Unduh</span>
+                                    <i class="bi bi-download"></i><span>Unduh</span>
                                 </a>
                                 <button type="button" onclick="closeSinglePreview(${idx})" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold transition cursor-pointer text-[11px] shadow-2xs">
                                     Tutup
@@ -1916,19 +2028,26 @@
             wrapper.innerHTML = html;
         }
 
-        function previewBerkasItem(nim, fileIndex) {
-            const existingIdx = window.activePreviews.findIndex(p => p.nim === nim && p.fileIndex === fileIndex);
+        function previewBerkasItem(nim, fileIndex, fileType = 'draft') {
+            const existingIdx = window.activePreviews.findIndex(p =>
+                p.nim === nim && p.fileIndex === fileIndex && (p.fileType || 'draft') === fileType
+            );
             if (existingIdx > -1) {
                 window.activePreviews.splice(existingIdx, 1);
                 refreshLihatBerkasView();
                 return;
             }
 
-            if (window.activePreviews.length >= 5) {
-                window.activePreviews.shift();
-            }
-            window.activePreviews.push({ nim, fileIndex });
+            if (window.activePreviews.length >= 5) window.activePreviews.shift();
+            window.activePreviews.push({ nim, fileIndex, fileType });
             refreshLihatBerkasView();
+
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    const previewWrap = document.getElementById('wrapperPreviewBerkas');
+                    if (previewWrap) previewWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 150);
+            }
         }
 
         function closeSinglePreview(index) {
@@ -1937,10 +2056,11 @@
             refreshLihatBerkasView();
         }
 
-        function togglePreviewIframeInteraction(nim, fileIndex) {
-            const iframe = document.getElementById(`iframePreviewBerkas_${nim}_${fileIndex}`);
-            const btn = document.getElementById(`btnPreviewInteract_${nim}_${fileIndex}`);
-            const icon = document.getElementById(`iconPreviewInteract_${nim}_${fileIndex}`);
+        function togglePreviewIframeInteraction(nim, fileIndex, fileType = 'draft') {
+            const uniqueKey = previewItemKey(nim, fileIndex, fileType);
+            const iframe = document.getElementById(`iframePreviewBerkas_${uniqueKey}`);
+            const btn = document.getElementById(`btnPreviewInteract_${uniqueKey}`);
+            const icon = document.getElementById(`iconPreviewInteract_${uniqueKey}`);
             if (!iframe) return;
 
             const isLocked = iframe.classList.contains('pointer-events-none');
@@ -1966,14 +2086,9 @@
             if (idx === -1) return;
             window.activeLihatBerkasIndices.splice(idx, 1);
             const mhs = bimbinganData[index];
-            if (mhs) {
-                window.activePreviews = window.activePreviews.filter(p => p.nim !== mhs.nim);
-            }
-            if (window.activeLihatBerkasIndices.length === 0) {
-                closeLihatBerkasPanel();
-            } else {
-                refreshLihatBerkasView();
-            }
+            if (mhs) window.activePreviews = window.activePreviews.filter(p => p.nim !== mhs.nim);
+            if (window.activeLihatBerkasIndices.length === 0) closeLihatBerkasPanel();
+            else refreshLihatBerkasView();
             updateTableButtonHighlights();
         }
 
@@ -1985,17 +2100,12 @@
             }
 
             const idx = window.activeLihatBerkasIndices.indexOf(index);
-            if (idx > -1) {
-                removeStudentFromLihatBerkas(index);
-                return;
-            }
+            if (idx > -1) { removeStudentFromLihatBerkas(index); return; }
 
             if (window.activeLihatBerkasIndices.length >= 4) {
                 const removed = window.activeLihatBerkasIndices.shift();
                 const removedMhs = bimbinganData[removed];
-                if (removedMhs) {
-                    window.activePreviews = window.activePreviews.filter(p => p.nim !== removedMhs.nim);
-                }
+                if (removedMhs) window.activePreviews = window.activePreviews.filter(p => p.nim !== removedMhs.nim);
             }
             window.activeLihatBerkasIndices.push(index);
 
@@ -2008,19 +2118,13 @@
             if (container) {
                 container.style.display = 'flex';
                 container.classList.add('active');
-                container.style.flexDirection = 'row';
-                container.style.alignItems = 'stretch';
-                container.style.overflow = 'hidden';
-            }
-            const wrapperDaftar = document.getElementById('wrapperDaftarMhs');
-            if (wrapperDaftar) {
-                wrapperDaftar.className = 'flex flex-col gap-3 w-[30%] min-w-[320px] max-w-[420px] overflow-y-auto flex-shrink-0';
             }
             const wrapperPreview = document.getElementById('wrapperPreviewBerkas');
             if (wrapperPreview) {
                 wrapperPreview.classList.remove('active');
                 wrapperPreview.innerHTML = '';
             }
+            updateLihatBerkasLayout();
         }
 
         function closeLihatBerkasPanel() {
@@ -2043,7 +2147,10 @@
 
         function updateTableButtonHighlights() {
             const activeIndices = window.activeLihatBerkasIndices || [];
-            document.querySelectorAll('#bimbinganTableBody tr').forEach((tr, idx) => {
+            document.querySelectorAll('#bimbinganTableBody tr').forEach((tr) => {
+                const dataIdx = tr.getAttribute('data-index');
+                if (dataIdx === null) return;
+                const idx = parseInt(dataIdx);
                 const btn = tr.querySelector('button[onclick^="toggleLihatBerkasPanel"]');
                 if (btn) {
                     const isActive = activeIndices.includes(idx);
@@ -2058,7 +2165,6 @@
             });
         }
 
-        // Keyboard ESC untuk menutup panel
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (document.getElementById('commentActionModal').classList.contains('active')) {
@@ -2071,7 +2177,12 @@
             }
         });
 
-        // Daftarkan ke global
+        window.addEventListener('resize', () => {
+            if (window.activeLihatBerkasIndices && window.activeLihatBerkasIndices.length > 0) {
+                updateLihatBerkasLayout();
+            }
+        });
+
         window.toggleLihatBerkasPanel = toggleLihatBerkasPanel;
         window.closeLihatBerkasPanel = closeLihatBerkasPanel;
         window.previewBerkasItem = previewBerkasItem;
@@ -2088,7 +2199,6 @@
         window.submitHoverReview = submitHoverReview;
         window.handleFileAction = handleFileAction;
         window.closeCommentActionModal = closeCommentActionModal;
-
     </script>
 
 </body>
