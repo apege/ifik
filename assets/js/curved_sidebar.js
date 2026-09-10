@@ -26,7 +26,7 @@
             this.svgId = options.svgId || 'curvedSidebarSvg';
             
             this.isDesktop = window.innerWidth >= 1024;
-            this.isOpen = typeof options.defaultOpen !== 'undefined' ? options.defaultOpen : true; // Open by default
+            this.isOpen = typeof options.defaultOpen !== 'undefined' ? options.defaultOpen : (window.innerWidth >= 1024); // Open by default only on desktop
             this.animFrameId = null;
             this.animDuration = 750; // ms
 
@@ -44,7 +44,7 @@
                 return;
             }
 
-            // Set initial open/collapsed state (Default open on desktop)
+            // Set initial open/collapsed state (Default open only on desktop >= 1024px)
             if (this.isOpen) {
                 this.panel.classList.add('is-active');
                 this.toggleBtn.classList.add('is-active');
@@ -80,8 +80,14 @@
                 }
             });
 
+            let prevWidth = window.innerWidth;
             window.addEventListener('resize', () => {
                 this.updateSvgDimensions();
+                const currentWidth = window.innerWidth;
+                if (prevWidth >= 1024 && currentWidth < 1024 && this.isOpen) {
+                    this.close();
+                }
+                prevWidth = currentWidth;
                 if (this.isOpen) {
                     this.setPath(0);
                 } else {

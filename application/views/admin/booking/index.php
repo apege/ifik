@@ -1026,6 +1026,131 @@
             font-weight: 500;
             flex: 1;
         }
+
+        /* Stat Slider Dots Indicator */
+        .stat-slider-dots {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            margin-bottom: 24px;
+        }
+
+        .stat-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .stat-dot.active {
+            width: 22px;
+            background: #ea580c;
+            border-radius: 999px;
+        }
+
+        /* Filter Pills Scroll Dots Indicator */
+        .filter-pills-dots {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-top: -4px;
+            margin-bottom: 4px;
+        }
+
+        .filter-pills-dots .pill-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .filter-pills-dots .pill-dot.active {
+            width: 18px;
+            background: #ea580c;
+            border-radius: 999px;
+        }
+
+        /* Mobile Responsive Styles & Card Slider */
+        @media (max-width: 900px) {
+            body {
+                padding: 68px 14px 110px 14px;
+            }
+            .table-responsive {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            table.booking-table {
+                min-width: 820px;
+                table-layout: auto;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+            .stat-cards-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 16px !important;
+                padding: 4px 2px 10px 2px;
+                margin-bottom: 6px !important;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                width: 100%;
+            }
+            .stat-cards-grid::-webkit-scrollbar {
+                display: none;
+            }
+            .stat-card-highlight {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+                scroll-snap-align: start;
+                scroll-snap-stop: always;
+            }
+            .stat-slider-dots {
+                display: flex;
+            }
+            .filter-pills-wrap {
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 2px 2px 6px 2px;
+                width: 100%;
+                gap: 8px;
+            }
+            .filter-pills-wrap::-webkit-scrollbar {
+                display: none;
+            }
+            .filter-pill {
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+            }
+            .filter-pills-dots {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-search-pill {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1185,9 +1310,12 @@
             </div>
         </div>
 
+        <!-- Mobile Stat Slider Pagination Dots -->
+        <div class="stat-slider-dots" id="statSliderDots"></div>
+
         <!-- Filter & Search Toolbar (Koordinator TA Style) -->
         <div class="toolbar-card" style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 18px 20px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);">
-            <div class="filter-pills-wrap">
+            <div class="filter-pills-wrap" id="filterPillsWrap">
                 <button type="button" class="filter-pill active" data-status="all" onclick="setFilterStatus('all')">
                     <span>Semua</span>
                     <span class="pill-count"><?= $totalCount ?></span>
@@ -1213,6 +1341,9 @@
                     <span class="pill-count"><?= $rejectedCount ?></span>
                 </button>
             </div>
+
+            <!-- Mobile Filter Pills Dots Indicator -->
+            <div class="filter-pills-dots" id="filterPillsDots"></div>
 
             <!-- Row 1: Unified Multi-Search Pill Component & Standalone Add Button (+ 1/4) -->
             <div class="search-pill-container">
@@ -1386,12 +1517,12 @@
                                     $dot = '#22c55e'; $bg = '#f0fdf4'; $color = '#166534'; $label = 'Disetujui Ka. Ur'; $statusCategory = 'kaur';
                                 } elseif (stripos($s, 'Laboran') !== false) {
                                     $dot = '#3b82f6'; $bg = '#eff6ff'; $color = '#1d4ed8'; $label = 'Disetujui Laboran'; $statusCategory = 'laboran';
-                                } elseif (stripos($s, 'Admin') !== false) {
-                                    $dot = '#8b5cf6'; $bg = '#f5f3ff'; $color = '#6d28d9'; $label = 'Disetujui Admin'; $statusCategory = 'admin';
+                                } elseif (stripos($s, 'Admin') !== false || stripos($s, 'Disetujui') !== false) {
+                                    $dot = '#8b5cf6'; $bg = '#f5f3ff'; $color = '#6d28d9'; $label = htmlspecialchars($s); $statusCategory = 'admin';
                                 } elseif ($s === 'Ditolak') {
                                     $dot = '#ef4444'; $bg = '#fef2f2'; $color = '#991b1b'; $label = 'Ditolak'; $statusCategory = 'rejected';
                                 } else {
-                                    $dot = '#94a3b8'; $bg = '#f8fafc'; $color = '#475569'; $label = htmlspecialchars($s);
+                                    $dot = '#8b5cf6'; $bg = '#f5f3ff'; $color = '#6d28d9'; $label = htmlspecialchars($s);
                                 }
 
                                 $dateFormatted = ($p->tanggal_mulai === $p->tanggal_selesai)
@@ -2002,7 +2133,11 @@
             currentFilterStatus = status;
 
             document.querySelectorAll('.filter-pill').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-status') === status);
+                const isActive = btn.getAttribute('data-status') === status;
+                btn.classList.toggle('active', isActive);
+                if (isActive && window.innerWidth <= 900) {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
             });
 
             currentPage = 1;
@@ -2559,6 +2694,92 @@
                 closeAllActionDropdowns();
             }
         });
+
+        // ==========================================
+        // MOBILE STAT CARDS SLIDER & DOTS LOGIC
+        // ==========================================
+        function initStatSliderDots() {
+            const grid = document.querySelector('.stat-cards-grid');
+            const dotsContainer = document.getElementById('statSliderDots');
+            if (!grid || !dotsContainer) return;
+
+            const cards = grid.querySelectorAll('.stat-card-highlight');
+            if (cards.length <= 1) return;
+
+            dotsContainer.innerHTML = '';
+            cards.forEach((_, idx) => {
+                const dot = document.createElement('span');
+                dot.className = 'stat-dot' + (idx === 0 ? ' active' : '');
+                dot.setAttribute('title', `Slide ${idx + 1}`);
+                dot.addEventListener('click', () => {
+                    cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = dotsContainer.querySelectorAll('.stat-dot');
+            grid.addEventListener('scroll', () => {
+                const scrollLeft = grid.scrollLeft;
+                const cardWidth = grid.offsetWidth || 1;
+                const activeIndex = Math.min(Math.max(0, Math.round(scrollLeft / cardWidth)), cards.length - 1);
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            }, { passive: true });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initStatSliderDots();
+            initFilterPillsDots();
+        });
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            initStatSliderDots();
+            initFilterPillsDots();
+        }
+
+        // ==========================================
+        // MOBILE FILTER PILLS DOTS LOGIC
+        // ==========================================
+        function initFilterPillsDots() {
+            const wrap = document.getElementById('filterPillsWrap') || document.querySelector('.filter-pills-wrap');
+            const dotsContainer = document.getElementById('filterPillsDots');
+            if (!wrap || !dotsContainer) return;
+
+            const pills = Array.from(wrap.querySelectorAll('.filter-pill'));
+            if (pills.length <= 1) return;
+
+            dotsContainer.innerHTML = '';
+            pills.forEach((pill, idx) => {
+                const dot = document.createElement('span');
+                dot.className = 'pill-dot' + (idx === 0 ? ' active' : '');
+                dot.setAttribute('title', pill.textContent.trim());
+                dot.addEventListener('click', () => {
+                    pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = dotsContainer.querySelectorAll('.pill-dot');
+            wrap.addEventListener('scroll', () => {
+                const wrapCenter = wrap.getBoundingClientRect().left + wrap.clientWidth / 2;
+                let closestIdx = 0;
+                let minDiff = Infinity;
+
+                pills.forEach((pill, i) => {
+                    const rect = pill.getBoundingClientRect();
+                    const pillCenter = rect.left + rect.width / 2;
+                    const diff = Math.abs(wrapCenter - pillCenter);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestIdx = i;
+                    }
+                });
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === closestIdx);
+                });
+            }, { passive: true });
+        }
     </script>
 </body>
 </html>
