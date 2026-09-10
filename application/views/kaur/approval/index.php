@@ -336,29 +336,204 @@
             font-weight: 800;
         }
 
-        .search-box-wrap { position: relative; min-width: 260px; }
-        .search-box-wrap input {
+        /* Unified Multi-Search Pill Component (Koordinator TA Style) */
+        .search-pill-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             width: 100%;
-            padding: 9px 16px 9px 38px;
-            border-radius: var(--radius-md);
-            border: 1.5px solid var(--border-color);
-            font-size: 0.84rem;
-            font-family: inherit;
-            color: var(--text-color);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .search-box-wrap input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+
+        .unified-search-pill {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 2px 12px;
+            flex: 1;
+            height: 44px;
+            transition: all 0.2s ease;
+            position: relative;
         }
-        .search-box-wrap i {
+        .unified-search-pill:focus-within, .unified-search-pill.active {
+            border-color: #ea580c !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12) !important;
+        }
+
+        .unified-divider {
+            width: 1.5px;
+            height: 20px;
+            background-color: #cbd5e1;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-standalone-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff7ed;
+            border: 1.5px solid #ffedd5;
+            border-radius: 14px;
+            padding: 6px 14px;
+            height: 44px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ea580c;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.06);
+        }
+        .btn-standalone-add:hover, .btn-standalone-add.active {
+            background: #ffedd5;
+            border-color: #fdba74;
+            transform: scale(1.02);
+        }
+
+        .badge-standalone-count {
+            background: #ea580c;
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 1.5px 8px;
+            border-radius: 99px;
+        }
+
+        .extra-rows-card {
+            display: none;
             position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 0.85rem;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 100%;
+            max-width: 660px;
+            background: #ffffff;
+            border: 1.5px solid #fed7aa;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.16);
+            z-index: 1000;
+        }
+
+        .extra-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .btn-remove-row {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #fff1f2;
+            border: 1.5px solid #fecdd3;
+            border-radius: 12px;
+            color: #e11d48;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+        .btn-remove-row:hover {
+            background: #ffe4e6;
+            transform: scale(1.05);
+        }
+
+        .custom-dropdown-container {
+            position: relative;
+        }
+
+        .custom-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.16);
+            z-index: 2000;
+            padding: 6px;
+            min-width: 200px;
+            display: none;
+        }
+        .custom-dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+        }
+        .dropdown-item:hover, .dropdown-item.active {
+            background: #fff7ed;
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        /* Pagination Bar */
+        .pagination-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .page-btn {
+            height: 32px;
+            min-width: 32px;
+            padding: 0 8px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+        .page-btn:hover:not(:disabled) {
+            border-color: #ea580c;
+            color: #ea580c;
+            background: #fff7ed;
+        }
+        .page-btn.active {
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            border-color: #ea580c;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         /* Table */
@@ -366,90 +541,551 @@
             background: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            overflow: hidden;
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+            width: 100%;
+            overflow: visible;
         }
 
-        .table-responsive { width: 100%; overflow-x: auto; }
-        table.kaur-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .table-responsive {
+            width: 100%;
+            overflow: visible;
+        }
+        table.kaur-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            table-layout: fixed;
+        }
         table.kaur-table th {
             background: #f8fafc;
-            padding: 14px 18px;
-            font-size: 0.76rem;
+            padding: 12px 10px;
+            font-size: 0.74rem;
             font-weight: 800;
             color: #475569;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             border-bottom: 1.5px solid var(--border-color);
             white-space: nowrap;
         }
 
         table.kaur-table td {
-            padding: 14px 18px;
-            font-size: 0.85rem;
+            padding: 11px 10px;
+            font-size: 0.82rem;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
+            overflow: visible;
         }
 
         table.kaur-table tr:hover td { background: #f8fafc; }
+        table.kaur-table tr:hover { position: relative; z-index: 1000; }
+
+        /* Custom Checkbox */
+        .custom-checkbox {
+            width: 17px;
+            height: 17px;
+            border-radius: 4px;
+            border: 1.5px solid #cbd5e1;
+            cursor: pointer;
+            accent-color: var(--primary);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ROOM COLUMN STYLES MATCHING INFORMASI RUANGAN */
+        .tr-room-col {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            position: relative;
+        }
+        .tr-room-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: transparent;
+            border: 1.6px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e293b;
+            flex-shrink: 0;
+        }
+        .tr-room-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+        .tr-room-info {
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            position: relative;
+        }
+        .tr-room-code {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+        .tr-room-name {
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* FLOATING RICH ROOM DETAIL TOOLTIP ON HOVER (OPENS DOWNWARD) */
+        .room-hover-tooltip {
+            position: absolute;
+            top: calc(100% + 8px);
+            bottom: auto;
+            left: 46px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 9999;
+            min-width: 220px;
+            max-width: 300px;
+            white-space: normal;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+        }
+        .room-hover-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            top: auto;
+            left: 20px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #0f172a transparent;
+        }
+        .tr-room-col:hover .room-hover-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .rht-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .rht-code {
+            font-weight: 800;
+            color: #fb923c;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+        }
+        .rht-cat {
+            font-size: 0.68rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            padding: 2px 7px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        .rht-title {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .rht-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 5px;
+            margin-top: 4px;
+        }
+
+        /* VERTICALLY STACKED PILLS: USER (TOP) + TIME (BOTTOM) */
+        .tr-user-time-col {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            width: 145px;
+            max-width: 100%;
+        }
+        .tr-pill-user {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1.5px solid #334155;
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 0.73rem;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            width: 100%;
+            height: 24px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        .tr-pill-user svg {
+            flex-shrink: 0;
+        }
+        .tr-pill-user span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .tr-pill-time {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1.5px solid #fb923c;
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 0.73rem;
+            font-weight: 700;
+            color: #ea580c;
+            white-space: nowrap;
+            width: 100%;
+            height: 24px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        .tr-pill-time svg {
+            flex-shrink: 0;
+        }
+        .tr-pill-time span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tr-date-col {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #1e293b;
+            text-align: left;
+            letter-spacing: -0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* KETERANGAN COLUMN */
+        .tr-desc-col {
+            min-width: 0;
+            position: relative;
+            width: 100%;
+        }
+        .tr-desc-text {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            max-width: 100%;
+        }
+
+        /* FLOATING RICH KETERANGAN TOOLTIP ON HOVER (OPENS DOWNWARD) */
+        .desc-hover-tooltip {
+            position: absolute;
+            top: calc(100% + 8px);
+            bottom: auto;
+            left: 0;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            z-index: 9999;
+            min-width: 220px;
+            max-width: 320px;
+            white-space: normal;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+        }
+        .desc-hover-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            top: auto;
+            left: 20px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #0f172a transparent;
+        }
+        .tr-desc-col:hover .desc-hover-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .dht-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+        .dht-content {
+            font-size: 0.8rem;
+            color: #f1f5f9;
+            word-break: break-word;
+        }
 
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 4px 11px;
+            gap: 5px;
+            padding: 3px 9px;
             border-radius: 999px;
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             font-weight: 700;
             white-space: nowrap;
         }
-        .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-        .btn-action-qr {
-            background: #16a34a;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* 3-DOTS ACTION BUTTON & DROPDOWN */
+        .action-dropdown-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-action-dots {
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-action-dots:hover, .btn-action-dots.active {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+        }
+
+        .action-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            min-width: 190px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.18), 0 4px 8px -2px rgba(15, 23, 42, 0.06);
+            padding: 6px;
+            z-index: 1000;
+            display: none;
+            text-align: left;
+        }
+
+        .action-dropdown-menu.show {
+            display: block;
+            animation: fadeInDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #334155;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
             text-decoration: none;
-            transition: background 0.2s;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            white-space: nowrap;
         }
-        .btn-action-qr:hover { background: #15803d; }
 
-        .btn-action-acc {
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.78rem;
+        .action-dropdown-item:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .action-dropdown-item.item-acc {
+            color: #16a34a;
+        }
+        .action-dropdown-item.item-acc:hover {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .action-dropdown-item.item-rej {
+            color: #dc2626;
+        }
+        .action-dropdown-item.item-rej:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .action-dropdown-item.item-qr {
+            color: #0284c7;
+        }
+        .action-dropdown-item.item-qr:hover {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .action-dropdown-divider {
+            height: 1px;
+            background: #f1f5f9;
+            margin: 4px 0;
+        }
+
+        /* Floating Multiple Select Action Bar */
+        .floating-batch-bar {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+            z-index: 9999;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+        }
+
+        .floating-batch-bar.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .batch-count-badge {
+            font-size: 0.85rem;
             font-weight: 700;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .batch-count-badge span {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+
+        .btn-batch-acc {
+            background: #16a34a;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.82rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
             transition: background 0.2s;
         }
-        .btn-action-acc:hover { background: #1d4ed8; }
 
-        .btn-action-rej {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fca5a5;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
+        .btn-batch-acc:hover {
+            background: #15803d;
         }
-        .btn-action-rej:hover { background: #dc2626; color: #fff; }
+
+        .btn-batch-rej {
+            background: #dc2626;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-batch-rej:hover {
+            background: #b91c1c;
+        }
+
+        .btn-batch-cancel {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-batch-cancel:hover {
+            color: #ffffff;
+        }
 
         /* Modal */
         .modal-overlay {
@@ -626,8 +1262,8 @@
             </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="toolbar-card">
+        <!-- Toolbar (Koordinator TA Style) -->
+        <div class="toolbar-card" style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 18px 20px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);">
             <div class="filter-pills-wrap">
                 <button type="button" class="filter-pill active" data-status="all" onclick="setFilterStatus('all')">
                     <span>Semua Permohonan</span>
@@ -647,9 +1283,80 @@
                 </button>
             </div>
 
-            <div class="search-box-wrap">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="kaurSearchInput" placeholder="Cari permohonan ruangan..." onkeyup="filterKaurRows()">
+            <!-- Row 1: Unified Multi-Search Pill Component & Standalone Add Button (+ 1/4) -->
+            <div class="search-pill-container">
+                <div class="unified-search-pill" id="mainSearchPill">
+                    <!-- Category Dropdown Container -->
+                    <div class="custom-dropdown-container">
+                        <input type="hidden" id="mainCategoryVal" value="query">
+                        <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                            <span id="label-filter-main-cat">Cari Kata Kunci</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-main-cat"></i>
+                        </button>
+                        <div id="menu-filter-main-cat" class="custom-dropdown-menu">
+                            <div onclick="selectMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item active"><span>🔍 Kata Kunci (Semua)</span></div>
+                            <div onclick="selectMainCategory('nama', '🏷️ Nama Peminjam', this)" class="dropdown-item"><span>🏷️ Nama Peminjam</span></div>
+                            <div onclick="selectMainCategory('ruangan', '🚪 Nama / Kode Ruangan', this)" class="dropdown-item"><span>🚪 Nama / Kode Ruangan</span></div>
+                            <div onclick="selectMainCategory('tanggal', '📅 Tanggal Peminjaman', this)" class="dropdown-item"><span>📅 Tanggal Peminjaman</span></div>
+                            <div onclick="selectMainCategory('keterangan', '📝 Keterangan / Keperluan', this)" class="dropdown-item"><span>📝 Keterangan / Keperluan</span></div>
+                            <div onclick="selectMainCategory('status', '⚡ Status Permohonan', this)" class="dropdown-item"><span>⚡ Status Permohonan</span></div>
+                        </div>
+                    </div>
+
+                    <div class="unified-divider"></div>
+
+                    <!-- Input Text Value Container -->
+                    <div id="mainValueContainer" style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2" style="color: #94a3b8; font-size: 0.75rem; margin-right: 8px;"></i>
+                        <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" oninput="filterTable()" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    </div>
+
+                    <!-- Tombol Cari -->
+                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="padding: 6px 14px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.75rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(234,88,12,0.25);">
+                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                    </button>
+                </div>
+
+                <!-- Standalone Add Filter Button (+ 1/4) -->
+                <button type="button" id="standaloneAddBtn" onclick="toggleOrAddFilterRow(event)" class="btn-standalone-add" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span id="filterCountBadge" class="badge-standalone-count">1/4</span>
+                </button>
+
+                <!-- Extra Filter Rows Card Popover -->
+                <div id="extraRowsCard" class="extra-rows-card">
+                    <div id="additionalFilterRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 10px; margin-top: 10px; font-size: 0.72rem;">
+                        <span style="color: #94a3b8;">Gunakan kombinasi kriteria untuk mempersempit permohonan peminjaman.</span>
+                        <button type="button" onclick="resetMultiSearch()" style="background: none; border: none; color: #dc2626; font-weight: 700; cursor: pointer;">
+                            Reset All Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Page Size & Records Count -->
+            <div style="padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+                <div style="font-size: 0.76rem; color: #64748b; font-weight: 500;">
+                    <span>Kelola & telusuri permohonan peminjaman ruangan yang memerlukan persetujuan resmi Ka. Ur.</span>
+                </div>
+
+                <!-- Page Size & Counter Right -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 12px; border-radius: 10px;">
+                        <span style="font-weight: 500;">Tampilkan</span>
+                        <select id="selectPerPage" onchange="changePageSize(this.value)" style="height: 24px; padding: 0 4px; font-size: 0.75rem; font-weight: 700; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; cursor: pointer; outline: none;">
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span style="font-weight: 500;">data/hal</span>
+                        <span style="color: #cbd5e1;">|</span>
+                        <span>Total: <strong class="total-rows-count" id="toolbarTotalCount" style="color: #0f172a; font-weight: 800;"><?= $totalCount ?></strong></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -657,114 +1364,254 @@
         <div class="table-card">
             <div class="table-responsive">
                 <table class="kaur-table" id="kaurTable">
+                    <colgroup>
+                        <col style="width: 44px;">
+                        <col style="width: 25%;">
+                        <col style="width: 18%;">
+                        <col style="width: 16%;">
+                        <col style="width: 23%;">
+                        <col style="width: 13%;">
+                        <col style="width: 50px;">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th>Peminjam</th>
-                            <th>Ruangan Laboratorium</th>
-                            <th>Jadwal Pelaksanaan</th>
-                            <th>Keperluan / Agenda</th>
-                            <th>Status Verifikasi</th>
-                            <th style="text-align: right;">Aksi Persetujuan & Surat</th>
+                            <th style="width: 44px; text-align: center; padding: 12px 6px;">
+                                <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)">
+                            </th>
+                            <th style="width: 25%;">Ruangan</th>
+                            <th style="width: 18%;">Peminjam & Waktu</th>
+                            <th style="width: 16%;">Tanggal</th>
+                            <th style="width: 23%;">Keterangan / Keperluan</th>
+                            <th style="width: 13%;">Status</th>
+                            <th style="width: 50px; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($peminjaman as $p): 
-                            $s = $p->status;
-                            $isApprovedKaur = (stripos($s, 'Ka. Ur') !== false || stripos($s, 'Kaur') !== false);
-                            $isLaboranAcc = (stripos($s, 'Laboran') !== false);
-                            $isPending = ($s === 'Pending');
-                            $isRejected = ($s === 'Ditolak');
+                        <?php if (empty($peminjaman)): ?>
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
+                                    <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 8px; display: block;"></i>
+                                    Belum ada permohonan peminjaman ruangan.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php 
+                            if (!function_exists('format_indo_date_php')) {
+                                function format_indo_date_php($date1, $date2 = null) {
+                                    if (empty($date1)) return '-';
+                                    $mNames = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                                    $t1 = strtotime($date1);
+                                    if (!$t1) return $date1;
+                                    $d1 = date('j', $t1);
+                                    $m1 = (int)date('n', $t1);
+                                    $y1 = date('Y', $t1);
 
-                            $statusCategory = 'other';
-                            if ($isApprovedKaur) {
-                                $statusCategory = 'kaur';
-                                $dot = '#22c55e'; $bg = '#f0fdf4'; $color = '#166534'; $label = 'Disetujui Ka. Ur (Surat QR Terbit)';
-                            } elseif ($isLaboranAcc) {
-                                $statusCategory = 'ready';
-                                $dot = '#3b82f6'; $bg = '#eff6ff'; $color = '#1d4ed8'; $label = 'ACC Laboran (Menunggu Ka. Ur)';
-                            } elseif ($isPending) {
-                                $statusCategory = 'ready';
-                                $dot = '#f59e0b'; $bg = '#fffbeb'; $color = '#b45309'; $label = 'Pending (Menunggu)';
-                            } elseif ($isRejected) {
-                                $statusCategory = 'rejected';
-                                $dot = '#ef4444'; $bg = '#fef2f2'; $color = '#991b1b'; $label = 'Ditolak';
-                            } else {
-                                $dot = '#8b5cf6'; $bg = '#f5f3ff'; $color = '#6d28d9'; $label = htmlspecialchars($s);
+                                    if (empty($date2) || $date1 === $date2) {
+                                        return "{$d1} {$mNames[$m1]} {$y1}";
+                                    }
+
+                                    $t2 = strtotime($date2);
+                                    if (!$t2) return "{$d1} {$mNames[$m1]} {$y1}";
+                                    $d2 = date('j', $t2);
+                                    $m2 = (int)date('n', $t2);
+                                    $y2 = date('Y', $t2);
+
+                                    if ($y1 === $y2 && $m1 === $m2) {
+                                        return "{$d1} - {$d2} {$mNames[$m1]} {$y1}";
+                                    } elseif ($y1 === $y2) {
+                                        return "{$d1} {$mNames[$m1]} - {$d2} {$mNames[$m2]} {$y1}";
+                                    } else {
+                                        return "{$d1} {$mNames[$m1]} {$y1} - {$d2} {$mNames[$m2]} {$y2}";
+                                    }
+                                }
                             }
 
-                            $dateFormatted = ($p->tanggal_mulai === $p->tanggal_selesai)
-                                ? date('d M Y', strtotime($p->tanggal_mulai))
-                                : date('d M', strtotime($p->tanggal_mulai)) . ' - ' . date('d M Y', strtotime($p->tanggal_selesai));
-                            $timeFormatted = substr($p->jam_mulai, 0, 5) . ' - ' . substr($p->jam_selesai, 0, 5);
-                        ?>
-                        <tr class="kaur-row" data-status-category="<?= $statusCategory ?>" data-search="<?= strtolower(htmlspecialchars($p->nama_lengkap . ' ' . $p->kode_ruangan . ' ' . $p->nama_ruangan . ' ' . $p->keterangan)) ?>">
-                            <td>
-                                <strong style="color: #0f172a; display: block;"><?= htmlspecialchars($p->nama_lengkap) ?></strong>
-                            </td>
-                            <td>
-                                <div style="font-weight: 700; color: #16a34a;"><?= htmlspecialchars($p->kode_ruangan ?: '-') ?></div>
-                                <div style="font-size: 0.8rem; color: #64748b;"><?= htmlspecialchars($p->nama_ruangan ?: '-') ?></div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 600; color: #0f172a;"><?= $dateFormatted ?></div>
-                                <div style="font-size: 0.78rem; color: #64748b; font-weight: 600;">⏰ <?= $timeFormatted ?></div>
-                            </td>
-                            <td>
-                                <div style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #334155;" title="<?= htmlspecialchars($p->keterangan) ?>">
-                                    <?= htmlspecialchars($p->keterangan ?: '-') ?>
-                                </div>
-                                <?php if ($isRejected && !empty($p->alasan_penolakan)): ?>
-                                    <div style="font-size: 0.75rem; color: #dc2626; margin-top: 2px;">
-                                        <i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($p->alasan_penolakan) ?>
+                            foreach($peminjaman as $idx => $p): 
+                                $s = $p->status;
+                                $isApprovedKaur = (stripos($s, 'Ka. Ur') !== false || stripos($s, 'Kaur') !== false);
+                                $isLaboranAcc = (stripos($s, 'Laboran') !== false);
+                                $isPending = ($s === 'Pending');
+                                $isRejected = ($s === 'Ditolak');
+
+                                $statusCategory = 'other';
+                                if ($isApprovedKaur) {
+                                    $statusCategory = 'kaur';
+                                    $dot = '#22c55e'; $bg = '#f0fdf4'; $color = '#166534'; $label = 'Disetujui Ka. Ur';
+                                } elseif ($isLaboranAcc) {
+                                    $statusCategory = 'ready';
+                                    $dot = '#3b82f6'; $bg = '#eff6ff'; $color = '#1d4ed8'; $label = 'Disetujui Laboran';
+                                } elseif ($isPending) {
+                                    $statusCategory = 'ready';
+                                    $dot = '#f59e0b'; $bg = '#fffbeb'; $color = '#b45309'; $label = 'Menunggu Persetujuan';
+                                } elseif ($isRejected) {
+                                    $statusCategory = 'rejected';
+                                    $dot = '#ef4444'; $bg = '#fef2f2'; $color = '#991b1b'; $label = 'Ditolak';
+                                } else {
+                                    $dot = '#8b5cf6'; $bg = '#f5f3ff'; $color = '#6d28d9'; $label = htmlspecialchars($s);
+                                }
+
+                                $dateFormatted = format_indo_date_php($p->tanggal_mulai, $p->tanggal_selesai);
+                                $timeFormatted = substr($p->jam_mulai, 0, 5) . ' - ' . substr($p->jam_selesai, 0, 5);
+                            ?>
+                            <tr class="kaur-row" 
+                                <?= $idx >= 10 ? 'style="display: none;"' : '' ?>
+                                data-id="<?= $p->id ?>" 
+                                data-status-category="<?= $statusCategory ?>" 
+                                data-nama="<?= strtolower(htmlspecialchars($p->nama_lengkap ?? '')) ?>"
+                                data-ruangan="<?= strtolower(htmlspecialchars(($p->kode_ruangan ?? '') . ' ' . ($p->nama_ruangan ?? '') . ' ' . ($p->nama_kategori ?? ''))) ?>"
+                                data-tanggal="<?= strtolower(htmlspecialchars($dateFormatted . ' ' . ($p->tanggal_mulai ?? '') . ' ' . ($p->tanggal_selesai ?? ''))) ?>"
+                                data-keterangan="<?= strtolower(htmlspecialchars($p->keterangan ?? '')) ?>"
+                                data-status="<?= strtolower(htmlspecialchars($s . ' ' . $label)) ?>"
+                                data-search="<?= strtolower(htmlspecialchars(($p->nama_lengkap ?? '') . ' ' . ($p->kode_ruangan ?? '') . ' ' . ($p->nama_ruangan ?? '') . ' ' . ($p->keterangan ?? '') . ' ' . ($p->status ?? '') . ' ' . $dateFormatted)) ?>">
+                                <td style="text-align: center; padding: 11px 6px;">
+                                    <input type="checkbox" class="custom-checkbox row-checkbox" data-id="<?= $p->id ?>" data-status="<?= $p->status ?>" onchange="updateBatchBar()">
+                                </td>
+                                <td>
+                                    <div class="tr-room-col">
+                                        <div class="tr-room-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        </div>
+                                        <div class="tr-room-info" title="<?= htmlspecialchars(($p->nama_ruangan ?: '') . ' (' . ($p->kode_ruangan ?: '') . ')') ?>">
+                                            <div class="tr-room-code"><?= htmlspecialchars($p->kode_ruangan ?: '-') ?></div>
+                                            <div class="tr-room-name"><?= htmlspecialchars($p->nama_ruangan ?: '-') ?></div>
+                                        </div>
+
+                                        <!-- Floating Room Detail Tooltip on Hover -->
+                                        <div class="room-hover-tooltip">
+                                            <div class="rht-header">
+                                                <span class="rht-code"><?= htmlspecialchars($p->kode_ruangan ?: '-') ?></span>
+                                                <span class="rht-cat"><?= htmlspecialchars($p->nama_kategori ?: 'Ruangan') ?></span>
+                                            </div>
+                                            <div class="rht-title"><?= htmlspecialchars($p->nama_ruangan ?: '-') ?></div>
+                                            <?php if (!empty($p->lokasi) || !empty($p->kapasitas)): ?>
+                                            <div class="rht-meta">
+                                                <?php if (!empty($p->lokasi)): ?><span>📍 <?= htmlspecialchars($p->lokasi) ?></span><?php endif; ?>
+                                                <?php if (!empty($p->kapasitas)): ?><span>👥 <?= htmlspecialchars($p->kapasitas) ?> Orang</span><?php endif; ?>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <span class="status-badge" style="background: <?= $bg ?>; color: <?= $color ?>;">
-                                    <span class="status-dot" style="background: <?= $dot ?>;"></span>
-                                    <?= $label ?>
-                                </span>
-                            </td>
-                            <td style="text-align: right;">
-                                <div style="display: inline-flex; gap: 6px; align-items: center;">
-                                    <?php if ($isApprovedKaur): ?>
-                                        <a href="<?= site_url('kaur/surat/' . $p->id) ?>" target="_blank" class="btn-action-qr" title="Cetak Surat Resmi Ber-QR Code">
-                                            <i class="fa-solid fa-qrcode"></i> Cetak Surat QR
-                                        </a>
-                                    <?php else: ?>
-                                        <button type="button" class="btn-action-acc" onclick="kaurApprove(<?= $p->id ?>)" title="Beri Persetujuan Resmi & Terbitkan Surat QR">
-                                            <i class="fa-solid fa-stamp"></i> ACC Resmi
+                                </td>
+                                <td>
+                                    <div class="tr-user-time-col">
+                                        <div class="tr-pill-user" title="<?= htmlspecialchars($p->nama_lengkap) ?>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1e293b" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                            <span><?= htmlspecialchars($p->nama_lengkap) ?></span>
+                                        </div>
+                                        <div class="tr-pill-time" title="<?= $timeFormatted ?>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            <span><?= $timeFormatted ?></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="tr-date-col">
+                                        <?= $dateFormatted ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="tr-desc-col" title="<?= htmlspecialchars($p->keterangan ?: '-') ?>">
+                                        <span class="tr-desc-text"><?= htmlspecialchars($p->keterangan ?: '-') ?></span>
+
+                                        <!-- Floating Keterangan Detail Tooltip on Hover -->
+                                        <div class="desc-hover-tooltip">
+                                            <span class="dht-badge">📝 Keterangan / Keperluan</span>
+                                            <div class="dht-content"><?= htmlspecialchars($p->keterangan ?: '-') ?></div>
+                                        </div>
+                                        <?php if ($isRejected && !empty($p->alasan_penolakan)): ?>
+                                            <div style="font-size: 0.75rem; color: #dc2626; margin-top: 4px;">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> <?= htmlspecialchars($p->alasan_penolakan) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge" style="background: <?= $bg ?>; color: <?= $color ?>;">
+                                        <span class="status-dot" style="background: <?= $dot ?>;"></span>
+                                        <?= $label ?>
+                                    </span>
+                                </td>
+                                <td style="text-align: center; overflow: visible; position: relative;">
+                                    <div class="action-dropdown-wrap">
+                                        <button type="button" class="btn-action-dots" onclick="toggleActionDropdown(<?= $p->id ?>, event)" title="Menu Aksi">
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
                                         </button>
-                                        <button type="button" class="btn-action-rej" onclick="openKaurRejectModal(<?= $p->id ?>)" title="Tolak Permohonan">
-                                            <i class="fa-solid fa-xmark"></i> Tolak
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
+                                        <div class="action-dropdown-menu" id="actionMenu_<?= $p->id ?>">
+                                            <?php if (!$isApprovedKaur && !$isRejected): ?>
+                                                <button type="button" class="action-dropdown-item item-acc" onclick="kaurApprove(<?= $p->id ?>)">
+                                                    <i class="fa-solid fa-stamp"></i> ACC Resmi Ka. Ur
+                                                </button>
+                                                <button type="button" class="action-dropdown-item item-rej" onclick="openKaurRejectModal(<?= $p->id ?>)">
+                                                    <i class="fa-solid fa-ban"></i> Tolak Permohonan
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if ($isApprovedKaur): ?>
+                                                <a href="<?= site_url('kaur/surat/' . $p->id) ?>" target="_blank" class="action-dropdown-item item-qr">
+                                                    <i class="fa-solid fa-qrcode"></i> Cetak Surat QR
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+            <!-- Dynamic Bottom Pagination Bar -->
+            <div class="pagination-bar">
+                <div id="paginationInfo" style="font-size: 0.78rem; font-weight: 500; color: #64748b;">
+                    Menampilkan <span id="pageInfoStart"><?= !empty($peminjaman) ? 1 : 0 ?></span> - <span id="pageInfoEnd"><?= min(10, count($peminjaman ?? [])) ?></span> dari <strong id="pageInfoTotal" style="color: #0f172a; font-weight: 800;"><?= count($peminjaman ?? []) ?></strong> permohonan
+                </div>
+                <div class="pagination-controls" id="paginationControls"></div>
             </div>
         </div>
 
     </div>
 
-    <!-- Modal Tolak -->
+    <!-- =========================================================
+         FLOATING BATCH ACTION BAR (MULTIPLE SELECT ACC / TOLAK)
+         ========================================================= -->
+    <div id="floatingBatchBar" class="floating-batch-bar">
+        <div class="batch-count-badge">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="selectedCountBadge">0</span> Data Terpilih
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-batch-acc" onclick="submitBatchApprove()">
+                <i class="fa-solid fa-check-double"></i> ACC Massal (Ka. Ur)
+            </button>
+            <button type="button" class="btn-batch-rej" onclick="openBatchRejectModal()">
+                <i class="fa-solid fa-ban"></i> Tolak Massal
+            </button>
+            <button type="button" class="btn-batch-cancel" onclick="deselectAll()">
+                Batal
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Tolak (Wajib Alasan) -->
     <div class="modal-overlay" id="kaurRejectModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-triangle-exclamation text-red-500"></i> Penolakan Permohonan Peminjaman</h3>
-                <button type="button" onclick="closeKaurRejectModal()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">&times;</button>
+                <h3><i class="fa-solid fa-triangle-exclamation text-red-500"></i> Catatan Penolakan Peminjaman</h3>
+                <button type="button" onclick="closeKaurRejectModal()" style="background:none;border:none;font-size:1.3rem;color:#94a3b8;cursor:pointer;">&times;</button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="kaurRejectId">
-                <label style="font-size:0.82rem; font-weight:700; color:#991b1b; display:block; margin-bottom:6px;">Alasan Penolakan Resmi (Wajib):</label>
-                <textarea id="kaurAlasanInput" rows="3" class="form-control" placeholder="Tuliskan catatan alasan penolakan..."></textarea>
+                <input type="hidden" id="kaurRejectTargetIds">
+                <input type="hidden" id="kaurRejectIsBatch" value="0">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size:0.82rem; font-weight:700; color:#991b1b; display:block; margin-bottom:6px;">Alasan Penolakan Resmi (Wajib Diisi) <span style="color:red;">*</span></label>
+                    <textarea id="kaurAlasanInput" rows="3" class="form-control" placeholder="Tuliskan catatan alasan penolakan secara jelas..." required></textarea>
+                    <small style="color: #64748b; font-size: 0.75rem; margin-top: 6px; display: block;">Catatan ini akan dikirimkan dan ditampilkan pada status permohonan peminjam.</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn" style="background:#f1f5f9; color:#475569; border:none; padding:8px 16px; border-radius:8px; cursor:pointer;" onclick="closeKaurRejectModal()">Batal</button>
-                <button type="button" class="btn" style="background:#dc2626; color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:700;" onclick="submitKaurReject()">Konfirmasi Tolak</button>
+                <button type="button" class="btn" style="background:#dc2626; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer;" onclick="submitKaurRejectConfirm()">
+                    <i class="fa-solid fa-ban"></i> Konfirmasi Tolak
+                </button>
             </div>
         </div>
     </div>
@@ -773,35 +1620,381 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const BASE_URL = '<?= base_url() ?>';
-        let currentFilter = 'all';
+        let currentFilterStatus = 'all';
+        let pageSize = 10;
+        let currentPage = 1;
+        let extraRowCounter = 0;
 
+        const SEARCH_CATEGORIES = [
+            { key: 'query', label: '🔍 Kata Kunci (Semua)' },
+            { key: 'nama', label: '🏷️ Nama Peminjam' },
+            { key: 'ruangan', label: '🚪 Nama / Kode Ruangan' },
+            { key: 'tanggal', label: '📅 Tanggal Peminjaman' },
+            { key: 'keterangan', label: '📝 Keterangan / Keperluan' },
+            { key: 'status', label: '⚡ Status Permohonan' }
+        ];
+
+        // ==========================================
+        // MULTI-SEARCH & DROPDOWNS
+        // ==========================================
+        function toggleCustomDropdown(id, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('menu-filter-' + id);
+            const arrow = document.getElementById('arrow-filter-' + id);
+            const isShown = menu.classList.contains('show');
+            closeAllCustomDropdowns();
+            if (!isShown) {
+                menu.classList.add('show');
+                if (arrow) arrow.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function closeAllCustomDropdowns() {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-arrow').forEach(a => a.style.transform = 'rotate(0deg)');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-dropdown-container') && !e.target.closest('.extra-rows-card') && !e.target.closest('#standaloneAddBtn')) {
+                closeAllCustomDropdowns();
+                const card = document.getElementById('extraRowsCard');
+                if (card && !e.target.closest('.extra-rows-card')) {
+                    card.style.display = 'none';
+                    const btn = document.getElementById('standaloneAddBtn');
+                    if (btn) btn.classList.remove('active');
+                }
+            }
+        });
+
+        function selectMainCategory(catKey, catLabel, el) {
+            document.getElementById('mainCategoryVal').value = catKey;
+            document.getElementById('label-filter-main-cat').innerText = catLabel.replace(/^[^\s]+\s*/, '');
+            if (el) {
+                el.parentElement.querySelectorAll('.dropdown-item').forEach(d => d.classList.remove('active'));
+                el.classList.add('active');
+            }
+            closeAllCustomDropdowns();
+            filterTable();
+        }
+
+        function toggleOrAddFilterRow(e) {
+            if (e) e.stopPropagation();
+            const card = document.getElementById('extraRowsCard');
+            const btn = document.getElementById('standaloneAddBtn');
+            const isOpen = card.style.display === 'block';
+
+            if (isOpen) {
+                card.style.display = 'none';
+                if (btn) btn.classList.remove('active');
+            } else {
+                card.style.display = 'block';
+                if (btn) btn.classList.add('active');
+                const container = document.getElementById('additionalFilterRowsContainer');
+                if (container.children.length === 0) {
+                    addFilterRow();
+                }
+            }
+        }
+
+        function addFilterRow(defaultKey = 'ruangan', defaultVal = '') {
+            const container = document.getElementById('additionalFilterRowsContainer');
+            if (container.children.length >= 3) {
+                Swal.fire({
+                    title: 'Batas Maksimal Filter',
+                    text: 'Maksimal 4 kriteria pencarian kombinasi (1 utama + 3 filter tambahan).',
+                    icon: 'info',
+                    confirmButtonColor: '#ea580c'
+                });
+                return;
+            }
+
+            extraRowCounter++;
+            const rowId = 'extra-row-' + extraRowCounter;
+
+            let dropdownItems = '';
+            SEARCH_CATEGORIES.forEach(c => {
+                const isActive = (c.key === defaultKey) ? 'active' : '';
+                dropdownItems += `<div onclick="selectExtraCategory('${rowId}', '${c.key}', '${c.label}', this)" class="dropdown-item ${isActive}"><span>${c.label}</span></div>`;
+            });
+
+            const catObj = SEARCH_CATEGORIES.find(c => c.key === defaultKey) || SEARCH_CATEGORIES[0];
+            const cleanLabel = catObj.label.replace(/^[^\s]+\s*/, '');
+
+            const rowHtml = document.createElement('div');
+            rowHtml.className = 'extra-filter-row';
+            rowHtml.id = rowId;
+            rowHtml.innerHTML = `
+                <div class="unified-search-pill" style="height: 40px;">
+                    <div class="custom-dropdown-container">
+                        <input type="hidden" class="extra-category-val" value="${defaultKey}">
+                        <button type="button" onclick="toggleCustomDropdown('${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                            <span class="extra-category-label">${cleanLabel}</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-${rowId}"></i>
+                        </button>
+                        <div id="menu-filter-${rowId}" class="custom-dropdown-menu">
+                            ${dropdownItems}
+                        </div>
+                    </div>
+                    <div class="unified-divider" style="height: 16px;"></div>
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        <input type="text" class="extra-search-input" value="${defaultVal}" oninput="filterTable()" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik filter tambahan..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    </div>
+                </div>
+                <button type="button" onclick="removeFilterRow('${rowId}')" class="btn-remove-row" title="Hapus kriteria ini">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+            `;
+
+            container.appendChild(rowHtml);
+            updateFilterCountBadge();
+        }
+
+        function selectExtraCategory(rowId, catKey, catLabel, el) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.querySelector('.extra-category-val').value = catKey;
+            row.querySelector('.extra-category-label').innerText = catLabel.replace(/^[^\s]+\s*/, '');
+            if (el) {
+                el.parentElement.querySelectorAll('.dropdown-item').forEach(d => d.classList.remove('active'));
+                el.classList.add('active');
+            }
+            closeAllCustomDropdowns();
+            filterTable();
+        }
+
+        function removeFilterRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+                updateFilterCountBadge();
+                filterTable();
+            }
+        }
+
+        function updateFilterCountBadge() {
+            const container = document.getElementById('additionalFilterRowsContainer');
+            const count = 1 + (container ? container.children.length : 0);
+            const badge = document.getElementById('filterCountBadge');
+            if (badge) badge.innerText = count + '/4';
+        }
+
+        function resetMultiSearch() {
+            document.getElementById('mainSearchInput').value = '';
+            selectMainCategory('query', '🔍 Kata Kunci (Semua)', null);
+            const container = document.getElementById('additionalFilterRowsContainer');
+            if (container) container.innerHTML = '';
+            updateFilterCountBadge();
+            const card = document.getElementById('extraRowsCard');
+            if (card) card.style.display = 'none';
+            const btn = document.getElementById('standaloneAddBtn');
+            if (btn) btn.classList.remove('active');
+            filterTable();
+        }
+
+        function getActiveFilters() {
+            const filters = [];
+            const mainKey = document.getElementById('mainCategoryVal').value || 'query';
+            const mainVal = (document.getElementById('mainSearchInput').value || '').toLowerCase().trim();
+            if (mainVal) {
+                filters.push({ key: mainKey, val: mainVal });
+            }
+
+            document.querySelectorAll('#additionalFilterRowsContainer .extra-filter-row').forEach(row => {
+                const key = row.querySelector('.extra-category-val').value;
+                const val = (row.querySelector('.extra-search-input').value || '').toLowerCase().trim();
+                if (val) {
+                    filters.push({ key: key, val: val });
+                }
+            });
+
+            return filters;
+        }
+
+        // ==========================================
+        // FILTER & PAGINATION ENGINE
+        // ==========================================
         function setFilterStatus(st) {
-            currentFilter = st;
+            currentFilterStatus = st;
             document.querySelectorAll('.filter-pill').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-status') === st);
             });
-            filterKaurRows();
+            currentPage = 1;
+            filterTable();
         }
 
-        function filterKaurRows() {
-            const query = (document.getElementById('kaurSearchInput').value || '').toLowerCase().trim();
-            const rows = document.querySelectorAll('.kaur-row');
+        function filterTable() {
+            const filters = getActiveFilters();
+            const allRows = Array.from(document.querySelectorAll('.kaur-row'));
 
-            rows.forEach(row => {
-                const cat = row.getAttribute('data-status-category');
-                const searchTxt = row.getAttribute('data-search') || '';
+            // 1. Filter matching rows
+            const matchingRows = allRows.filter(row => {
+                const cat = row.getAttribute('data-status-category') || '';
+                const matchStatus = (currentFilterStatus === 'all') || (cat === currentFilterStatus);
+                if (!matchStatus) return false;
 
-                const matchStatus = (currentFilter === 'all') || (cat === currentFilter);
-                const matchQuery  = !query || searchTxt.includes(query);
+                if (filters.length === 0) return true;
 
-                row.style.display = (matchStatus && matchQuery) ? '' : 'none';
+                return filters.every(f => {
+                    let fieldText = '';
+                    if (f.key === 'query') {
+                        fieldText = row.getAttribute('data-search') || '';
+                    } else {
+                        fieldText = row.getAttribute('data-' + f.key) || row.getAttribute('data-search') || '';
+                    }
+                    return fieldText.includes(f.val);
+                });
             });
+
+            const totalItems = matchingRows.length;
+            const totalPages = Math.ceil(totalItems / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            // 2. Show/Hide DOM elements based on page slice
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+
+            matchingRows.slice(startIndex, endIndex).forEach(row => {
+                row.style.display = '';
+            });
+
+            // 3. Update Toolbar and Pagination Info Counters
+            const toolbarCount = document.getElementById('toolbarTotalCount');
+            if (toolbarCount) toolbarCount.innerText = totalItems;
+
+            const pageInfoStart = document.getElementById('pageInfoStart');
+            const pageInfoEnd = document.getElementById('pageInfoEnd');
+            const pageInfoTotal = document.getElementById('pageInfoTotal');
+
+            if (pageInfoStart) pageInfoStart.innerText = totalItems > 0 ? (startIndex + 1) : 0;
+            if (pageInfoEnd) pageInfoEnd.innerText = Math.min(endIndex, totalItems);
+            if (pageInfoTotal) pageInfoTotal.innerText = totalItems;
+
+            renderPaginationControls(totalPages);
+            updateBatchBar();
         }
 
+        function renderPaginationControls(totalPages) {
+            const container = document.getElementById('paginationControls');
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (currentPage <= 4) {
+                    pages = [1, 2, 3, 4, 5, '...', totalPages];
+                } else if (currentPage >= totalPages - 3) {
+                    pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+                } else {
+                    pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+                }
+            }
+
+            let html = `
+                <button type="button" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="page-btn" title="Halaman Sebelumnya">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+            `;
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    html += `<span style="padding: 0 4px; font-weight: bold; color: #94a3b8;">...</span>`;
+                } else if (p === currentPage) {
+                    html += `<button type="button" class="page-btn active">${p}</button>`;
+                } else {
+                    html += `<button type="button" onclick="goToPage(${p})" class="page-btn">${p}</button>`;
+                }
+            });
+
+            html += `
+                <button type="button" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="page-btn" title="Halaman Selanjutnya">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function goToPage(p) {
+            currentPage = p;
+            filterTable();
+        }
+
+        function changePageSize(sz) {
+            pageSize = parseInt(sz) || 10;
+            currentPage = 1;
+            filterTable();
+        }
+
+        // Initialize table on load
+        $(document).ready(function() {
+            filterTable();
+        });
+
+        // Backward compatibility
+        function filterTableRows() {
+            filterTable();
+        }
+
+        // ==========================================
+        // MULTIPLE SELECT (BATCH ACTION) LOGIC
+        // ==========================================
+        function toggleSelectAll(masterCb) {
+            const visibleRows = document.querySelectorAll('.kaur-row:not([style*="display: none"]) .row-checkbox');
+            visibleRows.forEach(cb => {
+                cb.checked = masterCb.checked;
+            });
+            updateBatchBar();
+        }
+
+        function deselectAll() {
+            const masterCb = document.getElementById('selectAllCheckbox');
+            if (masterCb) masterCb.checked = false;
+
+            document.querySelectorAll('.row-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            updateBatchBar();
+        }
+
+        function getSelectedIds() {
+            const selected = [];
+            document.querySelectorAll('.row-checkbox:checked').forEach(cb => {
+                selected.push(cb.getAttribute('data-id'));
+            });
+            return selected;
+        }
+
+        function updateBatchBar() {
+            const selectedIds = getSelectedIds();
+            const bar = document.getElementById('floatingBatchBar');
+            const countBadge = document.getElementById('selectedCountBadge');
+
+            if (selectedIds.length > 0) {
+                if (countBadge) countBadge.innerText = selectedIds.length;
+                if (bar) bar.classList.add('show');
+            } else {
+                if (bar) bar.classList.remove('show');
+                const masterCb = document.getElementById('selectAllCheckbox');
+                if (masterCb) masterCb.checked = false;
+            }
+        }
+
+        // ==========================================
+        // SINGLE APPROVE & REJECT ACTIONS
+        // ==========================================
         function kaurApprove(id) {
             Swal.fire({
-                title: 'Setujui Resmi Peminjaman?',
-                text: 'Permohonan akan berstatus Disetujui Ka. Ur dan langsung menerbitkan Surat Resmi ber-QR Code.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#16a34a',
@@ -836,7 +2029,8 @@
         }
 
         function openKaurRejectModal(id) {
-            document.getElementById('kaurRejectId').value = id;
+            document.getElementById('kaurRejectTargetIds').value = JSON.stringify([id]);
+            document.getElementById('kaurRejectIsBatch').value = '0';
             document.getElementById('kaurAlasanInput').value = '';
             document.getElementById('kaurRejectModal').classList.add('active');
         }
@@ -845,24 +2039,118 @@
             document.getElementById('kaurRejectModal').classList.remove('active');
         }
 
-        function submitKaurReject() {
-            const id = document.getElementById('kaurRejectId').value;
+        // ==========================================
+        // BATCH APPROVE & REJECT ACTIONS
+        // ==========================================
+        function submitBatchApprove() {
+            const ids = getSelectedIds();
+            if (ids.length === 0) return;
+
+            Swal.fire({
+                title: `ACC ${ids.length} Permohonan Sekaligus?`,
+                text: `Semua ${ids.length} permohonan terpilih akan disetujui resmi oleh Ka. Ur dan surat ber-QR code akan diterbitkan.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, ACC Semua',
+                cancelButtonText: 'Batal'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    $.post(BASE_URL + 'kaur/batch_approve', { ids: ids }, function(resp) {
+                        if (resp.status === 'success') {
+                            Swal.fire({ title: 'Berhasil!', text: resp.message, icon: 'success', confirmButtonColor: '#16a34a' })
+                            .then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
+                }
+            });
+        }
+
+        function openBatchRejectModal() {
+            const ids = getSelectedIds();
+            if (ids.length === 0) return;
+
+            document.getElementById('kaurRejectTargetIds').value = JSON.stringify(ids);
+            document.getElementById('kaurRejectIsBatch').value = '1';
+            document.getElementById('kaurAlasanInput').value = '';
+            document.getElementById('kaurRejectModal').classList.add('active');
+        }
+
+        function submitKaurRejectConfirm() {
+            const ids = JSON.parse(document.getElementById('kaurRejectTargetIds').value || '[]');
             const alasan = document.getElementById('kaurAlasanInput').value.trim();
+            const isBatch = document.getElementById('kaurRejectIsBatch').value === '1';
 
             if (!alasan) {
-                Swal.fire('Catatan Wajib', 'Harap masukkan alasan penolakan!', 'warning');
+                Swal.fire({
+                    title: 'Catatan Penolakan Wajib',
+                    text: 'Harap tuliskan alasan penolakan secara jelas.',
+                    icon: 'warning',
+                    confirmButtonColor: '#ea580c'
+                });
                 return;
             }
 
-            $.post(BASE_URL + 'kaur/reject/' + id, { alasan_penolakan: alasan }, function(resp) {
-                if (resp.status === 'success') {
-                    closeKaurRejectModal();
-                    Swal.fire('Ditolak', resp.message, 'success').then(() => location.reload());
-                } else {
-                    Swal.fire('Gagal', resp.message, 'error');
-                }
-            }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan sistem', 'error'));
+            if (isBatch) {
+                $.post(BASE_URL + 'kaur/batch_reject', { ids: ids, alasan_penolakan: alasan }, function(resp) {
+                    if (resp.status === 'success') {
+                        closeKaurRejectModal();
+                        Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
+                        .then(() => location.reload());
+                    } else {
+                        Swal.fire('Gagal', resp.message, 'error');
+                    }
+                }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
+            } else {
+                const singleId = ids[0];
+                $.post(BASE_URL + 'kaur/reject/' + singleId, { alasan_penolakan: alasan }, function(resp) {
+                    if (resp.status === 'success') {
+                        closeKaurRejectModal();
+                        Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
+                        .then(() => location.reload());
+                    } else {
+                        Swal.fire('Gagal', resp.message, 'error');
+                    }
+                }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
+            }
         }
+
+        function openSingleRejectModal(id) {
+            document.getElementById('kaurRejectTargetIds').value = JSON.stringify([id]);
+            document.getElementById('kaurRejectIsBatch').value = '0';
+            document.getElementById('kaurAlasanInput').value = '';
+            closeAllActionDropdowns();
+            document.getElementById('kaurRejectModal').classList.add('active');
+        }
+
+        // ==========================================
+        // 3-DOTS ACTION DROPDOWN LOGIC
+        // ==========================================
+        function toggleActionDropdown(id, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('actionMenu_' + id);
+            const isOpen = menu && menu.classList.contains('show');
+            closeAllActionDropdowns();
+            if (!isOpen && menu) {
+                menu.classList.add('show');
+                const btn = menu.previousElementSibling;
+                if (btn) btn.classList.add('active');
+            }
+        }
+
+        function closeAllActionDropdowns() {
+            document.querySelectorAll('.action-dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.btn-action-dots').forEach(b => b.classList.remove('active'));
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.action-dropdown-wrap')) {
+                closeAllActionDropdowns();
+            }
+        });
     </script>
 </body>
 </html>

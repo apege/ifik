@@ -397,35 +397,204 @@
             font-weight: 800;
         }
 
-        .search-box-wrap {
+        /* Unified Multi-Search Pill Component (Koordinator TA Style) */
+        .search-pill-container {
             position: relative;
-            min-width: 260px;
-        }
-
-        .search-box-wrap input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             width: 100%;
-            padding: 9px 16px 9px 38px;
-            border-radius: var(--radius-md);
-            border: 1.5px solid var(--border-color);
-            font-size: 0.84rem;
-            font-family: inherit;
-            color: var(--text-color);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .search-box-wrap input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+        .unified-search-pill {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 2px 12px;
+            flex: 1;
+            height: 44px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .unified-search-pill:focus-within, .unified-search-pill.active {
+            border-color: #ea580c !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12) !important;
         }
 
-        .search-box-wrap i {
+        .unified-divider {
+            width: 1.5px;
+            height: 20px;
+            background-color: #cbd5e1;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-standalone-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff7ed;
+            border: 1.5px solid #ffedd5;
+            border-radius: 14px;
+            padding: 6px 14px;
+            height: 44px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ea580c;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.06);
+        }
+        .btn-standalone-add:hover, .btn-standalone-add.active {
+            background: #ffedd5;
+            border-color: #fdba74;
+            transform: scale(1.02);
+        }
+
+        .badge-standalone-count {
+            background: #ea580c;
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 1.5px 8px;
+            border-radius: 99px;
+        }
+
+        .extra-rows-card {
+            display: none;
             position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 0.85rem;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 100%;
+            max-width: 660px;
+            background: #ffffff;
+            border: 1.5px solid #fed7aa;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.16);
+            z-index: 1000;
+        }
+
+        .extra-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .btn-remove-row {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #fff1f2;
+            border: 1.5px solid #fecdd3;
+            border-radius: 12px;
+            color: #e11d48;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+        .btn-remove-row:hover {
+            background: #ffe4e6;
+            transform: scale(1.05);
+        }
+
+        .custom-dropdown-container {
+            position: relative;
+        }
+
+        .custom-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.16);
+            z-index: 2000;
+            padding: 6px;
+            min-width: 200px;
+            display: none;
+        }
+        .custom-dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+        }
+        .dropdown-item:hover, .dropdown-item.active {
+            background: #fff7ed;
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        /* Pagination Bar */
+        .pagination-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 20px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .page-btn {
+            height: 32px;
+            min-width: 32px;
+            padding: 0 8px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+        .page-btn:hover:not(:disabled) {
+            border-color: #ea580c;
+            color: #ea580c;
+            background: #fff7ed;
+        }
+        .page-btn.active {
+            background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+            border-color: #ea580c;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         /* Table Card */
@@ -433,38 +602,42 @@
             background: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            overflow: hidden;
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+            width: 100%;
+            overflow: visible;
         }
 
         .table-responsive {
             width: 100%;
-            overflow-x: auto;
+            overflow: visible;
         }
 
         table.laboran-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
+            table-layout: fixed;
         }
 
         table.laboran-table th {
             background: #f8fafc;
-            padding: 14px 18px;
-            font-size: 0.76rem;
+            padding: 12px 10px;
+            font-size: 0.74rem;
             font-weight: 800;
             color: #475569;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             border-bottom: 1.5px solid var(--border-color);
             white-space: nowrap;
         }
 
         table.laboran-table td {
-            padding: 14px 18px;
-            font-size: 0.85rem;
+            padding: 11px 10px;
+            font-size: 0.82rem;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         table.laboran-table tr:last-child td {
@@ -506,58 +679,119 @@
             flex-shrink: 0;
         }
 
-        /* Action Buttons */
-        .btn-table-action {
+        /* 3-DOTS ACTION BUTTON & DROPDOWN */
+        .action-dropdown-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-action-dots {
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0;
             background: #ffffff;
             color: #475569;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.82rem;
+            transition: all 0.18s ease;
+            font-size: 0.95rem;
         }
 
-        .btn-table-action.btn-acc:hover {
-            background: #16a34a;
-            color: #ffffff;
-            border-color: #16a34a;
+        .btn-action-dots:hover, .btn-action-dots.active {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
         }
 
-        .btn-table-action.btn-rej:hover {
-            background: #dc2626;
-            color: #ffffff;
-            border-color: #dc2626;
+        .action-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            min-width: 190px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.18), 0 4px 8px -2px rgba(15, 23, 42, 0.06);
+            padding: 6px;
+            z-index: 1000;
+            display: none;
+            text-align: left;
         }
 
-        .btn-table-action.btn-del:hover {
-            background: #ef4444;
-            color: #ffffff;
-            border-color: #ef4444;
+        .action-dropdown-menu.show {
+            display: block;
+            animation: fadeInDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .btn-table-action.btn-qr {
-            background: #f0fdf4;
-            color: #166534;
-            border-color: #bbf7d0;
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .action-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #334155;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
             text-decoration: none;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
-        .btn-table-action.btn-qr:hover {
-            background: #16a34a;
-            color: #ffffff;
-            border-color: #16a34a;
-            transform: scale(1.05);
+        .action-dropdown-item:hover {
+            background: #f8fafc;
+            color: #0f172a;
         }
 
-        .btn-table-action.btn-view:hover {
-            background: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
+        .action-dropdown-item.item-acc {
+            color: #16a34a;
+        }
+        .action-dropdown-item.item-acc:hover {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .action-dropdown-item.item-rej {
+            color: #dc2626;
+        }
+        .action-dropdown-item.item-rej:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .action-dropdown-item.item-del {
+            color: #ef4444;
+        }
+        .action-dropdown-item.item-del:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .action-dropdown-item.item-qr {
+            color: #0284c7;
+        }
+        .action-dropdown-item.item-qr:hover {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .action-dropdown-divider {
+            height: 1px;
+            background: #f1f5f9;
+            margin: 4px 0;
         }
 
         /* Floating Multiple Select Action Bar */
@@ -942,8 +1176,8 @@
             </div>
         </div>
 
-        <!-- Filter & Search Toolbar -->
-        <div class="toolbar-card">
+        <!-- Filter & Search Toolbar (Koordinator TA Style) -->
+        <div class="toolbar-card" style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 18px 20px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);">
             <div class="filter-pills-wrap">
                 <button type="button" class="filter-pill active" data-status="all" onclick="setFilterStatus('all')">
                     <span>Semua</span>
@@ -971,9 +1205,80 @@
                 </button>
             </div>
 
-            <div class="search-box-wrap">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="tableSearchInput" placeholder="Cari peminjam, ruangan, keterangan..." onkeyup="filterTableRows()">
+            <!-- Row 1: Unified Multi-Search Pill Component & Standalone Add Button (+ 1/4) -->
+            <div class="search-pill-container">
+                <div class="unified-search-pill" id="mainSearchPill">
+                    <!-- Category Dropdown Container -->
+                    <div class="custom-dropdown-container">
+                        <input type="hidden" id="mainCategoryVal" value="query">
+                        <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                            <span id="label-filter-main-cat">Cari Kata Kunci</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-main-cat"></i>
+                        </button>
+                        <div id="menu-filter-main-cat" class="custom-dropdown-menu">
+                            <div onclick="selectMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item active"><span>🔍 Kata Kunci (Semua)</span></div>
+                            <div onclick="selectMainCategory('nama', '🏷️ Nama Peminjam', this)" class="dropdown-item"><span>🏷️ Nama Peminjam</span></div>
+                            <div onclick="selectMainCategory('ruangan', '🚪 Nama / Kode Ruangan', this)" class="dropdown-item"><span>🚪 Nama / Kode Ruangan</span></div>
+                            <div onclick="selectMainCategory('tanggal', '📅 Tanggal Peminjaman', this)" class="dropdown-item"><span>📅 Tanggal Peminjaman</span></div>
+                            <div onclick="selectMainCategory('keterangan', '📝 Keterangan / Keperluan', this)" class="dropdown-item"><span>📝 Keterangan / Keperluan</span></div>
+                            <div onclick="selectMainCategory('status', '⚡ Status Permohonan', this)" class="dropdown-item"><span>⚡ Status Permohonan</span></div>
+                        </div>
+                    </div>
+
+                    <div class="unified-divider"></div>
+
+                    <!-- Input Text Value Container -->
+                    <div id="mainValueContainer" style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2" style="color: #94a3b8; font-size: 0.75rem; margin-right: 8px;"></i>
+                        <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" oninput="filterTable()" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    </div>
+
+                    <!-- Tombol Cari -->
+                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="padding: 6px 14px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.75rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(234,88,12,0.25);">
+                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                    </button>
+                </div>
+
+                <!-- Standalone Add Filter Button (+ 1/4) -->
+                <button type="button" id="standaloneAddBtn" onclick="toggleOrAddFilterRow(event)" class="btn-standalone-add" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span id="filterCountBadge" class="badge-standalone-count">1/4</span>
+                </button>
+
+                <!-- Extra Filter Rows Card Popover -->
+                <div id="extraRowsCard" class="extra-rows-card">
+                    <div id="additionalFilterRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f1f5f9; padding-top: 10px; margin-top: 10px; font-size: 0.72rem;">
+                        <span style="color: #94a3b8;">Gunakan kombinasi kriteria untuk mempersempit pencarian data.</span>
+                        <button type="button" onclick="resetMultiSearch()" style="background: none; border: none; color: #dc2626; font-weight: 700; cursor: pointer;">
+                            Reset All Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Page Size & Records Count -->
+            <div style="padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+                <div style="font-size: 0.76rem; color: #64748b; font-weight: 500;">
+                    <span>Kelola & telusuri data peminjaman ruangan secara langsung.</span>
+                </div>
+
+                <!-- Page Size & Counter Right -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 12px; border-radius: 10px;">
+                        <span style="font-weight: 500;">Tampilkan</span>
+                        <select id="selectPerPage" onchange="changePageSize(this.value)" style="height: 24px; padding: 0 4px; font-size: 0.75rem; font-weight: 700; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; cursor: pointer; outline: none;">
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span style="font-weight: 500;">data/hal</span>
+                        <span style="color: #cbd5e1;">|</span>
+                        <span>Total: <strong class="total-rows-count" id="toolbarTotalCount" style="color: #0f172a; font-weight: 800;"><?= $totalCount ?></strong></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -981,17 +1286,26 @@
         <div class="table-card">
             <div class="table-responsive">
                 <table class="laboran-table" id="laboranBookingTable">
+                    <colgroup>
+                        <col style="width: 44px;">
+                        <col style="width: 18%;">
+                        <col style="width: 22%;">
+                        <col style="width: 18%;">
+                        <col style="width: 24%;">
+                        <col style="width: 13%;">
+                        <col style="width: 50px;">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th style="width: 44px; text-align: center;">
+                            <th style="width: 44px; text-align: center; padding: 12px 6px;">
                                 <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)">
                             </th>
-                            <th>Peminjam</th>
-                            <th>Ruangan</th>
-                            <th>Waktu & Tanggal</th>
-                            <th>Keterangan / Keperluan</th>
-                            <th>Status Persetujuan</th>
-                            <th style="text-align: right;">Aksi</th>
+                            <th style="width: 18%;">Peminjam</th>
+                            <th style="width: 22%;">Ruangan</th>
+                            <th style="width: 18%;">Waktu & Tanggal</th>
+                            <th style="width: 24%;">Keterangan / Keperluan</th>
+                            <th style="width: 13%;">Status Persetujuan</th>
+                            <th style="width: 50px; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1003,7 +1317,7 @@
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach($peminjaman as $p): 
+                            <?php foreach($peminjaman as $idx => $p): 
                                 $s = $p->status;
                                 $isPending = ($s === 'Pending');
                                 $statusCategory = 'other';
@@ -1027,7 +1341,16 @@
                                     : date('d M', strtotime($p->tanggal_mulai)) . ' - ' . date('d M Y', strtotime($p->tanggal_selesai));
                                 $timeFormatted = substr($p->jam_mulai, 0, 5) . ' - ' . substr($p->jam_selesai, 0, 5);
                             ?>
-                            <tr class="booking-row" data-id="<?= $p->id ?>" data-status-category="<?= $statusCategory ?>" data-search="<?= strtolower(htmlspecialchars($p->nama_lengkap . ' ' . $p->kode_ruangan . ' ' . $p->nama_ruangan . ' ' . $p->keterangan)) ?>">
+                            <tr class="booking-row" 
+                                <?= $idx >= 10 ? 'style="display: none;"' : '' ?>
+                                data-id="<?= $p->id ?>" 
+                                data-status-category="<?= $statusCategory ?>" 
+                                data-nama="<?= strtolower(htmlspecialchars($p->nama_lengkap ?? '')) ?>"
+                                data-ruangan="<?= strtolower(htmlspecialchars(($p->kode_ruangan ?? '') . ' ' . ($p->nama_ruangan ?? ''))) ?>"
+                                data-tanggal="<?= strtolower(htmlspecialchars($dateFormatted . ' ' . ($p->tanggal_mulai ?? '') . ' ' . ($p->tanggal_selesai ?? ''))) ?>"
+                                data-keterangan="<?= strtolower(htmlspecialchars($p->keterangan ?? '')) ?>"
+                                data-status="<?= strtolower(htmlspecialchars($s . ' ' . $label)) ?>"
+                                data-search="<?= strtolower(htmlspecialchars(($p->nama_lengkap ?? '') . ' ' . ($p->kode_ruangan ?? '') . ' ' . ($p->nama_ruangan ?? '') . ' ' . ($p->keterangan ?? '') . ' ' . ($p->status ?? '') . ' ' . $dateFormatted)) ?>">
                                 <td style="text-align: center;">
                                     <input type="checkbox" class="custom-checkbox row-checkbox" data-id="<?= $p->id ?>" data-status="<?= $p->status ?>" onchange="updateBatchBar()">
                                 </td>
@@ -1058,26 +1381,33 @@
                                         <?= $label ?>
                                     </span>
                                 </td>
-                                <td style="text-align: right;">
-                                    <div style="display: inline-flex; gap: 6px; align-items: center;">
-                                        <?php if ($isPending): ?>
-                                            <button type="button" class="btn-table-action btn-acc" title="ACC Disetujui Laboran" onclick="singleApprove(<?= $p->id ?>)">
-                                                <i class="fa-solid fa-check"></i>
-                                            </button>
-                                            <button type="button" class="btn-table-action btn-rej" title="Tolak Peminjaman" onclick="openSingleRejectModal(<?= $p->id ?>)">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
-                                        <?php elseif ($statusCategory === 'laboran' || $statusCategory === 'kaur' || $statusCategory === 'admin'): ?>
-                                            <a href="<?= site_url('kaur/surat/' . $p->id) ?>" target="_blank" class="btn-table-action btn-qr" title="Cetak Surat Resmi Ber-QR Code">
-                                                <i class="fa-solid fa-qrcode"></i>
-                                            </a>
-                                        <?php endif; ?>
-                                        <button type="button" class="btn-table-action btn-view" title="Lihat Detail" onclick="openDetailModal(<?= htmlspecialchars(json_encode($p)) ?>)">
-                                            <i class="fa-solid fa-eye"></i>
+                                <td style="text-align: center; overflow: visible; position: relative;">
+                                    <div class="action-dropdown-wrap">
+                                        <button type="button" class="btn-action-dots" onclick="toggleActionDropdown(<?= $p->id ?>, event)" title="Menu Aksi">
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
                                         </button>
-                                        <button type="button" class="btn-table-action btn-del" title="Hapus Data" onclick="deleteBooking(<?= $p->id ?>)">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
+                                        <div class="action-dropdown-menu" id="actionMenu_<?= $p->id ?>">
+                                            <?php if ($isPending): ?>
+                                                <button type="button" class="action-dropdown-item item-acc" onclick="singleApprove(<?= $p->id ?>)">
+                                                    <i class="fa-solid fa-check"></i> Setujui Permohonan
+                                                </button>
+                                                <button type="button" class="action-dropdown-item item-rej" onclick="openSingleRejectModal(<?= $p->id ?>)">
+                                                    <i class="fa-solid fa-ban"></i> Tolak Permohonan
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if ($statusCategory === 'laboran' || $statusCategory === 'kaur' || $statusCategory === 'admin'): ?>
+                                                <a href="<?= site_url('kaur/surat/' . $p->id) ?>" target="_blank" class="action-dropdown-item item-qr">
+                                                    <i class="fa-solid fa-qrcode"></i> Cetak Surat QR
+                                                </a>
+                                            <?php endif; ?>
+                                            <button type="button" class="action-dropdown-item" onclick="openDetailModal(<?= htmlspecialchars(json_encode($p)) ?>)">
+                                                <i class="fa-solid fa-eye text-blue-500"></i> Detail Permohonan
+                                            </button>
+                                            <div class="action-dropdown-divider"></div>
+                                            <button type="button" class="action-dropdown-item item-del" onclick="deleteBooking(<?= $p->id ?>)">
+                                                <i class="fa-solid fa-trash-can"></i> Hapus Data
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -1085,6 +1415,13 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+            <!-- Dynamic Bottom Pagination Bar -->
+            <div class="pagination-bar">
+                <div id="paginationInfo" style="font-size: 0.78rem; font-weight: 500; color: #64748b;">
+                    Menampilkan <span id="pageInfoStart"><?= !empty($peminjaman) ? 1 : 0 ?></span> - <span id="pageInfoEnd"><?= min(10, count($peminjaman ?? [])) ?></span> dari <strong id="pageInfoTotal" style="color: #0f172a; font-weight: 800;"><?= count($peminjaman ?? []) ?></strong> data
+                </div>
+                <div class="pagination-controls" id="paginationControls"></div>
             </div>
         </div>
 
@@ -1283,9 +1620,197 @@
     <script>
         const BASE_URL = '<?= base_url() ?>';
         let currentFilterStatus = 'all';
+        let pageSize = 10;
+        let currentPage = 1;
+        let extraRowCounter = 0;
+
+        const SEARCH_CATEGORIES = [
+            { key: 'query', label: '🔍 Kata Kunci (Semua)' },
+            { key: 'nama', label: '🏷️ Nama Peminjam' },
+            { key: 'ruangan', label: '🚪 Nama / Kode Ruangan' },
+            { key: 'tanggal', label: '📅 Tanggal Peminjaman' },
+            { key: 'keterangan', label: '📝 Keterangan / Keperluan' },
+            { key: 'status', label: '⚡ Status Permohonan' }
+        ];
 
         // ==========================================
-        // FILTER & SEARCH TABLE
+        // MULTI-SEARCH & DROPDOWNS
+        // ==========================================
+        function toggleCustomDropdown(id, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('menu-filter-' + id);
+            const arrow = document.getElementById('arrow-filter-' + id);
+            const isShown = menu.classList.contains('show');
+            closeAllCustomDropdowns();
+            if (!isShown) {
+                menu.classList.add('show');
+                if (arrow) arrow.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function closeAllCustomDropdowns() {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-arrow').forEach(a => a.style.transform = 'rotate(0deg)');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-dropdown-container') && !e.target.closest('.extra-rows-card') && !e.target.closest('#standaloneAddBtn')) {
+                closeAllCustomDropdowns();
+                const card = document.getElementById('extraRowsCard');
+                if (card && !e.target.closest('.extra-rows-card')) {
+                    card.style.display = 'none';
+                    const btn = document.getElementById('standaloneAddBtn');
+                    if (btn) btn.classList.remove('active');
+                }
+            }
+        });
+
+        function selectMainCategory(catKey, catLabel, el) {
+            document.getElementById('mainCategoryVal').value = catKey;
+            document.getElementById('label-filter-main-cat').innerText = catLabel.replace(/^[^\s]+\s*/, '');
+            if (el) {
+                el.parentElement.querySelectorAll('.dropdown-item').forEach(d => d.classList.remove('active'));
+                el.classList.add('active');
+            }
+            closeAllCustomDropdowns();
+            filterTable();
+        }
+
+        function toggleOrAddFilterRow(e) {
+            if (e) e.stopPropagation();
+            const card = document.getElementById('extraRowsCard');
+            const btn = document.getElementById('standaloneAddBtn');
+            const isOpen = card.style.display === 'block';
+
+            if (isOpen) {
+                card.style.display = 'none';
+                if (btn) btn.classList.remove('active');
+            } else {
+                card.style.display = 'block';
+                if (btn) btn.classList.add('active');
+                const container = document.getElementById('additionalFilterRowsContainer');
+                if (container.children.length === 0) {
+                    addFilterRow();
+                }
+            }
+        }
+
+        function addFilterRow(defaultKey = 'ruangan', defaultVal = '') {
+            const container = document.getElementById('additionalFilterRowsContainer');
+            if (container.children.length >= 3) {
+                Swal.fire({
+                    title: 'Batas Maksimal Filter',
+                    text: 'Maksimal 4 kriteria pencarian kombinasi (1 utama + 3 filter tambahan).',
+                    icon: 'info',
+                    confirmButtonColor: '#ea580c'
+                });
+                return;
+            }
+
+            extraRowCounter++;
+            const rowId = 'extra-row-' + extraRowCounter;
+
+            let dropdownItems = '';
+            SEARCH_CATEGORIES.forEach(c => {
+                const isActive = (c.key === defaultKey) ? 'active' : '';
+                dropdownItems += `<div onclick="selectExtraCategory('${rowId}', '${c.key}', '${c.label}', this)" class="dropdown-item ${isActive}"><span>${c.label}</span></div>`;
+            });
+
+            const catObj = SEARCH_CATEGORIES.find(c => c.key === defaultKey) || SEARCH_CATEGORIES[0];
+            const cleanLabel = catObj.label.replace(/^[^\s]+\s*/, '');
+
+            const rowHtml = document.createElement('div');
+            rowHtml.className = 'extra-filter-row';
+            rowHtml.id = rowId;
+            rowHtml.innerHTML = `
+                <div class="unified-search-pill" style="height: 40px;">
+                    <div class="custom-dropdown-container">
+                        <input type="hidden" class="extra-category-val" value="${defaultKey}">
+                        <button type="button" onclick="toggleCustomDropdown('${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                            <span class="extra-category-label">${cleanLabel}</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-${rowId}"></i>
+                        </button>
+                        <div id="menu-filter-${rowId}" class="custom-dropdown-menu">
+                            ${dropdownItems}
+                        </div>
+                    </div>
+                    <div class="unified-divider" style="height: 16px;"></div>
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        <input type="text" class="extra-search-input" value="${defaultVal}" oninput="filterTable()" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik filter tambahan..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    </div>
+                </div>
+                <button type="button" onclick="removeFilterRow('${rowId}')" class="btn-remove-row" title="Hapus kriteria ini">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+            `;
+
+            container.appendChild(rowHtml);
+            updateFilterCountBadge();
+        }
+
+        function selectExtraCategory(rowId, catKey, catLabel, el) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.querySelector('.extra-category-val').value = catKey;
+            row.querySelector('.extra-category-label').innerText = catLabel.replace(/^[^\s]+\s*/, '');
+            if (el) {
+                el.parentElement.querySelectorAll('.dropdown-item').forEach(d => d.classList.remove('active'));
+                el.classList.add('active');
+            }
+            closeAllCustomDropdowns();
+            filterTable();
+        }
+
+        function removeFilterRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+                updateFilterCountBadge();
+                filterTable();
+            }
+        }
+
+        function updateFilterCountBadge() {
+            const container = document.getElementById('additionalFilterRowsContainer');
+            const count = 1 + (container ? container.children.length : 0);
+            const badge = document.getElementById('filterCountBadge');
+            if (badge) badge.innerText = count + '/4';
+        }
+
+        function resetMultiSearch() {
+            document.getElementById('mainSearchInput').value = '';
+            selectMainCategory('query', '🔍 Kata Kunci (Semua)', null);
+            const container = document.getElementById('additionalFilterRowsContainer');
+            if (container) container.innerHTML = '';
+            updateFilterCountBadge();
+            const card = document.getElementById('extraRowsCard');
+            if (card) card.style.display = 'none';
+            const btn = document.getElementById('standaloneAddBtn');
+            if (btn) btn.classList.remove('active');
+            filterTable();
+        }
+
+        function getActiveFilters() {
+            const filters = [];
+            const mainKey = document.getElementById('mainCategoryVal').value || 'query';
+            const mainVal = (document.getElementById('mainSearchInput').value || '').toLowerCase().trim();
+            if (mainVal) {
+                filters.push({ key: mainKey, val: mainVal });
+            }
+
+            document.querySelectorAll('#additionalFilterRowsContainer .extra-filter-row').forEach(row => {
+                const key = row.querySelector('.extra-category-val').value;
+                const val = (row.querySelector('.extra-search-input').value || '').toLowerCase().trim();
+                if (val) {
+                    filters.push({ key: key, val: val });
+                }
+            });
+
+            return filters;
+        }
+
+        // ==========================================
+        // FILTER & PAGINATION ENGINE
         // ==========================================
         function setFilterStatus(status) {
             currentFilterStatus = status;
@@ -1294,31 +1819,132 @@
                 btn.classList.toggle('active', btn.getAttribute('data-status') === status);
             });
 
-            filterTableRows();
+            currentPage = 1;
+            filterTable();
         }
 
-        function filterTableRows() {
-            const query = (document.getElementById('tableSearchInput').value || '').toLowerCase().trim();
-            const rows = document.querySelectorAll('.booking-row');
+        function filterTable() {
+            const filters = getActiveFilters();
+            const allRows = Array.from(document.querySelectorAll('.booking-row'));
+            
+            // 1. Filter matching rows
+            const matchingRows = allRows.filter(row => {
+                const rowStatusCat = row.getAttribute('data-status-category') || '';
+                const matchesStatusPill = (currentFilterStatus === 'all') || (rowStatusCat === currentFilterStatus);
+                if (!matchesStatusPill) return false;
 
-            rows.forEach(row => {
-                const rowCat = row.getAttribute('data-status-category');
-                const rowSearch = row.getAttribute('data-search') || '';
+                if (filters.length === 0) return true;
 
-                const matchesStatus = (currentFilterStatus === 'all') || (rowCat === currentFilterStatus);
-                const matchesSearch = !query || rowSearch.includes(query);
+                return filters.every(f => {
+                    let fieldText = '';
+                    if (f.key === 'query') {
+                        fieldText = row.getAttribute('data-search') || '';
+                    } else {
+                        fieldText = row.getAttribute('data-' + f.key) || row.getAttribute('data-search') || '';
+                    }
+                    return fieldText.includes(f.val);
+                });
+            });
 
-                if (matchesStatus && matchesSearch) {
-                    row.style.display = '';
+            const totalItems = matchingRows.length;
+            const totalPages = Math.ceil(totalItems / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            // 2. Show/Hide DOM elements based on page slice
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+
+            matchingRows.slice(startIndex, endIndex).forEach(row => {
+                row.style.display = '';
+            });
+
+            // 3. Update Toolbar and Pagination Info Counters
+            const toolbarCount = document.getElementById('toolbarTotalCount');
+            if (toolbarCount) toolbarCount.innerText = totalItems;
+
+            const pageInfoStart = document.getElementById('pageInfoStart');
+            const pageInfoEnd = document.getElementById('pageInfoEnd');
+            const pageInfoTotal = document.getElementById('pageInfoTotal');
+
+            if (pageInfoStart) pageInfoStart.innerText = totalItems > 0 ? (startIndex + 1) : 0;
+            if (pageInfoEnd) pageInfoEnd.innerText = Math.min(endIndex, totalItems);
+            if (pageInfoTotal) pageInfoTotal.innerText = totalItems;
+
+            renderPaginationControls(totalPages);
+            updateBatchBar();
+        }
+
+        function renderPaginationControls(totalPages) {
+            const container = document.getElementById('paginationControls');
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let pages = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (currentPage <= 4) {
+                    pages = [1, 2, 3, 4, 5, '...', totalPages];
+                } else if (currentPage >= totalPages - 3) {
+                    pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
                 } else {
-                    row.style.display = 'none';
-                    // Uncheck if hidden
-                    const cb = row.querySelector('.row-checkbox');
-                    if (cb) cb.checked = false;
+                    pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+                }
+            }
+
+            let html = `
+                <button type="button" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="page-btn" title="Halaman Sebelumnya">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+            `;
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    html += `<span style="padding: 0 4px; font-weight: bold; color: #94a3b8;">...</span>`;
+                } else if (p === currentPage) {
+                    html += `<button type="button" class="page-btn active">${p}</button>`;
+                } else {
+                    html += `<button type="button" onclick="goToPage(${p})" class="page-btn">${p}</button>`;
                 }
             });
 
-            updateBatchBar();
+            html += `
+                <button type="button" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="page-btn" title="Halaman Selanjutnya">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function goToPage(p) {
+            currentPage = p;
+            filterTable();
+        }
+
+        function changePageSize(sz) {
+            pageSize = parseInt(sz) || 10;
+            currentPage = 1;
+            filterTable();
+        }
+
+        // Initialize table on load
+        $(document).ready(function() {
+            filterTable();
+        });
+
+        // Backward compatibility
+        function filterTableRows() {
+            filterTable();
         }
 
         // ==========================================
@@ -1660,6 +2286,32 @@
                 }
             });
         }
+
+        // ==========================================
+        // 3-DOTS ACTION DROPDOWN LOGIC
+        // ==========================================
+        function toggleActionDropdown(id, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('actionMenu_' + id);
+            const isOpen = menu && menu.classList.contains('show');
+            closeAllActionDropdowns();
+            if (!isOpen && menu) {
+                menu.classList.add('show');
+                const btn = menu.previousElementSibling;
+                if (btn) btn.classList.add('active');
+            }
+        }
+
+        function closeAllActionDropdowns() {
+            document.querySelectorAll('.action-dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.btn-action-dots').forEach(b => b.classList.remove('active'));
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.action-dropdown-wrap')) {
+                closeAllActionDropdowns();
+            }
+        });
     </script>
 </body>
 </html>

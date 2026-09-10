@@ -58,6 +58,59 @@ class Kaur extends CI_Controller {
         }
     }
 
+    public function batch_approve()
+    {
+        header('Content-Type: application/json');
+        $ids = $this->input->post('ids');
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => 'error', 'message' => 'Pilih setidaknya satu data peminjaman!']);
+            return;
+        }
+
+        $status = 'Disetujui Ka. Ur';
+        $update = $this->Booking_model->batch_update_status($ids, $status);
+        if ($update) {
+            echo json_encode(['status' => 'success', 'message' => count($ids) . ' permohonan berhasil Disetujui Resmi oleh Ka. Ur!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyetujui data terpilih']);
+        }
+    }
+
+    public function batch_reject()
+    {
+        header('Content-Type: application/json');
+        $ids = $this->input->post('ids');
+        $alasan = $this->input->post('alasan_penolakan', true);
+
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => 'error', 'message' => 'Pilih setidaknya satu data peminjaman!']);
+            return;
+        }
+
+        if (empty(trim($alasan))) {
+            echo json_encode(['status' => 'error', 'message' => 'Catatan alasan penolakan wajib diisi!']);
+            return;
+        }
+
+        $update = $this->Booking_model->batch_update_status($ids, 'Ditolak', $alasan);
+        if ($update) {
+            echo json_encode(['status' => 'success', 'message' => count($ids) . ' permohonan berhasil ditolak!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menolak data terpilih']);
+        }
+    }
+
+    public function delete($id)
+    {
+        header('Content-Type: application/json');
+        $delete = $this->Booking_model->delete_booking($id);
+        if($delete) {
+            echo json_encode(['status' => 'success', 'message' => 'Data permohonan berhasil dihapus!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data']);
+        }
+    }
+
     public function surat($id)
     {
         // Get booking detail with room and category info
