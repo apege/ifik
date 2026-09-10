@@ -653,6 +653,8 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     card.addEventListener('click', (e) => e.stopPropagation());
+    card.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    card.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     bindCardEvents(card, node);
 
     return card;
