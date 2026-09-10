@@ -13,7 +13,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Info Ruangan & Calendar CSS -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/curved_sidebar.css?v=' . filemtime(FCPATH . 'assets/css/curved_sidebar.css')) ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/info_ruangan.css?v=' . filemtime(FCPATH . 'assets/css/info_ruangan.css')) ?>">
 
     <style>
@@ -50,9 +54,29 @@
         .gcal-header-left {
             display: flex;
             align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
+            gap: 8px;
+            flex: 0 0 120px;
             white-space: nowrap;
+        }
+
+        .gcal-header-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gcal-header-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex: 0 0 120px;
+        }
+
+        @media (max-width: 768px) {
+            .gcal-header-left { flex: 0 0 auto; }
+            .gcal-header-right { display: none; }
         }
 
         .header-left-pane {
@@ -159,7 +183,7 @@
             gap: 8px;
             position: relative;
             flex: 1 1 auto;
-            max-width: 480px;
+            max-width: 580px;
             min-width: 320px;
         }
 
@@ -170,7 +194,7 @@
             border: 1.5px solid #e2e8f0;
             border-radius: 14px;
             height: 42px;
-            padding: 2px 6px 2px 8px;
+            padding: 2px 4px 2px 8px;
             width: 100%;
             transition: all 0.2s ease;
             box-shadow: 0 2px 6px rgba(0,0,0,0.02);
@@ -341,15 +365,45 @@
             width: 100%;
             border: none !important;
             background: transparent !important;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             font-weight: 600;
             color: #0f172a;
             outline: none;
-            padding: 6px 6px 6px 28px;
+            padding: 6px 8px;
+            min-width: 0;
         }
         .unified-input-key::placeholder {
             color: #94a3b8;
             font-weight: 500;
+        }
+
+        .btn-submit-search-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: #ea580c;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+            flex-shrink: 0;
+            margin-left: 4px;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .btn-submit-search-pill:hover {
+            background: #c2410c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(234, 88, 12, 0.35);
+        }
+        .btn-submit-search-pill:active {
+            transform: translateY(0);
         }
 
         /* SEPARATE STANDALONE + TAMBAH BUTTON BESIDE SEARCH PILL */
@@ -923,6 +977,17 @@
             border-color: #10b981;
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
         }
+
+        .stat-pill-rejected {
+            background: #fef2f2;
+            border: 1.5px solid #fee2e2;
+            color: #b91c1c;
+        }
+        .stat-pill-rejected.active {
+            background: #fee2e2;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.22);
+        }
         .stat-label { font-weight: 600; }
         .stat-val { font-weight: 800; }
 
@@ -1063,10 +1128,12 @@
             gap: 16px;
             cursor: pointer;
             transition: background 0.15s ease, border-radius 0.15s ease;
+            position: relative;
         }
         .table-row-card:hover {
             background: rgba(255, 255, 255, 0.7);
             border-radius: 12px;
+            z-index: 50;
         }
 
         .tr-room-col {
@@ -1114,10 +1181,11 @@
             text-overflow: ellipsis;
         }
 
-        /* FLOATING RICH ROOM DETAIL TOOLTIP ON HOVER */
+        /* FLOATING RICH ROOM DETAIL TOOLTIP ON HOVER (OPENS DOWNWARD) */
         .room-hover-tooltip {
             position: absolute;
-            bottom: calc(100% + 8px);
+            top: calc(100% + 8px);
+            bottom: auto;
             left: 56px;
             background: #0f172a;
             color: #ffffff;
@@ -1127,10 +1195,10 @@
             box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(6px);
+            transform: translateY(-6px);
             transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
             pointer-events: none;
-            z-index: 1000;
+            z-index: 100;
             min-width: 220px;
             max-width: 320px;
             white-space: normal;
@@ -1141,11 +1209,12 @@
         .room-hover-tooltip::after {
             content: '';
             position: absolute;
-            top: 100%;
+            bottom: 100%;
+            top: auto;
             left: 20px;
             border-width: 6px;
             border-style: solid;
-            border-color: #0f172a transparent transparent transparent;
+            border-color: transparent transparent #0f172a transparent;
         }
         .tr-room-col:hover .room-hover-tooltip {
             opacity: 1;
@@ -1270,10 +1339,11 @@
             max-width: 100%;
         }
 
-        /* FLOATING RICH KETERANGAN TOOLTIP ON HOVER */
+        /* FLOATING RICH KETERANGAN TOOLTIP ON HOVER (OPENS DOWNWARD) */
         .desc-hover-tooltip {
             position: absolute;
-            bottom: calc(100% + 8px);
+            top: calc(100% + 8px);
+            bottom: auto;
             left: 20px;
             background: #0f172a;
             color: #ffffff;
@@ -1283,10 +1353,10 @@
             box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.45), 0 8px 12px -6px rgba(15, 23, 42, 0.35);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(6px);
+            transform: translateY(-6px);
             transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
             pointer-events: none;
-            z-index: 1000;
+            z-index: 100;
             min-width: 200px;
             max-width: 360px;
             white-space: normal;
@@ -1298,11 +1368,12 @@
         .desc-hover-tooltip::after {
             content: '';
             position: absolute;
-            top: 100%;
+            bottom: 100%;
+            top: auto;
             left: 24px;
             border-width: 6px;
             border-style: solid;
-            border-color: #0f172a transparent transparent transparent;
+            border-color: transparent transparent #0f172a transparent;
         }
         .tr-desc-col:hover .desc-hover-tooltip {
             opacity: 1;
@@ -1404,14 +1475,460 @@
             .unified-search-pill { width: 100%; }
             .table-view-container { padding: 12px 14px; }
         }
+            /* ===== CURVED ANIMATED SIDEBAR & CHIPS STYLING ===== */
+        .curved-sidebar-toggle-btn {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            margin-right: 4px;
+            flex-shrink: 0;
+        }
+        .sb-chip {
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .sb-chip:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        .sb-chip.active {
+            background: #ea580c;
+            border-color: #ea580c;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.25);
+        }
+
+        .btn-sidebar-kembali {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 12px;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        .btn-sidebar-kembali:hover {
+            background: #fff7ed;
+            border-color: #ea580c;
+            color: #ea580c;
+            transform: translateX(-3px);
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.12);
+        }
+
+        /* SIDEBAR CALENDAR NAV CONTROLS */
+        .sb-btn-today {
+            padding: 3px 10px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .sb-btn-today:hover {
+            background: #ea580c;
+            color: #ffffff;
+            border-color: #ea580c;
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.2);
+        }
+
+        .sb-nav-arrow {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: #ffffff;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .sb-nav-arrow:hover {
+            background: #ea580c;
+            color: #ffffff;
+            border-color: #ea580c;
+        }
+
+        .sb-month-year-btn {
+            background: #ffffff !important;
+            border: 1.5px solid #e2e8f0 !important;
+            border-radius: 9px !important;
+            padding: 4px 8px !important;
+        }
+        .sb-month-year-btn:hover {
+            border-color: #ea580c !important;
+            background: #fff7ed !important;
+        }
     </style>
 </head>
 <body>
+    <!-- =========================================================
+         CURVED ANIMATED SIDEBAR (CONTROL & NAVIGATION CENTER)
+         ========================================================= -->
+    <!-- Backdrop Blur Overlay -->
+    <div id="curvedSidebarBackdrop" class="curved-sidebar-backdrop"></div>
+
+    <?php
+    $sessionRoleId = (int)$this->session->userdata('role_id');
+    $isLoggedIn = $this->session->userdata('logged_in');
+
+    switch ($sessionRoleId) {
+        case 3: // Kaur / Ka Lab
+            $backUrl = site_url('kaur/approval');
+            $backLabel = 'Menu Utama Kaur';
+            break;
+        case 2: // Laboran
+            $backUrl = site_url('laboran/booking');
+            $backLabel = 'Dashboard Laboran';
+            break;
+        case 1: // Admin
+            $backUrl = site_url('admin');
+            $backLabel = 'Dashboard Admin';
+            break;
+        case 4: // Dosen
+            $backUrl = site_url('dosenwali');
+            $backLabel = 'Menu Dosen Wali';
+            break;
+        case 6: // Koordinator TA
+            $backUrl = site_url('koordinatorta');
+            $backLabel = 'Dashboard Koordinator TA';
+            break;
+        default: // Mahasiswa / Guest
+            $backUrl = site_url('dashboard');
+            $backLabel = 'Beranda Utama';
+            break;
+    }
+    ?>
+
+    <!-- Sliding Sidebar Panel with Morphing Curved SVG (Left Side) -->
+    <aside id="curvedSidebarPanel" class="curved-sidebar-panel" aria-label="Sidebar Navigasi & Kontrol" style="width: 320px;">
+        <div class="curved-sidebar-inner" style="padding-top: 55px; gap: 14px;">
+            
+            <div>
+                <!-- 1. Header Control with Close (X) Button -->
+                <div class="curved-sidebar-header" style="justify-content: flex-start; gap: 10px;">
+                    <button type="button" class="curved-sidebar-close-btn" id="curvedSidebarCloseBtn" aria-label="Tutup Sidebar" title="Tutup Sidebar (Esc)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <p style="margin: 0;"><i class="fa-solid fa-sliders" style="color: #ea580c;"></i> Kontrol & Navigasi</p>
+                </div>
+
+                <!-- Tombol Kembali Cepat ke Dashboard (Auto-scroll ke Informasi Ruangan) -->
+                <a href="<?= site_url('dashboard#info_ruangan'); ?>" class="btn-sidebar-kembali" title="Kembali ke Dashboard - Informasi Ruangan">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Kembali ke Dashboard</span>
+                </a>
+                
+                <!-- 2. Mode Tampilan Switcher -->
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 4px; display: flex; gap: 4px; margin-bottom: 14px;">
+                    <button type="button" id="sbViewCalBtn" class="btn-sb-mode" onclick="switchViewMode('calendar', event)" style="flex: 1; padding: 7px 10px; border-radius: 8px; border: none; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; background: #0f172a; color: #fff;">
+                        <i class="fa-solid fa-calendar-days"></i> Kalender
+                    </button>
+                    <button type="button" id="sbViewTblBtn" class="btn-sb-mode" onclick="switchViewMode('table', event)" style="flex: 1; padding: 7px 10px; border-radius: 8px; border: none; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; background: transparent; color: #64748b;">
+                        <i class="fa-solid fa-table-list"></i> Tabel
+                    </button>
+                </div>
+
+                <!-- 3. Navigasi Jadwal Kalender (Tampil Hanya Saat Mode Kalender) -->
+                <div id="sbCalendarNavSection" style="margin-bottom: 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 10px 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; margin: 0;">
+                            <i class="fa-solid fa-calendar-week" style="color: #ea580c;"></i> Navigasi Kalender
+                        </label>
+                        <button type="button" onclick="goToToday()" class="sb-btn-today" title="Lompat ke Hari Ini">
+                            Today
+                        </button>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; position: relative;">
+                        <!-- Navigasi Panah < > -->
+                        <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                            <button type="button" onclick="prevWeek()" class="sb-nav-arrow" title="Minggu Sebelumnya">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            </button>
+                            <button type="button" onclick="nextWeek()" class="sb-nav-arrow" title="Minggu Berikutnya">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                        </div>
+
+                        <!-- Month Year Picker Trigger in Sidebar -->
+                        <div class="month-year-picker-wrap" id="sbMonthYearPickerWrap" style="position: relative; flex: 1; display: flex; justify-content: flex-end;">
+                            <button type="button" class="month-year-btn sb-month-year-btn" id="sbMonthYearBtn" onclick="toggleMonthYearPicker(event, 'sb')" title="Pilih Bulan & Tahun">
+                                <span id="sbMonthTitle" style="font-size: 0.86rem; font-weight: 800; color: #0f172a; white-space: nowrap;">-</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+
+                            <!-- Sidebar Month-Year Popover Dropdown -->
+                            <div class="month-year-popover sb-month-popover" id="sbMonthYearPopover" style="right: 0; left: auto; width: 250px;">
+                                <!-- Year Navigation Header -->
+                                <div class="my-year-nav">
+                                    <button type="button" onclick="changePickerYear(-1, event, 'sb')" title="Tahun Sebelumnya">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                    </button>
+                                    <span id="sbPickerYearDisplay" style="font-size: 1rem; font-weight: 800; color: #0f172a;">2026</span>
+                                    <button type="button" onclick="changePickerYear(1, event, 'sb')" title="Tahun Selanjutnya">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                    </button>
+                                </div>
+
+                                <!-- Month Grid (12 Months) -->
+                                <div class="my-months-grid" id="sbPickerMonthsGrid">
+                                    <!-- Jan - Des buttons rendered via JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3B. Kontrol Filter & Urutan Tabel (Tampil Khusus Mode Tabel) -->
+                <div id="sbTableControlsSection" style="display: none; margin-bottom: 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <label style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; margin: 0;">
+                            <i class="fa-solid fa-chart-pie" style="color: #ea580c;"></i> Ringkasan & Filter Status
+                        </label>
+                    </div>
+
+                    <!-- Quick Status Filter Pills in Sidebar -->
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <div class="stat-pill stat-pill-total active" id="statPillTotal" onclick="filterByStatPill('all')" title="Klik untuk menampilkan semua data" style="flex: 1 1 calc(50% - 3px); justify-content: center; padding: 5px 8px; font-size: 0.76rem;">
+                            <span class="stat-label" style="color: #64748b;">Total:</span>
+                            <span class="stat-val" id="tableStatTotal" style="color: #0f172a;">0</span>
+                        </div>
+
+                        <div class="stat-pill stat-pill-pending" id="statPillPending" onclick="filterByStatPill('pending')" title="Klik untuk memfilter status Menunggu" style="flex: 1 1 calc(50% - 3px); justify-content: center; padding: 5px 8px; font-size: 0.76rem;">
+                            <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+                            <span class="stat-label">Menunggu:</span>
+                            <span class="stat-val" id="tableStatPending">0</span>
+                        </div>
+
+                        <!-- Disetujui with interactive dropdown options -->
+                        <div class="stat-pill-approved-wrap" style="position: relative; width: 100%;">
+                            <div class="stat-pill stat-pill-approved" id="statPillApproved" onclick="toggleApprovedSubMenu(event)" title="Klik untuk memilih filter status Disetujui" style="width: 100%; justify-content: space-between; padding: 6px 10px; font-size: 0.76rem; box-sizing: border-box;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                                    <span class="stat-label" id="approvedStatLabel">Disetujui:</span>
+                                    <span class="stat-val" id="tableStatApproved">0</span>
+                                </div>
+                                <svg id="approvedStatChevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 2px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+
+                            <!-- Dropdown Sub-Menu Disetujui -->
+                            <div class="approved-sub-menu" id="approvedSubMenu" style="width: 100%; top: calc(100% + 4px); z-index: 100050; box-sizing: border-box;">
+                                <div class="approved-sub-item active" id="subOptAllApproved" onclick="selectApprovedSub('all_approved', event)">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+                                        <span>Semua Disetujui</span>
+                                    </div>
+                                    <span class="sub-count" id="subCountAllApproved">0</span>
+                                </div>
+                                <div class="approved-sub-item" id="subOptLaboran" onclick="selectApprovedSub('laboran', event)">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6;"></span>
+                                        <span>Disetujui Laboran</span>
+                                    </div>
+                                    <span class="sub-count" id="subCountLaboran">0</span>
+                                </div>
+                                <div class="approved-sub-item" id="subOptKaur" onclick="selectApprovedSub('kaur', event)">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e;"></span>
+                                        <span>Disetujui Ka. Ur</span>
+                                    </div>
+                                    <span class="sub-count" id="subCountKaur">0</span>
+                                </div>
+                                <div class="approved-sub-item" id="subOptAdmin" onclick="selectApprovedSub('admin', event)">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #8b5cf6;"></span>
+                                        <span>Disetujui Admin</span>
+                                    </div>
+                                    <span class="sub-count" id="subCountAdmin">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ditolak Stat Pill -->
+                        <div class="stat-pill stat-pill-rejected" id="statPillRejected" onclick="filterByStatPill('rejected')" title="Klik untuk memfilter status Ditolak" style="width: 100%; justify-content: space-between; padding: 6px 10px; font-size: 0.76rem; box-sizing: border-box;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+                                <span class="stat-label">Ditolak:</span>
+                            </div>
+                            <span class="stat-val" id="tableStatRejected">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Tampilkan & Urutkan Selects -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <label for="tablePageSizeSelect" style="font-size: 0.74rem; font-weight: 700; color: #64748b; white-space: nowrap;">Tampilkan:</label>
+                            <select id="tablePageSizeSelect" class="custom-table-select" onchange="changeTablePageSize(this.value)" style="flex: 1; padding: 4px 26px 4px 10px; font-size: 0.76rem;">
+                                <option value="10">10 baris</option>
+                                <option value="20" selected>20 baris</option>
+                                <option value="50">50 baris</option>
+                                <option value="100">100 baris</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                            <label for="tableSortSelect" style="font-size: 0.74rem; font-weight: 700; color: #64748b; white-space: nowrap;">Urutkan:</label>
+                            <select id="tableSortSelect" class="custom-table-select" onchange="renderTableView()" style="flex: 1; padding: 4px 26px 4px 10px; font-size: 0.76rem;">
+                                <option value="date_desc">Tanggal (Terbaru)</option>
+                                <option value="date_asc">Tanggal (Terlama)</option>
+                                <option value="room_asc">Nama Ruangan (A-Z)</option>
+                                <option value="time_asc">Jam Mulai (Pagi - Malam)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Quick Navigasi Halaman Sistem (Matching 3D Icons & Role System) -->
+                <div class="curved-sidebar-header" style="margin-top: 10px;">
+                    <p>NAVIGATION</p>
+                </div>
+                <nav class="curved-sidebar-nav">
+                    <?php
+                    $sessionRoleId = (int)$this->session->userdata('role_id');
+                    $isLoggedIn = $this->session->userdata('logged_in');
+
+                    switch ($sessionRoleId) {
+                        case 3: // Kaur / Ka Lab
+                            $navItems = [
+                                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Approval Peminjaman', 'href' => site_url('kaur/approval'), 'icon_3d' => 'assets/images/icons_3d/approval.png'],
+                                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+                                ['heading' => 'Respon Ticketing Lab', 'href' => site_url('kaur#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png'],
+                                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
+                            ];
+                            break;
+
+                        case 2: // Laboran
+                            $navItems = [
+                                ['heading' => 'Approval Peminjaman', 'href' => site_url('laboran/booking'), 'icon_3d' => 'assets/images/icons_3d/approval.png'],
+                                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+                                ['heading' => 'Import Email & Token', 'href' => site_url('importemail'), 'icon_3d' => 'assets/images/icons_3d/email_token.png'],
+                                ['heading' => 'Pengaturan Unit Ticketing', 'href' => site_url('admin#unit-ticketing'), 'icon_3d' => 'assets/images/icons_3d/unit_ticketing.png'],
+                                ['heading' => 'Respon Ticketing Lab', 'href' => site_url('laboran#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png'],
+                                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
+                            ];
+                            break;
+
+                        case 1: // Admin System
+                            $navItems = [
+                                ['heading' => 'Dashboard Control', 'href' => site_url('admin'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
+                                ['heading' => 'Approval Peminjaman', 'href' => site_url('kelolabooking'), 'icon_3d' => 'assets/images/icons_3d/approval.png'],
+                                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+                                ['heading' => 'Import Email & Token', 'href' => site_url('importemail'), 'icon_3d' => 'assets/images/icons_3d/email_token.png'],
+                                ['heading' => 'Pengaturan Unit Ticketing', 'href' => site_url('admin#unit-ticketing'), 'icon_3d' => 'assets/images/icons_3d/unit_ticketing.png'],
+                                ['heading' => 'Respon Ticketing Lab', 'href' => site_url('laboran#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png'],
+                                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
+                            ];
+                            break;
+
+                        case 4: // Dosen
+                            $navItems = [
+                                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosenwali'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
+                                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+                                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
+                            ];
+                            break;
+
+                        case 6: // Koordinator TA
+                            $navItems = [
+                                ['heading' => 'Dashboard Utama', 'href' => site_url('koordinatorta'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
+                                ['heading' => 'Pendaftaran TA', 'href' => site_url('koordinatorta#pendaftaran'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Tahap Preview 2', 'href' => site_url('koordinatorta#preview2'), 'icon_3d' => 'assets/images/icons_3d/preview.png'],
+                                ['heading' => 'Jadwal Sidang TA', 'href' => site_url('koordinatorta#sidang'), 'icon_3d' => 'assets/images/icons_3d/sidang.png'],
+                                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+                                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
+                            ];
+                            break;
+
+                        default: // Mahasiswa (5) / Tamu
+                            $navItems = [
+                                ['heading' => 'Dashboard Utama', 'href' => site_url('dashboard'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
+                                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+                                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                            ];
+                            if ($isLoggedIn) {
+                                $navItems[] = ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'];
+                            } else {
+                                $navItems[] = ['heading' => 'Masuk', 'href' => site_url('login'), 'icon_3d' => 'assets/images/icons_3d/logout.png'];
+                            }
+                            break;
+                    }
+
+                    foreach ($navItems as $item): ?>
+                        <a href="<?= htmlspecialchars($item['href']) ?>" class="curved-nav-item">
+                            <div class="curved-nav-content">
+                                <?php if (!empty($item['icon_3d'])): ?>
+                                    <div class="curved-nav-3d-wrap">
+                                        <img src="<?= base_url($item['icon_3d']) ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                                    </div>
+                                <?php endif; ?>
+                                <div class="curved-nav-text">
+                                    <span class="curved-nav-heading"><?= htmlspecialchars($item['heading']) ?></span>
+                                </div>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </nav>
+            </div>
+
+            <!-- Footer -->
+            <div class="curved-sidebar-footer" style="padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                <div class="curved-sidebar-footer-brand">
+                    <i class="fa-solid fa-graduation-cap text-orange-500"></i>
+                    <span><?= htmlspecialchars($this->session->userdata('name') ?: 'Portal Ruangan • IFIK') ?></span>
+                </div>
+                <span class="curved-sidebar-footer-version"><?= $sessionRoleId == 3 ? 'Kaur / Ka. Lab' : ($sessionRoleId == 2 ? 'Laboran' : ($sessionRoleId == 1 ? 'Admin' : 'v2.0')) ?></span>
+            </div>
+        </div>
+
+        <!-- Morphing Bezier Curve SVG -->
+        <svg id="curvedSidebarSvg" class="curved-sidebar-svg">
+            <path id="curvedSidebarPath" />
+        </svg>
+    </aside>
 
     <!-- Header Kalender Full Page (Single Row Height 70px) -->
     <div class="gcal-page-header">
         <div class="gcal-header-left" style="display: flex; align-items: center; gap: 8px; position: relative;">
-            <!-- Pane 1: Calendar Navigation (Active on Calendar Mode) -->
+            <!-- Curved Sidebar Burger Toggle Button -->
+            <button type="button" id="curvedSidebarToggle" class="curved-sidebar-toggle-btn" aria-label="Toggle Sidebar Menu" title="Buka Menu Navigasi & Kontrol">
+                <div class="curved-sidebar-burger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            <!-- Pane 1: Calendar Navigation (Dipindahkan ke Curved Sidebar sesuai permintaan pembimbing) -->
+            <!--
             <div id="headerLeftCalendarNav" class="header-left-pane">
                 <button class="gcal-btn-today" onclick="goToToday()">Today</button>
                 <div class="gcal-nav-arrows" style="display: flex; gap: 4px;">
@@ -1419,16 +1936,13 @@
                     <button onclick="nextWeek()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
                 </div>
 
-                <!-- Interactive Month-Year Picker Trigger -->
                 <div class="month-year-picker-wrap" id="monthYearPickerWrap" style="position: relative;">
                     <button type="button" class="month-year-btn" id="monthYearBtn" onclick="toggleMonthYearPicker(event)" title="Klik untuk memilih bulan & tahun" style="padding: 4px 8px;">
                         <span id="gcalMonthTitle" style="font-size: 0.96rem; font-weight: 800; color: #0f172a; white-space: nowrap;">-</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
 
-                    <!-- Month-Year Popover Dropdown -->
                     <div class="month-year-popover" id="monthYearPopover">
-                        <!-- Year Navigation Header -->
                         <div class="my-year-nav">
                             <button type="button" onclick="changePickerYear(-1, event)" title="Tahun Sebelumnya">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -1439,13 +1953,12 @@
                             </button>
                         </div>
 
-                        <!-- Month Grid (12 Months) -->
                         <div class="my-months-grid" id="pickerMonthsGrid">
-                            <!-- Jan - Des buttons rendered via JS -->
                         </div>
                     </div>
                 </div>
             </div>
+            -->
 
             <!-- Pane 2: Table Title (Active on Table Mode) -->
             <div id="headerLeftTableTitle" class="header-left-pane" style="display: none;">
@@ -1453,8 +1966,9 @@
             </div>
         </div>
 
-        <!-- UNIFIED SEARCH PILL & SEPARATE STANDALONE + BUTTON IN HEADER -->
-        <div class="search-filter-container">
+        <!-- UNIFIED SEARCH PILL & SEPARATE STANDALONE + BUTTON IN HEADER (CENTERED) -->
+        <div class="gcal-header-center">
+            <div class="search-filter-container">
             
             <!-- Main Row 1 Pill (Kategori + Key Text Search / Custom Status Select) -->
             <div class="unified-search-pill" id="unifiedSearchPill">
@@ -1491,15 +2005,16 @@
 
                 <!-- Text Search Container -->
                 <div style="position: relative; flex: 1; display: flex; align-items: center;" id="mainValueContainer">
-                    <button type="button" onclick="triggerSearchSubmit()" title="Klik untuk Cari (atau tekan Enter)" style="background: none; border: none; padding: 0; margin: 0; position: absolute; left: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; z-index: 2;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </button>
-                    <input type="text" id="mainSearchInput" placeholder="Cari ruangan, peminjam, kode (key)..." 
+                    <input type="text" id="mainSearchInput" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." 
                            oninput="handleUnifiedMultiSearch(this)" 
                            onkeydown="if(event.key === 'Enter') { triggerSearchSubmit(); }"
                            onfocus="onMainInputFocused()"
-                           autocomplete="off" class="unified-input-key main-val-field" style="padding-left: 28px;">
-                    <button id="clearMainSearchBtn" onclick="clearMainSearch()" style="display: none; position: absolute; right: 6px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem;">&times;</button>
+                           autocomplete="off" class="unified-input-key main-val-field">
+                    <button id="clearMainSearchBtn" onclick="clearMainSearch()" style="display: none; position: absolute; right: 78px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem; line-height: 1;" title="Hapus pencarian">&times;</button>
+                    <button type="button" class="btn-submit-search-pill" onclick="triggerSearchSubmit()" title="Cari (Enter)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        Cari
+                    </button>
                 </div>
 
                 <!-- Custom Styled Status Selector Dropdown (Shown when Status Peminjaman is selected) -->
@@ -1566,33 +2081,11 @@
                 </div>
             </div>
 
-        </div>
+        </div> <!-- end search-filter-container -->
+        </div> <!-- end gcal-header-center -->
 
-        <div class="gcal-header-right" style="display: flex; align-items: center; gap: 8px;">
-            <!-- Compact Sliding View Switcher (Kalender / Tabel) -->
-            <div class="view-switcher-pill" id="viewSwitcherPill" onclick="toggleViewMode(event)" title="Klik untuk ganti tampilan Kalender / Tabel">
-                <button type="button" class="view-toggle-btn active" id="viewToggleCalendarBtn" onclick="switchViewMode('calendar', event)" title="Tampilan Kalender">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span class="view-label">Kalender</span>
-                </button>
-                <button type="button" class="view-toggle-btn" id="viewToggleTableBtn" onclick="switchViewMode('table', event)" title="Tampilan Tabel">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                    <span class="view-label">Tabel</span>
-                </button>
-            </div>
-
-            <a href="<?= base_url() ?>" class="btn-back-home">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                Kembali
-            </a>
-
-            <?php if ($this->session->userdata('logged_in')): ?>
-                <a href="<?= base_url('ajukan-booking') ?>" class="btn-ajukan-booking">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Ajukan Booking
-                </a>
-            <?php endif; ?>
-        </div>
+        <!-- Right Placeholder to balance center alignment -->
+        <div class="gcal-header-right"></div>
     </div>
 
     <!-- Container Utama Grid Kalender (Full Height) -->
@@ -1610,86 +2103,6 @@
     <!-- Container Utama Tampilan Tabel (Fullscreen Modern) -->
     <div class="table-view-container" id="tableViewContainer" style="display: none;">
         <div class="table-view-inner">
-            <!-- Table Quick Stats Banner -->
-            <div class="table-stats-bar">
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <div class="stat-pill stat-pill-total active" id="statPillTotal" onclick="filterByStatPill('all')" title="Klik untuk menampilkan semua data">
-                        <span class="stat-label" style="color: #64748b;">Total Data:</span>
-                        <span class="stat-val" id="tableStatTotal" style="color: #0f172a;">0</span>
-                    </div>
-
-                    <div class="stat-pill stat-pill-pending" id="statPillPending" onclick="filterByStatPill('pending')" title="Klik untuk memfilter status Menunggu">
-                        <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
-                        <span class="stat-label">Menunggu:</span>
-                        <span class="stat-val" id="tableStatPending">0</span>
-                    </div>
-
-                    <!-- Disetujui with interactive dropdown options -->
-                    <div class="stat-pill-approved-wrap" style="position: relative;">
-                        <div class="stat-pill stat-pill-approved" id="statPillApproved" onclick="toggleApprovedSubMenu(event)" title="Klik untuk memilih filter status Disetujui">
-                            <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
-                            <span class="stat-label" id="approvedStatLabel">Disetujui:</span>
-                            <span class="stat-val" id="tableStatApproved">0</span>
-                            <svg id="approvedStatChevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 2px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </div>
-
-                        <!-- Dropdown Sub-Menu Disetujui -->
-                        <div class="approved-sub-menu" id="approvedSubMenu">
-                            <div class="approved-sub-item active" id="subOptAllApproved" onclick="selectApprovedSub('all_approved', event)">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
-                                    <span>Semua Disetujui</span>
-                                </div>
-                                <span class="sub-count" id="subCountAllApproved">0</span>
-                            </div>
-                            <div class="approved-sub-item" id="subOptLaboran" onclick="selectApprovedSub('laboran', event)">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6;"></span>
-                                    <span>Disetujui Laboran</span>
-                                </div>
-                                <span class="sub-count" id="subCountLaboran">0</span>
-                            </div>
-                            <div class="approved-sub-item" id="subOptKaur" onclick="selectApprovedSub('kaur', event)">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e;"></span>
-                                    <span>Disetujui Ka. Ur</span>
-                                </div>
-                                <span class="sub-count" id="subCountKaur">0</span>
-                            </div>
-                            <div class="approved-sub-item" id="subOptAdmin" onclick="selectApprovedSub('admin', event)">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #8b5cf6;"></span>
-                                    <span>Disetujui Admin</span>
-                                </div>
-                                <span class="sub-count" id="subCountAdmin">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="margin-left: auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <label for="tablePageSizeSelect" style="font-size: 0.78rem; font-weight: 700; color: #64748b;">Tampilkan:</label>
-                        <select id="tablePageSizeSelect" class="custom-table-select" onchange="changeTablePageSize(this.value)">
-                            <option value="10">10 baris</option>
-                            <option value="20" selected>20 baris</option>
-                            <option value="50">50 baris</option>
-                            <option value="100">100 baris</option>
-                        </select>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <label for="tableSortSelect" style="font-size: 0.78rem; font-weight: 700; color: #64748b;">Urutkan:</label>
-                        <select id="tableSortSelect" class="custom-table-select" onchange="renderTableView()">
-                            <option value="date_desc">Tanggal (Terbaru)</option>
-                            <option value="date_asc">Tanggal (Terlama)</option>
-                            <option value="room_asc">Nama Ruangan (A-Z)</option>
-                            <option value="time_asc">Jam Mulai (Pagi - Malam)</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
             <!-- Table Column Header -->
             <div class="table-column-header">
                 <div class="th-col th-room">Ruangan</div>
@@ -1779,41 +2192,6 @@
                                     <strong style="color: #991b1b;">Alasan Penolakan:</strong> <span id="detailAlasanPenolakan" style="color: #7f1d1d;"></span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <!-- Panel Aksi Approval -->
-                        <div id="approvalActionPanel" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 16px; margin-bottom: 12px;">
-                            <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
-                                ⚡ Persetujuan Peminjaman (<span id="approvalRoleLabel"></span>)
-                            </h4>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="button" onclick="approveBookingAction()" style="flex: 1; background: #16a34a; color: #fff; border: none; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    Setujui
-                                </button>
-                                <button type="button" onclick="toggleRejectInput()" style="flex: 1; background: #dc2626; color: #fff; border: none; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                    Tolak
-                                </button>
-                            </div>
-
-                            <div id="rejectReasonBox" style="display: none; margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
-                                <label style="font-size: 0.8rem; font-weight: 600; color: #991b1b; display: block; margin-bottom: 6px;">Alasan Penolakan (Opsional):</label>
-                                <textarea id="rejectReasonInput" rows="2" style="width: 100%; font-size: 0.85rem; padding: 8px 12px; border: 1px solid #fca5a5; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box;" placeholder="Tuliskan alasan penolakan..."></textarea>
-                                <button type="button" onclick="rejectBookingAction()" style="width: 100%; background: #991b1b; color: #fff; border: none; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Konfirmasi Penolakan</button>
-                            </div>
-                        </div>
-
-                        <!-- Panel Aksi Hapus Jadwal -->
-                        <div id="deleteActionPanel" style="display: none;">
-                            <button type="button" onclick="deleteBookingAction()" style="width: 100%; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                Hapus Jadwal Peminjaman
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1846,6 +2224,8 @@
             const s = (status || '').toLowerCase();
             if (s === 'pending' || s === 'menunggu persetujuan') {
                 return { bg: '#f59e0b', border: '#d97706', badgeBg: '#fffbeb', badgeColor: '#b45309', dot: '#f59e0b', label: 'Menunggu Persetujuan' };
+            } else if (s.includes('ditolak') || s.includes('reject')) {
+                return { bg: '#ef4444', border: '#dc2626', badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444', label: 'Ditolak' };
             } else if (s.includes('ka. ur') || s.includes('kaur')) {
                 return { bg: '#10b981', border: '#059669', badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#10b981', label: 'Disetujui Ka. Ur' };
             } else if (s.includes('laboran')) {
@@ -1854,8 +2234,6 @@
                 return { bg: '#8b5cf6', border: '#7c3aed', badgeBg: '#f5f3ff', badgeColor: '#6d28d9', dot: '#8b5cf6', label: 'Disetujui Admin' };
             } else if (s.includes('disetujui')) {
                 return { bg: '#10b981', border: '#059669', badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#10b981', label: 'Disetujui' };
-            } else if (s === 'ditolak') {
-                return { bg: '#ef4444', border: '#dc2626', badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444', label: 'Ditolak' };
             } else if (s === 'selesai') {
                 return { bg: '#64748b', border: '#475569', badgeBg: '#f8fafc', badgeColor: '#475569', dot: '#94a3b8', label: 'Selesai' };
             }
@@ -2094,9 +2472,9 @@
 
             if (inputField) {
                 inputField.value = '';
-                if (val === 'keyword') inputField.placeholder = "Cari ruangan, peminjam, kode (key)...";
-                else if (val === 'kategori') inputField.placeholder = "Ketik nama kategori (e.g. Lab Komputer)...";
-                else if (val === 'ruangan') inputField.placeholder = "Ketik kode ruangan (e.g. IK.01.10)...";
+                if (val === 'keyword') inputField.placeholder = "Ketik kata kunci lalu tekan Enter atau klik Cari...";
+                else if (val === 'kategori') inputField.placeholder = "Ketik nama kategori lalu tekan Enter atau klik Cari...";
+                else if (val === 'ruangan') inputField.placeholder = "Ketik kode/nama ruangan lalu tekan Enter atau klik Cari...";
                 else if (val === 'tanggal') inputField.placeholder = "Pilih 1 tanggal / rentang tanggal...";
 
                 setupDatePickerIfNeeded(inputField, val);
@@ -2116,16 +2494,7 @@
                 flatpickr(inputEl, {
                     mode: "range",
                     dateFormat: "Y-m-d",
-                    disableMobile: "true",
-                    onChange: function(selectedDates, dateStr) {
-                        if (selectedDates && selectedDates.length > 0) {
-                            const d = new Date(selectedDates[0]);
-                            currentWeekStart = new Date(d);
-                            currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
-                            renderCalendar();
-                            applyMultiFilters();
-                        }
-                    }
+                    disableMobile: "true"
                 });
             }
         }
@@ -2162,45 +2531,50 @@
                 });
                 wrap.classList.remove('open');
             }
-
-            applyMultiFilters();
         }
 
         // ==========================================
         // MONTH-YEAR PICKER CONTROLLER
         // ==========================================
+        // ==========================================
+        // MONTH-YEAR PICKER CONTROLLER
+        // ==========================================
         let pickerCurrentYear = (new Date()).getFullYear();
 
-        function toggleMonthYearPicker(e) {
+        function toggleMonthYearPicker(e, source = 'main') {
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
             }
-            const wrap = document.getElementById('monthYearPickerWrap');
+            const wrapId = source === 'sb' ? 'sbMonthYearPickerWrap' : 'monthYearPickerWrap';
+            const wrap = document.getElementById(wrapId);
             if (!wrap) return;
             const wasOpen = wrap.classList.contains('open');
             closeAllCustomMenus();
             if (!wasOpen) {
                 pickerCurrentYear = currentWeekStart.getFullYear();
-                renderMonthYearPicker();
+                renderMonthYearPicker(source);
                 wrap.classList.add('open');
             }
         }
 
-        function changePickerYear(delta, e) {
+        function changePickerYear(delta, e, source = 'main') {
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
             }
             pickerCurrentYear += delta;
-            renderMonthYearPicker();
+            renderMonthYearPicker(source);
         }
 
-        function renderMonthYearPicker() {
-            const yearDisplay = document.getElementById('pickerYearDisplay');
+        function renderMonthYearPicker(source = 'main') {
+            const yearDisplayId = source === 'sb' ? 'sbPickerYearDisplay' : 'pickerYearDisplay';
+            const gridId = source === 'sb' ? 'sbPickerMonthsGrid' : 'pickerMonthsGrid';
+
+            const yearDisplay = document.getElementById(yearDisplayId);
             if (yearDisplay) yearDisplay.innerText = pickerCurrentYear;
 
-            const grid = document.getElementById('pickerMonthsGrid');
+            const grid = document.getElementById(gridId);
             if (!grid) return;
 
             const monthShorts = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -2211,7 +2585,7 @@
             monthShorts.forEach((mName, idx) => {
                 const isActive = (idx === activeMonth && pickerCurrentYear === activeYear);
                 html += `
-                    <div class="my-month-item ${isActive ? 'active' : ''}" onclick="selectMonthYear(${idx}, ${pickerCurrentYear}, event)">
+                    <div class="my-month-item ${isActive ? 'active' : ''}" onclick="selectMonthYear(${idx}, ${pickerCurrentYear}, event, '${source}')">
                         ${mName}
                     </div>
                 `;
@@ -2219,7 +2593,7 @@
             grid.innerHTML = html;
         }
 
-        function selectMonthYear(monthIndex, year, e) {
+        function selectMonthYear(monthIndex, year, e, source = 'main') {
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -2229,7 +2603,7 @@
             currentWeekStart = new Date(d);
             currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
 
-            const wrap = document.getElementById('monthYearPickerWrap');
+            const wrap = document.getElementById(source === 'sb' ? 'sbMonthYearPickerWrap' : 'monthYearPickerWrap');
             if (wrap) wrap.classList.remove('open');
 
             renderCalendar();
@@ -2241,12 +2615,15 @@
             document.querySelectorAll('.custom-status-dropdown').forEach(d => d.classList.remove('open'));
             const myWrap = document.getElementById('monthYearPickerWrap');
             if (myWrap) myWrap.classList.remove('open');
+            const sbWrap = document.getElementById('sbMonthYearPickerWrap');
+            if (sbWrap) sbWrap.classList.remove('open');
         }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.custom-cat-dropdown') && 
                 !e.target.closest('.custom-status-dropdown') && 
-                !e.target.closest('#monthYearPickerWrap')) {
+                !e.target.closest('#monthYearPickerWrap') &&
+                !e.target.closest('#sbMonthYearPickerWrap')) {
                 closeAllCustomMenus();
             }
             if (!e.target.closest('#unifiedSearchPill') && 
@@ -2297,9 +2674,9 @@
                 hideAutocomplete();
             }
 
-            // HANYA FILTER SAAT ENTER / KLIK CARI / PILIH DROPDOWN / HAPUS INPUT
+            // HANYA FILTER SAAT ENTER / KLIK TOMBOL CARI (isImmediate === true)
             // (Mencegah beban komputasi berat saat ribuan data diketik)
-            if (isImmediate || query.length === 0) {
+            if (isImmediate) {
                 applyMultiFilters();
             }
         }
@@ -2424,9 +2801,7 @@
                 activeTargetInput.value = val;
                 activeTargetInput.focus();
             }
-            if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
             hideAutocomplete();
-            applyMultiFilters();
         }
 
         function getActiveFilterRules() {
@@ -2534,16 +2909,20 @@
         }
 
         function updateHeaderMonthTitle() {
-            const monthTitle = document.getElementById('gcalMonthTitle');
-            if (monthTitle) {
-                const endOfWeek = new Date(currentWeekStart);
-                endOfWeek.setDate(endOfWeek.getDate() + 6);
-                if (currentWeekStart.getMonth() === endOfWeek.getMonth()) {
-                    monthTitle.innerText = `${INDO_MONTHS[currentWeekStart.getMonth()]} ${currentWeekStart.getFullYear()}`;
-                } else {
-                    monthTitle.innerText = `${INDO_MONTHS_SHORT[currentWeekStart.getMonth()]} - ${INDO_MONTHS_SHORT[endOfWeek.getMonth()]} ${endOfWeek.getFullYear()}`;
-                }
+            let formattedTitle = '-';
+            const endOfWeek = new Date(currentWeekStart);
+            endOfWeek.setDate(endOfWeek.getDate() + 6);
+            if (currentWeekStart.getMonth() === endOfWeek.getMonth()) {
+                formattedTitle = `${INDO_MONTHS[currentWeekStart.getMonth()]} ${currentWeekStart.getFullYear()}`;
+            } else {
+                formattedTitle = `${INDO_MONTHS_SHORT[currentWeekStart.getMonth()]} - ${INDO_MONTHS_SHORT[endOfWeek.getMonth()]} ${endOfWeek.getFullYear()}`;
             }
+
+            const monthTitle = document.getElementById('gcalMonthTitle');
+            if (monthTitle) monthTitle.innerText = formattedTitle;
+
+            const sbMonthTitle = document.getElementById('sbMonthTitle');
+            if (sbMonthTitle) sbMonthTitle.innerText = formattedTitle;
         }
 
         function switchViewMode(mode, e) {
@@ -2558,9 +2937,19 @@
             const calNav = document.getElementById('headerLeftCalendarNav');
             const tblTitle = document.getElementById('headerLeftTableTitle');
 
+            const sbCal = document.getElementById('sbViewCalBtn');
+            const sbTbl = document.getElementById('sbViewTblBtn');
+            const sbCalNav = document.getElementById('sbCalendarNavSection');
+            const sbTblControls = document.getElementById('sbTableControlsSection');
+
             if (mode === 'table') {
                 if (btnCal) btnCal.classList.remove('active');
                 if (btnTbl) btnTbl.classList.add('active');
+
+                if (sbCal) { sbCal.style.background = 'transparent'; sbCal.style.color = '#64748b'; }
+                if (sbTbl) { sbTbl.style.background = '#0f172a'; sbTbl.style.color = '#ffffff'; }
+                if (sbCalNav) sbCalNav.style.display = 'none';
+                if (sbTblControls) sbTblControls.style.display = 'flex';
 
                 if (calNav) calNav.style.display = 'none';
                 if (tblTitle) {
@@ -2584,6 +2973,11 @@
                 if (btnCal) btnCal.classList.add('active');
                 if (btnTbl) btnTbl.classList.remove('active');
 
+                if (sbCal) { sbCal.style.background = '#0f172a'; sbCal.style.color = '#ffffff'; }
+                if (sbTbl) { sbTbl.style.background = 'transparent'; sbTbl.style.color = '#64748b'; }
+                if (sbCalNav) sbCalNav.style.display = 'block';
+                if (sbTblControls) sbTblControls.style.display = 'none';
+
                 if (tblTitle) tblTitle.style.display = 'none';
                 if (calNav) {
                     calNav.style.display = 'flex';
@@ -2605,7 +2999,7 @@
             }
         }
 
-        window.activeStatPillFilter = 'all'; // 'all', 'pending', 'all_approved', 'laboran', 'kaur', 'admin'
+        window.activeStatPillFilter = 'all'; // 'all', 'pending', 'all_approved', 'laboran', 'kaur', 'admin', 'rejected'
 
         function filterByStatPill(type) {
             closeApprovedSubMenu();
@@ -2616,6 +3010,12 @@
                     window.activeStatPillFilter = 'all';
                 } else {
                     window.activeStatPillFilter = 'pending';
+                }
+            } else if (type === 'rejected') {
+                if (window.activeStatPillFilter === 'rejected') {
+                    window.activeStatPillFilter = 'all';
+                } else {
+                    window.activeStatPillFilter = 'rejected';
                 }
             }
             currentTablePage = 1;
@@ -2666,6 +3066,7 @@
             const totalCount = rawBase.length;
             const pendingCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu')).length;
             const allApprovedCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('setuju')).length;
+            const rejectedCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('ditolak') || (b.status || '').toLowerCase().includes('reject')).length;
             const laboranCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('laboran')).length;
             const kaurCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('ka. ur') || (b.status || '').toLowerCase().includes('kaur')).length;
             const adminCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('admin')).length;
@@ -2674,9 +3075,11 @@
             const statTotal = document.getElementById('tableStatTotal');
             const statPending = document.getElementById('tableStatPending');
             const statApproved = document.getElementById('tableStatApproved');
+            const statRejected = document.getElementById('tableStatRejected');
             if (statTotal) statTotal.innerText = totalCount;
             if (statPending) statPending.innerText = pendingCount;
             if (statApproved) statApproved.innerText = allApprovedCount;
+            if (statRejected) statRejected.innerText = rejectedCount;
 
             const scAll = document.getElementById('subCountAllApproved');
             const scLab = document.getElementById('subCountLaboran');
@@ -2691,11 +3094,13 @@
             const pillTot = document.getElementById('statPillTotal');
             const pillPen = document.getElementById('statPillPending');
             const pillApp = document.getElementById('statPillApproved');
+            const pillRej = document.getElementById('statPillRejected');
             const labelApp = document.getElementById('approvedStatLabel');
 
             if (pillTot) pillTot.classList.remove('active');
             if (pillPen) pillPen.classList.remove('active');
             if (pillApp) pillApp.classList.remove('active');
+            if (pillRej) pillRej.classList.remove('active');
 
             ['subOptAllApproved', 'subOptLaboran', 'subOptKaur', 'subOptAdmin'].forEach(id => {
                 const el = document.getElementById(id);
@@ -2709,6 +3114,10 @@
             if (activeFilter === 'pending') {
                 data = data.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu'));
                 if (pillPen) pillPen.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Disetujui:';
+            } else if (activeFilter === 'rejected') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('ditolak') || (b.status || '').toLowerCase().includes('reject'));
+                if (pillRej) pillRej.classList.add('active');
                 if (labelApp) labelApp.innerText = 'Disetujui:';
             } else if (activeFilter === 'all_approved') {
                 data = data.filter(b => (b.status || '').toLowerCase().includes('setuju'));
@@ -2811,7 +3220,7 @@
                 const roomCodesBadge = (b.kode_ruangan || '').split(',').map(c => c.trim()).filter(Boolean).map(c => `<span style="display:inline-block; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:1px 6px; font-size:0.68rem; font-weight:700; color:#334155; margin-right:3px;">${c}</span>`).join('');
 
                 html += `
-                    <div class="table-row-card" onclick="openDetailBookingModal(${b.id})" title="Klik untuk melihat detail & approval">
+                    <div class="table-row-card" onclick="openDetailBookingModal(${b.id})" title="Klik untuk melihat detail peminjaman">
                         <div class="tr-room-col">
                             <div class="tr-room-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -2914,6 +3323,17 @@
                     renderCalendar(window.bookingData);
                 }
                 return;
+            }
+
+            // Jump calendar week if a date rule is selected
+            const dateRule = rules.find(r => r.category === 'tanggal' && r.value);
+            if (dateRule) {
+                const datePart = dateRule.value.split(' to ')[0].trim();
+                const d = new Date(datePart);
+                if (!isNaN(d.getTime())) {
+                    currentWeekStart = new Date(d);
+                    currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+                }
             }
 
             const filtered = (window.bookingData || []).filter(booking => {
@@ -3221,39 +3641,6 @@
                 alasBox.style.display = 'none';
             }
 
-            const roleId = parseInt(window.userRoleId);
-            const approvePanel = document.getElementById('approvalActionPanel');
-            const deletePanel = document.getElementById('deleteActionPanel');
-            const rejectBox = document.getElementById('rejectReasonBox');
-            if (rejectBox) rejectBox.style.display = 'none';
-
-            const isAuthorized = [1, 2, 3].includes(roleId);
-            const statusLower = (booking.status || '').toLowerCase();
-
-            // Status yang bisa diapprove:
-            // 1. Pending (untuk Admin, Laboran, Ka. Ur)
-            // 2. Disetujui Laboran (bisa di-approve / difinalisasi oleh Ka. Ur dan Admin)
-            const canApprove = (
-                statusLower === 'pending' ||
-                ((roleId === 3 || roleId === 1) && statusLower.includes('laboran'))
-            );
-
-            if (isAuthorized && canApprove) {
-                let roleName = 'Admin';
-                if (roleId === 3) roleName = 'Ka. Ur';
-                else if (roleId === 2) roleName = 'Laboran';
-
-                document.getElementById('approvalRoleLabel').innerText = roleName;
-                approvePanel.style.display = 'block';
-            } else {
-                approvePanel.style.display = 'none';
-            }
-
-            if (isAuthorized && deletePanel) {
-                deletePanel.style.display = 'block';
-            } else if (deletePanel) {
-                deletePanel.style.display = 'none';
-            }
         }
 
         function closeDetailBookingModal() {
@@ -3279,115 +3666,6 @@
             }).catch(e => console.error(e));
         }
 
-        function approveBookingAction() {
-            const id = document.getElementById('detailBookingId').value;
-            if (!id) return;
-
-            Swal.fire({
-                title: 'Setujui Peminjaman',
-                text: 'Apakah Anda yakin ingin menyetujui peminjaman ini?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#16a34a',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Ya, Setujui',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(window.approveBookingUrl + '/' + id, { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Disetujui!',
-                                text: data.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                            reloadBookingData();
-                        } else {
-                            Swal.fire('Gagal', data.message, 'error');
-                        }
-                    }).catch(err => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
-                }
-            });
-        }
-
-        function toggleRejectInput() {
-            const box = document.getElementById('rejectReasonBox');
-            box.style.display = (box.style.display === 'none') ? 'block' : 'none';
-        }
-
-        function rejectBookingAction() {
-            const id = document.getElementById('detailBookingId').value;
-            const alasan = document.getElementById('rejectReasonInput').value;
-            if (!id) return;
-
-            const formData = new FormData();
-            formData.append('alasan_penolakan', alasan);
-
-            fetch(window.rejectBookingUrl + '/' + id, { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Ditolak',
-                        text: data.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    reloadBookingData();
-                } else {
-                    Swal.fire('Gagal', data.message, 'error');
-                }
-            }).catch(err => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
-        }
-
-        function deleteBookingAction() {
-            const id = document.getElementById('detailBookingId').value;
-            if (!id) return;
-
-            Swal.fire({
-                title: 'Hapus Jadwal',
-                text: 'Apakah Anda yakin ingin menghapus jadwal peminjaman ini secara permanen?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Ya, Hapus',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(window.deleteBookingUrl + '/' + id, { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Terhapus!',
-                                text: data.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                            
-                            reloadBookingData();
-                            setTimeout(() => {
-                                if (activeDailyBookings.length > 0) {
-                                    selectBookingInDailyModal(activeDailyBookings[0].id);
-                                } else {
-                                    closeDetailBookingModal();
-                                }
-                            }, 300);
-                        } else {
-                            Swal.fire('Gagal', data.message, 'error');
-                        }
-                    }).catch(err => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
-                }
-            });
-        }
-
         function nextWeek() { currentWeekStart.setDate(currentWeekStart.getDate() + 7); renderCalendar(); applyMultiFilters(); }
         function prevWeek() { currentWeekStart.setDate(currentWeekStart.getDate() - 7); renderCalendar(); applyMultiFilters(); }
         function goToToday() { currentWeekStart = new Date(); currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay()); renderCalendar(); applyMultiFilters(); }
@@ -3410,6 +3688,28 @@
                 }
             } catch (e) {
                 renderCalendar();
+            }
+        });
+    </script>
+    <!-- Curved Sidebar Script -->
+    <script src="<?= base_url('assets/js/curved_sidebar.js?v=' . time()); ?>"></script>
+
+    <script>
+        // Initialize Flatpickr Jump Date in Sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('sbJumpDatePicker')) {
+                flatpickr("#sbJumpDatePicker", {
+                    dateFormat: "Y-m-d",
+                    onChange: function(selectedDates, dateStr) {
+                        if (dateStr) {
+                            const d = new Date(dateStr);
+                            currentWeekStart = new Date(d);
+                            currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+                            renderCalendar();
+                            applyMultiFilters();
+                        }
+                    }
+                });
             }
         });
     </script>

@@ -111,20 +111,100 @@ class Kelolabooking extends CI_Controller {
 
         $update = $this->Booking_model->update_status($id, $status);
         if($update) {
-            echo json_encode(['status' => 'success', 'message' => 'Peminjaman ' . $status . '!']);
+            echo json_encode([
+                'status' => 'success', 
+                'message' => 'Peminjaman berhasil ' . $status . '! Surat resmi ber-QR Code siap dicetak.',
+                'surat_url' => site_url('kaur/surat/' . $id)
+            ]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menyetujui peminjaman']);
         }
     }
 
+    public function surat($id)
+    {
+        // Get booking detail with room and category info
+        $this->db->select('peminjaman.*, ruangan.nama_ruangan, ruangan.kode_ruangan, ruangan.lokasi, ruangan.kapasitas, kategori_ruangan.nama_kategori');
+        $this->db->from('peminjaman');
+        $this->db->join('ruangan', 'ruangan.id = peminjaman.id_ruangan', 'left');
+        $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
+        $this->db->where('peminjaman.id', $id);
+        $data['booking'] = $this->db->get()->row();
+
+        if (!$data['booking']) {
+            show_404();
+            return;
+        }
+
+        $data['title'] = 'Surat Resmi Peminjaman Ruangan - ' . ($data['booking']->kode_ruangan ?? 'IFIK');
+        $data['nomor_surat'] = 'SURAT/LAB-IFIK/' . date('Y', strtotime($data['booking']->created_at)) . '/' . sprintf('%04d', $data['booking']->id);
+        $data['qr_data'] = site_url('kaur/surat/' . $id);
+
+        $this->load->view('kaur/surat_resmi', $data);
+    }
+
     public function reject($id)
     {
         $alasan = $this->input->post('alasan_penolakan', true);
+        if (empty(trim($alasan))) {
+            echo json_encode(['status' => 'error', 'message' => 'Catatan alasan penolakan wajib diisi!']);
+            return;
+        }
         $update = $this->Booking_model->update_status($id, 'Ditolak', $alasan);
         if($update) {
             echo json_encode(['status' => 'success', 'message' => 'Peminjaman ditolak!']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menolak peminjaman']);
+        }
+    }
+
+    public function batch_approve()
+    {
+        header('Content-Type: application/json');
+        $ids = $this->input->post('ids');
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => 'error', 'message' => 'Pilih setidaknya satu data peminjaman!']);
+            return;
+        }
+
+        $role_id = $this->session->userdata('role_id');
+        if ($role_id == 3) {
+            $status = 'Disetujui Ka. Ur';
+        } elseif ($role_id == 2) {
+            $status = 'Disetujui Laboran';
+        } else {
+            $status = 'Disetujui Laboran';
+        }
+
+        $update = $this->Booking_model->batch_update_status($ids, $status);
+        if ($update) {
+            echo json_encode(['status' => 'success', 'message' => count($ids) . ' data peminjaman berhasil ' . $status . '!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menyetujui data terpilih']);
+        }
+    }
+
+    public function batch_reject()
+    {
+        header('Content-Type: application/json');
+        $ids = $this->input->post('ids');
+        $alasan = $this->input->post('alasan_penolakan', true);
+
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => 'error', 'message' => 'Pilih setidaknya satu data peminjaman!']);
+            return;
+        }
+
+        if (empty(trim($alasan))) {
+            echo json_encode(['status' => 'error', 'message' => 'Catatan alasan penolakan wajib diisi!']);
+            return;
+        }
+
+        $update = $this->Booking_model->batch_update_status($ids, 'Ditolak', $alasan);
+        if ($update) {
+            echo json_encode(['status' => 'success', 'message' => count($ids) . ' data peminjaman berhasil ditolak!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menolak data terpilih']);
         }
     }
 

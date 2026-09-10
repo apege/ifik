@@ -29,11 +29,43 @@ class KoordinatorTA_model extends CI_Model {
             'status_kelulusan_sidang' => "VARCHAR(50) DEFAULT 'Belum Dinilai'",
             'detail_penilaian_sidang' => "LONGTEXT DEFAULT NULL",
             'tgl_penilaian_sidang'    => "DATETIME DEFAULT NULL",
+            'status_publish_sidang'   => "VARCHAR(50) DEFAULT 'Draft'",
+            'tgl_publish_sidang'      => "DATETIME DEFAULT NULL",
+            'versi_penilaian'         => "INT(11) DEFAULT 1",
         );
         foreach ($new_cols as $col => $type) {
             if (!in_array($col, $fields)) {
                 $this->db->query("ALTER TABLE `pendaftaran_ta` ADD COLUMN `{$col}` {$type}");
             }
+        }
+
+        // Buat tabel history log penilaian sidang jika belum ada
+        if (!$this->db->table_exists('history_penilaian_sidang')) {
+            $this->db->query("
+                CREATE TABLE IF NOT EXISTS `history_penilaian_sidang` (
+                    `id` INT(11) NOT NULL AUTO_INCREMENT,
+                    `nim` VARCHAR(50) NOT NULL,
+                    `nama_mahasiswa` VARCHAR(150) NULL,
+                    `tahun_akademik` VARCHAR(20) NULL,
+                    `versi` INT(11) NOT NULL DEFAULT 1,
+                    `prodi` VARCHAR(50) NULL,
+                    `peminatan` VARCHAR(100) NULL,
+                    `nilai_akhir` DECIMAL(5,2) NULL,
+                    `grade` VARCHAR(10) NULL,
+                    `status_kelulusan` VARCHAR(50) NULL,
+                    `detail_penilaian` LONGTEXT NULL,
+                    `status_publish` VARCHAR(50) NOT NULL DEFAULT 'Draft',
+                    `tgl_publish` DATETIME NULL,
+                    `catatan` TEXT NULL,
+                    `aksi` VARCHAR(50) NOT NULL DEFAULT 'Input Penilaian',
+                    `actor_nip` VARCHAR(50) NULL,
+                    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_nim` (`nim`),
+                    KEY `idx_tahun` (`tahun_akademik`),
+                    KEY `idx_created` (`created_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
         }
 
         // Buat tabel history log plotting penguji jika belum ada
@@ -170,13 +202,13 @@ class KoordinatorTA_model extends CI_Model {
 
         $this->db->select('m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.alamat, m.kota, m.provinsi, m.email, m.no_hp, p.*, COALESCE(dw.nama_dosen, dw_alt.nama_dosen, "Dosen Wali") as nama_dosen_wali, dw.nip as nip_dosen_wali, COALESCE(dw1.nama_dosen, u1.name, p.pembimbing_1) as nama_pembimbing_1, COALESCE(dw2.nama_dosen, u2.name, p.pembimbing_2) as nama_pembimbing_2');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw', 'dw.nip = m.nip_dosen_wali', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(alamat) as alamat, MIN(kota) as kota, MIN(provinsi) as provinsi, MIN(email) as email, MIN(no_hp) as no_hp, MIN(nip_dosen_wali) as nip_dosen_wali FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw', 'dw.nip = m.nip_dosen_wali', 'left');
         $this->db->join('dosen_wali dw_alt', 'dw_alt.id = p.id_dosen_wali', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('users u1', 'u1.nidn_nim = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
-        $this->db->join('users u2', 'u2.nidn_nim = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nidn_nim, MIN(name) as name FROM users WHERE nidn_nim IS NOT NULL AND nidn_nim != "" GROUP BY nidn_nim) u1', 'u1.nidn_nim = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nidn_nim, MIN(name) as name FROM users WHERE nidn_nim IS NOT NULL AND nidn_nim != "" GROUP BY nidn_nim) u2', 'u2.nidn_nim = p.pembimbing_2', 'left');
         $this->db->where('p.is_submitted', 1);
         $this->db->order_by('p.created_at', 'DESC');
         $query = $this->db->get();
@@ -222,13 +254,13 @@ class KoordinatorTA_model extends CI_Model {
 
         $this->db->select('m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.alamat as mhs_alamat, m.kota, m.provinsi, m.email, m.no_hp, p.*, COALESCE(dw.nama_dosen, dw_alt.nama_dosen, "Dosen Wali") as nama_dosen_wali, dw.nip as nip_dosen_wali, COALESCE(dw1.nama_dosen, u1.name, p.pembimbing_1) as nama_pembimbing_1, COALESCE(dw2.nama_dosen, u2.name, p.pembimbing_2) as nama_pembimbing_2');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw', 'dw.nip = m.nip_dosen_wali', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(alamat) as alamat, MIN(kota) as kota, MIN(provinsi) as provinsi, MIN(email) as email, MIN(no_hp) as no_hp, MIN(nip_dosen_wali) as nip_dosen_wali FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw', 'dw.nip = m.nip_dosen_wali', 'left');
         $this->db->join('dosen_wali dw_alt', 'dw_alt.id = p.id_dosen_wali', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('users u1', 'u1.nidn_nim = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
-        $this->db->join('users u2', 'u2.nidn_nim = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nidn_nim, MIN(name) as name FROM users WHERE nidn_nim IS NOT NULL AND nidn_nim != "" GROUP BY nidn_nim) u1', 'u1.nidn_nim = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nidn_nim, MIN(name) as name FROM users WHERE nidn_nim IS NOT NULL AND nidn_nim != "" GROUP BY nidn_nim) u2', 'u2.nidn_nim = p.pembimbing_2', 'left');
         $this->db->where('p.nim', $nim);
         $query = $this->db->get();
         $row = $query ? $query->row_array() : null;
@@ -376,13 +408,13 @@ class KoordinatorTA_model extends CI_Model {
             COALESCE(dw2.nama_dosen, u2.name, p.pembimbing_2) as nama_pembimbing_2
         ');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw', 'dw.nip = m.nip_dosen_wali', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(prodi) as prodi, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(email) as m_email, MIN(no_hp) as m_no_hp, MIN(nip_dosen_wali) as nip_dosen_wali FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw', 'dw.nip = m.nip_dosen_wali', 'left');
         $this->db->join('dosen_wali dw_alt', 'dw_alt.id = p.id_dosen_wali', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('users u1', 'u1.nidn_nim = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
-        $this->db->join('users u2', 'u2.nidn_nim = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nidn_nim, MIN(name) as name FROM users WHERE nidn_nim IS NOT NULL AND nidn_nim != "" GROUP BY nidn_nim) u1', 'u1.nidn_nim = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nidn_nim, MIN(name) as name FROM users WHERE nidn_nim IS NOT NULL AND nidn_nim != "" GROUP BY nidn_nim) u2', 'u2.nidn_nim = p.pembimbing_2', 'left');
         $this->db->where_in('p.nim', $nims);
         $query = $this->db->get();
         $result = $query ? $query->result_array() : array();
@@ -574,12 +606,12 @@ class KoordinatorTA_model extends CI_Model {
             r.nama_ruangan as detail_nama_ruangan
         ');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
-        $this->db->join('dosen_wali dp1', 'dp1.nip = p.penguji_1', 'left');
-        $this->db->join('dosen_wali dp2', 'dp2.nip = p.penguji_2', 'left');
-        $this->db->join('ruangan r', 'r.nama_ruangan = p.ruangan_sidang OR r.kode_ruangan = p.ruangan_sidang', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(email) as email, MIN(no_hp) as no_hp FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dp1', 'dp1.nip = p.penguji_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dp2', 'dp2.nip = p.penguji_2', 'left');
+        $this->db->join('(SELECT nama_ruangan, MIN(kode_ruangan) as kode_ruangan FROM ruangan GROUP BY nama_ruangan) r', 'r.nama_ruangan = p.ruangan_sidang OR r.kode_ruangan = p.ruangan_sidang', 'left');
         
         // Hanya mahasiswa yang telah disetujui pendaftarannya oleh Koordinator TA & memiliki Dosen Pembimbing lengkap
         $this->db->where('p.status_approval_koor', 'Approved');
@@ -896,6 +928,9 @@ class KoordinatorTA_model extends CI_Model {
             p.status_approval_koor, p.status_approval_kk, p.current_stage,
             p.peminatan, p.nilai_akhir_sidang, p.grade_sidang, p.status_kelulusan_sidang,
             p.detail_penilaian_sidang, p.tgl_penilaian_sidang,
+            COALESCE(p.status_publish_sidang, "Draft") as status_publish_sidang,
+            p.tgl_publish_sidang,
+            COALESCE(p.versi_penilaian, 1) as versi_penilaian,
             dw1.nama_dosen as nama_pembimbing_1,
             dw2.nama_dosen as nama_pembimbing_2,
             dp1.nama_dosen as nama_penguji_1,
@@ -907,13 +942,13 @@ class KoordinatorTA_model extends CI_Model {
             ps.status as status_verifikasi_sidang
         ');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
-        $this->db->join('dosen_wali dp1', 'dp1.nip = p.penguji_1', 'left');
-        $this->db->join('dosen_wali dp2', 'dp2.nip = p.penguji_2', 'left');
-        $this->db->join('ruangan r', 'r.nama_ruangan = p.ruangan_sidang OR r.kode_ruangan = p.ruangan_sidang', 'left');
-        $this->db->join('ta_pendaftaran_sidang ps', 'ps.nim = p.nim', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(prodi) as prodi, MIN(email) as email, MIN(no_hp) as no_hp FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dp1', 'dp1.nip = p.penguji_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dp2', 'dp2.nip = p.penguji_2', 'left');
+        $this->db->join('(SELECT nama_ruangan, MIN(kode_ruangan) as kode_ruangan, MIN(lokasi) as lokasi FROM ruangan GROUP BY nama_ruangan) r', 'r.nama_ruangan = p.ruangan_sidang OR r.kode_ruangan = p.ruangan_sidang', 'left');
+        $this->db->join('(SELECT nim, MIN(id) as id, MIN(status) as status FROM ta_pendaftaran_sidang GROUP BY nim) ps', 'ps.nim = p.nim', 'left');
         
         // Mahasiswa yang telah disetujui Koordinator TA
         $this->db->where('p.status_approval_koor', 'Approved');
@@ -1261,8 +1296,8 @@ class KoordinatorTA_model extends CI_Model {
     // FITUR REVISI: PENILAIAN AKHIR SIDANG TA BERDASARKAN PRODI & PEMINATAN
     // =========================================================
 
-    // Simpan Penilaian Akhir Sidang TA
-    public function simpan_penilaian_sidang_ajax($nim, $prodi, $peminatan, $nilai_akhir, $grade, $status_kelulusan, $detail_penilaian = array(), $catatan = '') {
+    // Simpan Penilaian Akhir Sidang TA dengan Versi History & Snapshot Kriteria Mandiri
+    public function simpan_penilaian_sidang_ajax($nim, $prodi, $peminatan, $nilai_akhir, $grade, $status_kelulusan, $detail_penilaian = array(), $catatan = '', $status_publish = 'Draft', $tgl_publish = null, $tahun_akademik = null) {
         try {
             $this->_ensure_columns_exist();
 
@@ -1279,7 +1314,69 @@ class KoordinatorTA_model extends CI_Model {
                 return array('status' => false, 'message' => 'Data pendaftaran tugas akhir mahasiswa tidak ditemukan.');
             }
 
-            $detailJson = is_array($detail_penilaian) ? json_encode($detail_penilaian) : $detail_penilaian;
+            // Tentukan tahun akademik aktif jika kosong (contoh: 2026/2027)
+            if (empty($tahun_akademik)) {
+                $curYear = (int)date('Y');
+                $curMonth = (int)date('n');
+                $tahun_akademik = ($curMonth >= 8) ? "{$curYear}/" . ($curYear + 1) : ($curYear - 1) . "/{$curYear}";
+            }
+
+            // Hitung nomor versi penilaian berikutnya
+            $currVer = 1;
+            if ($this->db->table_exists('history_penilaian_sidang')) {
+                $lastLog = $this->db->select_max('versi')
+                                    ->where('nim', $nim)
+                                    ->get('history_penilaian_sidang')
+                                    ->row_array();
+                if (!empty($lastLog['versi'])) {
+                    $currVer = (int)$lastLog['versi'] + 1;
+                }
+            }
+
+            // Format tanggal publish
+            $nowStr = date('Y-m-d H:i:s');
+            if ($status_publish === 'Published' && empty($tgl_publish)) {
+                $tgl_publish = $nowStr;
+            } elseif ($status_publish === 'Draft') {
+                $tgl_publish = null;
+            }
+
+            // Normalisasi data detail kriteria menjadi snapshot mandiri
+            $criteriaList = array();
+            if (is_array($detail_penilaian)) {
+                if (isset($detail_penilaian['criteria']) && is_array($detail_penilaian['criteria'])) {
+                    $criteriaList = $detail_penilaian['criteria'];
+                } elseif (isset($detail_penilaian[0]) && is_array($detail_penilaian[0])) {
+                    $criteriaList = $detail_penilaian;
+                }
+            } elseif (is_string($detail_penilaian)) {
+                $dec = json_decode($detail_penilaian, true);
+                if (is_array($dec)) {
+                    if (isset($dec['criteria']) && is_array($dec['criteria'])) {
+                        $criteriaList = $dec['criteria'];
+                    } else {
+                        $criteriaList = $dec;
+                    }
+                }
+            }
+
+            // Snapshot struktur penilaian lengkap
+            $snapshotData = array(
+                'version'           => $currVer,
+                'prodi'             => $prodi,
+                'peminatan'         => $peminatan,
+                'tahun_akademik'    => $tahun_akademik,
+                'calculated_score'  => is_numeric($nilai_akhir) ? floatval($nilai_akhir) : 0,
+                'grade'             => !empty($grade) ? $grade : '-',
+                'status_kelulusan'  => !empty($status_kelulusan) ? $status_kelulusan : 'Lulus',
+                'status_publish'    => $status_publish,
+                'tgl_publish'       => $tgl_publish,
+                'catatan'           => $catatan,
+                'assessed_at'       => $nowStr,
+                'criteria'          => $criteriaList
+            );
+
+            $detailJson = json_encode($snapshotData, JSON_UNESCAPED_UNICODE);
 
             $updateData = array(
                 'peminatan'               => !empty($peminatan) ? $peminatan : ($exist['peminatan'] ?? 'Multimedia'),
@@ -1287,7 +1384,10 @@ class KoordinatorTA_model extends CI_Model {
                 'grade_sidang'            => !empty($grade) ? $grade : null,
                 'status_kelulusan_sidang' => !empty($status_kelulusan) ? $status_kelulusan : 'Lulus',
                 'detail_penilaian_sidang' => $detailJson,
-                'tgl_penilaian_sidang'    => date('Y-m-d H:i:s')
+                'tgl_penilaian_sidang'    => $nowStr,
+                'status_publish_sidang'   => $status_publish,
+                'tgl_publish_sidang'      => $tgl_publish,
+                'versi_penilaian'         => $currVer
             );
 
             if (!empty($catatan)) {
@@ -1298,9 +1398,37 @@ class KoordinatorTA_model extends CI_Model {
             $ok = $this->db->update('pendaftaran_ta', $updateData);
 
             if ($ok) {
-                // Ambil data mahasiswa untuk logging
+                // Ambil data nama mahasiswa
                 $mhs = $this->db->where('nim', $nim)->get('mahasiswa')->row_array();
                 $namaMhs = $mhs ? trim(($mhs['nama_depan'] ?? '') . ' ' . ($mhs['nama_belakang'] ?? '')) : "Mahasiswa {$nim}";
+
+                // Catat ke tabel riwayat khusus history_penilaian_sidang
+                $actorNip = $this->session->userdata('nip') ?: '19800202002';
+                $aksiLabel = ($currVer > 1) ? "Revisi Penilaian (Versi {$currVer})" : "Input Penilaian Awal";
+                if ($status_publish === 'Republished') {
+                    $aksiLabel = "Republish Penilaian (Versi {$currVer})";
+                }
+
+                if ($this->db->table_exists('history_penilaian_sidang')) {
+                    $this->db->insert('history_penilaian_sidang', array(
+                        'nim'              => $nim,
+                        'nama_mahasiswa'   => $namaMhs,
+                        'tahun_akademik'   => $tahun_akademik,
+                        'versi'            => $currVer,
+                        'prodi'            => $prodi,
+                        'peminatan'        => $peminatan,
+                        'nilai_akhir'      => is_numeric($nilai_akhir) ? floatval($nilai_akhir) : null,
+                        'grade'            => $grade,
+                        'status_kelulusan' => $status_kelulusan,
+                        'detail_penilaian' => $detailJson,
+                        'status_publish'   => $status_publish,
+                        'tgl_publish'      => $tgl_publish,
+                        'catatan'          => $catatan,
+                        'aksi'             => $aksiLabel,
+                        'actor_nip'        => $actorNip,
+                        'created_at'       => $nowStr
+                    ));
+                }
 
                 // Rekam ke tabel riwayat histori terpadu
                 try {
@@ -1311,8 +1439,8 @@ class KoordinatorTA_model extends CI_Model {
                         $exist['penguji_2'] ?? null,
                         $exist['penguji_1'] ?? null,
                         $exist['penguji_2'] ?? null,
-                        'Penilaian Sidang TA',
-                        "Nilai Akhir: {$nilai_akhir} (Grade: {$grade}) - Status: {$status_kelulusan} [Prodi: {$prodi}, Peminatan: {$peminatan}]" . (!empty($catatan) ? " | Catatan: {$catatan}" : "")
+                        $aksiLabel,
+                        "Nilai Akhir: {$nilai_akhir} (Grade: {$grade}) - Status: {$status_kelulusan} [Prodi: {$prodi}, Peminatan: {$peminatan}, Publikasi: {$status_publish}]" . (!empty($catatan) ? " | Catatan: {$catatan}" : "")
                     );
                 } catch (\Throwable $thLog) {
                     log_message('error', 'Logging history error: ' . $thLog->getMessage());
@@ -1320,13 +1448,17 @@ class KoordinatorTA_model extends CI_Model {
 
                 return array(
                     'status'  => true,
-                    'message' => "Penilaian Akhir Sidang untuk {$namaMhs} ({$nim}) berhasil disimpan!",
+                    'message' => "Penilaian Akhir Sidang untuk {$namaMhs} ({$nim}) berhasil disimpan (Versi {$currVer})!",
                     'data'    => array(
-                        'nim'              => $nim,
-                        'peminatan'        => $updateData['peminatan'],
-                        'nilai_akhir'      => $updateData['nilai_akhir_sidang'],
-                        'grade'            => $updateData['grade_sidang'],
-                        'status_kelulusan' => $updateData['status_kelulusan_sidang']
+                        'nim'                   => $nim,
+                        'versi'                 => $currVer,
+                        'peminatan'             => $updateData['peminatan'],
+                        'nilai_akhir'           => $updateData['nilai_akhir_sidang'],
+                        'grade'                 => $updateData['grade_sidang'],
+                        'status_kelulusan'      => $updateData['status_kelulusan_sidang'],
+                        'status_publish'        => $status_publish,
+                        'tgl_publish'           => $tgl_publish,
+                        'tahun_akademik'        => $tahun_akademik
                     )
                 );
             } else {
@@ -1339,7 +1471,94 @@ class KoordinatorTA_model extends CI_Model {
         }
     }
 
-    // Ambil Detail Penilaian Sidang Mahasiswa
+    // Ambil Riwayat Versi Penilaian Mahasiswa
+    public function get_history_penilaian_sidang($nim) {
+        if (!$this->db->table_exists('history_penilaian_sidang')) {
+            $this->_ensure_columns_exist();
+            return array();
+        }
+
+        $rows = $this->db->where('nim', $nim)
+                         ->order_by('versi', 'DESC')
+                         ->order_by('created_at', 'DESC')
+                         ->get('history_penilaian_sidang')
+                         ->result_array();
+
+        foreach ($rows as &$row) {
+            if (!empty($row['detail_penilaian'])) {
+                $row['detail_parsed'] = json_decode($row['detail_penilaian'], true);
+            } else {
+                $row['detail_parsed'] = null;
+            }
+        }
+
+        return $rows;
+    }
+
+    // Publish / Republish / Set Jadwal Publikasi Nilai Sidang
+    public function publish_penilaian_sidang_ajax($nim, $status_publish = 'Published', $tgl_publish = null, $catatan = '') {
+        if (!$this->db->table_exists('pendaftaran_ta')) {
+            return array('status' => false, 'message' => 'Tabel pendaftaran_ta tidak ditemukan.');
+        }
+
+        $exist = $this->db->where('nim', $nim)->get('pendaftaran_ta')->row_array();
+        if (!$exist) {
+            return array('status' => false, 'message' => 'Data mahasiswa tidak ditemukan.');
+        }
+
+        if (empty($exist['nilai_akhir_sidang']) && $status_publish !== 'Draft') {
+            return array('status' => false, 'message' => 'Mahasiswa belum memiliki nilai sidang untuk dipublikasikan.');
+        }
+
+        $nowStr = date('Y-m-d H:i:s');
+        if ($status_publish === 'Published' && empty($tgl_publish)) {
+            $tgl_publish = $nowStr;
+        } elseif ($status_publish === 'Draft') {
+            $tgl_publish = null;
+        }
+
+        $updateData = array(
+            'status_publish_sidang' => $status_publish,
+            'tgl_publish_sidang'    => $tgl_publish,
+            'updated_at'            => $nowStr
+        );
+
+        $this->db->where('nim', $nim);
+        $ok = $this->db->update('pendaftaran_ta', $updateData);
+
+        if ($ok) {
+            // Update juga snapshot di history jika ada
+            if ($this->db->table_exists('history_penilaian_sidang')) {
+                $actorNip = $this->session->userdata('nip') ?: '19800202002';
+                $aksiStr = ($status_publish === 'Republished') ? 'Republish Nilai' : ($status_publish === 'Published' ? 'Publish Nilai' : 'Unpublish (Draft)');
+                
+                $this->record_history_ta(
+                    'Sidang TA',
+                    $nim,
+                    $exist['penguji_1'] ?? null,
+                    $exist['penguji_2'] ?? null,
+                    $exist['penguji_1'] ?? null,
+                    $exist['penguji_2'] ?? null,
+                    $aksiStr,
+                    "Status publikasi diubah menjadi {$status_publish} (Jadwal: " . ($tgl_publish ?: 'Draft') . ")" . (!empty($catatan) ? " | {$catatan}" : "")
+                );
+            }
+
+            return array(
+                'status'  => true,
+                'message' => "Status publikasi nilai berhasil diperbarui menjadi {$status_publish}!",
+                'data'    => array(
+                    'nim'            => $nim,
+                    'status_publish' => $status_publish,
+                    'tgl_publish'    => $tgl_publish
+                )
+            );
+        }
+
+        return array('status' => false, 'message' => 'Gagal memperbarui status publikasi.');
+    }
+
+    // Ambil Detail Penilaian Sidang Mahasiswa Lengkap dengan Snapshot & Riwayat Versi
     public function get_detail_penilaian_sidang($nim) {
         if (!$this->db->table_exists('pendaftaran_ta')) return null;
 
@@ -1348,16 +1567,19 @@ class KoordinatorTA_model extends CI_Model {
             p.tgl_sidang, p.jam_mulai_sidang, p.jam_selesai_sidang, p.ruangan_sidang,
             p.peminatan, p.nilai_akhir_sidang, p.grade_sidang, p.status_kelulusan_sidang,
             p.detail_penilaian_sidang, p.tgl_penilaian_sidang, p.catatan_koor,
+            COALESCE(p.status_publish_sidang, "Draft") as status_publish_sidang,
+            p.tgl_publish_sidang,
+            COALESCE(p.versi_penilaian, 1) as versi_penilaian,
             m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as prodi_mhs, m.prodi as master_prodi,
             dw1.nama_dosen as nama_pembimbing_1, dw2.nama_dosen as nama_pembimbing_2,
             dp1.nama_dosen as nama_penguji_1, dp2.nama_dosen as nama_penguji_2
         ');
         $this->db->from('pendaftaran_ta p');
-        $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        $this->db->join('dosen_wali dw1', 'dw1.nip = p.pembimbing_1', 'left');
-        $this->db->join('dosen_wali dw2', 'dw2.nip = p.pembimbing_2', 'left');
-        $this->db->join('dosen_wali dp1', 'dp1.nip = p.penguji_1', 'left');
-        $this->db->join('dosen_wali dp2', 'dp2.nip = p.penguji_2', 'left');
+        $this->db->join('(SELECT nim, MIN(nama_depan) as nama_depan, MIN(nama_belakang) as nama_belakang, MIN(konsentrasi_dkv) as konsentrasi_dkv, MIN(prodi) as prodi FROM mahasiswa GROUP BY nim) m', 'm.nim = p.nim', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw1', 'dw1.nip = p.pembimbing_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dw2', 'dw2.nip = p.pembimbing_2', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dp1', 'dp1.nip = p.penguji_1', 'left');
+        $this->db->join('(SELECT nip, MIN(nama_dosen) as nama_dosen FROM dosen_wali GROUP BY nip) dp2', 'dp2.nip = p.penguji_2', 'left');
         $this->db->where('p.nim', $nim);
 
         $row = $this->db->get()->row_array();
@@ -1367,10 +1589,14 @@ class KoordinatorTA_model extends CI_Model {
         $row['prodi'] = !empty($row['prodi_mhs']) ? $row['prodi_mhs'] : (!empty($row['master_prodi']) ? $row['master_prodi'] : 'Desain Komunikasi Visual');
 
         if (!empty($row['detail_penilaian_sidang']) && is_string($row['detail_penilaian_sidang'])) {
-            $row['detail_penilaian_parsed'] = json_decode($row['detail_penilaian_sidang'], true);
+            $parsed = json_decode($row['detail_penilaian_sidang'], true);
+            $row['detail_penilaian_parsed'] = $parsed;
         } else {
             $row['detail_penilaian_parsed'] = null;
         }
+
+        // Ambil riwayat versi terdahulu
+        $row['history_versions'] = $this->get_history_penilaian_sidang($nim);
 
         return $row;
     }

@@ -42,6 +42,12 @@
       <img src="<?= base_url('assets/images/logo-dummy.webp'); ?>" alt="Logo IFIK" class="hero-logo-img">
       <h1 class="hero-title">Masuk dengan<br>Email Tel-U.</h1>
       <p class="hero-sub">Gunakan akun email resmi <span class="hero-highlight">@telkomuniversity.ac.id</span> atau <span class="hero-highlight">@student.telkomuniversity.ac.id</span> untuk mengakses layanan portal IFIK.</p>
+      
+      <!-- Pesan Informasi LAA -->
+      <div class="hero-laa-notice">
+        <svg class="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Belum memiliki akun? Silakan hubungi <strong>LAA</strong> untuk digenerate akun.</span>
+      </div>
     </div>
 
     <!-- RIGHT — HANGING CARD WITH ROPE -->

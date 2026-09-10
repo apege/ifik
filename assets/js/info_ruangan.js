@@ -134,13 +134,19 @@
     // Mapping status ke warna dan label singkat
     function getStatusStyle(status) {
         const s = (status || '').toLowerCase();
-        if (s === 'pending') {
+        if (s === 'pending' || s === 'menunggu persetujuan') {
             return {
                 bg: '#f59e0b', border: '#d97706',
                 badgeBg: '#fffbeb', badgeColor: '#b45309', dot: '#f59e0b',
                 label: 'Menunggu Persetujuan'
             };
-        } else if (s.includes('ka. ur')) {
+        } else if (s.includes('ditolak') || s.includes('reject')) {
+            return {
+                bg: '#ef4444', border: '#dc2626',
+                badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444',
+                label: 'Ditolak'
+            };
+        } else if (s.includes('ka. ur') || s.includes('kaur')) {
             return {
                 bg: '#10b981', border: '#059669',
                 badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#22c55e',
@@ -163,12 +169,6 @@
                 bg: '#10b981', border: '#059669',
                 badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#22c55e',
                 label: 'Disetujui'
-            };
-        } else if (s === 'ditolak') {
-            return {
-                bg: '#ef4444', border: '#dc2626',
-                badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444',
-                label: 'Ditolak'
             };
         } else if (s === 'selesai') {
             return {
@@ -299,42 +299,6 @@
             alasBox.style.display = 'none';
         }
 
-        // Role-based Approval & Delete Action Panels
-        const roleId = parseInt(window.userRoleId);
-        const approvePanel = document.getElementById('approvalActionPanel');
-        const deletePanel = document.getElementById('deleteActionPanel');
-        const rejectBox = document.getElementById('rejectReasonBox');
-        if (rejectBox) rejectBox.style.display = 'none';
-
-        const isAuthorized = [1, 2, 3].includes(roleId);
-        const statusLower = (booking.status || '').toLowerCase();
-
-        // Status yang bisa diapprove:
-        // 1. Pending (untuk Admin, Laboran, Ka. Ur)
-        // 2. Disetujui Laboran (bisa di-approve / difinalisasi oleh Ka. Ur dan Admin)
-        const canApprove = (
-            statusLower === 'pending' ||
-            ((roleId === 3 || roleId === 1) && statusLower.includes('laboran'))
-        );
-
-        if (isAuthorized && canApprove) {
-            let roleName = 'Admin';
-            if (roleId === 3) roleName = 'Ka. Ur';
-            else if (roleId === 2) roleName = 'Laboran';
-
-            document.getElementById('approvalRoleLabel').innerText = roleName;
-            approvePanel.style.display = 'block';
-        } else {
-            approvePanel.style.display = 'none';
-        }
-
-        // Tampilkan tombol Hapus Jadwal untuk pengguna berwenang (Role 1, 2, 3)
-        if (isAuthorized && deletePanel) {
-            deletePanel.style.display = 'block';
-        } else if (deletePanel) {
-            deletePanel.style.display = 'none';
-        }
-
         const modal = document.getElementById('detailBookingModal');
         if (modal && modal.parentNode !== document.body) {
             document.body.appendChild(modal);
@@ -342,143 +306,9 @@
         if (modal) modal.classList.add('show');
     }
 
-
     function closeDetailBookingModal() {
-        document.getElementById('detailBookingModal').classList.remove('show');
-    }
-
-    function approveBookingAction() {
-        const id = document.getElementById('detailBookingId').value;
-        if (!id) return;
-
-        Swal.fire({
-            title: 'Setujui Peminjaman',
-            text: 'Apakah Anda yakin ingin menyetujui peminjaman ini?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#16a34a',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'Ya, Setujui',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const url = (window.approveBookingUrl || window.location.origin + '/dashboard/approve_booking') + '/' + id;
-
-                fetch(url, { method: 'POST' })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            title: 'Disetujui!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonColor: '#16a34a'
-                        });
-                        closeDetailBookingModal();
-                        reloadBookingData();
-                    } else {
-                        Swal.fire({
-                            title: 'Gagal',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonColor: '#dc2626'
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire('Error', 'Terjadi kesalahan pada server', 'error');
-                });
-            }
-        });
-    }
-
-    function toggleRejectInput() {
-        const box = document.getElementById('rejectReasonBox');
-        box.style.display = (box.style.display === 'none') ? 'block' : 'none';
-    }
-
-    function rejectBookingAction() {
-        const id = document.getElementById('detailBookingId').value;
-        const alasan = document.getElementById('rejectReasonInput').value;
-        if (!id) return;
-
-        const formData = new FormData();
-        formData.append('alasan_penolakan', alasan);
-
-        const url = (window.rejectBookingUrl || window.location.origin + '/dashboard/reject_booking') + '/' + id;
-
-        fetch(url, { method: 'POST', body: formData })
-        .then(r => r.json())
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    title: 'Ditolak',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonColor: '#dc2626'
-                });
-                closeDetailBookingModal();
-                reloadBookingData();
-            } else {
-                Swal.fire({
-                    title: 'Gagal',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonColor: '#dc2626'
-                });
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            Swal.fire('Error', 'Terjadi kesalahan pada server', 'error');
-        });
-    }
-
-    function deleteBookingAction() {
-        const id = document.getElementById('detailBookingId').value;
-        if (!id) return;
-
-        Swal.fire({
-            title: 'Hapus Jadwal',
-            text: 'Apakah Anda yakin ingin menghapus jadwal peminjaman ini secara permanen?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#94a3b8',
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const url = (window.deleteBookingUrl || window.location.origin + '/dashboard/delete_booking') + '/' + id;
-
-                fetch(url, { method: 'POST' })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({
-                            title: 'Terhapus!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonColor: '#7c3aed'
-                        });
-                        closeDetailBookingModal();
-                        reloadBookingData();
-                    } else {
-                        Swal.fire({
-                            title: 'Gagal',
-                            text: data.message,
-                            icon: 'error',
-                            confirmButtonColor: '#dc2626'
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire('Error', 'Terjadi kesalahan pada server', 'error');
-                });
-            }
-        });
+        const modal = document.getElementById('detailBookingModal');
+        if (modal) modal.classList.remove('show');
     }
 
 

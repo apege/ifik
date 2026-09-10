@@ -304,6 +304,9 @@
 </head>
 <body>
 
+    <!-- Auto Role-Aware Curved Animated Sidebar -->
+    <?php $this->load->view('components/curved_sidebar'); ?>
+
     <div class="booking-page-container">
         <div class="page-topbar">
             <div>

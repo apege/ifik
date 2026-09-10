@@ -9,8 +9,9 @@ class AdminHeader extends CI_Controller {
         $this->load->model('Header_model');
         $this->load->helper(array('form', 'url'));
 
-        // Pastikan hanya admin (role_id 1) yang bisa akses
-        if (!$this->session->userdata('logged_in') || $this->session->userdata('role_id') != 1) {
+        // Pastikan hanya admin (role_id 1) atau laboran (role_id 2) yang bisa akses
+        $role_id = (int)$this->session->userdata('role_id');
+        if (!$this->session->userdata('logged_in') || ($role_id !== 1 && $role_id !== 2)) {
             $this->session->set_flashdata('error', 'Akses ditolak. Anda tidak memiliki izin untuk halaman ini.');
             redirect('login');
         }

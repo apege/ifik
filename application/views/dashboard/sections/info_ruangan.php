@@ -1,5 +1,7 @@
 <!-- Sesi 2: Informasi Ruangan -->
-<div class="section-wrapper" id="section-about">
+<div class="section-wrapper" id="section-about" data-section="info_ruangan">
+    <span id="info_ruangan" style="position: absolute; top: 0; left: 0; pointer-events: none;"></span>
+    <span id="ruangan" style="position: absolute; top: 0; left: 0; pointer-events: none;"></span>
     <div class="about-container" id="ruanganCard">
         
         <!-- Tombol Buka Kalender Penuh (Ke Page Terpisah) -->
@@ -141,7 +143,9 @@
 
                             if ($s === 'Pending') {
                                 $dot = '#f59e0b'; $bg = '#fffbeb'; $color = '#b45309'; $label = 'Menunggu';
-                            } elseif (strpos($s, 'Ka. Ur') !== false) {
+                            } elseif (stripos($s, 'Ditolak') !== false || stripos($s, 'Reject') !== false) {
+                                $dot = '#ef4444'; $bg = '#fef2f2'; $color = '#991b1b'; $label = 'Ditolak';
+                            } elseif (strpos($s, 'Ka. Ur') !== false || stripos($s, 'Kaur') !== false) {
                                 $dot = '#22c55e'; $bg = '#f0fdf4'; $color = '#166534'; $label = 'Disetujui Ka. Ur';
                             } elseif (strpos($s, 'Laboran') !== false) {
                                 $dot = '#3b82f6'; $bg = '#eff6ff'; $color = '#1d4ed8'; $label = 'Disetujui Laboran';
@@ -242,38 +246,6 @@
                         <strong style="color: #991b1b;">Alasan Penolakan:</strong> <span id="detailAlasanPenolakan" style="color: #7f1d1d;"></span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Panel Aksi Approval (Hanya jika status Pending & untuk Admin / Laboran / Ka. Ur) -->
-            <div id="approvalActionPanel" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 6px;">
-                    ⚡ Persetujuan Peminjaman (<span id="approvalRoleLabel"></span>)
-                </h4>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="approveBookingAction()" style="flex: 1; background: #16a34a; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Setujui
-                    </button>
-                    <button type="button" onclick="toggleRejectInput()" style="flex: 1; background: #dc2626; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        Tolak
-                    </button>
-                </div>
-
-                <!-- Input Alasan Penolakan -->
-                <div id="rejectReasonBox" style="display: none; margin-top: 12px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
-                    <label style="font-size: 0.8rem; font-weight: 600; color: #991b1b; display: block; margin-bottom: 6px;">Alasan Penolakan (Opsional):</label>
-                    <textarea id="rejectReasonInput" rows="2" class="form-control" placeholder="Tuliskan alasan penolakan..." style="font-size: 0.85rem; margin-bottom: 8px; border-color: #fca5a5; width: 100%; box-sizing: border-box;"></textarea>
-                    <button type="button" onclick="rejectBookingAction()" style="width: 100%; background: #991b1b; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">Konfirmasi Penolakan</button>
-                </div>
-            </div>
-
-            <!-- Panel Aksi Hapus Jadwal (Khusus Role 1: Admin, 2: Laboran, 3: Ka. Ur) -->
-            <div id="deleteActionPanel" style="display: none; margin-top: 8px;">
-                <button type="button" onclick="deleteBookingAction()" style="width: 100%; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    Hapus Jadwal Peminjaman
-                </button>
             </div>
         </div>
     </div>

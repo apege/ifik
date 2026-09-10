@@ -745,6 +745,46 @@
     <script src="<?= base_url('assets/js/info_ruangan.js?v=' . filemtime(FCPATH . 'assets/js/info_ruangan.js')) ?>"></script>
 
     <script>
+        // Fungsi Scroll Dinamis ke Sesi Spesifik (info_ruangan, berita, virtual_tour, footer, dll)
+        window.scrollToSection = function(targetKey) {
+            const vh = window.innerHeight;
+            const container = document.querySelector('.dashboard-container');
+            if (!container) return;
+
+            let targetScroll = 0;
+            const key = (targetKey || '').toString().toLowerCase().replace(/^#/, '');
+
+            if (key === 'info_ruangan' || key === 'ruangan' || key === 'section-about') {
+                const el = document.getElementById('section-about') || document.getElementById('info_ruangan') || document.getElementById('ruangan');
+                targetScroll = el ? el.offsetTop : vh * 1;
+            } else if (key === 'berita' || key === 'section-contact' || key === 'section-berita') {
+                const el = document.getElementById('section-contact') || document.getElementById('section-berita');
+                targetScroll = el ? el.offsetTop : vh * 2;
+            } else if (key === 'virtual_tour' || key === 'virtual-tour' || key === 'section-virtual-tour') {
+                const el = document.getElementById('section-virtual-tour');
+                targetScroll = el ? el.offsetTop : vh * 3;
+            } else if (key === 'footer' || key === 'section-footer') {
+                const el = document.getElementById('section-footer');
+                targetScroll = el ? el.offsetTop : vh * 4;
+            } else if (key === 'dashboard' || key === 'carousel' || key === 'section-carousel' || key === '0' || key === '') {
+                targetScroll = 0;
+            } else {
+                const el = document.getElementById(key);
+                if (el) {
+                    targetScroll = el.offsetTop;
+                }
+            }
+
+            if (window.lenis) {
+                window.lenis.scrollTo(targetScroll, { 
+                    duration: 1.5, 
+                    easing: (t) => 1 - Math.pow(1 - t, 4) 
+                });
+            } else {
+                container.scrollTo({ top: targetScroll, behavior: 'smooth' });
+            }
+        };
+
         // Fungsi Scroll Dinamis ke Sesi Berikutnya
         function scrollToNextSection() {
             const vh = window.innerHeight;
@@ -773,6 +813,19 @@
                 container.scrollTo({ top: targetScroll, behavior: 'smooth' });
             }
         }
+
+        // Auto-Scroll saat halaman dibuka dengan URL Hash (misal: /dashboard#info_ruangan)
+        function handleUrlHashScroll() {
+            if (window.location.hash) {
+                const hash = window.location.hash;
+                setTimeout(() => {
+                    window.scrollToSection(hash);
+                }, 400);
+            }
+        }
+
+        window.addEventListener('load', handleUrlHashScroll);
+        window.addEventListener('hashchange', handleUrlHashScroll);
 
         // Update arah panah (ke atas/bawah) secara realtime saat di-scroll
         document.addEventListener('DOMContentLoaded', () => {

@@ -488,16 +488,15 @@
             will-change: transform, filter, opacity;
         }
     </style>
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased pb-16">
+<body class="bg-slate-50 text-slate-800 antialiased pb-16 pl-14">
+
+    <!-- Auto Role-Aware Curved Animated Sidebar -->
+    <?php $this->load->view('components/curved_sidebar'); ?>
 
     <!-- Top Navigation Header -->
     <header class="sticky top-0 z-40 glass-header px-6 py-4 mb-8">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <a href="<?= site_url('dashboard') ?>" class="w-10 h-10 rounded-xl bg-orange-100 text-brand-600 flex items-center justify-center hover:bg-brand-600 hover:text-white transition-all shadow-sm">
-                    <i class="fa-solid fa-arrow-left text-lg"></i>
-                </a>
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-xl font-bold text-slate-900 tracking-tight">Import Email & Dispatcher Token</h1>
@@ -2357,11 +2356,8 @@
                     `;
                 } else if (acc.token && acc.token.length > 0) {
                     tokenHtml = `
-                        <div class="inline-flex items-center justify-between w-[118px] px-2 py-1 bg-slate-50 hover:bg-orange-50/50 border border-slate-200/80 hover:border-orange-300/80 rounded-lg text-xs font-mono font-medium text-slate-700 transition-all mx-auto group">
-                            <span class="tracking-wide cursor-pointer font-bold truncate max-w-[75px]" onclick="copyTokenByUserId('${acc.id}')" title="Klik untuk Salin Token: ${acc.token}">${acc.token}</span>
-                            <button id="copy-btn-${acc.id}" onclick="copyTokenByUserId('${acc.id}')" class="text-slate-400 group-hover:text-brand-600 hover:text-brand-700 transition-colors p-0.5 cursor-pointer" title="Salin Token">
-                                <i class="fa-regular fa-copy text-xs"></i>
-                            </button>
+                        <div class="inline-flex items-center justify-center w-[118px] px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-mono font-medium text-slate-400 mx-auto select-none" title="Token Akses Terenkripsi">
+                            <span class="tracking-widest font-extrabold text-slate-400 text-[11px]">••••••••</span>
                         </div>
                     `;
                 } else {
@@ -3081,7 +3077,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Token Berhasil Dibuat',
-                        html: `Token untuk <b>${acc.name}</b>: <code class="bg-slate-100 px-2 py-1 rounded text-brand-600 font-bold font-mono text-sm">${token}</code>`,
+                        html: `Token akses untuk <b>${acc.name}</b> berhasil digenerate dan tersimpan ke basis data.`,
                         timer: 2000,
                         showConfirmButton: false
                     });
@@ -3248,7 +3244,7 @@
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
-                timer: 2200,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer);
@@ -3258,7 +3254,7 @@
 
             Toast.fire({
                 icon: 'success',
-                title: `Token <span style="font-family:monospace; font-weight:700; color:#ea580c; background:#fff7ed; padding:2px 6px; border-radius:6px; border:1px solid #fed7aa;">${token}</span> berhasil disalin!`
+                title: 'Token akses berhasil disalin ke clipboard!'
             });
         }
 

@@ -1,0 +1,373 @@
+/* =========================================================
+   CURVED ANIMATED SIDEBAR (LEFT-SIDE COMPACT REFINED LAYOUT)
+   ========================================================= */
+
+/* Toggle Button (Fixed at Top Left) */
+.curved-sidebar-toggle-btn {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    right: auto;
+    z-index: 99999;
+    width: 38px;
+    height: 38px;
+    background: #ffffff;
+    border-radius: 11px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.3s ease, background-color 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.curved-sidebar-toggle-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+    background: #f8fafc;
+}
+
+.curved-sidebar-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* 3-Bar Hamburger Morph */
+.curved-sidebar-burger {
+    position: relative;
+    width: 17px;
+    height: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.curved-sidebar-burger span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background: #0f172a;
+    border-radius: 2px;
+    transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.2s ease;
+}
+
+.curved-sidebar-toggle-btn.is-active .curved-sidebar-burger span:nth-child(1) {
+    transform: translateY(5px) rotate(45deg);
+}
+
+.curved-sidebar-toggle-btn.is-active .curved-sidebar-burger span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.curved-sidebar-toggle-btn.is-active .curved-sidebar-burger span:nth-child(3) {
+    transform: translateY(-5px) rotate(-45deg);
+}
+
+/* Backdrop Overlay (Active on Mobile / Semi-overlay on Desktop) */
+.curved-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 99990;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.curved-sidebar-backdrop.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+    /* On desktop, keep page interactive without blocking screen when sidebar is open */
+    .curved-sidebar-backdrop.is-active {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* Sidebar Menu Drawer (Left Side - Compact 290px Width) */
+.curved-sidebar-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+    height: 100vh;
+    height: 100dvh;
+    width: 320px;
+    max-width: 88vw;
+    background: #ffffff;
+    z-index: 99995;
+    transform: translateX(calc(-100% - 90px));
+    transition: transform 0.75s cubic-bezier(0.76, 0, 0.24, 1);
+    box-shadow: 10px 0 32px rgba(15, 23, 42, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: visible;
+}
+
+.curved-sidebar-panel.is-active {
+    transform: translateX(0);
+}
+
+/* Curved Morphing SVG on Right Edge */
+.curved-sidebar-svg {
+    position: absolute;
+    top: 0;
+    right: -69px;
+    left: auto;
+    width: 70px;
+    height: 100%;
+    stroke: none;
+    fill: #ffffff;
+    pointer-events: none;
+    overflow: visible;
+    filter: drop-shadow(4px 0 8px rgba(0, 0, 0, 0.02));
+}
+
+/* Sidebar Inner Scroll Container (Hidden Scrollbar) */
+.curved-sidebar-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 60px 22px 18px 22px;
+    overflow-y: auto;
+    position: relative;
+    z-index: 10;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.curved-sidebar-inner::-webkit-scrollbar {
+    display: none;
+}
+
+/* Navigation Header */
+.curved-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.curved-sidebar-header p {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0;
+}
+
+.curved-sidebar-close-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.curved-sidebar-close-btn:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #ef4444;
+    transform: rotate(90deg) scale(1.05);
+}
+
+/* Nav Link Items */
+.curved-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.curved-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 12px;
+    text-decoration: none;
+    text-transform: none;
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none;
+    transition: all 0.25s ease;
+}
+
+.curved-nav-item:hover {
+    background: rgba(248, 250, 252, 0.85);
+}
+
+.curved-nav-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+}
+
+/* 3D Glossy Claymorphic Icon Styling */
+.curved-nav-3d-wrap {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+    filter: drop-shadow(0 4px 8px rgba(15, 23, 42, 0.09));
+}
+
+.curved-nav-3d-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.curved-nav-item:hover .curved-nav-3d-wrap {
+    transform: translateY(-2px) scale(1.15) rotate(3deg);
+    filter: drop-shadow(0 6px 14px rgba(234, 88, 12, 0.22));
+}
+
+.curved-nav-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.92rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    transition: all 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.curved-nav-item:hover .curved-nav-icon {
+    background: #fff7ed;
+    color: #ea580c;
+    border-color: #fed7aa;
+    transform: translateX(3px) scale(1.06);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);
+}
+
+.curved-nav-index {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #cbd5e1;
+    transition: color 0.35s cubic-bezier(0.76, 0, 0.24, 1), transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.curved-nav-item:hover .curved-nav-index {
+    color: #ea580c;
+    transform: translateX(3px);
+}
+
+.curved-nav-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+/* Kinetic Staggered Letter Wave (Clean Title Case) */
+.curved-nav-heading {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.curved-nav-item:hover .curved-nav-heading {
+    transform: translateX(3px);
+    color: #ea580c;
+}
+
+.curved-nav-word {
+    display: inline-flex;
+    margin-right: 0.28em;
+    white-space: nowrap;
+}
+
+.curved-nav-letter {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
+}
+
+.curved-nav-item:hover .curved-nav-letter {
+    transform: translateX(2px);
+    color: #ea580c;
+}
+
+/* Subheading hint (if present) */
+.curved-nav-subheading {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: none;
+    color: #94a3b8;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Footer Section */
+.curved-sidebar-footer {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid rgba(241, 245, 249, 0.9);
+}
+
+.curved-sidebar-footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #64748b;
+    letter-spacing: -0.01em;
+}
+
+.curved-sidebar-footer-version {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #94a3b8;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    letter-spacing: 0.05em;
+}

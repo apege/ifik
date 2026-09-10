@@ -281,6 +281,12 @@ class Dashboard extends CI_Controller {
         $data['title'] = 'Tentang Fakultas Industri Kreatif';
         $this->load->view('dashboard/about', $data);
     }
+
+    public function sidebar_demo()
+    {
+        $this->load->helper('url');
+        $this->load->view('demo/sidebar');
+    }
 }
 
 

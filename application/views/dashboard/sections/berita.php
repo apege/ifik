@@ -231,11 +231,12 @@
         transform: translateY(-50%);
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
         gap: 12px;
         z-index: 20;
         width: 56px;
+        padding-right: 4px;
     }
 
     .news-arrow-btn {
@@ -283,6 +284,7 @@
         flex-direction: column;
         gap: 8px;
         align-items: center;
+        align-self: center;
         margin: 4px 0;
         transition: opacity 0.3s ease;
     }
@@ -326,6 +328,7 @@
         color: #94a3b8;
         font-weight: 600;
         text-align: center;
+        align-self: center;
         line-height: 1.3;
     }
 
@@ -436,39 +439,79 @@
 
     /* ===== RESPONSIVE ===== */
     /* ===== VIEW ALL BUTTON ===== */
+    /* ===== EXPANDING CIRCULAR VIEW ALL BUTTON ===== */
     .news-view-all-btn {
         position: relative;
-        margin-top: 8px;
+        right: auto;
         bottom: auto;
-        left: auto;
-        transform: none;
+        margin-top: 4px;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 9px 24px;
-        border-radius: 50px;
+        justify-content: flex-start;
+        height: 48px;
+        width: 48px;
+        padding: 0;
+        border-radius: 9999px;
         border: 2px solid #ea580c;
-        background: transparent;
+        background: #ffffff;
         color: #ea580c;
-        font-size: 0.85rem;
+        font-size: 0.84rem;
         font-weight: 700;
         cursor: pointer;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
+        transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.3s ease,
+                    border-color 0.3s ease,
+                    box-shadow 0.3s ease,
+                    transform 0.25s ease;
         z-index: 25;
         white-space: nowrap;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08);
+        flex-shrink: 0;
     }
-    .news-view-all-btn:hover {
-        background: #fff7ed;
-        color: #ea580c;
-        border-color: #f97316;
-        box-shadow: 0 0 22px rgba(234, 88, 12, 0.4), 0 6px 18px rgba(234, 88, 12, 0.2);
+    .news-view-all-btn .btn-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .news-view-all-btn .btn-text-label {
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        transition: max-width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                    opacity 0.25s ease,
+                    padding 0.35s ease;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+    .news-view-all-btn:hover,
+    .news-view-all-btn:focus-visible {
+        width: 155px;
+        background: #ea580c;
+        color: #ffffff;
+        border-color: #ea580c;
+        box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
         transform: translateY(-2px);
+    }
+    .news-view-all-btn:hover .btn-text-label,
+    .news-view-all-btn:focus-visible .btn-text-label {
+        max-width: 100px;
+        opacity: 1;
+        padding-right: 14px;
     }
     .news-view-all-btn svg {
         width: 16px;
         height: 16px;
         flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+    .news-view-all-btn:hover svg {
+        transform: rotate(90deg);
     }
 
     /* ===== MODAL OVERLAY (LIGHT THEME) ===== */
@@ -885,27 +928,185 @@
     }
 
     @media (max-width: 900px) {
-        .news-header h1 { font-size: 1.7rem; }
+        .news-header h1 { font-size: 1.75rem; }
         .news-header p { font-size: 0.88rem; }
-        .news-card { width: 230px; height: 340px; }
-        .news-fan-container { height: 350px; }
+        .news-card {
+            width: 230px;
+            height: 340px;
+            --spread-x: calc(var(--offset) * 75px);
+            --angle-per-card: 8deg;
+        }
+        .news-fan-container { height: 360px; }
         .news-title { font-size: 0.95rem; }
         .news-excerpt { font-size: 0.82rem; -webkit-line-clamp: 2; }
-        .news-modal-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+        #section-contact {
+            height: auto !important;
+            min-height: 100vh;
+            padding-top: 50px !important;
+            padding-bottom: 50px !important;
+            justify-content: flex-start !important;
+        }
+        .news-header {
+            margin-bottom: 8px;
+        }
+        .news-header h1 {
+            font-size: 1.6rem;
+        }
+        .news-header p {
+            font-size: 0.85rem;
+            padding: 0 16px;
+        }
+        .news-fan-container {
+            height: 360px;
+        }
+        .news-card {
+            width: 230px;
+            height: 335px;
+            --spread-x: calc(var(--offset) * 45px);
+            --arc-y: calc(var(--offset) * var(--offset) * 4px);
+            --angle-per-card: 6deg;
+        }
+        .news-card:hover {
+            --hover-shift-x: calc(var(--offset) * 15px);
+            transform: translate(calc(-50% + var(--spread-x) + var(--hover-shift-x)), calc(-50% - 25px)) rotate(0deg) scale(1.03) !important;
+        }
+        .news-card:hover ~ .news-card {
+            transform: translate(calc(-50% + var(--spread-x) + 40px), calc(-50% + var(--arc-y) + 10px)) rotate(calc(var(--angle) + 4deg)) !important;
+        }
+        .news-fan-container:has(.news-card:hover) .news-card:not(:hover):not(.news-card:hover ~ .news-card) {
+            transform: translate(calc(-50% + var(--spread-x) - 40px), calc(-50% + var(--arc-y) + 10px)) rotate(calc(var(--angle) - 4deg)) !important;
+        }
+        /* Mobile horizontal controls */
+        .news-controls {
+            position: relative;
+            right: auto;
+            top: auto;
+            transform: none;
+            flex-direction: row;
+            width: auto;
+            gap: 14px;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            z-index: 20;
+        }
+        .news-arrow-btn {
+            width: 42px;
+            height: 42px;
+            font-size: 1.1rem;
+        }
+        .news-arrow-btn#newsPrevBtn {
+            transform: rotate(-90deg);
+        }
+        .news-arrow-btn#newsNextBtn {
+            transform: rotate(-90deg);
+        }
+        .news-dots {
+            flex-direction: row;
+            gap: 6px;
+            margin: 0 4px;
+        }
+        .news-dot {
+            width: 8px;
+            height: 8px;
+        }
+        .news-dot.active {
+            width: 24px;
+            height: 8px;
+            border-radius: 99px;
+        }
+        .news-view-all-btn {
+            position: relative;
+            right: auto;
+            bottom: auto;
+            margin-top: 12px;
+            margin-bottom: 6px;
+        }
+        .news-dot-fill {
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ea580c, #f97316);
+        }
         .news-modal-header {
             flex-direction: column;
             align-items: stretch;
             gap: 16px;
+            position: relative;
         }
         .news-search-wrapper {
             margin: 0;
             max-width: 100%;
         }
         .news-modal-close {
-            align-self: flex-end;
             position: absolute;
-            top: 24px;
-            right: 24px;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+        .news-modal-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        #newsModal {
+            padding: 32px 16px 40px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        #section-contact {
+            padding-top: 36px !important;
+            padding-bottom: 36px !important;
+        }
+        .news-header h1 {
+            font-size: 1.35rem;
+        }
+        .news-header p {
+            font-size: 0.78rem;
+        }
+        .news-fan-container {
+            height: 330px;
+        }
+        .news-card {
+            width: 215px;
+            height: 315px;
+            border-radius: 18px;
+            --spread-x: calc(var(--offset) * 30px);
+            --arc-y: calc(var(--offset) * var(--offset) * 3px);
+            --angle-per-card: 4deg;
+        }
+        .news-content {
+            padding: 14px 16px;
+        }
+        .news-title {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+        .news-date {
+            font-size: 0.7rem;
+            margin-bottom: 6px;
+        }
+        .news-excerpt {
+            font-size: 0.78rem;
+            -webkit-line-clamp: 2;
+        }
+        .news-view-all-btn {
+            padding: 8px 18px;
+            font-size: 0.8rem;
+        }
+        .news-modal-grid {
+            grid-template-columns: 1fr;
+        }
+        .news-modal-card {
+            height: 280px;
+        }
+        .news-modal-header h2 {
+            font-size: 1.35rem;
         }
     }
 </style>
@@ -932,16 +1133,18 @@
             <div class="news-dots" id="newsDots"></div>
             <span class="news-page-info" id="newsPageInfo"></span>
             <button class="news-arrow-btn" id="newsNextBtn" title="Halaman Berikutnya">&#8595;</button>
+            
+            <!-- Tombol View All (Circular Expanding Button) -->
+            <button class="news-view-all-btn" id="newsViewAllBtn" title="Buka Semua Berita" aria-label="Lihat Semua Berita">
+                <span class="btn-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                </span>
+                <span class="btn-text-label">Semua Berita</span>
+            </button>
         </div>
-
-        <!-- Tombol View All -->
-        <button class="news-view-all-btn" id="newsViewAllBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-            </svg>
-            Lihat Semua Berita
-        </button>
 
     </div>
 </div>
@@ -1222,7 +1425,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateProgressBar(pct) {
         const activeDotFill = dotsEl.querySelector('.news-dot.active .news-dot-fill');
         if (activeDotFill) {
-            activeDotFill.style.height = `${Math.min(100, Math.max(0, pct))}%`;
+            const isMobile = window.innerWidth <= 768;
+            const cappedPct = Math.min(100, Math.max(0, pct));
+            if (isMobile) {
+                activeDotFill.style.width = `${cappedPct}%`;
+                activeDotFill.style.height = '100%';
+            } else {
+                activeDotFill.style.height = `${cappedPct}%`;
+                activeDotFill.style.width = '100%';
+            }
         }
     }
 
@@ -1271,6 +1482,33 @@ document.addEventListener('DOMContentLoaded', () => {
         elapsedMs = 0;
         updateProgressBar(0);
         lastTimestamp = null;
+    }
+
+    // Touch Swipe Support for Mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    container.addEventListener('touchstart', (e) => {
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }
+    }, { passive: true });
+
+    function handleSwipe() {
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0) {
+                if (!nextBtn.disabled) nextBtn.click();
+            } else {
+                if (!prevBtn.disabled) prevBtn.click();
+            }
+        }
     }
 
     // Pause auto-scroll HANYA saat kursor berada langsung di atas kartu (.news-card)
