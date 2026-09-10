@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? '[SIMULASI] Ticketing Admin LAA'; ?> - IFIK</title>
+    <title><?= $title ?? 'Ticketing Admin LAA'; ?> - IFIK</title>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -66,7 +66,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Inbox Tiket Masuk Unit LAA</h1>
-                        <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-extrabold tracking-wider uppercase border border-amber-200">Simulasi</span>
+                        <span class="px-2 py-0.5 rounded-md bg-orange-100 text-orange-800 text-[10px] font-extrabold tracking-wider uppercase border border-orange-200">Panel LAA</span>
                     </div>
                     <p class="text-xs text-slate-500 mt-0.5">Tinjau laporan kendala dari dosen wali & akademik khusus untuk Layanan Akademik.</p>
                 </div>
@@ -75,10 +75,10 @@
             <!-- Quick Action Links -->
             <div class="flex items-center gap-2.5">
                 <a href="<?= site_url('dosen/ticketing/input'); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-xs transition-all">
-                    <i class="bi bi-plus-circle-fill"></i> Test Kirim Tiket Dosen
+                    <i class="bi bi-plus-circle-fill"></i> Kirim Tiket Dosen
                 </a>
                 <a href="<?= site_url('dosen/ticketing/riwayat'); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200">
-                    <i class="bi bi-person-badge"></i> Cek Riwayat Dosen
+                    <i class="bi bi-clock-history"></i> Cek Riwayat Dosen
                 </a>
             </div>
         </div>

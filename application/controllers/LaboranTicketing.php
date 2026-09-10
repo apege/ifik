@@ -135,11 +135,11 @@ class LaboranTicketing extends CI_Controller {
     public function simpan_tanggapan() {
         $id = $this->input->post('ticket_id', true);
         $status = $this->input->post('status', true);
-        $tanggapan = trim($this->input->post('tanggapan', true));
+        $tanggapan = trim($this->input->post('tanggapan', true) ?? '');
 
         // Validasi input
-        if (empty($id) || empty($status) || empty($tanggapan)) {
-            $this->session->set_flashdata('error', 'Harap isi status tiket dan tanggapan dengan lengkap.');
+        if (empty($id) || empty($status)) {
+            $this->session->set_flashdata('error', 'Harap tentukan status tiket.');
             redirect('laboran/respon-ticketing');
             return;
         }
@@ -162,16 +162,26 @@ class LaboranTicketing extends CI_Controller {
         }
 
         $updateData = [
-            'status'        => $status,
-            'tanggapan'     => $tanggapan,
-            'tgl_tanggapan' => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s')
+            'status'     => $status,
+            'updated_at' => date('Y-m-d H:i:s')
         ];
+
+        if ($tanggapan !== '') {
+            $updateData['tanggapan'] = $tanggapan;
+            $updateData['tgl_tanggapan'] = date('Y-m-d H:i:s');
+        } elseif ($status === 'Menunggu') {
+            $updateData['tanggapan'] = null;
+            $updateData['tgl_tanggapan'] = null;
+        }
 
         $this->db->where('id', (int)$id);
         $this->db->update($this->table, $updateData);
 
-        $this->session->set_flashdata('success', "Tiket {$ticket->kode_tiket} berhasil direspon dengan status '{$status}'.");
+        $msg = ($tanggapan !== '')
+            ? "Tiket {$ticket->kode_tiket} berhasil direspon dengan status '{$status}'."
+            : "Status tiket {$ticket->kode_tiket} berhasil diperbarui menjadi '{$status}'.";
+
+        $this->session->set_flashdata('success', $msg);
         redirect('laboran/respon-ticketing');
     }
 

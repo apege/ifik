@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'Inbox Respon Tiket — Laboran'; ?> - IFIK</title>
+    <title><?= $title ?? 'Inbox Respon Tiket Dosen — IFIK Portal'; ?></title>
 
     <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,31 +55,31 @@
 </head>
 <body class="antialiased">
 
-    <!-- Curved Animated Sidebar for Laboran -->
-    <?php $this->load->view('components/curved_sidebar'); ?>
+    <!-- Include Dosen Sidebar -->
+    <?php $this->load->view('partials/dosen_sidebar'); ?>
 
     <!-- Header Navigation -->
     <header class="glass-header sticky top-0 z-30 px-6 py-4 pl-16">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
                 <div class="w-11 h-11 rounded-2xl bg-orange-100 text-brand-600 flex items-center justify-center font-bold text-xl shadow-xs border border-orange-200/50">
-                    <i class="bi bi-tools"></i>
+                    <i class="bi bi-chat-left-text-fill"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Inbox Respon Tiket Laboratorium</h1>
-                        <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-extrabold tracking-wider uppercase border border-blue-200">Panel Laboran</span>
+                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Inbox Respon Tiket Dosen</h1>
+                        <span class="px-2.5 py-0.5 rounded-md bg-orange-100 text-orange-800 text-[10px] font-extrabold tracking-wider uppercase border border-orange-200">Panel Dosen</span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Tinjau & respon laporan kendala khusus unit Laboratorium & Sarana Prasarana.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Tinjau dan respon laporan kendala terkait Dosen Wali, Bimbingan & Akademik.</p>
                 </div>
             </div>
 
             <!-- Quick Action Links -->
             <div class="flex items-center gap-2.5">
-                <a href="<?= site_url('laboran/ticketing/input'); ?>" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-xs transition-all">
+                <a href="<?= site_url('dosen/ticketing/input'); ?>" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-xs transition-all">
                     <i class="bi bi-plus-circle-fill"></i> Buat Tiket Baru
                 </a>
-                <a href="<?= site_url('laboran/ticketing/riwayat'); ?>" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200">
+                <a href="<?= site_url('dosen/ticketing/riwayat'); ?>" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200">
                     <i class="bi bi-clock-history"></i> Riwayat Tiket Saya
                 </a>
             </div>
@@ -111,7 +113,7 @@
         <!-- Stats Overview Cards -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-8">
             <!-- Total -->
-            <a href="<?= site_url('laboran/respon-ticketing?status=all'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'all' ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <a href="<?= site_url('dosen/respon-ticketing?status=all'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'all' ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Masuk</span>
                     <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs"><i class="bi bi-inbox-fill"></i></span>
@@ -120,7 +122,7 @@
             </a>
 
             <!-- Menunggu -->
-            <a href="<?= site_url('laboran/respon-ticketing?status=Menunggu'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Menunggu' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <a href="<?= site_url('dosen/respon-ticketing?status=Menunggu'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Menunggu' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Menunggu</span>
                     <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="bi bi-hourglass-split"></i></span>
@@ -129,7 +131,7 @@
             </a>
 
             <!-- Diproses -->
-            <a href="<?= site_url('laboran/respon-ticketing?status=Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Diproses' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <a href="<?= site_url('dosen/respon-ticketing?status=Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Diproses' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Diproses</span>
                     <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs"><i class="bi bi-gear-fill"></i></span>
@@ -138,7 +140,7 @@
             </a>
 
             <!-- Selesai -->
-            <a href="<?= site_url('laboran/respon-ticketing?status=Selesai'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Selesai' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <a href="<?= site_url('dosen/respon-ticketing?status=Selesai'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Selesai' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Selesai</span>
                     <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="bi bi-check2-circle"></i></span>
@@ -147,7 +149,7 @@
             </a>
 
             <!-- Ditutup -->
-            <a href="<?= site_url('laboran/respon-ticketing?status=Ditutup'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Ditutup' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <a href="<?= site_url('dosen/respon-ticketing?status=Ditutup'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Ditutup' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ditutup</span>
                     <span class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center text-xs"><i class="bi bi-archive-fill"></i></span>
@@ -170,7 +172,7 @@
                 foreach ($statusPills as $stKey => $stLabel):
                     $isActive = ($filterStatus === $stKey);
                 ?>
-                    <a href="<?= site_url('laboran/respon-ticketing?status=' . $stKey . ($search ? '&q=' . urlencode($search) : '')); ?>" 
+                    <a href="<?= site_url('dosen/respon-ticketing?status=' . $stKey . ($search ? '&q=' . urlencode($search) : '')); ?>" 
                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all <?= $isActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-600' ?>">
                         <?= $stLabel; ?>
                     </a>
@@ -178,16 +180,16 @@
             </div>
 
             <!-- Search Form -->
-            <form method="GET" action="<?= site_url('laboran/respon-ticketing'); ?>" class="w-full md:w-72 relative">
+            <form method="GET" action="<?= site_url('dosen/respon-ticketing'); ?>" class="w-full md:w-72 relative">
                 <input type="hidden" name="status" value="<?= htmlspecialchars($filterStatus); ?>">
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 text-xs">
                         <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" name="q" value="<?= htmlspecialchars($search); ?>" placeholder="Cari kode, nama, kendala..." 
+                    <input type="text" name="q" value="<?= htmlspecialchars($search); ?>" placeholder="Cari kode, pengirim, kendala..." 
                            class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium">
                     <?php if (!empty($search)): ?>
-                        <a href="<?= site_url('laboran/respon-ticketing?status=' . $filterStatus); ?>" class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 text-xs">
+                        <a href="<?= site_url('dosen/respon-ticketing?status=' . $filterStatus); ?>" class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 hover:text-slate-600 text-xs">
                             <i class="bi bi-x-circle-fill"></i>
                         </a>
                     <?php endif; ?>
@@ -195,14 +197,14 @@
             </form>
         </div>
 
-        <!-- Table of Incoming Lab Tickets -->
+        <!-- Table of Incoming Dosen Tickets -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-extrabold uppercase text-slate-500 tracking-wider">
                             <th class="py-3.5 px-4 font-extrabold">Kode Tiket</th>
-                            <th class="py-3.5 px-4 font-extrabold">Pengirim / Dosen</th>
+                            <th class="py-3.5 px-4 font-extrabold">Pengirim</th>
                             <th class="py-3.5 px-4 font-extrabold">Kendala & Kategori</th>
                             <th class="py-3.5 px-4 font-extrabold">Prioritas</th>
                             <th class="py-3.5 px-4 font-extrabold">Status</th>
@@ -243,10 +245,10 @@
                                         </span>
                                     </td>
 
-                                    <!-- Pengirim / Dosen -->
+                                    <!-- Pengirim -->
                                     <td class="py-3.5 px-4">
                                         <div class="font-bold text-slate-900"><?= htmlspecialchars($t->nama_dosen); ?></div>
-                                        <div class="text-[11px] text-slate-400 font-mono mt-0.5">NIDN: <?= htmlspecialchars($t->nidn ?: '-'); ?></div>
+                                        <div class="text-[11px] text-slate-400 font-mono mt-0.5">NIDN/ID: <?= htmlspecialchars($t->nidn ?: '-'); ?></div>
                                     </td>
 
                                     <!-- Kendala & Kategori -->
@@ -306,8 +308,8 @@
                                     <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-xl">
                                         <i class="bi bi-inbox"></i>
                                     </div>
-                                    <div class="text-sm font-bold text-slate-700">Tidak ada tiket masuk untuk Laboratorium</div>
-                                    <p class="text-xs text-slate-400 mt-1">Saat ini belum ada laporan kendala lab atau filter yang dipilih tidak memiliki data.</p>
+                                    <div class="text-sm font-bold text-slate-700">Tidak ada tiket masuk untuk Dosen</div>
+                                    <p class="text-xs text-slate-400 mt-1">Saat ini belum ada laporan kendala yang ditujukan ke unit Dosen / Dosen Wali atau filter yang dipilih tidak memiliki data.</p>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -358,7 +360,7 @@
                     <span id="step1Time" class="text-[10px] font-mono text-emerald-600 font-bold whitespace-nowrap">-</span>
                 </div>
                 <p class="text-[10px] text-slate-400 leading-snug mt-0.5">
-                    Laporan kendala masuk ke antrean unit <span id="step1Unit" class="font-semibold text-slate-600"></span>.
+                    Laporan kendala masuk ke sistem unit <span id="step1Unit" class="font-semibold text-slate-600"></span>.
                 </p>
             </div>
 
@@ -393,7 +395,7 @@
                 <div id="step3TanggapanBox" class="hidden mt-1.5 p-2 rounded-xl bg-orange-50 border border-orange-200/80 text-[10px] text-slate-700 leading-relaxed">
                     <div class="text-[9px] font-bold text-orange-800 uppercase flex items-center gap-1 mb-0.5">
                         <i class="bi bi-chat-quote-fill text-orange-600"></i>
-                        <span>Respon Resmi Laboran:</span>
+                        <span>Respon Resmi Dosen:</span>
                     </div>
                     <div id="step3TanggapanText" class="italic line-clamp-2 text-slate-600"></div>
                 </div>
@@ -427,7 +429,7 @@
 
     </div>
 
-    <!-- Modal Respon & Detail Tiket Laboran -->
+    <!-- Modal Respon & Detail Tiket Dosen -->
     <div id="modalRespon" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <!-- Backdrop -->
@@ -463,7 +465,7 @@
                         </div>
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Unit Tujuan</span>
-                            <span class="font-bold text-blue-700 inline-flex items-center gap-1 mt-0.5 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[11px]" id="modalUnitTujuan">-</span>
+                            <span class="font-bold text-orange-700 inline-flex items-center gap-1 mt-0.5 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200 text-[11px]" id="modalUnitTujuan">-</span>
                         </div>
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kategori</span>
@@ -499,21 +501,21 @@
                     <!-- Riwayat Tanggapan Terakhir (Jika ada) -->
                     <div id="modalRiwayatTanggapanSection" class="hidden p-3.5 bg-emerald-50/60 border border-emerald-200 rounded-2xl">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Tanggapan Terakhir Laboran</span>
+                            <span class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">Tanggapan Terakhir Dosen</span>
                             <span class="text-[10px] text-emerald-600 font-mono" id="modalTglTanggapan">-</span>
                         </div>
                         <p class="text-xs text-emerald-950 whitespace-pre-wrap" id="modalTanggapanText">-</p>
                     </div>
 
-                    <!-- Form Tanggapan Laboran -->
-                    <form id="formResponTiket" method="POST" action="<?= site_url('laboran/respon-ticketing/simpan_tanggapan'); ?>" class="pt-3 border-t border-slate-100 space-y-3">
-                        <input type="hidden" name="ticket_id" id="formTicketId" value="">
+                    <!-- Form Tanggapan Dosen -->
+                    <form id="formResponTiket" method="POST" action="<?= site_url('dosen/respon-ticketing/simpan_tanggapan'); ?>" class="pt-3 border-t border-slate-100 space-y-3">
+                        <input type="hidden" name="id_tiket" id="formTicketId" value="">
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Perbarui Status Pengerjaan <span class="text-rose-500">*</span></label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Perbarui Status Penanganan <span class="text-rose-500">*</span></label>
                             <select name="status" id="formStatusSelect" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500">
                                 <option value="Menunggu">Menunggu</option>
-                                <option value="Diproses">Diproses (Sedang Ditangani Laboran)</option>
+                                <option value="Diproses">Diproses (Sedang Ditangani Dosen)</option>
                                 <option value="Selesai">Selesai (Kendala Telah Diatasi)</option>
                                 <option value="Ditutup">Ditutup</option>
                             </select>
@@ -521,10 +523,10 @@
 
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="block text-xs font-bold text-slate-700">Tanggapan / Catatan Tindak Lanjut Laboran</label>
+                                <label class="block text-xs font-bold text-slate-700">Tanggapan / Catatan Tindak Lanjut Dosen</label>
                                 <span class="text-[10px] text-slate-400 font-semibold">(Opsional jika status Menunggu)</span>
                             </div>
-                            <textarea name="tanggapan" id="formTanggapanText" rows="4" placeholder="Tuliskan konfirmasi, solusi pengerjaan, atau tindak lanjut teknis jika ada (opsional jika masih menunggu antrean)..." 
+                            <textarea name="tanggapan" id="formTanggapanText" rows="4" placeholder="Tuliskan konfirmasi, arahan, atau solusi penanganan (opsional jika masih menunggu antrean)..." 
                                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium"></textarea>
                         </div>
 
@@ -533,7 +535,7 @@
                                 Batal
                             </button>
                             <button type="submit" class="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5">
-                                <i class="bi bi-send-fill"></i> Kirim Respon & Update Status
+                                <i class="bi bi-send-fill"></i> Simpan Tanggapan & Status
                             </button>
                         </div>
                     </form>
@@ -563,14 +565,14 @@
             document.getElementById('formTanggapanText').value = '';
 
             // Fetch detail tiket
-            fetch('<?= site_url("laboran/respon-ticketing/detail/"); ?>' + encodeURIComponent(kodeTiket))
+            fetch('<?= site_url("dosen/respon-ticketing/detail/"); ?>' + encodeURIComponent(kodeTiket))
                 .then(res => res.json())
                 .then(res => {
                     if (res.status && res.data) {
                         const d = res.data;
                         document.getElementById('formTicketId').value = d.id;
                         document.getElementById('modalKodeTiket').innerText = d.kode_tiket;
-                        document.getElementById('modalCreatedAt').innerText = 'Dibuat pada: ' + d.created_at_fmt;
+                        document.getElementById('modalCreatedAt').innerText = 'Dibuat pada: ' + d.created_at;
                         document.getElementById('modalNamaDosen').innerText = d.nama_dosen;
                         document.getElementById('modalNidn').innerText = 'NIDN/ID: ' + d.nidn;
                         document.getElementById('modalUnitTujuan').innerText = d.unit_tujuan;
@@ -586,10 +588,10 @@
                         }
 
                         // Lampiran
-                        if (d.lampiran) {
+                        if (d.lampiran_url) {
                             document.getElementById('modalLampiranSection').classList.remove('hidden');
-                            document.getElementById('modalLampiranLink').href = d.lampiran;
-                            document.getElementById('modalLampiranName').innerText = d.lampiran_name || 'Buka Lampiran';
+                            document.getElementById('modalLampiranLink').href = d.lampiran_url;
+                            document.getElementById('modalLampiranName').innerText = d.lampiran || 'Buka Lampiran';
                         }
 
                         // Tanggapan sebelumnya
@@ -698,7 +700,7 @@
                     step2Title.className = 'font-bold text-[11px] text-amber-800';
                     step2Time.className = 'text-[10px] font-semibold text-amber-600 flex items-center whitespace-nowrap';
                     step2Time.innerHTML = '<i class="bi bi-hourglass-split mr-1 text-[9px]"></i> Menunggu Antrean';
-                    step2Desc.textContent = 'Menunggu giliran peninjauan oleh Laboran / unit ' + (unit || 'terkait') + '.';
+                    step2Desc.textContent = 'Menunggu giliran peninjauan oleh Dosen / unit ' + (unit || 'terkait') + '.';
 
                     // Step 3: Pending
                     step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
@@ -706,7 +708,7 @@
                     step3Title.className = 'font-bold text-[11px] text-slate-400';
                     step3Time.className = 'text-[10px] font-normal text-slate-400 flex items-center whitespace-nowrap';
                     step3Time.innerHTML = '<i class="bi bi-dash mr-1 text-[10px]"></i> Belum Ada Solusi';
-                    step3Desc.textContent = 'Solusi teknis lab akan disampaikan setelah kendala dianalisis.';
+                    step3Desc.textContent = 'Solusi akan disampaikan setelah kendala dianalisis.';
 
                     // Step 4: Pending
                     step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
@@ -728,7 +730,7 @@
                     step2Title.className = 'font-bold text-[11px] text-blue-800';
                     step2Time.className = 'text-[10px] font-mono font-bold text-blue-600 flex items-center whitespace-nowrap';
                     step2Time.innerHTML = '<i class="bi bi-clock-history mr-1 text-[9px]"></i>' + (updated || created);
-                    step2Desc.textContent = 'Laboran sedang aktif menangani dan memperbaiki kendala lab.';
+                    step2Desc.textContent = 'Dosen sedang aktif meninjau dan menangani kendala ini.';
 
                     // Step 3: Preparing or with notes
                     if (tanggapan && tanggapan.trim()) {
@@ -737,7 +739,7 @@
                         step3Title.className = 'font-bold text-[11px] text-blue-800';
                         step3Time.className = 'text-[10px] font-mono font-bold text-blue-600 flex items-center whitespace-nowrap';
                         step3Time.innerHTML = '<i class="bi bi-clock mr-1 text-[9px]"></i>' + (tglTanggapan || updated);
-                        step3Desc.textContent = 'Laboran telah memberikan catatan tindak lanjut.';
+                        step3Desc.textContent = 'Dosen telah memberikan catatan tanggapan.';
                         step3Box.classList.remove('hidden');
                         step3Text.textContent = '"' + tanggapan.trim() + '"';
                     } else {
@@ -745,8 +747,8 @@
                         step3Icon.innerHTML = '<i class="bi bi-hourglass-split animate-pulse"></i>';
                         step3Title.className = 'font-bold text-[11px] text-slate-600';
                         step3Time.className = 'text-[10px] font-semibold text-amber-600 flex items-center whitespace-nowrap';
-                        step3Time.innerHTML = '<i class="bi bi-hourglass mr-1 text-[9px]"></i> Sedang Ditangani';
-                        step3Desc.textContent = 'Solusi dan perbaikan sedang dikerjakan di laboratorium.';
+                        step3Time.innerHTML = '<i class="bi bi-hourglass mr-1 text-[9px]"></i> Sedang Disiapkan';
+                        step3Desc.textContent = 'Solusi dan jawaban sedang dirumuskan oleh Dosen.';
                     }
 
                     // Step 4: Pending
@@ -755,7 +757,7 @@
                     step4Title.className = 'font-bold text-[11px] text-slate-400';
                     step4Time.className = 'text-[10px] font-normal text-slate-400 flex items-center whitespace-nowrap';
                     step4Time.innerHTML = '<i class="bi bi-dash mr-1 text-[10px]"></i> Belum Ditutup';
-                    step4Desc.textContent = 'Tiket masih dalam proses pengerjaan teknis.';
+                    step4Desc.textContent = 'Tiket masih dalam proses penanganan.';
 
                     stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-blue-300';
 
@@ -769,7 +771,7 @@
                     step2Title.className = 'font-bold text-[11px] text-slate-700';
                     step2Time.className = 'text-[10px] font-mono font-bold text-slate-500 flex items-center whitespace-nowrap';
                     step2Time.innerHTML = '<i class="bi bi-clock-history mr-1 text-[9px]"></i>' + (updated || created);
-                    step2Desc.textContent = 'Kendala laboratorium telah diperiksa dan diselesaikan.';
+                    step2Desc.textContent = 'Kendala telah ditelaah dan diproses oleh Dosen.';
 
                     // Step 3: Complete with WhatsApp Blue Double Check & Solusi
                     step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black bg-sky-500 text-white shadow-xs ring-2 ring-sky-200';
@@ -777,7 +779,7 @@
                     step3Title.className = 'font-bold text-[11px] text-sky-900';
                     step3Time.className = 'text-[10px] font-mono font-bold text-sky-700 flex items-center whitespace-nowrap';
                     step3Time.innerHTML = '<i class="bi bi-clock-fill mr-1 text-[9px]"></i>' + (tglTanggapan || updated);
-                    step3Desc.textContent = 'Solusi resmi telah diberikan oleh Laboran.';
+                    step3Desc.textContent = 'Solusi resmi telah diberikan oleh Dosen.';
 
                     if (tanggapan && tanggapan.trim()) {
                         step3Box.classList.remove('hidden');
@@ -790,7 +792,7 @@
                     step4Title.className = 'font-bold text-[11px] text-amber-800';
                     step4Time.className = 'text-[10px] font-semibold text-amber-600 flex items-center whitespace-nowrap';
                     step4Time.innerHTML = '<i class="bi bi-check-circle mr-1 text-[9px]"></i> Siap Ditutup';
-                    step4Desc.textContent = 'Perangkat/fasilitas telah pulih, menunggu konfirmasi penutupan.';
+                    step4Desc.textContent = 'Solusi telah terkirim, menunggu konfirmasi penutupan.';
 
                     stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-sky-400';
 

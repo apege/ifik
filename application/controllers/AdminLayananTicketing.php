@@ -57,7 +57,7 @@ class AdminLayananTicketing extends CI_Controller {
         ];
 
         $data = [
-            'title'        => '[SIMULASI] Kelola Tiket Dosen — Admin Layanan (LAA)',
+            'title'        => 'Kelola Tiket Dosen — Admin Layanan (LAA)',
             'tickets'      => $tickets,
             'stats'        => $stats,
             'filterStatus' => $filterStatus,

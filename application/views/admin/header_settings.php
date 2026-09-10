@@ -2150,7 +2150,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
           const currentEditId = isEditMode ? document.getElementById('ruanganId').value : null;
           const occupiedMap = getOccupiedRoomsMap(currentEditId);
 
-          // Support multi-input via comma or single input
           const items = val.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
           const conflicts = [];
 

@@ -1759,7 +1759,7 @@
                         data: {id_kategori: id_kategori},
                         dataType: "json",
                         success: function(data) {
-                            if(data.length === 1) {
+                            if(data.length === 1 && (!data[0].kode_ruangan || data[0].kode_ruangan.indexOf(',') === -1)) {
                                 let room = data[0];
                                 let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
                                 let html = `<option value="${room.id}" selected>${roomLabel}</option>`;
@@ -1768,8 +1768,18 @@
                             } else {
                                 let html = '<option value="">Pilih Ruangan</option>';
                                 $.each(data, function(i, room) {
-                                    let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
-                                    html += `<option value="${room.id}">${roomLabel}</option>`;
+                                    if (room.kode_ruangan && room.kode_ruangan.indexOf(',') > -1) {
+                                        let codes = room.kode_ruangan.split(',');
+                                        $.each(codes, function(ci, c) {
+                                            let codeTrim = c.trim();
+                                            if (codeTrim) {
+                                                html += `<option value="${room.id}">${room.nama_ruangan} (Ruang: ${codeTrim})</option>`;
+                                            }
+                                        });
+                                    } else {
+                                        let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
+                                        html += `<option value="${room.id}">${roomLabel}</option>`;
+                                    }
                                 });
                                 $('#ruanganSelect').html(html);
                                 $('#ruanganSelect').css({'background-color': '#f8fafc', 'pointer-events': 'auto', 'color': 'var(--text-color)'});

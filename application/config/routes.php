@@ -105,10 +105,10 @@ $route['dosen/ticketing/input'] = 'DosenTicketing/input';
 $route['dosen/ticketing/simpan'] = 'DosenTicketing/simpan';
 $route['dosen/ticketing/riwayat'] = 'DosenTicketing/riwayat';
 $route['dosen/ticketing/detail/(:any)'] = 'DosenTicketing/detail/$1';
-$route['dosen/respon-ticketing'] = 'AdminLayananTicketing/index';
-$route['dosen/respon-ticketing/detail/(:any)'] = 'AdminLayananTicketing/detail/$1';
-$route['dosen/respon-ticketing/simpan_tanggapan'] = 'AdminLayananTicketing/simpan_tanggapan';
-$route['dosen/respon-ticketing/(:any)'] = 'AdminLayananTicketing/$1';
+$route['dosen/respon-ticketing'] = 'DosenTicketing/respon_index';
+$route['dosen/respon-ticketing/detail/(:any)'] = 'DosenTicketing/respon_detail/$1';
+$route['dosen/respon-ticketing/simpan_tanggapan'] = 'DosenTicketing/respon_simpan_tanggapan';
+$route['dosen/respon-ticketing/(:any)'] = 'DosenTicketing/respon_$1';
 
 // Koordinator TA Routes
 $route['koordinatorta'] = 'KoordinatorTA';
