@@ -483,6 +483,33 @@ body {
   font-weight: 800;
 }
 
+/* ─── MOBILE-ONLY LAA NOTICE ──────────────────── */
+.mobile-laa-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #4a1c03;
+  line-height: 1.4;
+  text-align: left;
+}
+.mobile-laa-notice strong {
+  color: #1c0a00;
+  font-weight: 800;
+}
+
+@media (min-width: 1024px) {
+  .mobile-laa-notice {
+    display: none !important;
+  }
+}
+
 /* ─── FOOTER ──────────────────────────────────── */
 .footer-copy {
   position: fixed; bottom: 14px; left: 0; right: 0; text-align: center;

@@ -184,6 +184,12 @@
             <button type="submit" id="submitBtn" class="btn-submit">Masuk &rarr;</button>
 
             <p class="forgot-link"><a href="<?= base_url('forgot_password'); ?>">Lupa password?</a></p>
+
+            <!-- Informasi Belum Memiliki Akun (Khusus Tampilan Mobile) -->
+            <div class="mobile-laa-notice">
+              <svg width="14" height="14" class="text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Belum memiliki akun? Silakan hubungi <strong>LAA</strong> untuk digenerate akun.</span>
+            </div>
           </form>
         </div>
 
