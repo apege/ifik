@@ -40,6 +40,7 @@ class AdminLayanan_model extends CI_Model {
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `nim` VARCHAR(30) NOT NULL,
                 `kode_berkas` VARCHAR(50) NOT NULL,
+                `nama_berkas` VARCHAR(150) NULL,
                 `file_name` VARCHAR(255) NOT NULL,
                 `status_verifikasi` ENUM('Pending','Valid','Invalid') DEFAULT 'Pending',
                 `catatan` TEXT NULL,
@@ -48,9 +49,25 @@ class AdminLayanan_model extends CI_Model {
                 UNIQUE KEY `nim_kode` (`nim`, `kode_berkas`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
         } else {
+            if (!$this->db->field_exists('nama_berkas', 'pendaftaran_berkas')) {
+                $this->db->query("ALTER TABLE `pendaftaran_berkas` ADD COLUMN `nama_berkas` VARCHAR(150) NULL AFTER `kode_berkas`;");
+            }
             if (!$this->db->field_exists('catatan', 'pendaftaran_berkas')) {
                 $this->db->query("ALTER TABLE `pendaftaran_berkas` ADD COLUMN `catatan` TEXT NULL AFTER `status_verifikasi`;");
             }
+            if ($this->db->table_exists('syarat_berkas_ta')) {
+                $this->db->query("UPDATE `pendaftaran_berkas` pb 
+                                  JOIN `syarat_berkas_ta` sb ON pb.kode_berkas = sb.kode_berkas 
+                                  SET pb.nama_berkas = sb.nama_berkas 
+                                  WHERE pb.nama_berkas IS NULL OR pb.nama_berkas = ''");
+            }
+        }
+
+        if ($this->db->table_exists('pendaftaran_berkas') && $this->db->table_exists('pendaftaran_ta')) {
+            $this->db->query("UPDATE `pendaftaran_berkas` pb 
+                              JOIN `pendaftaran_ta` pt ON pt.nim = pb.nim 
+                              SET pb.status_verifikasi = 'Pending' 
+                              WHERE pt.status_approval_admin = 'Pending'");
         }
 
         if ($this->db->table_exists('pendaftaran_ta')) {
@@ -60,7 +77,48 @@ class AdminLayanan_model extends CI_Model {
         }
     }
 
+    public function get_short_berkas_label($nama_berkas, $kode_berkas = '') {
+        $known = [
+            'ksm'        => 'KSM',
+            'transkrip'  => 'TRA',
+            'pernyataan' => 'SUR',
+            'bebas_lab'  => 'LAB',
+        ];
+        $k_clean = strtolower(trim((string)$kode_berkas));
+        if (isset($known[$k_clean])) {
+            return $known[$k_clean];
+        }
 
+        if (!empty($kode_berkas) && strlen($kode_berkas) <= 5 && !in_array($k_clean, ['file', 'doc'])) {
+            return strtoupper($kode_berkas);
+        }
+
+        $nama = trim((string)$nama_berkas);
+        if (!empty($nama)) {
+            if (preg_match('/^([^\(]+)\(([^)]+)\)/', $nama, $m)) {
+                $before = strtoupper(trim($m[1]));
+                $inside = strtoupper(trim($m[2]));
+                if (strlen($before) >= 2 && strlen($before) <= 5) return $before;
+                if (strlen($inside) >= 2 && strlen($inside) <= 5) return $inside;
+            }
+
+            if (preg_match('/\(([^)]+)\)/', $nama, $m)) {
+                $inside = strtoupper(trim($m[1]));
+                if (strlen($inside) >= 2 && strlen($inside) <= 5) return $inside;
+            }
+
+            $words = explode(' ', $nama);
+            if (!empty($words[0])) {
+                $first_word = strtoupper(trim($words[0]));
+                if (strlen($first_word) >= 2 && strlen($first_word) <= 5 && ctype_alpha($first_word)) {
+                    return $first_word;
+                }
+            }
+        }
+
+        $cleaned = preg_replace('/[^a-zA-Z0-9]/', '', $nama);
+        return strtoupper(substr($cleaned, 0, 3) ?: 'DOC');
+    }
 
     public function get_all_syarat_berkas() {
         $this->_ensure_tables();
@@ -112,15 +170,43 @@ class AdminLayanan_model extends CI_Model {
         return $map;
     }
 
-    public function save_student_berkas($nim, $kode_berkas, $file_name, $status = 'Pending', $catatan = null) {
+    public function save_student_berkas($nim, $kode_berkas, $file_name, $status = 'Pending', $arg5 = null, $arg6 = null) {
         $this->_ensure_tables();
+
+        $nama_berkas = null;
+        $catatan     = null;
+
+        if ($arg6 !== null) {
+            $nama_berkas = $arg5;
+            $catatan     = $arg6;
+        } else if ($arg5 !== null) {
+            if ($status === 'Pending' || ($this->db->table_exists('syarat_berkas_ta') && $this->db->get_where('syarat_berkas_ta', ['nama_berkas' => $arg5])->num_rows() > 0)) {
+                $nama_berkas = $arg5;
+            } else {
+                $catatan = $arg5;
+            }
+        }
+
+        if (empty($nama_berkas)) {
+            $sb = $this->db->get_where('syarat_berkas_ta', ['kode_berkas' => $kode_berkas])->row_array();
+            if ($sb && !empty($sb['nama_berkas'])) {
+                $nama_berkas = $sb['nama_berkas'];
+            } else {
+                $nama_berkas = ucfirst(str_replace('_', ' ', $kode_berkas));
+            }
+        }
+
         $existing = $this->db->get_where('pendaftaran_berkas', ['nim' => $nim, 'kode_berkas' => $kode_berkas])->row_array();
 
         $data = [
-            'file_name' => $file_name,
+            'file_name'         => $file_name,
             'status_verifikasi' => $status,
-            'updated_at' => date('Y-m-d H:i:s')
+            'updated_at'        => date('Y-m-d H:i:s')
         ];
+
+        if (!empty($nama_berkas) && $this->db->field_exists('nama_berkas', 'pendaftaran_berkas')) {
+            $data['nama_berkas'] = $nama_berkas;
+        }
 
         if ($catatan !== null && $this->db->field_exists('catatan', 'pendaftaran_berkas')) {
             $data['catatan'] = $catatan;
@@ -128,13 +214,27 @@ class AdminLayanan_model extends CI_Model {
 
         if ($existing) {
             $this->db->where('id', $existing['id']);
-            return $this->db->update('pendaftaran_berkas', $data);
+            $res = $this->db->update('pendaftaran_berkas', $data);
         } else {
-            $data['nim'] = $nim;
+            $data['nim']         = $nim;
             $data['kode_berkas'] = $kode_berkas;
-            $data['created_at'] = date('Y-m-d H:i:s');
-            return $this->db->insert('pendaftaran_berkas', $data);
+            $data['created_at']  = date('Y-m-d H:i:s');
+            $res = $this->db->insert('pendaftaran_berkas', $data);
         }
+
+        // Fail-safe sync: If a berkas is uploaded/set to Pending, ensure pendaftaran_ta's status_approval_admin resets to Pending
+        if ($status === 'Pending' && $this->db->table_exists('pendaftaran_ta')) {
+            $p_row = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+            if ($p_row && $p_row['status_approval_admin'] === 'Approved') {
+                $up_ta = ['status_approval_admin' => 'Pending'];
+                if (($p_row['status_approval_wali'] ?? '') === 'Approved') {
+                    $up_ta['current_stage'] = 'Admin Layanan';
+                }
+                $this->db->where('nim', $nim)->update('pendaftaran_ta', $up_ta);
+            }
+        }
+
+        return $res;
     }
 
     public function update_verifikasi($nim, $status_input, $catatan = '', $extra_catatan = null, $berkas_valid = array(), $berkas_kurang = array()) {
@@ -494,19 +594,47 @@ class AdminLayanan_model extends CI_Model {
         $invalid_count = 0;
         $pending_count = 0;
         $items         = array();
+        $processed_kodes = array();
 
+        // 1. Process student's existing recorded files in pendaftaran_berkas
+        foreach ($map as $kode => $record) {
+            $processed_kodes[$kode] = true;
+            $st = $record['status_verifikasi'] ?? 'Pending';
+            if ($st === 'Approved') $st = 'Valid';
+            if ($st === 'Rejected') $st = 'Invalid';
+
+            if ($st === 'Valid') {
+                $valid_count++;
+            } elseif ($st === 'Invalid') {
+                $invalid_count++;
+            } else {
+                $pending_count++;
+            }
+
+            $nama_berkas = !empty($record['nama_berkas']) ? $record['nama_berkas'] : ($record['nama'] ?? ucfirst(str_replace('_', ' ', $kode)));
+            $file_name   = $record['file_name'] ?? '';
+            $file_url    = $this->resolve_pdf_url($file_name);
+
+            $items[] = array(
+                'kode'      => $kode,
+                'nama'      => $nama_berkas,
+                'short'     => $this->get_short_berkas_label($nama_berkas, $kode),
+                'status'    => $st,
+                'file_name' => $file_name,
+                'file_url'  => $file_url
+            );
+        }
+
+        // 2. Append active requirements if student hasn't uploaded them yet
         foreach ($active_syarat as $sb) {
             $kode = $sb['kode_berkas'];
-            $st = 'Pending';
+            if (isset($processed_kodes[$kode])) continue;
 
-            if (isset($map[$kode]['status_verifikasi']) && $map[$kode]['status_verifikasi'] !== 'Pending') {
-                $st = $map[$kode]['status_verifikasi'];
-            } elseif (isset($row['status_' . $kode]) && !empty($row['status_' . $kode])) {
+            $st = 'Pending';
+            if (isset($row['status_' . $kode]) && !empty($row['status_' . $kode])) {
                 $st = $row['status_' . $kode];
             } elseif (isset($row['status_approval_admin']) && $row['status_approval_admin'] === 'Approved') {
                 $st = 'Valid';
-            } elseif (isset($map[$kode]['status_verifikasi'])) {
-                $st = $map[$kode]['status_verifikasi'];
             }
 
             if ($st === 'Approved') $st = 'Valid';
@@ -520,13 +648,13 @@ class AdminLayanan_model extends CI_Model {
                 $pending_count++;
             }
 
-            $file_name = $map[$kode]['file_name'] ?? ($row['file_' . $kode] ?? '');
+            $file_name = $row['file_' . $kode] ?? '';
             $file_url  = $this->resolve_pdf_url($file_name);
 
             $items[] = array(
                 'kode'      => $kode,
                 'nama'      => $sb['nama_berkas'],
-                'short'     => strtoupper(substr($sb['nama_berkas'], 0, 3)),
+                'short'     => $this->get_short_berkas_label($sb['nama_berkas'], $kode),
                 'status'    => $st,
                 'file_name' => $file_name,
                 'file_url'  => $file_url
@@ -537,7 +665,7 @@ class AdminLayanan_model extends CI_Model {
             'valid_count'   => $valid_count,
             'invalid_count' => $invalid_count,
             'pending_count' => $pending_count,
-            'total_count'   => count($active_syarat),
+            'total_count'   => count($items),
             'items'         => $items
         );
     }
@@ -586,19 +714,47 @@ class AdminLayanan_model extends CI_Model {
             $invalid_count = 0;
             $pending_count = 0;
             $items         = array();
+            $processed_kodes = array();
 
+            // 1. Process student's existing recorded files in pendaftaran_berkas
+            foreach ($map as $kode => $record) {
+                $processed_kodes[$kode] = true;
+                $st = $record['status_verifikasi'] ?? 'Pending';
+                if ($st === 'Approved') $st = 'Valid';
+                if ($st === 'Rejected') $st = 'Invalid';
+
+                if ($st === 'Valid') {
+                    $valid_count++;
+                } elseif ($st === 'Invalid') {
+                    $invalid_count++;
+                } else {
+                    $pending_count++;
+                }
+
+                $nama_berkas = !empty($record['nama_berkas']) ? $record['nama_berkas'] : ($record['nama'] ?? ucfirst(str_replace('_', ' ', $kode)));
+                $file_name   = $record['file_name'] ?? '';
+                $file_url    = $this->resolve_pdf_url($file_name);
+
+                $items[] = array(
+                    'kode'      => $kode,
+                    'nama'      => $nama_berkas,
+                    'short'     => $this->get_short_berkas_label($nama_berkas, $kode),
+                    'status'    => $st,
+                    'file_name' => $file_name,
+                    'file_url'  => $file_url
+                );
+            }
+
+            // 2. Append active requirements if student hasn't uploaded them yet
             foreach ($active_syarat as $sb) {
                 $kode = $sb['kode_berkas'];
-                $st = 'Pending';
+                if (isset($processed_kodes[$kode])) continue;
 
-                if (isset($map[$kode]['status_verifikasi']) && $map[$kode]['status_verifikasi'] !== 'Pending') {
-                    $st = $map[$kode]['status_verifikasi'];
-                } elseif (isset($s_row['status_' . $kode]) && !empty($s_row['status_' . $kode])) {
+                $st = 'Pending';
+                if (isset($s_row['status_' . $kode]) && !empty($s_row['status_' . $kode])) {
                     $st = $s_row['status_' . $kode];
                 } elseif (isset($s_row['status_approval_admin']) && $s_row['status_approval_admin'] === 'Approved') {
                     $st = 'Valid';
-                } elseif (isset($map[$kode]['status_verifikasi'])) {
-                    $st = $map[$kode]['status_verifikasi'];
                 }
 
                 if ($st === 'Approved') $st = 'Valid';
@@ -612,13 +768,13 @@ class AdminLayanan_model extends CI_Model {
                     $pending_count++;
                 }
 
-                $file_name = $map[$kode]['file_name'] ?? ($s_row['file_' . $kode] ?? '');
+                $file_name = $s_row['file_' . $kode] ?? '';
                 $file_url  = $this->resolve_pdf_url($file_name);
 
                 $items[] = array(
                     'kode'      => $kode,
                     'nama'      => $sb['nama_berkas'],
-                    'short'     => strtoupper(substr($sb['nama_berkas'], 0, 3)),
+                    'short'     => $this->get_short_berkas_label($sb['nama_berkas'], $kode),
                     'status'    => $st,
                     'file_name' => $file_name,
                     'file_url'  => $file_url
@@ -629,7 +785,7 @@ class AdminLayanan_model extends CI_Model {
                 'valid_count'   => $valid_count,
                 'invalid_count' => $invalid_count,
                 'pending_count' => $pending_count,
-                'total_count'   => count($active_syarat),
+                'total_count'   => count($items),
                 'items'         => $items
             );
         }

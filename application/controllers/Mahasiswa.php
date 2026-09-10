@@ -394,7 +394,7 @@ class Mahasiswa extends CI_Controller {
 
                 if ($uploaded) {
                     $file_uploads[$kode] = $uploaded;
-                    $this->AdminLayanan_model->save_student_berkas($nim, $kode, $uploaded, 'Pending');
+                    $this->AdminLayanan_model->save_student_berkas($nim, $kode, $uploaded, 'Pending', $sb['nama_berkas'] ?? null);
                 } else {
                     $old = $this->input->post($field_name . '_old');
                     if ($old) {
@@ -421,8 +421,9 @@ class Mahasiswa extends CI_Controller {
                 $w_status = 'Pending';
             }
 
-            // Jika status Admin LAA tadinya Rejected dan siswa mengedit/re-upload, reset LAA ke Pending untuk re-verifikasi
-            if ($a_status === 'Rejected') {
+            // Jika status Admin LAA Rejected/Approved dan siswa mengedit/re-upload/unggah file baru, reset LAA ke Pending untuk re-verifikasi
+            $has_new_uploads = !empty($file_step3) || !empty($file_step4) || !empty($file_step5) || !empty($file_step6);
+            if ($a_status === 'Rejected' || ($a_status === 'Approved' && $has_new_uploads) || $has_new_uploads) {
                 $a_status = 'Pending';
             }
 
@@ -896,6 +897,13 @@ class Mahasiswa extends CI_Controller {
             if ($existing_ta) {
                 if (empty($existing_ta['konsentrasi_dkv'])) $upData['konsentrasi_dkv'] = $mhs_konsentrasi;
                 if (empty($existing_ta['id_kk'])) $upData['id_kk'] = $mhs_id_kk;
+                // Jika status LAA sudah Approved/Rejected sebelumnya, reset ke Pending karena ada re-upload / upload file baru
+                if (isset($existing_ta['status_approval_admin']) && in_array($existing_ta['status_approval_admin'], ['Approved', 'Rejected'])) {
+                    $upData['status_approval_admin'] = 'Pending';
+                    if (($existing_ta['status_approval_wali'] ?? '') === 'Approved') {
+                        $upData['current_stage'] = 'Admin Layanan';
+                    }
+                }
                 $this->db->where('nim', $nim)->update('pendaftaran_ta', $upData);
             } else {
                 $upData['nim']                  = $nim;
@@ -913,8 +921,14 @@ class Mahasiswa extends CI_Controller {
 
             // 2. Simpan juga ke tabel pendaftaran_berkas via AdminLayanan_model
             $this->load->model('AdminLayanan_model');
+            $req_nama_berkas = $this->input->post('nama_berkas');
+            if (empty($req_nama_berkas)) {
+                $sb_row = $this->db->get_where('syarat_berkas_ta', ['kode_berkas' => $kode_berkas])->row_array();
+                if ($sb_row) $req_nama_berkas = $sb_row['nama_berkas'];
+            }
+
             if (method_exists($this->AdminLayanan_model, 'save_student_berkas')) {
-                $this->AdminLayanan_model->save_student_berkas($nim, $kode_berkas, $file_name, 'Pending');
+                $this->AdminLayanan_model->save_student_berkas($nim, $kode_berkas, $file_name, 'Pending', $req_nama_berkas);
             }
 
             // Sync ke pendaftaran_berkas agar status verifikasi Admin LAA di-reset ke Pending untuk berkas baru ini
@@ -922,15 +936,18 @@ class Mahasiswa extends CI_Controller {
             if ($this->db->table_exists('pendaftaran_berkas')) {
                 $existing_berkas = $this->db->get_where('pendaftaran_berkas', ['nim' => $nim, 'kode_berkas' => $kode_berkas])->row_array();
                 if ($existing_berkas) {
-                    $this->db->where('id', $existing_berkas['id'])->update('pendaftaran_berkas', [
+                    $up_data = [
                         'file_name'         => $file_name,
                         'status_verifikasi' => 'Pending',
                         'updated_at'        => date('Y-m-d H:i:s')
-                    ]);
+                    ];
+                    if (!empty($req_nama_berkas)) $up_data['nama_berkas'] = $req_nama_berkas;
+                    $this->db->where('id', $existing_berkas['id'])->update('pendaftaran_berkas', $up_data);
                 } else {
                     $this->db->insert('pendaftaran_berkas', [
                         'nim'               => $nim,
                         'kode_berkas'       => $kode_berkas,
+                        'nama_berkas'       => $req_nama_berkas,
                         'file_name'         => $file_name,
                         'status_verifikasi' => 'Pending',
                         'created_at'        => date('Y-m-d H:i:s')

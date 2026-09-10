@@ -361,14 +361,7 @@ class DosenWali_model extends CI_Model {
         $this->db->where('nim', $nim);
         $res = $this->db->update('pendaftaran_ta', $data);
 
-        // Sinkronisasi ke pendaftaran_berkas
-        if ($this->db->table_exists('pendaftaran_berkas')) {
-            $ver = ($status === 'Approved') ? 'Valid' : (($status === 'Rejected') ? 'Invalid' : 'Pending');
-            $this->db->where('nim', $nim)->update('pendaftaran_berkas', [
-                'status_verifikasi' => $ver,
-                'updated_at'        => date('Y-m-d H:i:s')
-            ]);
-        }
+
 
         return $res;
     }
@@ -412,12 +405,7 @@ class DosenWali_model extends CI_Model {
                 if (in_array('catatan_file_' . $k, $fields)) $data['catatan_file_' . $k] = '';
             }
 
-            if ($this->db->table_exists('pendaftaran_berkas')) {
-                $this->db->where('nim', $nim)->update('pendaftaran_berkas', [
-                    'status_verifikasi' => 'Valid',
-                    'updated_at'        => date('Y-m-d H:i:s')
-                ]);
-            }
+
         } else if ($status === 'Rejected') {
             $data['current_stage'] = 'Dosen Wali (Revisi)';
         }
@@ -546,13 +534,7 @@ class DosenWali_model extends CI_Model {
         }
         $this->db->update('pendaftaran_ta', $data);
 
-        // Update juga ke pendaftaran_berkas
-        if ($this->db->table_exists('pendaftaran_berkas')) {
-            $this->db->where_in('nim', $nims)->update('pendaftaran_berkas', [
-                'status_verifikasi' => 'Valid',
-                'updated_at'        => date('Y-m-d H:i:s')
-            ]);
-        }
+
 
         return $this->db->affected_rows();
     }

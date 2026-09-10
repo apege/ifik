@@ -892,6 +892,9 @@
                         });
                         tbody.innerHTML = html;
                         rebindStudentCheckboxes();
+                        if (window.activeLihatBerkasNims && window.activeLihatBerkasNims.length > 0) {
+                            refreshLihatBerkasView();
+                        }
                     }
 
                     // 3. Update Pagination Text & Controls
@@ -1343,16 +1346,24 @@
                         const berkas_kurang = st.berkas_kurang || [];
                         const is_rejected = (st.status_approval_admin === 'Rejected');
                         
-                        let valid_arr = Object.keys(st.files || {});
-                        if (berkas_kurang.length > 0) {
-                            valid_arr = valid_arr.filter(k => !berkas_kurang.includes(k));
+                        let valid_arr = [];
+                        let invalid_arr = berkas_kurang.slice();
+                        if (st.files) {
+                            Object.keys(st.files).forEach(k => {
+                                const fSt = st.files[k].status;
+                                if (fSt === 'Valid' || fSt === 'Approved') {
+                                    if (!valid_arr.includes(k)) valid_arr.push(k);
+                                } else if (fSt === 'Invalid' || fSt === 'Rejected') {
+                                    if (!invalid_arr.includes(k)) invalid_arr.push(k);
+                                }
+                            });
                         }
 
                         return {
                             ...st,
                             ver_action: is_rejected ? 'reject' : (st.status_approval_admin === 'Approved' ? 'approve' : 'pending'),
                             berkas_valid: valid_arr,
-                            berkas_kurang: berkas_kurang,
+                            berkas_kurang: invalid_arr,
                             catatan_admin: st.catatan_admin || ''
                         };
                     });
@@ -2197,6 +2208,38 @@
             }, 3000);
         }
 
+        function updateMhsDataDocStatus(nim, kode_berkas, status) {
+            if (!nim || !kode_berkas) return;
+            const nimStr = String(nim).trim();
+            const nimNum = Number(nimStr);
+            const keyStr = String(kode_berkas).trim();
+
+            const targets = [
+                window.mhsDataMap ? window.mhsDataMap[nimStr] : null,
+                window.mhsDataMap ? window.mhsDataMap[nimNum] : null,
+                window.laaStudentData ? window.laaStudentData[nimStr] : null,
+                window.laaStudentData ? window.laaStudentData[nimNum] : null,
+            ];
+
+            targets.forEach(mhs => {
+                if (!mhs) return;
+
+                if (!mhs.files) mhs.files = {};
+                if (!mhs.files[keyStr]) mhs.files[keyStr] = {};
+                mhs.files[keyStr].status = status;
+
+                if (mhs.berkas_summary && Array.isArray(mhs.berkas_summary.items)) {
+                    const item = mhs.berkas_summary.items.find(i => String(i.kode).trim() === keyStr);
+                    if (item) {
+                        item.status = status;
+                    }
+                }
+
+                mhs[`status_file_${keyStr}`] = status;
+                mhs[`status_${keyStr}`] = status;
+            });
+        }
+
         function quickVerifyFloatingDoc(nim, kode_berkas, status, customCatatan = '') {
             if (!nim || !kode_berkas) return;
             let catatan = customCatatan || '';
@@ -2217,19 +2260,26 @@
                 if (res.success) {
                     const normStatus = res.status || status;
                     
-                    if (window.mhsDataMap && window.mhsDataMap[nim] && window.mhsDataMap[nim].files && window.mhsDataMap[nim].files[kode_berkas]) {
-                        window.mhsDataMap[nim].files[kode_berkas].status = normStatus;
-                    }
-                    if (window.laaStudentData && window.laaStudentData[nim] && window.laaStudentData[nim].files && window.laaStudentData[nim].files[kode_berkas]) {
-                        window.laaStudentData[nim].files[kode_berkas].status = normStatus;
-                    }
+                    updateMhsDataDocStatus(nim, kode_berkas, normStatus);
 
                     if (typeof showLAAToast === 'function') {
                         const msg = (normStatus === 'Valid') ? 'Dokumen berhasil disetujui (Valid)!' : 'Catatan revisi berhasil dikirim!';
                         showLAAToast(msg, normStatus === 'Valid');
                     }
 
-                    refreshLihatBerkasView();
+                    // Close the floating preview card if present in activePreviews
+                    if (window.activePreviews && window.activePreviews.length > 0) {
+                        const pNim = String(nim).trim();
+                        const pDocKey = String(kode_berkas).trim();
+                        const existingIdx = window.activePreviews.findIndex(p => String(p.nim).trim() === pNim && String(p.docKey).trim() === pDocKey);
+                        if (existingIdx > -1) {
+                            closeSinglePreview(existingIdx);
+                        } else {
+                            refreshLihatBerkasView();
+                        }
+                    } else {
+                        refreshLihatBerkasView();
+                    }
 
                     if (typeof refreshLAATable === 'function') {
                         refreshLAATable();
@@ -2322,8 +2372,12 @@
         }
         window.showLAAToast = showLAAToast;
 
-        function resolveDocPdfUrl(filename) {
-            if (!filename) return '<?= base_url("uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf"); ?>';
+        function resolveDocPdfUrl(filename, existingUrl) {
+            const fallbackPdf = '<?= base_url("uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf"); ?>';
+            if (existingUrl && (existingUrl.startsWith('http://') || existingUrl.startsWith('https://'))) {
+                return existingUrl;
+            }
+            if (!filename) return fallbackPdf;
             filename = String(filename).trim();
             if (filename.startsWith('http://') || filename.startsWith('https://')) return filename;
             if (filename.startsWith('uploads/')) return '<?= base_url(); ?>' + filename;
@@ -2373,41 +2427,47 @@
         }
 
         function getMhsDocInfo(mhs, docKey, nim) {
+            const fallbackPdf = '<?= base_url("uploads/persyaratan_ta/Sertifikat_Massal_2026-07-07_(2).pdf"); ?>';
             if (!mhs) {
                 const fallbackName = `${docKey}_${nim}.pdf`;
-                return { filename: fallbackName, url: resolveDocPdfUrl(fallbackName), status: 'Pending' };
+                return { filename: fallbackName, url: fallbackPdf, status: 'Pending' };
             }
 
             let filename = '';
             let url = '';
-            let status = 'Pending';
+            let status = null;
 
             if (mhs.files && mhs.files[docKey]) {
                 filename = mhs.files[docKey].name || '';
                 url = mhs.files[docKey].url || '';
-                status = mhs.files[docKey].status || 'Pending';
+                if (mhs.files[docKey].status) {
+                    status = mhs.files[docKey].status;
+                }
             }
 
-            if (!filename && mhs.berkas_summary && mhs.berkas_summary.items) {
-                const item = mhs.berkas_summary.items.find(i => i.kode === docKey);
+            if (!status && mhs.berkas_summary && mhs.berkas_summary.items) {
+                const item = mhs.berkas_summary.items.find(i => String(i.kode).trim() === String(docKey).trim());
                 if (item) {
-                    filename = item.file_name || '';
-                    url = item.file_url || '';
-                    status = item.status || 'Pending';
+                    if (!filename) filename = item.file_name || '';
+                    if (!url) url = item.file_url || '';
+                    if (item.status) status = item.status;
                 }
             }
 
             if (!filename) {
                 filename = mhs[`file_${docKey}`] || mhs[`file_name_${docKey}`] || '';
             }
-            if (!status || status === 'Pending') {
-                status = mhs[`status_file_${docKey}`] || mhs[`status_${docKey}`] || status || 'Pending';
+            if (!status) {
+                status = mhs[`status_file_${docKey}`] || mhs[`status_${docKey}`] || 'Pending';
             }
 
-            if (!filename) filename = `${docKey}_${nim}.pdf`;
-            if (!url) url = resolveDocPdfUrl(filename);
+            if (status === 'Approved') status = 'Valid';
+            if (status === 'Rejected') status = 'Invalid';
 
-            return { filename, url, status };
+            if (!filename) filename = `${docKey}_${nim}.pdf`;
+            if (!url) url = resolveDocPdfUrl(filename, url);
+
+            return { filename, url, status: status || 'Pending' };
         }
 
         function toggleLihatBerkasPanel(nim) {

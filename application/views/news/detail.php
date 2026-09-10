@@ -197,6 +197,73 @@ $gambar_url = !empty($berita->gambar) ? base_url($berita->gambar) : base_url('as
         .animate-up {
             animation: fadeInUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
+
+        /* Responsif Mobile & Tablet */
+        @media (max-width: 768px) {
+            nav {
+                padding: 14px 20px;
+            }
+            .back-btn {
+                font-size: 0.9rem;
+            }
+            .article-hero {
+                height: 40vh;
+                background-attachment: scroll;
+            }
+            .article-container {
+                margin: -50px auto 40px auto;
+                padding: 0 20px;
+            }
+            .article-meta {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+                letter-spacing: 1px;
+                margin-bottom: 14px;
+            }
+            .article-title {
+                font-size: 2rem;
+                line-height: 1.25;
+                margin-bottom: 24px;
+            }
+            .article-content {
+                font-size: 1rem;
+                line-height: 1.75;
+                text-align: left;
+            }
+            .article-content p {
+                margin-bottom: 20px;
+            }
+            .article-content p:first-of-type::first-letter {
+                font-size: 3rem;
+                margin-right: 8px;
+            }
+            .article-content blockquote {
+                padding: 18px 20px;
+                font-size: 1.1rem;
+                margin: 30px 0;
+            }
+            .article-content img {
+                margin: 24px 0;
+                border-radius: 16px;
+            }
+            footer {
+                padding: 24px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .article-title {
+                font-size: 1.65rem;
+            }
+            .article-hero {
+                height: 35vh;
+            }
+            .article-container {
+                margin: -40px auto 30px auto;
+                padding: 0 16px;
+            }
+        }
     </style>
 </head>
 <body>

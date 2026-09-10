@@ -50,6 +50,12 @@ class AdminLayanan extends CI_Controller {
 
         $data['berkas_summaries'] = $this->AdminLayanan_model->get_batch_student_berkas_summaries($data['list_pengajuan'], $data['syarat_berkas']);
 
+        foreach ($data['list_pengajuan'] as &$r) {
+            $nim = $r['nim'] ?? '';
+            $r['berkas_summary'] = $data['berkas_summaries'][$nim] ?? null;
+        }
+        unset($r);
+
         $this->load->view('admin_layanan/dashboard', $data);
     }
 
@@ -479,23 +485,18 @@ class AdminLayanan extends CI_Controller {
             $full_name = trim(($r['nama_depan'] ?? '') . ' ' . ($r['nama_belakang'] ?? ''));
             if (empty($full_name)) $full_name = 'Mahasiswa ' . $nim;
 
-            $student_berkas_map = $this->AdminLayanan_model->get_student_berkas_map($nim);
+            $student_summary = $this->AdminLayanan_model->get_student_berkas_summary($nim, $active_syarat, $r);
             $files = array();
 
-            foreach ($active_syarat as $idx => $sb) {
-                $kode = $sb['kode_berkas'];
-                $file_name = $student_berkas_map[$kode]['file_name'] ?? ($r['file_' . $kode] ?? '');
-                if (empty($file_name)) {
-                    $file_name = $kode . '_' . $nim . '.pdf';
-                }
-                $st = $student_berkas_map[$kode]['status_verifikasi'] ?? ($r['status_' . $kode] ?? 'Pending');
-
+            foreach ($student_summary['items'] as $idx => $it) {
+                $kode = $it['kode'];
+                $file_name = !empty($it['file_name']) ? $it['file_name'] : ($kode . '_' . $nim . '.pdf');
                 $files[$kode] = array(
-                    'title'       => ($idx + 1) . '. ' . $sb['nama_berkas'],
+                    'title'       => ($idx + 1) . '. ' . $it['nama'],
                     'name'        => $file_name,
-                    'url'         => $resolve_pdf_url($file_name),
-                    'status'      => $st,
-                    'is_required' => $sb['is_required']
+                    'url'         => $it['file_url'],
+                    'status'      => $it['status'],
+                    'is_required' => 1
                 );
             }
 
