@@ -143,7 +143,9 @@
 
                             if ($s === 'Pending') {
                                 $dot = '#f59e0b'; $bg = '#fffbeb'; $color = '#b45309'; $label = 'Menunggu';
-                            } elseif (strpos($s, 'Ka. Ur') !== false) {
+                            } elseif (stripos($s, 'Ditolak') !== false || stripos($s, 'Reject') !== false) {
+                                $dot = '#ef4444'; $bg = '#fef2f2'; $color = '#991b1b'; $label = 'Ditolak';
+                            } elseif (strpos($s, 'Ka. Ur') !== false || stripos($s, 'Kaur') !== false) {
                                 $dot = '#22c55e'; $bg = '#f0fdf4'; $color = '#166534'; $label = 'Disetujui Ka. Ur';
                             } elseif (strpos($s, 'Laboran') !== false) {
                                 $dot = '#3b82f6'; $bg = '#eff6ff'; $color = '#1d4ed8'; $label = 'Disetujui Laboran';

@@ -124,9 +124,10 @@ class Booking_model extends CI_Model {
 
     public function get_all_peminjaman()
     {
-        $this->db->select('peminjaman.*, ruangan.nama_ruangan, ruangan.kode_ruangan');
+        $this->db->select('peminjaman.*, ruangan.nama_ruangan, ruangan.kode_ruangan, ruangan.id_kategori, ruangan.lokasi, ruangan.kapasitas, kategori_ruangan.nama_kategori');
         $this->db->from('peminjaman');
         $this->db->join('ruangan', 'ruangan.id = peminjaman.id_ruangan', 'left');
+        $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
         $this->db->order_by('peminjaman.created_at', 'DESC');
         return $this->db->get()->result();
     }
@@ -179,8 +180,7 @@ class Booking_model extends CI_Model {
         $this->db->from('peminjaman');
         $this->db->join('ruangan', 'ruangan.id = peminjaman.id_ruangan', 'left');
         $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
-        // Tampilkan semua kecuali yang Ditolak dan Dibatalkan
-        $this->db->where_not_in('peminjaman.status', ['Ditolak', 'Dibatalkan']);
+        // Tampilkan semua jadwal peminjaman termasuk yang Ditolak (agar riwayat tetap terlihat)
         $this->db->order_by('peminjaman.tanggal_mulai', 'ASC');
         $this->db->order_by('peminjaman.jam_mulai', 'ASC');
         return $this->db->get()->result();
@@ -188,6 +188,7 @@ class Booking_model extends CI_Model {
 
     /**
      * Check if a room booking conflicts with existing non-rejected/non-cancelled bookings
+     * Booking yang ditolak atau dibatalkan TIDAK dihitung sebagai bentrok (bisa dibooking ulang oleh orang lain)
      */
     public function check_conflict($id_ruangan, $tanggal_mulai, $tanggal_selesai, $jam_mulai, $jam_selesai, $ignore_id = null)
     {
@@ -195,7 +196,11 @@ class Booking_model extends CI_Model {
         $this->db->from('peminjaman');
         $this->db->join('ruangan', 'ruangan.id = peminjaman.id_ruangan', 'left');
         $this->db->where('peminjaman.id_ruangan', $id_ruangan);
-        $this->db->where_not_in('peminjaman.status', ['Ditolak', 'Dibatalkan']);
+        
+        // Pengecualian mutlak: Status Ditolak atau Dibatalkan tidak menyebabkan bentrok
+        $this->db->where_not_in('peminjaman.status', ['Ditolak', 'Dibatalkan', 'ditolak', 'dibatalkan']);
+        $this->db->where("peminjaman.status NOT LIKE '%Ditolak%'", NULL, FALSE);
+        $this->db->where("peminjaman.status NOT LIKE '%Dibatalkan%'", NULL, FALSE);
 
         // Check date range overlap
         $this->db->where('peminjaman.tanggal_mulai <=', $tanggal_selesai);

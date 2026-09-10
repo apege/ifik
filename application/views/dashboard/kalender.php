@@ -977,6 +977,17 @@
             border-color: #10b981;
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
         }
+
+        .stat-pill-rejected {
+            background: #fef2f2;
+            border: 1.5px solid #fee2e2;
+            color: #b91c1c;
+        }
+        .stat-pill-rejected.active {
+            background: #fee2e2;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.22);
+        }
         .stat-label { font-weight: 600; }
         .stat-val { font-weight: 800; }
 
@@ -1701,12 +1712,12 @@
 
                     <!-- Quick Status Filter Pills in Sidebar -->
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <div class="stat-pill stat-pill-total active" id="statPillTotal" onclick="filterByStatPill('all')" title="Klik untuk menampilkan semua data" style="flex: 1 1 auto; justify-content: center; padding: 5px 8px; font-size: 0.76rem;">
+                        <div class="stat-pill stat-pill-total active" id="statPillTotal" onclick="filterByStatPill('all')" title="Klik untuk menampilkan semua data" style="flex: 1 1 calc(50% - 3px); justify-content: center; padding: 5px 8px; font-size: 0.76rem;">
                             <span class="stat-label" style="color: #64748b;">Total:</span>
                             <span class="stat-val" id="tableStatTotal" style="color: #0f172a;">0</span>
                         </div>
 
-                        <div class="stat-pill stat-pill-pending" id="statPillPending" onclick="filterByStatPill('pending')" title="Klik untuk memfilter status Menunggu" style="flex: 1 1 auto; justify-content: center; padding: 5px 8px; font-size: 0.76rem;">
+                        <div class="stat-pill stat-pill-pending" id="statPillPending" onclick="filterByStatPill('pending')" title="Klik untuk memfilter status Menunggu" style="flex: 1 1 calc(50% - 3px); justify-content: center; padding: 5px 8px; font-size: 0.76rem;">
                             <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
                             <span class="stat-label">Menunggu:</span>
                             <span class="stat-val" id="tableStatPending">0</span>
@@ -1754,6 +1765,15 @@
                                     <span class="sub-count" id="subCountAdmin">0</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Ditolak Stat Pill -->
+                        <div class="stat-pill stat-pill-rejected" id="statPillRejected" onclick="filterByStatPill('rejected')" title="Klik untuk memfilter status Ditolak" style="width: 100%; justify-content: space-between; padding: 6px 10px; font-size: 0.76rem; box-sizing: border-box;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="stat-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+                                <span class="stat-label">Ditolak:</span>
+                            </div>
+                            <span class="stat-val" id="tableStatRejected">0</span>
                         </div>
                     </div>
 
@@ -2204,6 +2224,8 @@
             const s = (status || '').toLowerCase();
             if (s === 'pending' || s === 'menunggu persetujuan') {
                 return { bg: '#f59e0b', border: '#d97706', badgeBg: '#fffbeb', badgeColor: '#b45309', dot: '#f59e0b', label: 'Menunggu Persetujuan' };
+            } else if (s.includes('ditolak') || s.includes('reject')) {
+                return { bg: '#ef4444', border: '#dc2626', badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444', label: 'Ditolak' };
             } else if (s.includes('ka. ur') || s.includes('kaur')) {
                 return { bg: '#10b981', border: '#059669', badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#10b981', label: 'Disetujui Ka. Ur' };
             } else if (s.includes('laboran')) {
@@ -2212,8 +2234,6 @@
                 return { bg: '#8b5cf6', border: '#7c3aed', badgeBg: '#f5f3ff', badgeColor: '#6d28d9', dot: '#8b5cf6', label: 'Disetujui Admin' };
             } else if (s.includes('disetujui')) {
                 return { bg: '#10b981', border: '#059669', badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#10b981', label: 'Disetujui' };
-            } else if (s === 'ditolak') {
-                return { bg: '#ef4444', border: '#dc2626', badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444', label: 'Ditolak' };
             } else if (s === 'selesai') {
                 return { bg: '#64748b', border: '#475569', badgeBg: '#f8fafc', badgeColor: '#475569', dot: '#94a3b8', label: 'Selesai' };
             }
@@ -2979,7 +2999,7 @@
             }
         }
 
-        window.activeStatPillFilter = 'all'; // 'all', 'pending', 'all_approved', 'laboran', 'kaur', 'admin'
+        window.activeStatPillFilter = 'all'; // 'all', 'pending', 'all_approved', 'laboran', 'kaur', 'admin', 'rejected'
 
         function filterByStatPill(type) {
             closeApprovedSubMenu();
@@ -2990,6 +3010,12 @@
                     window.activeStatPillFilter = 'all';
                 } else {
                     window.activeStatPillFilter = 'pending';
+                }
+            } else if (type === 'rejected') {
+                if (window.activeStatPillFilter === 'rejected') {
+                    window.activeStatPillFilter = 'all';
+                } else {
+                    window.activeStatPillFilter = 'rejected';
                 }
             }
             currentTablePage = 1;
@@ -3040,6 +3066,7 @@
             const totalCount = rawBase.length;
             const pendingCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu')).length;
             const allApprovedCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('setuju')).length;
+            const rejectedCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('ditolak') || (b.status || '').toLowerCase().includes('reject')).length;
             const laboranCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('laboran')).length;
             const kaurCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('ka. ur') || (b.status || '').toLowerCase().includes('kaur')).length;
             const adminCount = rawBase.filter(b => (b.status || '').toLowerCase().includes('admin')).length;
@@ -3048,9 +3075,11 @@
             const statTotal = document.getElementById('tableStatTotal');
             const statPending = document.getElementById('tableStatPending');
             const statApproved = document.getElementById('tableStatApproved');
+            const statRejected = document.getElementById('tableStatRejected');
             if (statTotal) statTotal.innerText = totalCount;
             if (statPending) statPending.innerText = pendingCount;
             if (statApproved) statApproved.innerText = allApprovedCount;
+            if (statRejected) statRejected.innerText = rejectedCount;
 
             const scAll = document.getElementById('subCountAllApproved');
             const scLab = document.getElementById('subCountLaboran');
@@ -3065,11 +3094,13 @@
             const pillTot = document.getElementById('statPillTotal');
             const pillPen = document.getElementById('statPillPending');
             const pillApp = document.getElementById('statPillApproved');
+            const pillRej = document.getElementById('statPillRejected');
             const labelApp = document.getElementById('approvedStatLabel');
 
             if (pillTot) pillTot.classList.remove('active');
             if (pillPen) pillPen.classList.remove('active');
             if (pillApp) pillApp.classList.remove('active');
+            if (pillRej) pillRej.classList.remove('active');
 
             ['subOptAllApproved', 'subOptLaboran', 'subOptKaur', 'subOptAdmin'].forEach(id => {
                 const el = document.getElementById(id);
@@ -3083,6 +3114,10 @@
             if (activeFilter === 'pending') {
                 data = data.filter(b => (b.status || '').toLowerCase().includes('pending') || (b.status || '').toLowerCase().includes('menunggu'));
                 if (pillPen) pillPen.classList.add('active');
+                if (labelApp) labelApp.innerText = 'Disetujui:';
+            } else if (activeFilter === 'rejected') {
+                data = data.filter(b => (b.status || '').toLowerCase().includes('ditolak') || (b.status || '').toLowerCase().includes('reject'));
+                if (pillRej) pillRej.classList.add('active');
                 if (labelApp) labelApp.innerText = 'Disetujui:';
             } else if (activeFilter === 'all_approved') {
                 data = data.filter(b => (b.status || '').toLowerCase().includes('setuju'));

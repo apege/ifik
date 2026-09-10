@@ -34,7 +34,7 @@ if (isset($navItems) && is_array($navItems) && !empty($navItems)) {
 
         case 3: // Kaur / Ka Lab
             $defaultNavItems = [
-                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png', 'index' => 1],
+                ['heading' => 'Bimbingan TA', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png', 'index' => 1],
                 ['heading' => 'Approval Peminjaman', 'href' => site_url('kaur/approval'), 'icon_3d' => 'assets/images/icons_3d/approval.png', 'index' => 2],
                 ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png', 'index' => 3],
                 ['heading' => 'Respon Ticketing Lab', 'href' => site_url('kaur#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png', 'index' => 4],

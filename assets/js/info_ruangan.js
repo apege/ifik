@@ -134,13 +134,19 @@
     // Mapping status ke warna dan label singkat
     function getStatusStyle(status) {
         const s = (status || '').toLowerCase();
-        if (s === 'pending') {
+        if (s === 'pending' || s === 'menunggu persetujuan') {
             return {
                 bg: '#f59e0b', border: '#d97706',
                 badgeBg: '#fffbeb', badgeColor: '#b45309', dot: '#f59e0b',
                 label: 'Menunggu Persetujuan'
             };
-        } else if (s.includes('ka. ur')) {
+        } else if (s.includes('ditolak') || s.includes('reject')) {
+            return {
+                bg: '#ef4444', border: '#dc2626',
+                badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444',
+                label: 'Ditolak'
+            };
+        } else if (s.includes('ka. ur') || s.includes('kaur')) {
             return {
                 bg: '#10b981', border: '#059669',
                 badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#22c55e',
@@ -163,12 +169,6 @@
                 bg: '#10b981', border: '#059669',
                 badgeBg: '#f0fdf4', badgeColor: '#166534', dot: '#22c55e',
                 label: 'Disetujui'
-            };
-        } else if (s === 'ditolak') {
-            return {
-                bg: '#ef4444', border: '#dc2626',
-                badgeBg: '#fef2f2', badgeColor: '#991b1b', dot: '#ef4444',
-                label: 'Ditolak'
             };
         } else if (s === 'selesai') {
             return {
