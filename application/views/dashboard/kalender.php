@@ -1456,24 +1456,396 @@
             cursor: not-allowed;
         }
 
-        @media (max-width: 960px) {
-            .table-row-card {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            .tr-status-col {
-                justify-content: flex-start;
-            }
-        }
         @media (max-width: 1024px) {
             .unified-search-pill { width: 340px; }
             #mainAutocompleteList { width: 340px; }
         }
-        @media (max-width: 640px) {
-            .gcal-page-header { flex-wrap: wrap; height: auto; padding: 12px 16px; }
-            .search-filter-container { width: 100%; }
-            .unified-search-pill { width: 100%; }
-            .table-view-container { padding: 12px 14px; }
+        @media (max-width: 768px) {
+            .gcal-page-header {
+                height: 56px;
+                padding: 0 10px;
+                flex-wrap: nowrap;
+                gap: 6px;
+            }
+            .gcal-header-left {
+                flex: 0 0 auto;
+            }
+            .gcal-header-center {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .search-filter-container {
+                width: 100%;
+                min-width: 0;
+                max-width: 100%;
+                gap: 4px;
+            }
+            .unified-search-pill {
+                width: 100%;
+                height: 38px;
+                padding: 2px 4px 2px 6px;
+            }
+            .custom-cat-trigger {
+                padding: 0 4px;
+                font-size: 0.72rem;
+                gap: 3px;
+                max-width: 95px;
+            }
+            .custom-cat-trigger span {
+                max-width: 75px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .unified-search-input {
+                font-size: 0.76rem;
+                padding: 2px 4px;
+                min-width: 0;
+            }
+            .btn-search-trigger {
+                height: 30px;
+                padding: 0 8px;
+                font-size: 0.72rem;
+                border-radius: 8px;
+                gap: 4px;
+            }
+            .btn-standalone-add {
+                height: 38px;
+                padding: 0 8px;
+                font-size: 0.72rem;
+                flex-shrink: 0;
+            }
+            #extraRowsCard {
+                width: calc(100vw - 20px);
+                max-width: 400px;
+                right: 0;
+                top: calc(100% + 6px);
+            }
+            #mainAutocompleteList {
+                width: calc(100vw - 20px);
+                max-width: 400px;
+                right: 0;
+            }
+
+            /* Responsive Calendar Body & Horizontal Scroll */
+            .gcal-body {
+                height: calc(100vh - 56px);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+            }
+            .gcal-days-header-wrapper {
+                overflow: hidden;
+                width: 100%;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgba(30, 41, 59, 0.1);
+                background: #ffffff;
+            }
+            .gcal-days-header {
+                display: flex;
+                min-width: 818px;
+                width: 818px;
+                padding-left: 48px;
+                padding-right: 0;
+                box-sizing: border-box;
+                border-bottom: none;
+                will-change: transform;
+            }
+            .gcal-day-header {
+                min-width: 110px;
+                width: 110px;
+                flex: 0 0 110px;
+                padding: 8px 0;
+                box-sizing: border-box;
+            }
+            .gcal-day-name {
+                font-size: 0.68rem;
+                letter-spacing: 0.5px;
+            }
+            .gcal-day-num {
+                font-size: 1.15rem;
+                width: 36px;
+                height: 36px;
+            }
+            .gcal-grid-scroll {
+                overflow-x: auto !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch;
+                width: 100%;
+                flex: 1 1 auto;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(234, 88, 12, 0.4) transparent;
+            }
+            .gcal-grid {
+                min-width: 818px;
+                width: 818px;
+                display: flex;
+                position: relative;
+            }
+            .gcal-time-col {
+                width: 48px;
+                min-width: 48px;
+                flex: 0 0 48px;
+                position: sticky;
+                left: 0;
+                z-index: 25;
+                background: #fbf7f1;
+                border-right: 1px solid rgba(30, 41, 59, 0.1);
+                box-shadow: 2px 0 6px rgba(0, 0, 0, 0.04);
+            }
+            .gcal-time-label span {
+                font-size: 0.64rem;
+                right: 6px;
+            }
+            .gcal-day-cols {
+                min-width: 770px;
+                width: 770px;
+                flex: 0 0 770px;
+                display: flex;
+            }
+            .gcal-day-col {
+                min-width: 110px;
+                width: 110px;
+                flex: 0 0 110px;
+                border-left: 1px solid rgba(30, 41, 59, 0.08);
+                position: relative;
+            }
+            .gcal-event {
+                left: 3px;
+                right: 3px;
+                padding: 4px 6px;
+                border-radius: 8px;
+                border-left-width: 3px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            }
+            .gcal-event-title {
+                font-size: 0.72rem;
+                font-weight: 800;
+                line-height: 1.2;
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .gcal-event-time {
+                font-size: 0.64rem;
+                font-weight: 700;
+                opacity: 0.9;
+                margin-top: 2px;
+                white-space: nowrap;
+            }
+            .gcal-event-status {
+                font-size: 0.60rem;
+                font-weight: 700;
+                opacity: 0.85;
+                margin-top: 1px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* HIDE DESKTOP TABLE COLUMN HEADER ON MOBILE */
+            .table-column-header {
+                display: none !important;
+            }
+
+            /* HIDE DESKTOP TABLE TITLE IN TOPBAR ON MOBILE TO GIVE MAXIMUM SPACE FOR SEARCH */
+            #headerLeftTableTitle {
+                display: none !important;
+            }
+
+            .table-view-container {
+                padding: 14px 12px 30px;
+                height: calc(100vh - 56px);
+            }
+            .table-view-inner {
+                gap: 12px;
+            }
+
+            .table-cards-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            /* TRANSFORM EACH TABLE ROW INTO A CLEAN MODERN CARD */
+            .table-row-card {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 8px 10px;
+                padding: 14px 14px;
+                background: #ffffff;
+                border: 1px solid rgba(234, 88, 12, 0.16);
+                border-radius: 16px;
+                box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+                min-height: auto;
+                box-sizing: border-box;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                border-bottom: 1px solid rgba(234, 88, 12, 0.16);
+            }
+            .table-row-card:active, .table-row-card:hover {
+                background: #ffffff;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(234, 88, 12, 0.12);
+            }
+
+            /* ROW 1 LEFT: Ruangan Icon & Code/Name */
+            .tr-room-col {
+                grid-column: 1 / 2;
+                order: 1;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 0;
+            }
+            .tr-room-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                border-width: 1.5px;
+                flex-shrink: 0;
+            }
+            .tr-room-icon svg {
+                width: 17px;
+                height: 17px;
+            }
+            .tr-room-info {
+                flex: 1;
+                min-width: 0;
+            }
+            .tr-room-code {
+                font-size: 0.92rem;
+                font-weight: 800;
+                color: #0f172a;
+                line-height: 1.25;
+                white-space: normal;
+                word-break: break-word;
+            }
+            .tr-room-name {
+                font-size: 0.76rem;
+                color: #64748b;
+                margin-top: 2px;
+                line-height: 1.25;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            /* ROW 1 RIGHT: Status Badge */
+            .tr-status-col {
+                grid-column: 2 / 3;
+                order: 2;
+                width: auto;
+                justify-content: flex-end;
+                align-items: flex-start;
+                flex-shrink: 0;
+                padding-left: 0;
+            }
+            .tr-status-badge {
+                width: auto;
+                height: 24px;
+                padding: 2px 10px;
+                font-size: 0.70rem;
+                font-weight: 700;
+                border-radius: 999px;
+                gap: 5px;
+                white-space: nowrap;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            /* ROW 2: User & Time Badges Side-by-Side */
+            .tr-user-time-col {
+                grid-column: 1 / 3;
+                order: 3;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                width: 100%;
+                gap: 6px;
+                margin-top: 2px;
+            }
+            .tr-pill-user {
+                width: auto;
+                flex: 0 0 auto;
+                max-width: 100%;
+                height: 26px;
+                padding: 0 10px;
+                font-size: 0.74rem;
+                font-weight: 600;
+                border-radius: 999px;
+                box-sizing: border-box;
+                justify-content: flex-start;
+            }
+            .tr-pill-user span {
+                max-width: 150px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .tr-pill-time {
+                width: auto;
+                flex: 0 0 auto;
+                height: 26px;
+                padding: 0 10px;
+                font-size: 0.74rem;
+                font-weight: 700;
+                border-radius: 999px;
+                box-sizing: border-box;
+                justify-content: flex-start;
+            }
+
+            /* ROW 3: Date */
+            .tr-date-col {
+                grid-column: 1 / 3;
+                order: 4;
+                font-size: 0.76rem;
+                font-weight: 700;
+                text-align: left;
+                color: #334155;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin-top: 1px;
+            }
+            .tr-date-col::before {
+                content: '📅 ';
+                font-size: 0.74rem;
+            }
+
+            /* ROW 4: Description */
+            .tr-desc-col {
+                grid-column: 1 / 3;
+                order: 5;
+                padding: 0;
+                width: 100%;
+                margin-top: 1px;
+            }
+            .tr-desc-text {
+                font-size: 0.76rem;
+                color: #64748b;
+                line-height: 1.35;
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            /* Hide tooltips on mobile touch */
+            .table-row-card .room-hover-tooltip,
+            .table-row-card .desc-hover-tooltip {
+                display: none !important;
+            }
+
+            .table-pagination-wrap {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+                justify-content: center;
+            }
         }
             /* ===== CURVED ANIMATED SIDEBAR & CHIPS STYLING ===== */
         .curved-sidebar-toggle-btn {
@@ -2090,10 +2462,12 @@
 
     <!-- Container Utama Grid Kalender (Full Height) -->
     <div class="gcal-body" id="calendarViewContainer">
-        <div class="gcal-days-header" id="gcalDaysHeader">
-            <!-- Digenerate via JS -->
+        <div class="gcal-days-header-wrapper">
+            <div class="gcal-days-header" id="gcalDaysHeader">
+                <!-- Digenerate via JS -->
+            </div>
         </div>
-        <div class="gcal-grid-scroll">
+        <div class="gcal-grid-scroll" id="gcalGridScroll">
             <div class="gcal-grid" id="gcalGrid">
                 <!-- Digenerate via JS -->
             </div>
@@ -3474,6 +3848,25 @@
             dayColsHTML += `</div>`;
 
             grid.innerHTML = timeColHTML + dayColsHTML;
+
+            // Mobile Days Header Sync & Auto-scroll to today
+            const gridScroll = document.getElementById('gcalGridScroll');
+            if (gridScroll && daysHeader) {
+                gridScroll.onscroll = function() {
+                    daysHeader.style.transform = `translateX(-${gridScroll.scrollLeft}px)`;
+                };
+
+                if (window.innerWidth <= 768) {
+                    const today = new Date();
+                    const diffDays = Math.round((new Date(today.getFullYear(), today.getMonth(), today.getDate()) - new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth(), currentWeekStart.getDate())) / (1000 * 60 * 60 * 24));
+                    if (diffDays >= 0 && diffDays < 7) {
+                        setTimeout(() => {
+                            const targetX = Math.max(0, (diffDays * 110) - ((window.innerWidth - 48) / 2) + 55);
+                            gridScroll.scrollTo({ left: targetX, behavior: 'smooth' });
+                        }, 60);
+                    }
+                }
+            }
         }
 
         // ==========================================
