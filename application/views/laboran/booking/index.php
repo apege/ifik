@@ -66,7 +66,8 @@
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px 12px;
         }
 
         .header-title-wrap h1 .role-badge {
@@ -79,12 +80,18 @@
             border-radius: 999px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            line-height: 1.2;
         }
 
         .header-title-wrap p {
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-top: 4px;
+            line-height: 1.45;
         }
 
         .header-actions {
@@ -413,10 +420,10 @@
             align-items: center;
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 2px 12px;
+            border-radius: 16px;
+            padding: 4px 6px 4px 14px;
             flex: 1;
-            height: 44px;
+            height: 48px;
             transition: all 0.2s ease;
             position: relative;
         }
@@ -428,22 +435,26 @@
 
         .unified-divider {
             width: 1.5px;
-            height: 20px;
+            height: 22px;
             background-color: #cbd5e1;
             margin: 0 10px;
             flex-shrink: 0;
         }
 
+        .standalone-btn-text {
+            display: none;
+        }
+
         .btn-standalone-add {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: #fff7ed;
             border: 1.5px solid #ffedd5;
-            border-radius: 14px;
-            padding: 6px 14px;
-            height: 44px;
-            font-size: 0.8rem;
+            border-radius: 16px;
+            padding: 6px 16px;
+            height: 48px;
+            font-size: 0.85rem;
             font-weight: 700;
             color: #ea580c;
             cursor: pointer;
@@ -460,9 +471,9 @@
         .badge-standalone-count {
             background: #ea580c;
             color: #ffffff;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            padding: 1.5px 8px;
+            padding: 2px 9px;
             border-radius: 99px;
         }
 
@@ -470,9 +481,9 @@
             display: none;
             position: absolute;
             top: calc(100% + 8px);
+            left: 0;
             right: 0;
             width: 100%;
-            max-width: 660px;
             background: #ffffff;
             border: 1.5px solid #fed7aa;
             border-radius: 16px;
@@ -1367,7 +1378,7 @@
         /* Mobile Responsive Styles & Card Slider */
         @media (max-width: 900px) {
             body {
-                padding: 68px 14px 110px 14px;
+                padding: 16px 14px 110px 14px;
             }
             .table-responsive {
                 overflow-x: auto !important;
@@ -1380,7 +1391,22 @@
             .page-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 14px;
+                gap: 10px;
+                padding-left: 48px; /* Clearance for fixed burger button */
+                margin-bottom: 20px;
+                min-height: 42px;
+            }
+            .header-title-wrap h1 {
+                font-size: 1.25rem;
+                gap: 8px;
+            }
+            .header-title-wrap h1 .role-badge {
+                font-size: 0.65rem;
+                padding: 2px 8px;
+            }
+            .header-title-wrap p {
+                font-size: 0.8rem;
+                line-height: 1.4;
             }
             .stat-cards-grid {
                 display: flex !important;
@@ -1430,6 +1456,92 @@
             }
             .filter-pills-dots {
                 display: flex;
+            }
+
+            /* Multi-Search Mobile Optimization */
+            .search-pill-container {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+
+            .unified-search-pill {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 48px !important;
+                padding: 4px 6px 4px 12px !important;
+                border-radius: 14px !important;
+                box-sizing: border-box !important;
+            }
+
+            #label-filter-main-cat, .extra-category-label {
+                max-width: 105px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                font-size: 0.8rem !important;
+            }
+
+            .btn-search-cari {
+                margin-left: 6px !important;
+                padding: 6px 14px !important;
+                font-size: 0.78rem !important;
+                gap: 4px !important;
+                border-radius: 10px !important;
+                white-space: nowrap !important;
+            }
+
+            .standalone-btn-text {
+                display: inline !important;
+            }
+
+            .btn-standalone-add {
+                width: 100% !important;
+                height: 44px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 0 16px !important;
+                font-size: 0.84rem !important;
+                border-radius: 14px !important;
+                box-sizing: border-box !important;
+            }
+
+            .extra-rows-card {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                width: 100% !important;
+                border-radius: 16px !important;
+                margin-top: 6px !important;
+                padding: 14px 12px !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+                z-index: 50 !important;
+                box-sizing: border-box !important;
+            }
+
+            .extra-filter-row {
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .extra-filter-row .unified-search-pill {
+                flex: 1 !important;
+                width: auto !important;
+                min-width: 0 !important;
+                height: 46px !important;
+            }
+
+            .extra-filter-row .btn-remove-row {
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 12px !important;
+                flex-shrink: 0 !important;
             }
         }
 
@@ -1638,9 +1750,9 @@
                     <!-- Category Dropdown Container -->
                     <div class="custom-dropdown-container">
                         <input type="hidden" id="mainCategoryVal" value="query">
-                        <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                        <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none font-bold text-slate-800 cursor-pointer py-1 px-1 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.84rem;color:#1e293b;">
                             <span id="label-filter-main-cat">Cari Kata Kunci</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-main-cat"></i>
+                            <i class="fa-solid fa-chevron-down text-[11px] text-slate-400 dropdown-arrow" id="arrow-filter-main-cat"></i>
                         </button>
                         <div id="menu-filter-main-cat" class="custom-dropdown-menu">
                             <div onclick="selectMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item active"><span>🔍 Kata Kunci (Semua)</span></div>
@@ -1658,26 +1770,26 @@
                     <div id="mainValueContainer" style="flex: 1; display: flex; align-items: center; min-width: 0; position: relative;">
                         <!-- MODE 1: Text Search (default) -->
                         <div id="modeText" style="flex:1;display:flex;align-items:center;min-width:0;">
-                            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 0.75rem; margin-right: 8px; flex-shrink:0;"></i>
-                            <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 0.85rem; margin-right: 10px; flex-shrink:0;"></i>
+                            <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." style="width: 100%; font-size: 0.85rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
                         </div>
                         <!-- MODE 2: Date Range Picker (single input, range mode) -->
-                        <div id="modeTanggal" style="flex:1;display:none;align-items:center;min-width:0;gap:6px;">
-                            <i class="fa-solid fa-calendar-days" style="color: #94a3b8; font-size: 0.75rem; flex-shrink:0; margin-right:6px;"></i>
-                            <input type="text" id="dateRangePicker" placeholder="Pilih rentang tanggal..." readonly style="flex:1;font-size:0.78rem;font-weight:500;background:transparent;border:none;outline:none;color:#1e293b;cursor:pointer;min-width:0;">
-                            <button type="button" id="btnClearDateRange" onclick="clearDateRange()" style="display:none;background:none;border:none;color:#94a3b8;cursor:pointer;padding:2px 4px;font-size:0.75rem;flex-shrink:0;" title="Hapus filter tanggal">
+                        <div id="modeTanggal" style="flex:1;display:none;align-items:center;min-width:0;gap:8px;">
+                            <i class="fa-solid fa-calendar-days" style="color: #94a3b8; font-size: 0.85rem; flex-shrink:0; margin-right:4px;"></i>
+                            <input type="text" id="dateRangePicker" placeholder="Pilih rentang tanggal..." readonly style="flex:1;font-size:0.85rem;font-weight:600;background:transparent;border:none;outline:none;color:#1e293b;cursor:pointer;min-width:0;">
+                            <button type="button" id="btnClearDateRange" onclick="clearDateRange()" style="display:none;background:none;border:none;color:#94a3b8;cursor:pointer;padding:2px 4px;font-size:0.8rem;flex-shrink:0;" title="Hapus filter tanggal">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
                         <!-- MODE 3: Status Dropdown -->
                         <div id="modeStatus" style="flex:1;display:none;align-items:center;min-width:0;position:relative;">
-                            <i class="fa-solid fa-circle-half-stroke" style="color: #94a3b8; font-size: 0.75rem; margin-right: 8px; flex-shrink:0;"></i>
-                            <button type="button" id="statusDropdownTrigger" onclick="toggleMainStatusDropdown(event)" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;outline:none;cursor:pointer;font-size:0.78rem;font-weight:600;color:#1e293b;padding:0;">
-                                <span id="statusDropdownLabel" style="display:flex;align-items:center;gap:6px;">
+                            <i class="fa-solid fa-circle-half-stroke" style="color: #94a3b8; font-size: 0.85rem; margin-right: 10px; flex-shrink:0;"></i>
+                            <button type="button" id="statusDropdownTrigger" onclick="toggleMainStatusDropdown(event)" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;outline:none;cursor:pointer;font-size:0.85rem;font-weight:700;color:#1e293b;padding:0;">
+                                <span id="statusDropdownLabel" style="display:flex;align-items:center;gap:8px;">
                                     <span id="statusDropdownDot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;flex-shrink:0;"></span>
                                     <span id="statusDropdownText">Semua Status</span>
                                 </span>
-                                <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;color:#94a3b8;margin-right:4px;"></i>
+                                <i class="fa-solid fa-chevron-down" style="font-size:0.7rem;color:#94a3b8;margin-right:4px;"></i>
                             </button>
                             <input type="hidden" id="statusDropdownVal" value="">
                             <!-- Status Dropdown Menu -->
@@ -1706,14 +1818,17 @@
 
 
                     <!-- Tombol Cari -->
-                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="padding: 6px 14px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.75rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(234,88,12,0.25);">
-                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="padding: 7px 18px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.82rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 7px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(234,88,12,0.25);">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i> Cari
                     </button>
                 </div>
 
                 <!-- Standalone Add Filter Button (+ 1/4) -->
                 <button type="button" id="standaloneAddBtn" onclick="toggleOrAddFilterRow(event)" class="btn-standalone-add" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
-                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span class="standalone-btn-content" style="display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-filter text-[11px]" style="color: #ea580c; font-size: 0.75rem;"></i>
+                        <span class="standalone-btn-text">Filter Tambahan</span>
+                    </span>
                     <span id="filterCountBadge" class="badge-standalone-count">1/4</span>
                 </button>
 
@@ -2301,11 +2416,141 @@
             document.getElementById('statusDropdownMenu').style.display = 'none';
         }
 
+        let extraFpInstances = {};
+
+        function getExtraRowInputHtml(rowId, catKey, defaultVal = '') {
+            const catObj = SEARCH_CATEGORIES.find(c => c.key === catKey) || SEARCH_CATEGORIES[0];
+            const cleanLabel = catObj.label.replace(/^[^\s]+\s*/, '');
+
+            if (catKey === 'tanggal') {
+                return `
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0; gap: 8px; position: relative;">
+                        <i class="fa-regular fa-calendar-days text-slate-400" style="font-size: 0.85rem; flex-shrink: 0;"></i>
+                        <input type="text" id="extraDateInput_${rowId}" class="extra-date-picker-input" placeholder="Pilih rentang tanggal..." readonly style="width: 100%; font-size: 0.84rem; font-weight: 600; background: transparent; border: none; outline: none; color: #1e293b; cursor: pointer;">
+                        <button type="button" id="extraDateClear_${rowId}" onclick="clearExtraDateRange('${rowId}')" style="display: none; background: none; border: none; color: #94a3b8; font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 4px;" title="Reset Tanggal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (catKey === 'status') {
+                return `
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0; position: relative;" id="extraStatusWrapper_${rowId}">
+                        <input type="hidden" class="extra-status-val" id="extraStatusVal_${rowId}" value="${defaultVal || ''}">
+                        <button type="button" onclick="toggleExtraStatusDropdown('${rowId}', event)" style="background: none; border: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.84rem; font-weight: 700; color: #1e293b; width: 100%; text-align: left; padding: 0;">
+                            <span id="extraStatusDot_${rowId}" style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block; flex-shrink: 0;"></span>
+                            <span id="extraStatusText_${rowId}" style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Semua Status</span>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; color: #94a3b8; margin-right: 4px;"></i>
+                        </button>
+                        <div id="extraStatusMenu_${rowId}" class="extra-status-menu" style="display: none; position: absolute; top: calc(100% + 8px); left: 0; min-width: 220px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,0.18); z-index: 100030; padding: 6px;">
+                            <div onclick="selectExtraStatus('${rowId}', '', 'Semua Status', '#94a3b8', this)" class="status-filter-opt active" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;flex-shrink:0;"></span> Semua Status
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'pending', 'Menunggu ACC', '#f59e0b', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;flex-shrink:0;"></span> Menunggu ACC
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'laboran', 'Disetujui Laboran', '#3b82f6', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block;flex-shrink:0;"></span> Disetujui Laboran
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'kaur', 'Disetujui Ka. Ur', '#22c55e', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0;"></span> Disetujui Ka. Ur
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'admin', 'Disetujui Admin', '#8b5cf6', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#8b5cf6;display:inline-block;flex-shrink:0;"></span> Disetujui Admin
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'rejected', 'Ditolak', '#ef4444', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;flex-shrink:0;"></span> Ditolak
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        <input type="text" class="extra-search-input" value="${defaultVal}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik ${cleanLabel.toLowerCase()}..." style="width: 100%; font-size: 0.84rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    </div>
+                `;
+            }
+        }
+
+        function initExtraRowInput(rowId, catKey) {
+            if (extraFpInstances[rowId]) {
+                extraFpInstances[rowId].destroy();
+                delete extraFpInstances[rowId];
+            }
+
+            if (catKey === 'tanggal') {
+                setTimeout(() => {
+                    const el = document.getElementById('extraDateInput_' + rowId);
+                    if (el) {
+                        extraFpInstances[rowId] = flatpickr(el, {
+                            mode: 'range',
+                            locale: { firstDayOfWeek: 1 },
+                            dateFormat: 'Y-m-d',
+                            altInput: true,
+                            altFormat: 'd M Y',
+                            allowInput: false,
+                            disableMobile: true,
+                            onClose: function(selectedDates) {
+                                const btn = document.getElementById('extraDateClear_' + rowId);
+                                if (btn) btn.style.display = selectedDates.length > 0 ? 'inline-flex' : 'none';
+                            }
+                        });
+                    }
+                }, 10);
+            }
+        }
+
+        function clearExtraDateRange(rowId) {
+            if (extraFpInstances[rowId]) {
+                extraFpInstances[rowId].clear();
+            }
+            const btn = document.getElementById('extraDateClear_' + rowId);
+            if (btn) btn.style.display = 'none';
+        }
+
+        function toggleExtraStatusDropdown(rowId, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('extraStatusMenu_' + rowId);
+            if (!menu) return;
+            const isShown = menu.style.display === 'block';
+            document.querySelectorAll('.extra-status-menu').forEach(m => m.style.display = 'none');
+            const mainStatusMenu = document.getElementById('statusDropdownMenu');
+            if (mainStatusMenu) mainStatusMenu.style.display = 'none';
+            closeAllCustomDropdowns();
+            menu.style.display = isShown ? 'none' : 'block';
+        }
+
+        function selectExtraStatus(rowId, val, label, color, el) {
+            const valInput = document.getElementById('extraStatusVal_' + rowId);
+            const dot = document.getElementById('extraStatusDot_' + rowId);
+            const text = document.getElementById('extraStatusText_' + rowId);
+            const menu = document.getElementById('extraStatusMenu_' + rowId);
+            if (valInput) valInput.value = val;
+            if (dot) dot.style.background = color;
+            if (text) text.innerText = label;
+            if (menu) {
+                menu.querySelectorAll('.status-filter-opt').forEach(o => {
+                    o.style.background = '';
+                    o.style.color = '#334155';
+                });
+                if (el) {
+                    el.style.background = '#fff7ed';
+                    el.style.color = '#ea580c';
+                }
+                menu.style.display = 'none';
+            }
+        }
+
         document.addEventListener('click', function(e) {
             if (!e.target.closest('#modeStatus')) {
                 const m = document.getElementById('statusDropdownMenu');
                 if (m) m.style.display = 'none';
             }
+            document.querySelectorAll('.extra-status-menu').forEach(menu => {
+                if (!e.target.closest('#' + menu.parentElement.id)) {
+                    menu.style.display = 'none';
+                }
+            });
         }, true);
 
         function switchMainMode(mode) {
@@ -2382,28 +2627,29 @@
             rowHtml.className = 'extra-filter-row';
             rowHtml.id = rowId;
             rowHtml.innerHTML = `
-                <div class="unified-search-pill" style="height: 40px;">
+                <div class="unified-search-pill" style="height: 44px;">
                     <div class="custom-dropdown-container">
                         <input type="hidden" class="extra-category-val" value="${defaultKey}">
-                        <button type="button" onclick="toggleCustomDropdown('${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                        <button type="button" onclick="toggleCustomDropdown('${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none font-bold text-slate-800 cursor-pointer py-1 px-1 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.84rem;color:#1e293b;">
                             <span class="extra-category-label">${cleanLabel}</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-${rowId}"></i>
+                            <i class="fa-solid fa-chevron-down text-[11px] text-slate-400 dropdown-arrow" id="arrow-filter-${rowId}"></i>
                         </button>
                         <div id="menu-filter-${rowId}" class="custom-dropdown-menu">
                             ${dropdownItems}
                         </div>
                     </div>
-                    <div class="unified-divider" style="height: 16px;"></div>
-                    <div style="flex: 1; display: flex; align-items: center; min-width: 0;">
-                        <input type="text" class="extra-search-input" value="${defaultVal}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik filter tambahan..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    <div class="unified-divider" style="height: 20px;"></div>
+                    <div id="extraInputContainer_${rowId}" style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        ${getExtraRowInputHtml(rowId, defaultKey, defaultVal)}
                     </div>
                 </div>
                 <button type="button" onclick="removeFilterRow('${rowId}')" class="btn-remove-row" title="Hapus kriteria ini">
-                    <i class="fa-solid fa-trash-can text-xs"></i>
+                    <i class="fa-solid fa-trash-can text-sm"></i>
                 </button>
             `;
 
             container.appendChild(rowHtml);
+            initExtraRowInput(rowId, defaultKey);
             updateFilterCountBadge();
         }
 
@@ -2417,9 +2663,19 @@
                 el.classList.add('active');
             }
             closeAllCustomDropdowns();
+
+            const inputContainer = document.getElementById('extraInputContainer_' + rowId);
+            if (inputContainer) {
+                inputContainer.innerHTML = getExtraRowInputHtml(rowId, catKey, '');
+                initExtraRowInput(rowId, catKey);
+            }
         }
 
         function removeFilterRow(rowId) {
+            if (extraFpInstances[rowId]) {
+                extraFpInstances[rowId].destroy();
+                delete extraFpInstances[rowId];
+            }
             const row = document.getElementById(rowId);
             if (row) {
                 row.remove();
@@ -2442,6 +2698,14 @@
             if (btnClear) btnClear.style.display = 'none';
             selectStatusFilter('', 'Semua Status', '#94a3b8', null);
             selectMainCategory('query', '🔍 Kata Kunci (Semua)', null);
+            
+            Object.keys(extraFpInstances).forEach(rowId => {
+                if (extraFpInstances[rowId]) {
+                    extraFpInstances[rowId].destroy();
+                }
+            });
+            extraFpInstances = {};
+
             const container = document.getElementById('additionalFilterRowsContainer');
             if (container) container.innerHTML = '';
             updateFilterCountBadge();
@@ -2476,10 +2740,26 @@
             }
 
             document.querySelectorAll('#additionalFilterRowsContainer .extra-filter-row').forEach(row => {
+                const rowId = row.id;
                 const key = row.querySelector('.extra-category-val').value;
-                const val = (row.querySelector('.extra-search-input').value || '').toLowerCase().trim();
-                if (val) {
-                    filters.push({ key: key, val: val });
+                if (key === 'tanggal') {
+                    const fp = extraFpInstances[rowId];
+                    const dates = fp ? fp.selectedDates : [];
+                    const fromVal = dates[0] || null;
+                    const toVal = dates[1] || dates[0] || null;
+                    if (fromVal) {
+                        filters.push({ key: 'tanggal_range', from: fromVal, to: toVal });
+                    }
+                } else if (key === 'status') {
+                    const statusVal = (row.querySelector('.extra-status-val')?.value || '').trim();
+                    if (statusVal) {
+                        filters.push({ key: 'status_category', val: statusVal });
+                    }
+                } else {
+                    const val = (row.querySelector('.extra-search-input')?.value || '').toLowerCase().trim();
+                    if (val) {
+                        filters.push({ key: key, val: val });
+                    }
                 }
             });
 
@@ -3241,25 +3521,30 @@
             });
 
             const dots = dotsContainer.querySelectorAll('.pill-dot');
-            wrap.addEventListener('scroll', () => {
-                const wrapCenter = wrap.getBoundingClientRect().left + wrap.clientWidth / 2;
-                let closestIdx = 0;
-                let minDiff = Infinity;
-
-                pills.forEach((pill, i) => {
-                    const rect = pill.getBoundingClientRect();
-                    const pillCenter = rect.left + rect.width / 2;
-                    const diff = Math.abs(wrapCenter - pillCenter);
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        closestIdx = i;
-                    }
-                });
+            const updateDots = () => {
+                const maxScroll = wrap.scrollWidth - wrap.clientWidth;
+                if (maxScroll <= 0) {
+                    dots.forEach((dot, i) => dot.classList.toggle('active', i === 0));
+                    return;
+                }
+                const scrollLeft = wrap.scrollLeft;
+                let activeIdx = 0;
+                if (scrollLeft <= 5) {
+                    activeIdx = 0;
+                } else if (scrollLeft >= maxScroll - 5) {
+                    activeIdx = dots.length - 1;
+                } else {
+                    activeIdx = Math.min(Math.max(0, Math.round((scrollLeft / maxScroll) * (dots.length - 1))), dots.length - 1);
+                }
 
                 dots.forEach((dot, i) => {
-                    dot.classList.toggle('active', i === closestIdx);
+                    dot.classList.toggle('active', i === activeIdx);
                 });
-            }, { passive: true });
+            };
+
+            wrap.addEventListener('scroll', updateDots, { passive: true });
+            window.addEventListener('resize', updateDots, { passive: true });
+            updateDots();
         }
     </script>
 </body>
