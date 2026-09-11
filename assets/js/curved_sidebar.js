@@ -26,7 +26,7 @@
             this.svgId = options.svgId || 'curvedSidebarSvg';
             
             this.isDesktop = window.innerWidth >= 1024;
-            this.isOpen = typeof options.defaultOpen !== 'undefined' ? options.defaultOpen : (window.innerWidth >= 1024); // Open by default only on desktop
+            this.isOpen = typeof options.defaultOpen !== 'undefined' ? options.defaultOpen : true; // Always default open (never hidden)
             this.animFrameId = null;
             this.animDuration = 750; // ms
 
@@ -44,7 +44,7 @@
                 return;
             }
 
-            // Set initial open/collapsed state (Default open only on desktop >= 1024px)
+            // Set initial open/collapsed state (Always default OPEN / not hidden)
             if (this.isOpen) {
                 this.panel.classList.add('is-active');
                 this.toggleBtn.classList.add('is-active');
@@ -55,6 +55,10 @@
                 this.panel.classList.remove('is-active');
                 this.toggleBtn.classList.remove('is-active');
                 this.toggleBtn.setAttribute('aria-expanded', 'false');
+                if (this.backdrop) {
+                    this.backdrop.classList.remove('is-active');
+                }
+                document.body.classList.remove('curved-sidebar-open');
                 this.setPath(70);
                 if (this.svg) this.svg.style.opacity = '0';
             }
@@ -84,14 +88,8 @@
                 }
             });
 
-            let prevWidth = window.innerWidth;
             window.addEventListener('resize', () => {
                 this.updateSvgDimensions();
-                const currentWidth = window.innerWidth;
-                if (prevWidth >= 1024 && currentWidth < 1024 && this.isOpen) {
-                    this.close();
-                }
-                prevWidth = currentWidth;
                 if (this.isOpen) {
                     this.setPath(0);
                 } else {
@@ -169,10 +167,6 @@
                             // Fallback standard navigation
                         }
                     }
-                    // Auto-close on mobile screen
-                    if (window.innerWidth < 1024) {
-                        setTimeout(() => this.close(), 180);
-                    }
                 });
             });
         }
@@ -229,7 +223,14 @@
             if (this.backdrop && window.innerWidth < 1024) {
                 this.backdrop.classList.add('is-active');
             }
+            if (window.innerWidth < 1024) {
+                document.body.classList.add('curved-sidebar-open');
+            }
             this.panel.classList.add('is-active');
+
+            // Scroll inner menu to top
+            const inner = this.panel ? this.panel.querySelector('.curved-sidebar-inner') : null;
+            if (inner) inner.scrollTop = 0;
 
             if (this.svg) this.svg.style.opacity = '1';
             // Morph curve from bulging (70) to flat (0)
@@ -246,6 +247,7 @@
             this.toggleBtn.classList.remove('is-active');
             this.toggleBtn.setAttribute('aria-expanded', 'false');
             if (this.backdrop) this.backdrop.classList.remove('is-active');
+            document.body.classList.remove('curved-sidebar-open');
             this.panel.classList.remove('is-active');
 
             if (this.svg) this.svg.style.opacity = '1';
@@ -256,13 +258,16 @@
         }
     }
 
-    // Export globally & auto-init if elements exist
-    window.CurvedSidebar = CurvedSidebar;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.getElementById('curvedSidebarPanel')) {
+    function initCurvedSidebar() {
+        if (document.getElementById('curvedSidebarPanel') && !window.curvedSidebarInstance) {
             window.curvedSidebarInstance = new CurvedSidebar();
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCurvedSidebar);
+    } else {
+        initCurvedSidebar();
+    }
 
 })(window, document);
