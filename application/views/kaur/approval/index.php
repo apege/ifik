@@ -360,7 +360,7 @@
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
             border-radius: 16px;
-            padding: 3px 14px;
+            padding: 4px 6px 4px 14px;
             flex: 1;
             height: 48px;
             transition: all 0.2s ease;
@@ -376,7 +376,7 @@
             width: 1.5px;
             height: 22px;
             background-color: #cbd5e1;
-            margin: 0 12px;
+            margin: 0 10px;
             flex-shrink: 0;
         }
 
@@ -1228,18 +1228,137 @@
             border-radius: 999px;
         }
 
+        /* =========================================================
+           SURAT RESMI MODAL STYLING (BASE / DESKTOP)
+           ========================================================= */
+        .surat-modal-card {
+            max-width: 860px;
+            width: 95%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+        }
+
+        .surat-modal-header {
+            padding: 14px 20px;
+            background: #ffffff;
+            border-bottom: 1.5px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .surat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .surat-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .surat-header-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .surat-header-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .surat-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-surat-print {
+            padding: 7px 14px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-surat-print:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .btn-surat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-surat-icon:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-surat-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-surat-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
         /* Mobile Responsive Styles & Card Slider */
         @media (max-width: 900px) {
             body {
                 padding: 16px 14px 110px 14px;
-            }
-            .table-responsive {
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-            }
-            table.kaur-table {
-                min-width: 820px;
-                table-layout: auto;
             }
             .page-header {
                 flex-direction: column;
@@ -1323,7 +1442,7 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 height: 48px !important;
-                padding: 3px 12px !important;
+                padding: 4px 6px 4px 12px !important;
                 border-radius: 14px !important;
                 box-sizing: border-box !important;
             }
@@ -1337,9 +1456,10 @@
             }
 
             .btn-search-cari {
-                padding: 7px 16px !important;
-                font-size: 0.8rem !important;
-                gap: 5px !important;
+                margin-left: 6px !important;
+                padding: 6px 14px !important;
+                font-size: 0.78rem !important;
+                gap: 4px !important;
                 border-radius: 10px !important;
                 white-space: nowrap !important;
             }
@@ -1395,6 +1515,388 @@
                 border-radius: 12px !important;
                 flex-shrink: 0 !important;
             }
+
+            /* =========================================================
+               RESPONSIVE TABLE TO MOBILE CARDS TRANSFORMATION (<900px)
+               ========================================================= */
+            .table-card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            table.kaur-table, table.laboran-table {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                border: none !important;
+            }
+
+            table.kaur-table colgroup, table.laboran-table colgroup,
+            table.kaur-table thead, table.laboran-table thead {
+                display: none !important;
+            }
+
+            table.kaur-table tbody, table.laboran-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .kaur-row, .booking-row {
+                display: flex !important;
+                flex-direction: column !important;
+                background: #ffffff !important;
+                border: 1.5px solid #e2e8f0 !important;
+                border-radius: 16px !important;
+                padding: 14px 14px 14px 14px !important;
+                box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+                gap: 10px !important;
+                position: relative !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s !important;
+            }
+
+            .kaur-row[style*="display: none"],
+            .booking-row[style*="display: none"] {
+                display: none !important;
+            }
+
+            .kaur-row:hover, .booking-row:hover {
+                border-color: #cbd5e1 !important;
+                box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08) !important;
+            }
+
+            .kaur-row:has(.row-checkbox:checked),
+            .booking-row:has(.row-checkbox:checked) {
+                border-color: #fdba74 !important;
+                background: #fffbf7 !important;
+                box-shadow: 0 4px 16px rgba(234, 88, 12, 0.09) !important;
+            }
+
+            .kaur-row td, .booking-row td {
+                display: block !important;
+                padding: 0 !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+
+            /* TD 1: Checkbox (Top Left Absolute) */
+            .kaur-row td:nth-child(1),
+            .booking-row td:nth-child(1) {
+                position: absolute !important;
+                top: 14px !important;
+                left: 14px !important;
+                width: auto !important;
+                z-index: 2 !important;
+            }
+
+            .kaur-row td:nth-child(1) .custom-checkbox,
+            .booking-row td:nth-child(1) .custom-checkbox {
+                margin: 0 !important;
+                width: 20px !important;
+                height: 20px !important;
+            }
+
+            /* TD 6: Status Badge (Top Bar, Next to Checkbox) */
+            .kaur-row td:nth-child(6),
+            .booking-row td:nth-child(6) {
+                order: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                padding-left: 30px !important;
+                padding-right: 80px !important;
+                min-height: 28px !important;
+            }
+
+            .kaur-row .status-badge,
+            .booking-row .status-badge {
+                width: auto !important;
+                max-width: 100% !important;
+                height: 26px !important;
+                padding: 2px 10px !important;
+                font-size: 0.72rem !important;
+                justify-content: flex-start !important;
+            }
+
+            /* TD 7: Aksi (Top Right Absolute) */
+            .kaur-row td:nth-child(7),
+            .booking-row td:nth-child(7) {
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                width: auto !important;
+                z-index: 20 !important;
+                padding: 0 !important;
+            }
+
+            .kaur-row .btn-action-dots,
+            .booking-row .btn-action-dots {
+                height: 30px !important;
+                padding: 4px 10px !important;
+                font-size: 0.76rem !important;
+                border-radius: 8px !important;
+            }
+
+            .kaur-row .action-dropdown-menu,
+            .booking-row .action-dropdown-menu {
+                right: 0 !important;
+                left: auto !important;
+                top: calc(100% + 4px) !important;
+            }
+
+            /* TD 2: Ruangan (Order 2) */
+            .kaur-row td:nth-child(2),
+            .booking-row td:nth-child(2) {
+                order: 2 !important;
+                margin-top: 4px !important;
+            }
+
+            .kaur-row .tr-room-col,
+            .booking-row .tr-room-col {
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+
+            .kaur-row .tr-room-icon,
+            .booking-row .tr-room-icon {
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 10px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .kaur-row .tr-room-info,
+            .booking-row .tr-room-info {
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+
+            .kaur-row .tr-room-code,
+            .booking-row .tr-room-code {
+                font-size: 0.92rem !important;
+                font-weight: 800 !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                line-height: 1.3 !important;
+            }
+
+            .kaur-row .tr-room-name,
+            .booking-row .tr-room-name {
+                font-size: 0.78rem !important;
+                font-weight: 500 !important;
+                color: #64748b !important;
+                white-space: normal !important;
+                line-height: 1.3 !important;
+            }
+
+            /* TD 3: Peminjam & Waktu (Order 3) */
+            .kaur-row td:nth-child(3),
+            .booking-row td:nth-child(3) {
+                order: 3 !important;
+            }
+
+            .kaur-row .tr-user-time-col,
+            .booking-row .tr-user-time-col {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .kaur-row .tr-pill-user,
+            .kaur-row .tr-pill-time,
+            .booking-row .tr-pill-user,
+            .booking-row .tr-pill-time {
+                flex: 1 1 calc(50% - 4px) !important;
+                min-width: 120px !important;
+                width: auto !important;
+                height: 28px !important;
+                font-size: 0.76rem !important;
+                padding: 3px 10px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* TD 4: Tanggal (Order 4) */
+            .kaur-row td:nth-child(4),
+            .booking-row td:nth-child(4) {
+                order: 4 !important;
+            }
+
+            .kaur-row .tr-date-col,
+            .booking-row .tr-date-col {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                font-size: 0.78rem !important;
+                font-weight: 700 !important;
+                color: #334155 !important;
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 10px !important;
+                padding: 6px 12px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .kaur-row .tr-date-col::before,
+            .booking-row .tr-date-col::before {
+                content: '📅';
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+
+            /* TD 5: Keterangan (Order 5) */
+            .kaur-row td:nth-child(5),
+            .booking-row td:nth-child(5) {
+                order: 5 !important;
+            }
+
+            .kaur-row .tr-desc-col,
+            .booking-row .tr-desc-col {
+                display: block !important;
+                width: 100% !important;
+                background: #f8fafc !important;
+                border-left: 3.5px solid #ea580c !important;
+                border-radius: 0 10px 10px 0 !important;
+                padding: 8px 12px !important;
+                box-sizing: border-box !important;
+            }
+
+            .kaur-row .tr-desc-text,
+            .booking-row .tr-desc-text {
+                white-space: normal !important;
+                font-size: 0.78rem !important;
+                color: #334155 !important;
+                line-height: 1.4 !important;
+                word-break: break-word !important;
+            }
+
+            /* Floating Batch Bar Mobile */
+            .floating-batch-bar {
+                width: calc(100% - 24px) !important;
+                max-width: calc(100% - 24px) !important;
+                left: 12px !important;
+                bottom: 16px !important;
+                transform: translateX(0) translateY(120px) !important;
+                padding: 10px 14px !important;
+                border-radius: 16px !important;
+                gap: 10px !important;
+                box-sizing: border-box !important;
+                justify-content: space-between !important;
+                flex-wrap: wrap !important;
+            }
+            .floating-batch-bar.show {
+                transform: translateX(0) translateY(0) !important;
+            }
+            .floating-batch-bar .batch-count-badge {
+                font-size: 0.76rem !important;
+            }
+            .floating-batch-bar .btn-batch-acc,
+            .floating-batch-bar .btn-batch-rej,
+            .floating-batch-bar .btn-batch-del {
+                padding: 6px 12px !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* Pagination Bar Mobile */
+            .pagination-bar {
+                flex-direction: column !important;
+                gap: 10px !important;
+                align-items: center !important;
+                padding: 14px 12px !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 14px !important;
+                margin-top: 12px !important;
+            }
+
+            /* Surat Resmi Modal Responsive Mobile */
+            .surat-modal-card {
+                width: 95% !important;
+                max-width: 95% !important;
+                height: 92vh !important;
+                max-height: 94vh !important;
+                border-radius: 16px !important;
+                margin: 0 auto !important;
+            }
+
+            .surat-modal-card .modal-header {
+                padding: 10px 12px !important;
+                gap: 8px !important;
+            }
+
+            .surat-header-left {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                min-width: 0 !important;
+                flex: 1 !important;
+            }
+
+            .surat-header-icon {
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 8px !important;
+                background: #ecfdf5 !important;
+                color: #16a34a !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 0.95rem !important;
+                flex-shrink: 0 !important;
+            }
+
+            .surat-header-title {
+                font-size: 0.86rem !important;
+                font-weight: 800 !important;
+                color: #0f172a !important;
+                margin: 0 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .surat-header-desc {
+                display: none !important;
+            }
+
+            .surat-header-actions {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .btn-surat-print {
+                padding: 6px 10px !important;
+                font-size: 0.74rem !important;
+                border-radius: 8px !important;
+                gap: 5px !important;
+            }
+
+            .btn-surat-icon, .btn-surat-close {
+                width: 30px !important;
+                height: 30px !important;
+                border-radius: 8px !important;
+            }
         }
 
         @media (max-width: 600px) {
@@ -1446,7 +1948,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Total Permohonan</div>
-                        <div class="stat-card-val" id="statTotalCount"><?= $totalCount ?></div>
+                        <div class="stat-card-val" id="statTotalVal"><?= $totalCount ?></div>
                         <div class="stat-card-desc">Semua berkas pengajuan lab</div>
                     </div>
                     <div class="stat-card-3d-icon">
@@ -1465,7 +1967,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Perlu ACC Ka. Ur</div>
-                        <div class="stat-card-val">
+                        <div class="stat-card-val" id="statReadyVal">
                             <?= $readyForKaurCount ?>
                             <?php if ($totalCount > 0): ?>
                                 <span class="stat-card-percent">(<?= round(($readyForKaurCount / $totalCount) * 100) ?>%)</span>
@@ -1489,7 +1991,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Surat QR Terbit (ACC)</div>
-                        <div class="stat-card-val">
+                        <div class="stat-card-val" id="statApprovedVal">
                             <?= $approvedKaurCount ?>
                             <?php if ($totalCount > 0): ?>
                                 <span class="stat-card-percent">(<?= round(($approvedKaurCount / $totalCount) * 100) ?>%)</span>
@@ -1513,7 +2015,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Ditolak</div>
-                        <div class="stat-card-val">
+                        <div class="stat-card-val" id="statRejectedVal">
                             <?= $rejectedCount ?>
                             <?php if ($totalCount > 0): ?>
                                 <span class="stat-card-percent">(<?= round(($rejectedCount / $totalCount) * 100) ?>%)</span>
@@ -1540,19 +2042,19 @@
             <div class="filter-pills-wrap" id="filterPillsWrap">
                 <button type="button" class="filter-pill active" data-status="all" onclick="setFilterStatus('all')">
                     <span>Semua</span>
-                    <span class="pill-count"><?= $totalCount ?></span>
+                    <span class="pill-count" id="pillCountAll"><?= $totalCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="ready" onclick="setFilterStatus('ready')">
                     <span>⚡ Perlu ACC Ka. Ur</span>
-                    <span class="pill-count"><?= $readyForKaurCount ?></span>
+                    <span class="pill-count" id="pillCountReady"><?= $readyForKaurCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="kaur" onclick="setFilterStatus('kaur')">
                     <span>📄 Surat QR Terbit</span>
-                    <span class="pill-count"><?= $approvedKaurCount ?></span>
+                    <span class="pill-count" id="pillCountKaur"><?= $approvedKaurCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="rejected" onclick="setFilterStatus('rejected')">
                     <span>🔴 Ditolak</span>
-                    <span class="pill-count"><?= $rejectedCount ?></span>
+                    <span class="pill-count" id="pillCountRejected"><?= $rejectedCount ?></span>
                 </button>
             </div>
 
@@ -1586,7 +2088,7 @@
                         <!-- MODE 1: Text Search (default) -->
                         <div id="modeText" style="flex:1;display:flex;align-items:center;min-width:0;">
                             <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 0.85rem; margin-right: 10px; flex-shrink:0;"></i>
-                            <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." style="width: 100%; font-size: 0.85rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                            <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Cari kata kunci..." style="width: 100%; font-size: 0.85rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
                         </div>
                         <!-- MODE 2: Date Range Picker (single input, range mode) -->
                         <div id="modeTanggal" style="flex:1;display:none;align-items:center;min-width:0;gap:8px;">
@@ -1630,7 +2132,7 @@
 
 
                     <!-- Tombol Cari -->
-                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="padding: 7px 18px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.82rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 7px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(234,88,12,0.25);">
+                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="margin-left: 8px; padding: 7px 18px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.82rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 7px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(234,88,12,0.25);">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i> Cari
                     </button>
                 </div>
@@ -1866,7 +2368,7 @@
                                             <span>Aksi</span>
                                         </button>
                                         <div class="action-dropdown-menu" id="actionMenu_<?= $p->id ?>">
-                                            <?php if ($isPending): ?>
+                                            <?php if ($isPending || $isLaboranAcc): ?>
                                                 <button type="button" class="action-dropdown-item item-acc" onclick="kaurApprove(<?= $p->id ?>)">
                                                     <i class="fa-solid fa-check"></i> Setujui (Ka. Ur)
                                                 </button>
@@ -2006,29 +2508,35 @@
          MODAL POPUP PRATINJAU & CETAK SURAT RESMI QR
          ========================================================= -->
     <div class="modal-overlay" id="suratModal" style="z-index: 100050;">
-        <div class="modal-card surat-modal-card" style="max-width: 860px; width: 95%; height: 90vh; display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);">
-            <div class="modal-header" style="padding: 14px 20px; background: #ffffff; border-bottom: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #ecfdf5; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+        <div class="modal-card surat-modal-card">
+            <div class="modal-header surat-modal-header">
+                <div class="surat-header-left">
+                    <div class="surat-header-icon">
                         <i class="fa-solid fa-file-circle-check"></i>
                     </div>
-                    <div>
-                        <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0;">Surat Resmi Ber-QR Code</h3>
-                        <p style="font-size: 0.75rem; color: #64748b; margin: 0;">Pratinjau dokumen legalitas peminjaman laboratorium</p>
+                    <div style="min-width: 0; flex: 1;">
+                        <h3 class="surat-header-title">Surat Resmi Ber-QR Code</h3>
+                        <p class="surat-header-desc">Pratinjau dokumen legalitas peminjaman laboratorium</p>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <button type="button" onclick="printSuratIframe()" style="padding: 7px 14px; background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: none; border-radius: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);">
-                        <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                <div class="surat-header-actions">
+                    <button type="button" class="btn-surat-print" onclick="printSuratIframe()">
+                        <i class="fa-solid fa-print"></i> <span>Cetak / PDF</span>
                     </button>
-                    <a id="suratNewTabBtn" href="#" target="_blank" title="Buka di Tab Baru" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <a id="suratNewTabBtn" href="#" target="_blank" title="Buka di Tab Baru" class="btn-surat-icon">
                         <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem;"></i>
                     </a>
-                    <button type="button" onclick="closeSuratModal()" style="width: 34px; height: 34px; border-radius: 8px; border: none; background: #f1f5f9; color: #64748b; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    <button type="button" onclick="closeSuratModal()" class="btn-surat-close">&times;</button>
                 </div>
             </div>
             <div class="modal-body" style="flex: 1; padding: 0; background: #525659; position: relative; overflow: hidden;">
-                <iframe id="suratIframe" src="about:blank" style="width: 100%; height: 100%; border: none; display: block;" onload="hideSuratLoader()"></iframe>
+                <script>
+                    function hideSuratLoader() {
+                        const loader = document.getElementById('suratLoader');
+                        if (loader) loader.style.display = 'none';
+                    }
+                </script>
+                <iframe id="suratIframe" src="about:blank" style="width: 100%; height: 100%; border: none; display: block;" onload="if(typeof hideSuratLoader==='function')hideSuratLoader();"></iframe>
                 <div id="suratLoader" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 10;">
                     <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: #16a34a;"></i>
                     <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Memuat Surat Resmi...</span>
@@ -2507,7 +3015,14 @@
             // 1. Filter matching rows
             const matchingRows = allRows.filter(row => {
                 const cat = row.getAttribute('data-status-category') || '';
-                const matchStatus = (currentFilterStatus === 'all') || (cat === currentFilterStatus);
+                let matchStatus = false;
+                if (currentFilterStatus === 'all') {
+                    matchStatus = true;
+                } else if (currentFilterStatus === 'ready') {
+                    matchStatus = (cat === 'ready' || cat === 'pending' || cat === 'laboran');
+                } else {
+                    matchStatus = (cat === currentFilterStatus);
+                }
                 if (!matchStatus) return false;
 
                 if (filters.length === 0) return true;
@@ -2551,6 +3066,23 @@
             matchingRows.slice(startIndex, endIndex).forEach(row => {
                 row.style.display = '';
             });
+
+            let noDataRow = document.getElementById('noDataFilterRow');
+            if (totalItems === 0 && allRows.length > 0) {
+                if (!noDataRow) {
+                    const tbody = document.querySelector('#laboranBookingTable tbody') || document.querySelector('table.kaur-table tbody');
+                    if (tbody) {
+                        noDataRow = document.createElement('tr');
+                        noDataRow.id = 'noDataFilterRow';
+                        noDataRow.innerHTML = `<td colspan="7" style="text-align: center; padding: 36px 16px; color: #94a3b8; background: #ffffff; border-radius: 16px; border: 1.5px solid #e2e8f0; display: block; width: 100%; box-sizing: border-box;"><i class="fa-solid fa-magnifying-glass" style="font-size: 1.8rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>Tidak ada data permohonan yang sesuai dengan filter pencarian.</td>`;
+                        tbody.appendChild(noDataRow);
+                    }
+                } else {
+                    noDataRow.style.display = '';
+                }
+            } else if (noDataRow) {
+                noDataRow.style.display = 'none';
+            }
 
             // 3. Update Toolbar and Pagination Info Counters
             const toolbarCount = document.getElementById('toolbarTotalCount');
@@ -2687,11 +3219,16 @@
             if (selectedItems.length > 0) {
                 if (countBadge) countBadge.innerText = selectedItems.length;
 
-                // Cek apakah ada item yang berstatus 'pending' (bisa disetujui / ditolak oleh Ka. Ur)
-                const hasPendingItems = selectedItems.some(item => item.statusCategory === 'pending' || item.status === 'Pending');
+                // Cek apakah ada item yang siap disetujui / ditolak oleh Ka. Ur (belum berstatus kaur/ditolak)
+                const hasApprovableItems = selectedItems.some(item => 
+                    item.statusCategory === 'pending' || 
+                    item.statusCategory === 'laboran' || 
+                    item.statusCategory === 'ready' || 
+                    (item.statusCategory !== 'kaur' && item.statusCategory !== 'rejected')
+                );
 
-                if (btnAcc) btnAcc.style.display = hasPendingItems ? 'inline-flex' : 'none';
-                if (btnRej) btnRej.style.display = hasPendingItems ? 'inline-flex' : 'none';
+                if (btnAcc) btnAcc.style.display = hasApprovableItems ? 'inline-flex' : 'none';
+                if (btnRej) btnRej.style.display = hasApprovableItems ? 'inline-flex' : 'none';
 
                 if (bar) bar.classList.add('show');
             } else {
@@ -2699,6 +3236,174 @@
                 const masterCb = document.getElementById('selectAllCheckbox');
                 if (masterCb) masterCb.checked = false;
             }
+        }
+
+        // ==========================================
+        // REALTIME DOM UPDATE HELPERS (NO PAGE RELOAD)
+        // ==========================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function updateRowToApproved(id) {
+            const row = document.querySelector(`.kaur-row[data-id="${id}"]`);
+            if (!row) return;
+
+            // 1. Update data attributes
+            row.setAttribute('data-status-category', 'kaur');
+            row.setAttribute('data-status', 'disetujui ka. ur');
+            const searchAttr = row.getAttribute('data-search') || '';
+            row.setAttribute('data-search', searchAttr.replace(/pending|laboran/gi, 'disetujui ka. ur'));
+
+            // 2. Update status column badge (TD 6)
+            const statusCell = row.querySelector('td:nth-child(6)');
+            if (statusCell) {
+                statusCell.innerHTML = `
+                    <span class="status-badge" style="background: #f0fdf4; color: #166534;" title="Disetujui Ka. Ur">
+                        <span class="status-dot" style="background: #22c55e;"></span>
+                        <span class="status-text">Disetujui Ka. Ur</span>
+                    </span>
+                `;
+            }
+
+            // 3. Update action dropdown menu
+            const menu = document.getElementById(`actionMenu_${id}`);
+            if (menu) {
+                // Remove approve and reject buttons
+                menu.querySelectorAll('.item-acc, .item-rej').forEach(el => el.remove());
+
+                // Add Surat QR button if not already present
+                if (!menu.querySelector('.item-qr')) {
+                    const qrBtn = document.createElement('button');
+                    qrBtn.type = 'button';
+                    qrBtn.className = 'action-dropdown-item item-qr';
+                    qrBtn.onclick = () => openSuratModal(id);
+                    qrBtn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Cetak Surat QR`;
+                    
+                    const detailBtn = menu.querySelector('button[onclick*="openDetailModal"]');
+                    if (detailBtn) {
+                        menu.insertBefore(qrBtn, detailBtn);
+                    } else {
+                        menu.prepend(qrBtn);
+                    }
+                }
+            }
+
+            // 4. Update checkbox
+            const cb = row.querySelector('.row-checkbox');
+            if (cb) {
+                cb.setAttribute('data-status', 'Disetujui Ka. Ur');
+                cb.setAttribute('data-status-category', 'kaur');
+                cb.checked = false;
+            }
+        }
+
+        function updateRowToRejected(id, alasan) {
+            const row = document.querySelector(`.kaur-row[data-id="${id}"]`);
+            if (!row) return;
+
+            // 1. Update data attributes
+            row.setAttribute('data-status-category', 'rejected');
+            row.setAttribute('data-status', 'ditolak');
+
+            // 2. Update status column badge (TD 6)
+            const statusCell = row.querySelector('td:nth-child(6)');
+            if (statusCell) {
+                statusCell.innerHTML = `
+                    <span class="status-badge" style="background: #fef2f2; color: #991b1b;" title="Ditolak">
+                        <span class="status-dot" style="background: #ef4444;"></span>
+                        <span class="status-text">Ditolak</span>
+                    </span>
+                `;
+            }
+
+            // 3. Update keterangan column (TD 5) with rejection note
+            const descCol = row.querySelector('.tr-desc-col');
+            if (descCol) {
+                let note = descCol.querySelector('.tr-alasan-note');
+                if (!note) {
+                    note = document.createElement('div');
+                    note.className = 'tr-alasan-note';
+                    note.style.cssText = 'font-size: 0.75rem; color: #dc2626; margin-top: 4px;';
+                    descCol.appendChild(note);
+                }
+                note.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ` + escapeHtml(alasan);
+            }
+
+            // 4. Update action dropdown menu
+            const menu = document.getElementById(`actionMenu_${id}`);
+            if (menu) {
+                menu.querySelectorAll('.item-acc, .item-rej, .item-qr').forEach(el => el.remove());
+            }
+
+            // 5. Update checkbox
+            const cb = row.querySelector('.row-checkbox');
+            if (cb) {
+                cb.setAttribute('data-status', 'Ditolak');
+                cb.setAttribute('data-status-category', 'rejected');
+                cb.checked = false;
+            }
+        }
+
+        function removeRowFromDom(id) {
+            const row = document.querySelector(`.kaur-row[data-id="${id}"]`);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function recalculateKaurStats() {
+            const allRows = Array.from(document.querySelectorAll('.kaur-row'));
+            const total = allRows.length;
+            let ready = 0;
+            let approved = 0;
+            let rejected = 0;
+
+            allRows.forEach(row => {
+                const cat = row.getAttribute('data-status-category') || '';
+                if (cat === 'pending' || cat === 'laboran' || cat === 'ready') ready++;
+                else if (cat === 'kaur') approved++;
+                else if (cat === 'rejected') rejected++;
+            });
+
+            // Update Stat Cards Values & Percents
+            const statTotalVal = document.getElementById('statTotalVal');
+            if (statTotalVal) statTotalVal.innerText = total;
+
+            const statReadyVal = document.getElementById('statReadyVal');
+            if (statReadyVal) {
+                const pct = total > 0 ? Math.round((ready / total) * 100) : 0;
+                statReadyVal.innerHTML = `${ready} ${total > 0 ? `<span class="stat-card-percent">(${pct}%)</span>` : ''}`;
+            }
+
+            const statApprovedVal = document.getElementById('statApprovedVal');
+            if (statApprovedVal) {
+                const pct = total > 0 ? Math.round((approved / total) * 100) : 0;
+                statApprovedVal.innerHTML = `${approved} ${total > 0 ? `<span class="stat-card-percent">(${pct}%)</span>` : ''}`;
+            }
+
+            const statRejectedVal = document.getElementById('statRejectedVal');
+            if (statRejectedVal) {
+                const pct = total > 0 ? Math.round((rejected / total) * 100) : 0;
+                statRejectedVal.innerHTML = `${rejected} ${total > 0 ? `<span class="stat-card-percent">(${pct}%)</span>` : ''}`;
+            }
+
+            // Update Filter Pills Badges
+            const pillAll = document.getElementById('pillCountAll');
+            if (pillAll) pillAll.innerText = total;
+            const pillReady = document.getElementById('pillCountReady');
+            if (pillReady) pillReady.innerText = ready;
+            const pillKaur = document.getElementById('pillCountKaur');
+            if (pillKaur) pillKaur.innerText = approved;
+            const pillRejected = document.getElementById('pillCountRejected');
+            if (pillRejected) pillRejected.innerText = rejected;
+
+            // Update Toolbar Total
+            const toolbarCount = document.getElementById('toolbarTotalCount');
+            if (toolbarCount) toolbarCount.innerText = total;
         }
 
         // ==========================================
@@ -2717,6 +3422,12 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/approve/' + id, function(resp) {
                         if (resp.status === 'success') {
+                            // Realtime DOM Update
+                            updateRowToApproved(id);
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
                             Swal.fire({
                                 title: 'Berhasil Disetujui!',
                                 text: resp.message,
@@ -2729,8 +3440,6 @@
                             }).then((action) => {
                                 if (action.isConfirmed) {
                                     openSuratModal(id);
-                                } else {
-                                    location.reload();
                                 }
                             });
                         } else {
@@ -2838,6 +3547,7 @@
         // DELETE BOOKING
         // ==========================================
         function deleteBooking(id) {
+            closeAllActionDropdowns();
             Swal.fire({
                 title: 'Hapus Data Peminjaman?',
                 text: 'Data yang dihapus tidak dapat dikembalikan.',
@@ -2851,8 +3561,12 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/delete/' + id, function(resp) {
                         if (resp.status === 'success') {
-                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' })
-                            .then(() => location.reload());
+                            removeRowFromDom(id);
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
+                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' });
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
@@ -2868,14 +3582,22 @@
             const selectedItems = getSelectedItems();
             if (selectedItems.length === 0) return;
 
-            // Filter hanya data yang statusCategory === 'ready' (siap disetujui Ka. Ur)
-            const readyItems = selectedItems.filter(item => item.statusCategory === 'ready');
-            const alreadyApproved = selectedItems.filter(item => item.statusCategory === 'kaur');
+            // Filter data yang belum disetujui Ka. Ur (bisa pending atau disetujui laboran)
+            const readyItems = selectedItems.filter(item => 
+                item.statusCategory === 'pending' || 
+                item.statusCategory === 'laboran' || 
+                item.statusCategory === 'ready' ||
+                (item.statusCategory !== 'kaur' && item.statusCategory !== 'rejected')
+            );
+            const alreadyApproved = selectedItems.filter(item => 
+                item.statusCategory === 'kaur' || 
+                (item.status && item.status.toLowerCase().includes('ka. ur'))
+            );
 
             if (readyItems.length === 0) {
                 Swal.fire({
                     title: 'Tidak Ada yang Perlu Disetujui',
-                    text: 'Semua data yang dipilih sudah berstatus Disetujui Ka. Ur atau belum dalam antrean persetujuan.',
+                    text: 'Semua data yang dipilih sudah berstatus Disetujui Ka. Ur atau telah ditolak.',
                     icon: 'info',
                     confirmButtonColor: '#16a34a'
                 });
@@ -2883,9 +3605,9 @@
             }
 
             const readyIds = readyItems.map(item => item.id);
-            let confirmMsg = `Semua ${readyIds.length} permohonan terpilih akan disetujui dan surat peminjaman QR code akan diterbitkan.`;
+            let confirmMsg = `Semua ${readyIds.length} permohonan terpilih akan disetujui resmi oleh Ka. Ur dan surat QR code akan diterbitkan.`;
             if (alreadyApproved.length > 0) {
-                confirmMsg = `Ditemukan ${readyIds.length} permohonan yang belum disetujui (${alreadyApproved.length} data lainnya sudah disetujui sebelumnya). Lanjutkan menyetujui ${readyIds.length} data ini?`;
+                confirmMsg = `Ditemukan ${readyIds.length} permohonan yang belum disetujui Ka. Ur (${alreadyApproved.length} data lainnya sudah disetujui sebelumnya). Lanjutkan menyetujui ${readyIds.length} data ini?`;
             }
 
             Swal.fire({
@@ -2901,8 +3623,17 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/batch_approve', { ids: readyIds }, function(resp) {
                         if (resp.status === 'success') {
-                            Swal.fire({ title: 'Berhasil!', text: resp.message, icon: 'success', confirmButtonColor: '#16a34a' })
-                            .then(() => location.reload());
+                            readyIds.forEach(id => updateRowToApproved(id));
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
+                            Swal.fire({ 
+                                title: 'Berhasil!', 
+                                text: resp.message, 
+                                icon: 'success', 
+                                confirmButtonColor: '#16a34a' 
+                            });
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
@@ -2928,8 +3659,12 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/batch_delete', { ids: ids }, function(resp) {
                         if (resp.status === 'success') {
-                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' })
-                            .then(() => location.reload());
+                            ids.forEach(id => removeRowFromDom(id));
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
+                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' });
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
@@ -2942,13 +3677,18 @@
             const selectedItems = getSelectedItems();
             if (selectedItems.length === 0) return;
 
-            const readyItems = selectedItems.filter(item => item.statusCategory === 'ready');
-            const otherItems = selectedItems.filter(item => item.statusCategory !== 'ready');
+            const readyItems = selectedItems.filter(item => 
+                item.statusCategory === 'pending' || 
+                item.statusCategory === 'laboran' || 
+                item.statusCategory === 'ready' ||
+                item.statusCategory !== 'rejected'
+            );
+            const otherItems = selectedItems.filter(item => item.statusCategory === 'rejected');
 
             if (readyItems.length === 0) {
                 Swal.fire({
                     title: 'Tidak Dapat Ditolak',
-                    text: 'Semua data yang dipilih sudah berstatus Disetujui atau Ditolak sehingga tidak dapat diproses lagi.',
+                    text: 'Semua data yang dipilih sudah berstatus Ditolak.',
                     icon: 'info',
                     confirmButtonColor: '#ea580c'
                 });
@@ -2964,7 +3704,7 @@
             if (infoEl) {
                 let infoHtml = `<i class="fa-solid fa-users"></i> Menolak <strong>${readyIds.length}</strong> permohonan peminjaman terpilih.`;
                 if (otherItems.length > 0) {
-                    infoHtml += `<div style="font-size: 0.74rem; color: #64748b; font-weight: normal; margin-top: 4px;">(${otherItems.length} data lainnya dilewati karena sudah selesai/diproses).</div>`;
+                    infoHtml += `<div style="font-size: 0.74rem; color: #64748b; font-weight: normal; margin-top: 4px;">(${otherItems.length} data lainnya dilewati karena sudah ditolak sebelumnya).</div>`;
                 }
                 infoEl.innerHTML = infoHtml;
             }
@@ -3020,8 +3760,12 @@
                         $.post(BASE_URL + 'kaur/batch_reject', { ids: ids, alasan_penolakan: alasan }, function(resp) {
                             if (resp.status === 'success') {
                                 closeKaurRejectModal();
-                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
-                                .then(() => location.reload());
+                                ids.forEach(id => updateRowToRejected(id, alasan));
+                                recalculateKaurStats();
+                                deselectAll();
+                                filterTable();
+
+                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' });
                             } else {
                                 Swal.fire('Gagal', resp.message, 'error');
                             }
@@ -3031,8 +3775,12 @@
                         $.post(BASE_URL + 'kaur/reject/' + singleId, { alasan_penolakan: alasan }, function(resp) {
                             if (resp.status === 'success') {
                                 closeKaurRejectModal();
-                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
-                                .then(() => location.reload());
+                                updateRowToRejected(singleId, alasan);
+                                recalculateKaurStats();
+                                deselectAll();
+                                filterTable();
+
+                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' });
                             } else {
                                 Swal.fire('Gagal', resp.message, 'error');
                             }
