@@ -213,7 +213,7 @@
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jenis Tugas Akhir Terpilih</span>
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full bg-orange-500"></span>
-                        <span class="text-sm font-extrabold text-slate-900"><?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Proyek Akhir'); ?></span>
+                        <span class="text-sm font-extrabold text-slate-900"><?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Pengkaryaan'); ?></span>
                     </div>
                 </div>
 

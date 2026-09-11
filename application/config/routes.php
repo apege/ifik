@@ -79,11 +79,36 @@ $route['dosenpenguji'] = 'Mahasiswa/dosen_penguji';
 $route['mahasiswa/dosen_penguji'] = 'Mahasiswa/dosen_penguji';
 
 // Dosen Wali Routes
+$route['dosen/wali'] = 'DosenWali';
+$route['dosen/wali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
+$route['dosen/wali/(:any)'] = 'DosenWali/$1';
+$route['dosen/wali/(:any)/(:any)'] = 'DosenWali/$1/$2';
 
 $route['dosenwali'] = 'DosenWali';
 $route['dosenwali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
 $route['dosenwali/(:any)'] = 'DosenWali/$1';
 $route['dosenwali/(:any)/(:any)'] = 'DosenWali/$1/$2';
+
+// Dosen Tanda Tangan Digital Routes
+$route['dosen/tanda-tangan'] = 'DosenWali/tanda_tangan';
+$route['dosen/tanda-tangan/simpan'] = 'DosenWali/simpan_tanda_tangan';
+$route['dosen/tanda-tangan/hapus'] = 'DosenWali/hapus_tanda_tangan';
+$route['dosen/tanda-tangan/download'] = 'DosenWali/download_tanda_tangan';
+$route['dosen/wali/tanda-tangan'] = 'DosenWali/tanda_tangan';
+$route['dosen/wali/tanda-tangan/simpan'] = 'DosenWali/simpan_tanda_tangan';
+$route['dosen/wali/tanda-tangan/hapus'] = 'DosenWali/hapus_tanda_tangan';
+$route['dosen/wali/tanda-tangan/download'] = 'DosenWali/download_tanda_tangan';
+
+// Dosen Ticketing Routes
+$route['dosen/ticketing'] = 'DosenTicketing/input';
+$route['dosen/ticketing/input'] = 'DosenTicketing/input';
+$route['dosen/ticketing/simpan'] = 'DosenTicketing/simpan';
+$route['dosen/ticketing/riwayat'] = 'DosenTicketing/riwayat';
+$route['dosen/ticketing/detail/(:any)'] = 'DosenTicketing/detail/$1';
+$route['dosen/respon-ticketing'] = 'DosenTicketing/respon_index';
+$route['dosen/respon-ticketing/detail/(:any)'] = 'DosenTicketing/respon_detail/$1';
+$route['dosen/respon-ticketing/simpan_tanggapan'] = 'DosenTicketing/respon_simpan_tanggapan';
+$route['dosen/respon-ticketing/(:any)'] = 'DosenTicketing/respon_$1';
 
 // Koordinator TA Routes
 $route['koordinatorta'] = 'KoordinatorTA';
@@ -127,6 +152,11 @@ $route['adminlayanan/submit_verifikasi/(:any)'] = 'AdminLayanan/submit_verifikas
 $route['adminlayanan/submit_verifikasi_batch'] = 'AdminLayanan/submit_verifikasi_batch';
 $route['adminlayanan/get_batch_details'] = 'AdminLayanan/get_batch_details';
 
+// [TEMPORARY SIMULASI] Admin Layanan (LAA) Ticketing Simulation Routes
+$route['adminlayanan/ticketing'] = 'AdminLayananTicketing/index';
+$route['adminlayanan/ticketing/detail/(:any)'] = 'AdminLayananTicketing/detail/$1';
+$route['adminlayanan/ticketing/simpan_tanggapan'] = 'AdminLayananTicketing/simpan_tanggapan';
+
 
 // Ketua KK Routes
 $route['ketuakk'] = 'KetuaKK/index';
@@ -139,6 +169,9 @@ $route['ketuakk/submit_bulk_approval'] = 'KetuaKK/submit_bulk_approval';
 $route['admin'] = 'Admin/index';
 $route['admin/log_history'] = 'Admin/log_history';
 $route['log-history'] = 'Admin/log_history';
+$route['adminfooter'] = 'AdminFooter/index';
+$route['adminfooter/update_settings'] = 'AdminFooter/update_settings';
+$route['adminfooter/reset_defaults'] = 'AdminFooter/reset_defaults';
 
 // News / Berita Routes
 $route['news/detail/(:num)'] = 'News/detail/$1';
@@ -159,6 +192,17 @@ $route['kaur/approval'] = 'Kaur/approval';
 $route['kaur/surat/(:num)'] = 'Kaur/surat/$1';
 $route['laboran/surat/(:num)'] = 'Laboran/surat/$1';
 $route['kelolabooking/surat/(:num)'] = 'Kelolabooking/surat/$1';
+
+// Laboran Ticketing & Respon Routes
+$route['laboran/respon-ticketing'] = 'LaboranTicketing/index';
+$route['laboran/respon-ticketing/detail/(:any)'] = 'LaboranTicketing/detail/$1';
+$route['laboran/respon-ticketing/simpan_tanggapan'] = 'LaboranTicketing/simpan_tanggapan';
+$route['laboran/respon-ticketing/(:any)'] = 'LaboranTicketing/$1';
+$route['laboran/ticketing'] = 'LaboranTicketing/input';
+$route['laboran/ticketing/input'] = 'LaboranTicketing/input';
+$route['laboran/ticketing/simpan'] = 'LaboranTicketing/simpan';
+$route['laboran/ticketing/riwayat'] = 'LaboranTicketing/riwayat';
+$route['laboran/ticketing/detail/(:any)'] = 'LaboranTicketing/riwayat_detail/$1';
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

@@ -17,7 +17,8 @@ $labs_data = [
         'glow_color' => 'rgba(216, 184, 150, 0.55)',
         'photo' => file_exists(FCPATH . 'assets/images/multimedia.jpg') ? base_url('assets/images/multimedia.jpg') : base_url('assets/images/lab_multimedia_real.jpg'),
         'photo_fallback' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop',
-        'location' => 'Gedung Industri Kreatif - Lantai 3 (Ruang FIK-302)',
+        'location' => 'Gedung Industri Kreatif - Lantai 3',
+        'room_codes' => ['LK.01.01', 'LK.01.02'],
         'capacity' => '36 Unit Workstation',
         'hours' => 'Senin - Jumat | 08:00 - 17:00 WIB',
         'desc' => 'Laboratorium Multimedia & Game difasilitasi dengan komputer berspesifikasi tinggi yang dirancang khusus untuk memenuhi kebutuhan pengembangan game 3D modern, simulasi realitas virtual (VR), rendering animasi kompleks, serta perancangan media interaktif.',
@@ -49,6 +50,7 @@ $labs_data = [
         'photo' => file_exists(FCPATH . 'assets/images/Aula1.jpg') ? base_url('assets/images/Aula1.jpg') : (file_exists(FCPATH . 'assets/images/aula.jpg') ? base_url('assets/images/aula.jpg') : base_url('assets/images/lab_aula_real.jpg')),
         'photo_fallback' => 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1000&auto=format&fit=crop',
         'location' => 'Gedung Utama Fakultas Industri Kreatif - Lantai 1',
+        'room_codes' => ['IK.01.05'],
         'capacity' => '300+ Kursi Peserta',
         'hours' => 'Senin - Sabtu | 07:30 - 21:00 WIB',
         'desc' => 'Aula Utama Fakultas Industri Kreatif merupakan ruang pertemuan dan kegiatan serbaguna skala besar yang fleksibel untuk berbagai acara akademik maupun non-akademik, seperti pameran karya seni visual, seminar nasional, workshop kreatif, dan sidang terbuka.',
@@ -79,7 +81,8 @@ $labs_data = [
         'glow_color' => 'rgba(71, 130, 158, 0.5)',
         'photo' => file_exists(FCPATH . 'assets/images/sintiq.jpg') ? base_url('assets/images/sintiq.jpg') : (file_exists(FCPATH . 'assets/images/cintiq.jpg') ? base_url('assets/images/cintiq.jpg') : base_url('assets/images/lab_cintiq_real.jpg')),
         'photo_fallback' => 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=1000&auto=format&fit=crop',
-        'location' => 'Gedung Industri Kreatif - Lantai 2 (Ruang FIK-205)',
+        'location' => 'Gedung Industri Kreatif - Lantai 2',
+        'room_codes' => ['IK.01.08'],
         'capacity' => '30 Unit Cintiq Pro',
         'hours' => 'Senin - Jumat | 08:00 - 17:00 WIB',
         'desc' => 'Lab Tablet Cintiq disiapkan khusus bagi mahasiswa program studi Desain Komunikasi Visual dan Animasi untuk mengasah keahlian menggambar digital. Setiap station dilengkapi Pen Display profesional berakurasi warna tinggi.',
@@ -110,7 +113,8 @@ $labs_data = [
         'glow_color' => 'rgba(34, 197, 94, 0.5)',
         'photo' => file_exists(FCPATH . 'assets/images/greenscreen.jpg') ? base_url('assets/images/greenscreen.jpg') : 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=1000&auto=format&fit=crop',
         'photo_fallback' => 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=1000&auto=format&fit=crop',
-        'location' => 'Gedung Industri Kreatif - Lantai 2 (Ruang FIK-208)',
+        'location' => 'Gedung Industri Kreatif - Lantai 2',
+        'room_codes' => ['IK.01.16'],
         'capacity' => 'Studio Prod. & Lighting Rig',
         'hours' => 'Senin - Jumat | 08:00 - 17:00 WIB',
         'desc' => 'Lab Green Screen Studio dilengkapi dengan dinding Cyclorama Green Screen berukuran besar, sistem tata cahaya profesional Studio Lighting Rig, peredam suara khusus, serta kamera sinematik untuk kebutuhan pengambilan gambar Visual Effects (VFX), live streaming, dan produksi video profesional.',
@@ -141,7 +145,8 @@ $labs_data = [
         'glow_color' => 'rgba(168, 85, 247, 0.5)',
         'photo' => file_exists(FCPATH . 'assets/images/incubator.jpg') ? base_url('assets/images/incubator.jpg') : 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop',
         'photo_fallback' => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop',
-        'location' => 'Gedung Industri Kreatif - Lantai 4 (Ruang FIK-401)',
+        'location' => 'Gedung Industri Kreatif - Lantai 4',
+        'room_codes' => ['IK.01.13'],
         'capacity' => '50+ Seat Co-Working',
         'hours' => 'Senin - Sabtu | 08:00 - 20:00 WIB',
         'desc' => 'Lab Inkubator Bisnis & Tech dirancang sebagai hub inkubasi bagi mahasiswa dan peneliti yang sedang membangun proyek startup digital, inovasi teknologi, dan industri kreatif. Dilengkapi dengan area co-working fleksibel, ruang pitching investor, dan fasilitas pendampingan bisnis.',
@@ -172,7 +177,8 @@ $labs_data = [
         'glow_color' => 'rgba(14, 165, 233, 0.5)',
         'photo' => file_exists(FCPATH . 'assets/images/mac.jpg') ? base_url('assets/images/mac.jpg') : 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000&auto=format&fit=crop',
         'photo_fallback' => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1000&auto=format&fit=crop',
-        'location' => 'Gedung Industri Kreatif - Lantai 3 (Ruang FIK-305)',
+        'location' => 'Gedung Industri Kreatif - Lantai 3',
+        'room_codes' => ['IK.01.08'],
         'capacity' => '32 Workstation Mac',
         'hours' => 'Senin - Jumat | 08:00 - 17:00 WIB',
         'desc' => 'Lab Workstation Apple Mac merupakan studio komputasi khusus berbasis macOS yang dioptimalkan untuk kebutuhan pasca-produksi film, color grading sinematik, desain tata letak penerbitan, komposisi musik digital, serta pengembangan aplikasi ekosistem Apple.',
@@ -193,8 +199,8 @@ $labs_data = [
 
 $active_key = isset($labs_data[$lab_key]) ? $lab_key : null;
 
-// If not found in hardcoded array, look up from DB
-if (!$active_key && !empty($all_ruangan)) {
+// Look up from DB to sync live data or create dynamic entry
+if (!empty($all_ruangan)) {
     foreach ($all_ruangan as $r) {
         $n = strtolower(trim($r->nama_ruangan));
         $c = strtolower(trim($r->kode_ruangan));
@@ -212,38 +218,59 @@ if (!$active_key && !empty($all_ruangan)) {
         }
 
         if ($rkey === $lab_key || (string)$r->id === (string)$lab_key || 'room_' . $r->id === (string)$lab_key || $c === (string)$lab_key || $n === (string)$lab_key) {
+            $matched_key = isset($labs_data[$lab_key]) ? $lab_key : (isset($labs_data[$rkey]) ? $rkey : null);
             $active_key = $lab_key;
+
             $img_url = !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : base_url('assets/images/multimedia.jpg');
             $model_url = !empty($r->model_3d) ? (strpos($r->model_3d, 'http') === 0 ? $r->model_3d : base_url($r->model_3d)) : '';
+            $parsed_room_codes = !empty($r->kode_ruangan) ? array_filter(array_map('trim', explode(',', $r->kode_ruangan))) : [];
 
-            $labs_data[$lab_key] = [
-                'id_ruangan'   => $r->id,
-                'title'        => $r->nama_ruangan,
-                'subtitle'     => !empty($r->tagline) ? $r->tagline : 'Fasilitas Ruangan Fakultas Industri Kreatif',
-                'badge'        => 'Laboratorium FIK',
-                'status'       => $r->status ?? 'Tersedia',
-                'status_class' => 'status-open',
-                'model'        => $model_url,
-                'orbit'        => '45deg 75deg 85%',
-                'fov'          => '22deg',
-                'bg_gradient'  => 'radial-gradient(circle at 50% 60%, rgba(234, 88, 12, 0.18) 0%, rgba(255, 251, 245, 0.97) 100%)',
-                'border_color' => 'rgba(234, 88, 12, 0.3)',
-                'glow_color'   => 'rgba(234, 88, 12, 0.4)',
-                'photo'        => $img_url,
-                'photo_fallback' => 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000&auto=format&fit=crop',
-                'location'     => !empty($r->lokasi) ? $r->lokasi : 'Gedung Fakultas Industri Kreatif',
-                'capacity'     => !empty($r->jumlah_unit) ? $r->jumlah_unit : (!empty($r->kapasitas) ? $r->kapasitas . ' Orang' : '-'),
-                'hours'        => !empty($r->jam_operasional) ? $r->jam_operasional : 'Senin - Jumat | 08:00 - 17:00 WIB',
-                'desc'         => !empty($r->deskripsi) ? $r->deskripsi : 'Fasilitas ruangan praktikum dan perkuliahan di Fakultas Industri Kreatif.',
-                'specs'        => !empty($r->spesifikasi_fasilitas)
-                    ? array_map(function($s) {
-                        return ['icon' => '⚙️', 'title' => 'Spesifikasi', 'desc' => trim($s)];
-                      }, array_filter(explode("\n", $r->spesifikasi_fasilitas)))
-                    : [['icon' => '🏫', 'title' => 'Fasilitas', 'desc' => 'Informasi fasilitas lengkap tersedia di lokasi.']],
-                'rules'        => !empty($r->tata_tertib)
-                    ? array_filter(array_map('trim', explode("\n", $r->tata_tertib)))
-                    : ['Ikuti tata tertib yang berlaku di ruangan.'],
-            ];
+            if ($matched_key && isset($labs_data[$matched_key])) {
+                // Sync live database data into template
+                if (!empty($r->nama_ruangan)) $labs_data[$matched_key]['title'] = $r->nama_ruangan;
+                if (!empty($r->tagline)) $labs_data[$matched_key]['subtitle'] = $r->tagline;
+                if (!empty($r->status)) $labs_data[$matched_key]['status'] = $r->status;
+                if (!empty($r->lokasi)) $labs_data[$matched_key]['location'] = $r->lokasi;
+                if (!empty($parsed_room_codes)) $labs_data[$matched_key]['room_codes'] = $parsed_room_codes;
+                if (!empty($r->jumlah_unit)) $labs_data[$matched_key]['capacity'] = $r->jumlah_unit;
+                elseif (!empty($r->kapasitas)) $labs_data[$matched_key]['capacity'] = $r->kapasitas . ' Orang';
+                if (!empty($r->jam_operasional)) $labs_data[$matched_key]['hours'] = $r->jam_operasional;
+                if (!empty($r->deskripsi)) $labs_data[$matched_key]['desc'] = $r->deskripsi;
+                if (!empty($r->foto)) $labs_data[$matched_key]['photo'] = $img_url;
+                if (!empty($r->model_3d)) $labs_data[$matched_key]['model'] = $model_url;
+                if (!empty($r->id)) $labs_data[$matched_key]['id_ruangan'] = $r->id;
+                $labs_data[$lab_key] = $labs_data[$matched_key];
+            } else {
+                // Create dynamic entry
+                $labs_data[$lab_key] = [
+                    'id_ruangan'   => $r->id,
+                    'title'        => $r->nama_ruangan,
+                    'subtitle'     => !empty($r->tagline) ? $r->tagline : 'Fasilitas Ruangan Fakultas Industri Kreatif',
+                    'badge'        => 'Laboratorium FIK',
+                    'status'       => $r->status ?? 'Tersedia',
+                    'status_class' => 'status-open',
+                    'model'        => $model_url,
+                    'orbit'        => '45deg 75deg 85%',
+                    'fov'          => '22deg',
+                    'bg_gradient'  => 'radial-gradient(circle at 50% 60%, rgba(234, 88, 12, 0.18) 0%, rgba(255, 251, 245, 0.97) 100%)',
+                    'border_color' => 'rgba(234, 88, 12, 0.3)',
+                    'glow_color'   => 'rgba(234, 88, 12, 0.4)',
+                    'photo'        => $img_url,
+                    'location'     => !empty($r->lokasi) ? $r->lokasi : 'Gedung Fakultas Industri Kreatif',
+                    'room_codes'   => $parsed_room_codes,
+                    'capacity'     => !empty($r->jumlah_unit) ? $r->jumlah_unit : (!empty($r->kapasitas) ? $r->kapasitas . ' Orang' : '-'),
+                    'hours'        => !empty($r->jam_operasional) ? $r->jam_operasional : 'Senin - Jumat | 08:00 - 17:00 WIB',
+                    'desc'         => !empty($r->deskripsi) ? $r->deskripsi : 'Fasilitas ruangan praktikum dan perkuliahan di Fakultas Industri Kreatif.',
+                    'specs'        => !empty($r->spesifikasi_fasilitas)
+                        ? array_map(function($s) {
+                            return ['icon' => '⚙️', 'title' => 'Spesifikasi', 'desc' => trim($s)];
+                          }, array_filter(explode("\n", $r->spesifikasi_fasilitas)))
+                        : [['icon' => '🏫', 'title' => 'Fasilitas', 'desc' => 'Informasi fasilitas lengkap tersedia di lokasi.']],
+                    'rules'        => !empty($r->tata_tertib)
+                        ? array_filter(array_map('trim', explode("\n", $r->tata_tertib)))
+                        : ['Ikuti tata tertib yang berlaku di ruangan.'],
+                ];
+            }
             break;
         }
     }
@@ -803,6 +830,17 @@ $lab = $labs_data[$active_key];
                             <span class="icon">📍</span>
                             <span><?= $lab['location'] ?></span>
                         </div>
+                        <?php if (!empty($lab['room_codes'])): ?>
+                        <div class="meta-item" style="background: #fff7ed; border-color: #fed7aa; color: #9a3412;">
+                            <span class="icon">🚪</span>
+                            <span style="font-weight: 700; color: #c2410c;">Ruangan:</span>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap; align-items: center;">
+                                <?php foreach ($lab['room_codes'] as $rc): ?>
+                                    <span style="background: #ea580c; color: #ffffff; padding: 2px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.02em;"><?= htmlspecialchars($rc) ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                         <div class="meta-item">
                             <span class="icon">💺</span>
                             <span><?= $lab['capacity'] ?></span>

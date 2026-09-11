@@ -26,6 +26,8 @@
     </script>
     <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="<?= base_url('assets/css/style.css'); ?>" rel="stylesheet">
@@ -100,53 +102,27 @@
 </head>
 <body class="bg-gradient-to-br from-amber-100/80 via-orange-50 to-amber-100/90 text-slate-900 font-sans antialiased min-h-screen flex flex-col selection:bg-orange-500 selection:text-white relative">
 
-    <!-- Auto Role-Aware Curved Animated Sidebar -->
-    <?php $this->load->view('components/curved_sidebar'); ?>
+    <?php $this->load->view('partials/dosen_sidebar'); ?>
 
-    <!-- Header Glass Navbar -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-orange-100/80 shadow-xs">
-        <div class="w-full px-4 sm:px-6 lg:px-10">
-            <div class="flex items-center justify-between h-20">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-10 h-10 bg-gradient-to-tr from-slate-900 to-slate-800 text-white rounded-2xl font-bold text-xl flex items-center justify-center box-3d">
-                        W
-                    </div>
-                    <div>
-                        <span class="font-bold text-base text-slate-900 tracking-tight block leading-none">IFIK Portal</span>
-                        <span class="text-[10px] uppercase font-bold tracking-wider text-orange-600 mt-1 block">Dosen Wali Akademik</span>
-                    </div>
-                </div>
-
-                <!-- User Profile Pill (Kode, Nama, Kejuruan Dosen Wali) -->
-                <div class="flex items-center gap-3">
-                    <div class="hidden sm:flex flex-col text-right">
-                        <span class="text-xs font-bold text-slate-800 leading-tight"><?= $dosen_info['nama_dosen'] ?? 'Alif Dosen, S.T., M.T.'; ?></span>
-                        <div class="flex items-center justify-end gap-2 text-[10px] font-semibold text-slate-500 mt-0.5">
-                            <span class="px-2 py-0.5 bg-orange-100/90 text-orange-700 rounded-md border border-orange-200/80 font-bold"><?= $dosen_info['kode_dosen'] ?? 'DW-001'; ?></span>
-                            <span>Prodi: <strong class="text-slate-700"><?= $dosen_info['kejuruan'] ?? 'Informatika / DKV'; ?></strong></span>
-                        </div>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white flex items-center justify-center font-bold text-base box-3d shadow-xs">
-                        <i class="bi bi-person-badge-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container (Full Wide Layout) -->
-    <main class="w-full px-4 sm:px-6 lg:px-10 py-10 flex-grow">
+    <!-- Main Container -->
+    <main class="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-grow">
 
         <!-- Welcome Banner & Page Title -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
             <div>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-orange-600 block mb-1">OVERVIEW BIMBINGAN</span>
                 <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Dashboard Dosen Wali</h1>
                 <p class="text-slate-600 text-xs mt-1 font-normal">Kelola persetujuan pendaftaran Tugas Akhir mahasiswa bimbingan Anda secara praktis.</p>
             </div>
-            <div class="px-4 py-2 bg-white/90 rounded-xl border border-orange-200 shadow-xs text-xs font-semibold text-slate-700 flex items-center gap-2 w-fit">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Approval System Active</span>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2.5 px-3.5 py-2 bg-white/90 rounded-xl border border-orange-200 shadow-xs text-xs">
+                    <span class="px-2 py-0.5 bg-orange-100/90 text-orange-700 rounded-md border border-orange-200/80 font-bold text-[11px]"><?= $dosen_info['kode_dosen'] ?? 'DW-001'; ?></span>
+                    <span class="text-slate-600 font-semibold">Prodi: <strong class="text-slate-800"><?= $dosen_info['kejuruan'] ?? 'Informatika / DKV'; ?></strong></span>
+                </div>
+                <div class="px-4 py-2 bg-white/90 rounded-xl border border-orange-200 shadow-xs text-xs font-semibold text-slate-700 flex items-center gap-2 w-fit">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Approval System Active</span>
+                </div>
             </div>
         </div>
 
@@ -179,8 +155,8 @@
         <!-- Stats Overview Cards (Exact Interactive Design from Import Akun) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             <!-- 1. Total Mahasiswa Bimbingan Card -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1 h-full">
+                <div class="h-full flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
                     <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
@@ -190,18 +166,18 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Mahasiswa</p>
+                    <div class="relative z-10 flex items-start justify-between gap-2.5">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] xl:text-[11px] font-bold uppercase tracking-normal xl:tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors truncate" title="Total Mahasiswa">Total Mahasiswa</p>
                             <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statTotalMhs"><?= $totalMhs; ?></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Bimbingan Akademik</p>
+                            <p class="text-xs font-medium text-slate-500 mt-1 truncate">Bimbingan Akademik</p>
                         </div>
                         
                         <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-users text-lg"></i>
+                            <div class="relative w-11 h-11 flex items-center justify-center rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-users text-base"></i>
                             </div>
                         </div>
                     </div>
@@ -223,8 +199,8 @@
             </div>
 
             <!-- 2. Menunggu Approval Card (Cyan) -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1 h-full">
+                <div class="h-full flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
                     <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
@@ -234,18 +210,18 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Menunggu Approval</p>
+                    <div class="relative z-10 flex items-start justify-between gap-2.5">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] xl:text-[11px] font-bold uppercase tracking-normal xl:tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors truncate" title="Menunggu Approval">Menunggu Approval</p>
                             <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statPendingMhs"><?= $pendingCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($pendingCount/$totalMhs)*100) : 0; ?>%)</span></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Ditolak / Disetujui</p>
+                            <p class="text-xs font-medium text-slate-500 mt-1 truncate">Perlu Ditolak / Disetujui</p>
                         </div>
                         
                         <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-key text-lg"></i>
+                            <div class="relative w-11 h-11 flex items-center justify-center rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-key text-base"></i>
                             </div>
                         </div>
                     </div>
@@ -267,8 +243,8 @@
             </div>
 
             <!-- 3. Disetujui Card (Emerald) -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1 h-full">
+                <div class="h-full flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
                     <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
@@ -278,18 +254,18 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui</p>
+                    <div class="relative z-10 flex items-start justify-between gap-2.5">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] xl:text-[11px] font-bold uppercase tracking-normal xl:tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors truncate" title="Disetujui">Disetujui</p>
                             <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statApprovedMhs"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Admin</p>
+                            <p class="text-xs font-medium text-slate-500 mt-1 truncate">Lanjut ke Admin</p>
                         </div>
                         
                         <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-paper-plane text-lg"></i>
+                            <div class="relative w-11 h-11 flex items-center justify-center rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-paper-plane text-base"></i>
                             </div>
                         </div>
                     </div>
@@ -311,8 +287,8 @@
             </div>
 
             <!-- 4. Perlu Revisi Card (Amber) -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
+            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1 h-full">
+                <div class="h-full flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
                     <!-- Ambient Glow Effects -->
                     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                         <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
@@ -322,18 +298,18 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Perlu Revisi</p>
+                    <div class="relative z-10 flex items-start justify-between gap-2.5">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[10px] xl:text-[11px] font-bold uppercase tracking-normal xl:tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors truncate" title="Perlu Revisi">Perlu Revisi</p>
                             <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight" id="statRejectedMhs"><?= $rejectedCount; ?></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Telah Ditolak / Perlu Revisi</p>
+                            <p class="text-xs font-medium text-slate-500 mt-1 truncate">Telah Ditolak / Perlu Revisi</p>
                         </div>
                         
                         <!-- Glowing Halo Icon -->
                         <div class="relative shrink-0">
                             <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-clock text-lg"></i>
+                            <div class="relative w-11 h-11 flex items-center justify-center rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                <i class="fa-solid fa-clock text-base"></i>
                             </div>
                         </div>
                     </div>
@@ -413,34 +389,34 @@
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-900 text-white uppercase tracking-wider text-[10px] sm:text-[11px] font-black border-b border-slate-800">
-                            <th class="py-3.5 px-3 text-center w-8">
+                            <th class="py-3 px-2 text-center w-8">
                                 <input type="checkbox" id="checkAllStudents" onchange="toggleAllCheckboxesDW(this)" title="Pilih Semua Mahasiswa" class="w-4 h-4 text-orange-600 rounded border-slate-600 focus:ring-orange-500 cursor-pointer">
                             </th>
-                            <th class="py-3.5 px-4 pl-3">MAHASISWA</th>
-                            <th class="py-3.5 px-4">JUDUL RENCANA TA</th>
-                            <th class="py-3.5 px-4 text-center">STATUS <?= !empty($syarat_berkas) ? count($syarat_berkas) : 4; ?> BERKAS</th>
-                            <th class="py-3.5 px-4 text-center">DOSEN WALI</th>
-                            <th class="py-3.5 px-4 text-center">TAHAP SAAT INI</th>
-                            <th class="py-3.5 px-4 pr-6 text-right">AKSI</th>
+                            <th class="py-3 px-3">MAHASISWA</th>
+                            <th class="py-3 px-3">JUDUL RENCANA TA</th>
+                            <th class="py-3 px-3 text-center">STATUS <?= !empty($syarat_berkas) ? count($syarat_berkas) : 4; ?> BERKAS</th>
+                            <th class="py-3 px-3 text-center">DOSEN WALI</th>
+                            <th class="py-3 px-3 text-center">TAHAP SAAT INI</th>
+                            <th class="py-3 px-3 pr-4 text-right">AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-orange-100/80 font-medium bg-white" id="tableBodyMhs">
                         <?php if(!empty($list_mahasiswa)): ?>
                             <?php foreach($list_mahasiswa as $mhs): ?>
                                 <?php 
-                                    $st = $mhs['status_approval_wali'] ?? 'Pending';
-                                    $badgeStyle = ($st === 'Approved') ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : (($st === 'Rejected') ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-amber-100 text-amber-700 border-amber-300');
-                                    $full_name = trim($mhs['nama_depan'] . ' ' . $mhs['nama_belakang']);
-                                    if(empty($full_name)) $full_name = 'Mahasiswa ' . $mhs['nim'];
-                                    
-                                    $ksm_st = $mhs['status_file_ksm'] ?? 'Pending';
-                                    $trs_st = $mhs['status_file_transkrip'] ?? 'Pending';
-                                    $prn_st = $mhs['status_file_pernyataan'] ?? 'Pending';
-                                    $lab_st = $mhs['status_file_bebas_lab'] ?? 'Pending';
-                                ?>
+                                     $st = $mhs['status_approval_wali'] ?? 'Pending';
+                                     $badgeStyle = ($st === 'Approved') ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : (($st === 'Rejected') ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-amber-100 text-amber-700 border-amber-300');
+                                     $full_name = trim($mhs['nama_depan'] . ' ' . $mhs['nama_belakang']);
+                                     if(empty($full_name)) $full_name = 'Mahasiswa ' . $mhs['nim'];
+                                     
+                                     $ksm_st = $mhs['status_file_ksm'] ?? 'Pending';
+                                     $trs_st = $mhs['status_file_transkrip'] ?? 'Pending';
+                                     $prn_st = $mhs['status_file_pernyataan'] ?? 'Pending';
+                                     $lab_st = $mhs['status_file_bebas_lab'] ?? 'Pending';
+                                 ?>
                                 <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="<?= $st; ?>" data-nim="<?= strtolower($mhs['nim']); ?>" data-nama="<?= strtolower($full_name); ?>" data-judul="<?= strtolower($mhs['judul_1'] ?? ''); ?>" data-stage="<?= strtolower($mhs['current_stage'] ?? 'draft'); ?>">
                                     <!-- Checkbox Column -->
-                                    <td class="py-4 px-3 text-center whitespace-nowrap">
+                                    <td class="py-3 px-2 text-center whitespace-nowrap">
                                         <input type="checkbox" name="batch_select[]" value="<?= $mhs['nim']; ?>" 
                                                data-name="<?= htmlspecialchars($full_name); ?>" 
                                                onchange="updateBatchBarDW()"
@@ -448,9 +424,9 @@
                                     </td>
                                     
                                     <!-- Mahasiswa Info -->
-                                    <td class="py-4 px-4 pl-3 whitespace-nowrap">
-                                        <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-orange-600 font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                    <td class="py-3 px-3 whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-7 h-7 rounded-lg bg-orange-100 border border-orange-200 text-orange-600 font-bold text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
                                                 <?= strtoupper(substr($mhs['nama_depan'] ?? 'M', 0, 1)); ?>
                                             </div>
                                             <div>
@@ -467,78 +443,132 @@
                                     </td>
 
                                     <!-- Judul TA -->
-                                    <td class="py-4 px-4 text-slate-700 max-w-xs leading-relaxed text-xs">
-                                        <?= !empty($mhs['judul_1']) ? character_limiter($mhs['judul_1'], 50) : '<span class="text-slate-400 italic font-normal">Belum Mendaftar</span>'; ?>
+                                    <td class="py-3 px-3 text-slate-700 max-w-[180px] xl:max-w-[220px] leading-snug text-xs">
+                                        <div class="line-clamp-2" title="<?= htmlspecialchars($mhs['judul_1'] ?? ''); ?>">
+                                            <?= !empty($mhs['judul_1']) ? htmlspecialchars($mhs['judul_1']) : '<span class="text-slate-400 italic font-normal">Belum Mendaftar</span>'; ?>
+                                        </div>
                                     </td>
 
-                                    <!-- Status Berkas Dinamis -->
-                                    <td class="py-4 px-4 text-center whitespace-nowrap">
-                                        <div class="inline-flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-[10px] font-mono shadow-2xs">
-                                            <?php 
-                                                $active_sb = !empty($syarat_berkas) ? $syarat_berkas : [
-                                                    ['kode_berkas' => 'ksm', 'nama_berkas' => 'KSM'],
-                                                    ['kode_berkas' => 'transkrip', 'nama_berkas' => 'Transkrip'],
-                                                    ['kode_berkas' => 'pernyataan', 'nama_berkas' => 'Surat Pernyataan'],
-                                                    ['kode_berkas' => 'bebas_lab', 'nama_berkas' => 'Bebas Lab']
+                                    <!-- Status Berkas Dinamis (Ringkasan Jumlah & Singkatan Berkas) -->
+                                    <td class="py-3 px-3 text-center whitespace-nowrap">
+                                        <?php 
+                                            $active_sb = !empty($syarat_berkas) ? $syarat_berkas : [
+                                                ['kode_berkas' => 'ksm', 'nama_berkas' => 'KSM'],
+                                                ['kode_berkas' => 'transkrip', 'nama_berkas' => 'Transkrip'],
+                                                ['kode_berkas' => 'pernyataan', 'nama_berkas' => 'Surat Pernyataan'],
+                                                ['kode_berkas' => 'bebas_lab', 'nama_berkas' => 'Bebas Lab']
+                                            ];
+                                            $v_cnt = 0;
+                                            $i_cnt = 0;
+                                            $p_cnt = 0;
+                                            $item_pills = [];
+
+                                            $map_abbr = ['ksm' => 'KSM', 'transkrip' => 'TRS', 'pernyataan' => 'SRT', 'bebas_lab' => 'LAB'];
+
+                                            foreach ($active_sb as $sb) {
+                                                $k_code = $sb['kode_berkas'];
+                                                $b_st = $mhs['status_file_' . $k_code] ?? 'Pending';
+                                                if ($b_st === 'Pending' && !empty($mhs['berkas_map'][$k_code]['status_verifikasi'])) {
+                                                    $ver = $mhs['berkas_map'][$k_code]['status_verifikasi'];
+                                                    $b_st = ($ver === 'Valid') ? 'Approved' : (($ver === 'Invalid') ? 'Rejected' : 'Pending');
+                                                }
+
+                                                if ($b_st === 'Approved') {
+                                                    $v_cnt++;
+                                                } elseif ($b_st === 'Rejected') {
+                                                    $i_cnt++;
+                                                } else {
+                                                    $p_cnt++;
+                                                }
+
+                                                $btn_class = ($b_st === 'Approved') ? 'bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200' : (($b_st === 'Rejected') ? 'bg-rose-100/90 text-rose-700 hover:bg-rose-200' : 'bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60');
+                                                
+                                                if (isset($map_abbr[$k_code])) {
+                                                    $abbr = $map_abbr[$k_code];
+                                                } else {
+                                                    $w = preg_split('/[\s_-]+/', trim($sb['nama_berkas']));
+                                                    $abbr = strtoupper(substr($w[0], 0, 4));
+                                                }
+
+                                                $item_pills[] = [
+                                                    'code' => $k_code,
+                                                    'name' => $sb['nama_berkas'],
+                                                    'abbr' => $abbr,
+                                                    'class' => $btn_class
                                                 ];
-                                                $total_sb = count($active_sb);
-                                                $b_count = 0;
-                                            ?>
-                                            <?php foreach ($active_sb as $sb): ?>
-                                                <?php 
-                                                    $b_count++;
-                                                    $k_code = $sb['kode_berkas'];
-                                                    $b_st = $mhs['status_file_' . $k_code] ?? 'Pending';
-                                                    if ($b_st === 'Pending' && !empty($mhs['berkas_map'][$k_code]['status_verifikasi'])) {
-                                                        $ver = $mhs['berkas_map'][$k_code]['status_verifikasi'];
-                                                        $b_st = ($ver === 'Valid') ? 'Approved' : (($ver === 'Invalid') ? 'Rejected' : 'Pending');
-                                                    }
-                                                    $btn_class = ($b_st === 'Approved') ? 'bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200' : (($b_st === 'Rejected') ? 'bg-rose-100/90 text-rose-700 hover:bg-rose-200' : 'bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60');
-                                                    
-                                                    $map_abbr = ['ksm' => 'KSM', 'transkrip' => 'TRS', 'pernyataan' => 'SRT', 'bebas_lab' => 'LAB'];
-                                                    if (isset($map_abbr[$k_code])) {
-                                                        $abbr = $map_abbr[$k_code];
-                                                    } else {
-                                                        $w = preg_split('/[\s_-]+/', trim($sb['nama_berkas']));
-                                                        $abbr = strtoupper(substr($w[0], 0, 4));
-                                                    }
-                                                ?>
-                                                <button type="button" 
-                                                        onclick="openQuickDocReview('<?= $mhs['nim']; ?>', '<?= $k_code; ?>')" 
-                                                        id="badge_doc_<?= $mhs['nim']; ?>_<?= $k_code; ?>"
-                                                        title="Review <?= htmlspecialchars($sb['nama_berkas']); ?> - <?= htmlspecialchars($full_name); ?>"
-                                                        class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer <?= $btn_class; ?>">
-                                                    <?= $abbr; ?>
-                                                </button>
-                                                <?php if($b_count < $total_sb): ?>
-                                                    <span class="text-slate-300">·</span>
+                                            }
+                                        ?>
+                                        <div class="flex flex-col items-center gap-1.5">
+                                            <!-- Ringkasan Status Berkas (Valid, Direvisi, Menunggu) persis Admin LAA -->
+                                            <div id="berkas_summary_badges_<?= $mhs['nim']; ?>" class="flex items-center gap-1 flex-wrap justify-center">
+                                                <?php if($v_cnt > 0): ?>
+                                                    <button type="button" onclick="openStudentBerkasPreview('<?= $mhs['nim']; ?>')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="<?= $v_cnt; ?> Berkas Disetujui/Valid — Klik untuk Lihat Berkas">
+                                                        <i class="fa-solid fa-circle-check text-emerald-500 text-[9px]"></i>
+                                                        <span><?= $v_cnt; ?> Valid</span>
+                                                    </button>
                                                 <?php endif; ?>
-                                            <?php endforeach; ?>
+
+                                                <?php if($i_cnt > 0): ?>
+                                                    <button type="button" onclick="openStudentBerkasPreview('<?= $mhs['nim']; ?>')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="<?= $i_cnt; ?> Berkas Ditolak/Direvisi — Klik untuk Lihat Berkas">
+                                                        <i class="fa-solid fa-circle-xmark text-rose-500 text-[9px]"></i>
+                                                        <span><?= $i_cnt; ?> Direvisi</span>
+                                                    </button>
+                                                <?php endif; ?>
+
+                                                <?php if($p_cnt > 0): ?>
+                                                    <button type="button" onclick="openStudentBerkasPreview('<?= $mhs['nim']; ?>')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="<?= $p_cnt; ?> Berkas Menunggu Verifikasi — Klik untuk Lihat Berkas">
+                                                        <i class="fa-solid fa-clock text-amber-500 text-[9px]"></i>
+                                                        <span><?= $p_cnt; ?> Menunggu</span>
+                                                    </button>
+                                                <?php endif; ?>
+
+                                                <?php if($v_cnt === 0 && $i_cnt === 0 && $p_cnt === 0): ?>
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                                        Belum ada berkas
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <!-- Singkatan Berkas Persyaratan -->
+                                            <div class="inline-flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-[10px] font-mono shadow-2xs">
+                                                <?php foreach ($item_pills as $idx => $p): ?>
+                                                    <button type="button" 
+                                                            onclick="openStudentBerkasPreview('<?= $mhs['nim']; ?>', '<?= $p['code']; ?>')" 
+                                                            id="badge_doc_<?= $mhs['nim']; ?>_<?= $p['code']; ?>"
+                                                            title="Review <?= htmlspecialchars($p['name']); ?> - <?= htmlspecialchars($full_name); ?>"
+                                                            class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer <?= $p['class']; ?>">
+                                                        <?= $p['abbr']; ?>
+                                                    </button>
+                                                    <?php if($idx < count($item_pills) - 1): ?>
+                                                        <span class="text-slate-300">·</span>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            </div>
                                         </div>
                                     </td>
 
                                     <!-- Status Approval Dosen Wali -->
-                                    <td class="py-4 px-4 text-center whitespace-nowrap">
-                                        <span class="px-3 py-1 font-semibold text-[11px] rounded-full border shadow-xs inline-block <?= $badgeStyle; ?>"><?= $st; ?></span>
+                                    <td class="py-3 px-3 text-center whitespace-nowrap">
+                                        <span class="px-2.5 py-0.5 font-semibold text-[11px] rounded-full border shadow-xs inline-block <?= $badgeStyle; ?>"><?= $st; ?></span>
                                     </td>
 
                                     <!-- Tahap Saat Ini -->
-                                    <td class="py-4 px-4 text-center whitespace-nowrap">
-                                        <span class="px-3 py-1 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 shadow-xs inline-block"><?= $mhs['current_stage'] ?? 'Draft'; ?></span>
+                                    <td class="py-3 px-3 text-center whitespace-nowrap">
+                                        <span class="px-2.5 py-0.5 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 shadow-xs inline-block"><?= $mhs['current_stage'] ?? 'Draft'; ?></span>
                                     </td>
 
                                     <!-- Aksi -->
-                                    <td class="py-4 px-4 pr-6 text-right whitespace-nowrap">
-                                        <div class="inline-flex items-center gap-2">
-                                            <a href="<?= site_url('dosenwali/detail_mahasiswa/' . $mhs['nim']); ?>" 
-                                               class="btn-3d-orange inline-flex items-center gap-1.5 text-white font-bold px-3.5 py-2 rounded-xl text-xs"
+                                    <td class="py-3 px-3 pr-4 text-right whitespace-nowrap">
+                                        <div class="inline-flex items-center gap-1.5">
+                                            <a href="<?= site_url('dosen/wali/detail_mahasiswa/' . $mhs['nim']); ?>" 
+                                               class="btn-3d-orange inline-flex items-center gap-1 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs"
                                                title="Detail & Approval Mahasiswa">
                                                 <i class="bi bi-search text-xs"></i> Detail
                                             </a>
                                             <button type="button" 
                                                     onclick="toggleLihatBerkasPanel('<?= $mhs['nim']; ?>')" 
                                                     id="btn_lihat_berkas_<?= $mhs['nim']; ?>"
-                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 font-bold text-xs transition cursor-pointer shadow-2xs"
+                                                    class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 font-bold text-xs transition cursor-pointer shadow-2xs"
                                                     title="Lihat Berkas">
                                                 <i class="fa-solid fa-folder-open text-xs"></i>
                                             </button>
@@ -601,7 +631,7 @@
     </div>
 
     <!-- Multi-Student Batch Review Modal Popup -->
-    <div id="batchReviewModalDW" style="display: none;" onclick="if(event.target === this) closeBatchModalDW()" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div id="batchReviewModalDW" style="display: none;" onclick="if(event.target === this) closeBatchModalDW()" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto">
         <div class="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()">
             
             <!-- Modal Header: Multi-Student Summary & Quick Nav Anchors -->
@@ -697,7 +727,7 @@
     </div>
 
     <!-- Quick Single Document Review Modal (Mirip Admin Layanan dengan Slip Tombol Judul & Skema TA) -->
-    <div id="quickDocReviewModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-md animate-fade-in" tabindex="-1" onclick="if(event.target === this) closeQuickDocReviewModal()">
+    <div id="quickDocReviewModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/65 backdrop-blur-md animate-fade-in" tabindex="-1" onclick="if(event.target === this) closeQuickDocReviewModal()">
         <div id="quickDocModalDialog" class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden transform transition-all relative" onclick="event.stopPropagation()">
             
             <!-- In-Modal Toast Notification -->
@@ -794,7 +824,7 @@
     </div>
 
     <!-- Floating Non-Blocking Container: Lihat & Pratinjau Berkas (Layar Luar Tetap Bebas Diklik) -->
-    <div id="lihatBerkasContainer" class="fixed inset-0 pointer-events-none z-50 flex items-center justify-center p-3 sm:p-5 gap-4 sm:gap-5 overflow-x-auto" style="display: none;">
+    <div id="lihatBerkasContainer" class="fixed inset-0 pointer-events-none z-[60] flex items-center justify-center p-3 sm:p-5 gap-4 sm:gap-5 overflow-x-auto" style="display: none;">
         
         <!-- Wrapper Kartu Mahasiswa (Kanan-Kiri saat tanpa preview, Atas-Bawah di Kiri Ujung saat preview aktif) -->
         <div id="wrapperDaftarMhs" class="flex flex-row items-center gap-4 shrink-0 max-h-[92vh] overflow-y-auto">
@@ -809,7 +839,7 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="dwToast" class="fixed top-6 right-6 z-50 transform transition-all duration-300 translate-y-[-150%] opacity-0 pointer-events-none">
+    <div id="dwToast" class="fixed top-6 right-6 z-[999] transform transition-all duration-300 translate-y-[-150%] opacity-0 pointer-events-none">
         <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700">
             <div class="w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-bold" id="dwToastIcon">
                 <i class="fa-solid fa-check"></i>
@@ -1163,16 +1193,21 @@
                             : '<span class="text-slate-400 italic font-normal">Belum Mendaftar</span>';
                         const isChecked = currentlyChecked.includes(mhs.nim) ? 'checked' : '';
 
-                        // Bangun badge status berkas dinamis
+                        // Bangun badge status berkas dinamis & ringkasan jumlah
                         const activeSyaratList = (window.SYARAT_BERKAS && window.SYARAT_BERKAS.length > 0) ? window.SYARAT_BERKAS : [
                             { kode_berkas: 'ksm', nama_berkas: 'KSM' },
                             { kode_berkas: 'transkrip', nama_berkas: 'Transkrip' },
                             { kode_berkas: 'pernyataan', nama_berkas: 'Surat Pernyataan' },
                             { kode_berkas: 'bebas_lab', nama_berkas: 'Bebas Lab' }
                         ];
+                        let vCnt = 0, iCnt = 0, pCnt = 0;
                         const berkasPillsHtml = activeSyaratList.map((sb, bIdx) => {
                             const k = sb.kode_berkas;
                             const bSt = mhs[`status_file_${k}`] || (mhs.berkas_map && mhs.berkas_map[k] ? (mhs.berkas_map[k].status_verifikasi === 'Valid' ? 'Approved' : (mhs.berkas_map[k].status_verifikasi === 'Invalid' ? 'Rejected' : 'Pending')) : 'Pending');
+                            if (bSt === 'Approved') vCnt++;
+                            else if (bSt === 'Rejected') iCnt++;
+                            else pCnt++;
+
                             const bClass = (bSt === 'Approved') ? 'bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200' : ((bSt === 'Rejected') ? 'bg-rose-100/90 text-rose-700 hover:bg-rose-200' : 'bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60');
                             
                             const mapAbbr = { ksm: 'KSM', transkrip: 'TRS', pernyataan: 'SRT', bebas_lab: 'LAB' };
@@ -1182,19 +1217,33 @@
                                 abbr = (w[0] || 'DOC').substring(0, 4).toUpperCase();
                             }
                             const dot = (bIdx < activeSyaratList.length - 1) ? '<span class="text-slate-300">·</span>' : '';
-                            return `<button type="button" onclick="openQuickDocReview('${mhs.nim}', '${k}')" id="badge_doc_${mhs.nim}_${k}" title="Review ${sb.nama_berkas} - ${mhs.nama}" class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer ${bClass}">${abbr}</button>${dot}`;
+                            return `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}', '${k}')" id="badge_doc_${mhs.nim}_${k}" title="Review ${sb.nama_berkas} - ${mhs.nama}" class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer ${bClass}">${abbr}</button>${dot}`;
                         }).join('');
+
+                        let summaryBadgesHtml = '';
+                        if (vCnt > 0) {
+                            summaryBadgesHtml += `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="${vCnt} Berkas Disetujui/Valid — Klik untuk Lihat Berkas"><i class="fa-solid fa-circle-check text-emerald-500 text-[9px]"></i> <span>${vCnt} Valid</span></button>`;
+                        }
+                        if (iCnt > 0) {
+                            summaryBadgesHtml += `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="${iCnt} Berkas Ditolak/Direvisi — Klik untuk Lihat Berkas"><i class="fa-solid fa-circle-xmark text-rose-500 text-[9px]"></i> <span>${iCnt} Direvisi</span></button>`;
+                        }
+                        if (pCnt > 0) {
+                            summaryBadgesHtml += `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="${pCnt} Berkas Menunggu Verifikasi — Klik untuk Lihat Berkas"><i class="fa-solid fa-clock text-amber-500 text-[9px]"></i> <span>${pCnt} Menunggu</span></button>`;
+                        }
+                        if (vCnt === 0 && iCnt === 0 && pCnt === 0) {
+                            summaryBadgesHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">Belum ada berkas</span>`;
+                        }
 
                         const prodiHtml = mhs.konsentrasi ? `<span>•</span><span class="text-orange-600 font-medium">${mhs.konsentrasi}</span>` : '';
 
                         return `
                             <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="${st}" data-nim="${(mhs.nim || '').toLowerCase()}" data-nama="${(mhs.nama || '').toLowerCase()}" data-judul="${(mhs.judul || '').toLowerCase()}" data-stage="${(mhs.current_stage || 'draft').toLowerCase()}">
-                                <td class="py-4 px-3 text-center whitespace-nowrap">
+                                <td class="py-3 px-2 text-center whitespace-nowrap">
                                     <input type="checkbox" name="batch_select[]" value="${mhs.nim}" data-name="${mhs.nama}" ${isChecked} onchange="updateBatchBarDW()" class="student-cb w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer">
                                 </td>
-                                <td class="py-4 px-4 pl-3 whitespace-nowrap">
-                                    <div class="flex items-center gap-2.5">
-                                        <div class="w-8 h-8 rounded-xl bg-orange-100 border border-orange-200 text-orange-600 font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                <td class="py-3 px-3 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-orange-100 border border-orange-200 text-orange-600 font-bold text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
                                             ${(mhs.nama || 'M').charAt(0).toUpperCase()}
                                         </div>
                                         <div>
@@ -1206,29 +1255,38 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-4 px-4 text-slate-700 max-w-xs leading-relaxed text-xs">${judulShort}</td>
-                                <td class="py-4 px-4 text-center whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-[10px] font-mono shadow-2xs">
-                                        ${berkasPillsHtml}
+                                <td class="py-3 px-3 text-slate-700 max-w-[180px] xl:max-w-[220px] leading-snug text-xs">
+                                    <div class="line-clamp-2" title="${mhs.judul || ''}">
+                                        ${judulShort}
                                     </div>
                                 </td>
-                                <td class="py-4 px-4 text-center whitespace-nowrap">
-                                    <span class="px-3 py-1 font-semibold text-[11px] rounded-full border shadow-xs inline-block ${badgeStyle}">${st}</span>
+                                <td class="py-3 px-3 text-center whitespace-nowrap">
+                                    <div class="flex flex-col items-center gap-1.5">
+                                        <div id="berkas_summary_badges_${mhs.nim}" class="flex items-center gap-1 flex-wrap justify-center">
+                                            ${summaryBadgesHtml}
+                                        </div>
+                                        <div class="inline-flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-[10px] font-mono shadow-2xs">
+                                            ${berkasPillsHtml}
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="py-4 px-4 text-center whitespace-nowrap">
-                                    <span class="px-3 py-1 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 shadow-xs inline-block">${mhs.current_stage || 'Draft'}</span>
+                                <td class="py-3 px-3 text-center whitespace-nowrap">
+                                    <span class="px-2.5 py-0.5 font-semibold text-[11px] rounded-full border shadow-xs inline-block ${badgeStyle}">${st}</span>
                                 </td>
-                                <td class="py-4 px-4 pr-6 text-right whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-2">
+                                <td class="py-3 px-3 text-center whitespace-nowrap">
+                                    <span class="px-2.5 py-0.5 font-semibold text-[11px] rounded-full bg-slate-100 text-slate-700 border border-slate-200 shadow-xs inline-block">${mhs.current_stage || 'Draft'}</span>
+                                </td>
+                                <td class="py-3 px-3 pr-4 text-right whitespace-nowrap">
+                                    <div class="inline-flex items-center gap-1.5">
                                         <a href="${mhs.detail_url}" 
-                                           class="btn-3d-orange inline-flex items-center gap-1.5 text-white font-bold px-3.5 py-2 rounded-xl text-xs"
+                                           class="btn-3d-orange inline-flex items-center gap-1 text-white font-bold px-2.5 py-1.5 rounded-xl text-xs"
                                            title="Detail & Approval Mahasiswa">
                                             <i class="bi bi-search text-xs"></i> Detail
                                         </a>
                                         <button type="button" 
                                                 onclick="toggleLihatBerkasPanel('${mhs.nim}')" 
                                                 id="btn_lihat_berkas_${mhs.nim}"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 font-bold text-xs transition cursor-pointer shadow-2xs"
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-200 font-bold text-xs transition cursor-pointer shadow-2xs"
                                                 title="Lihat Berkas">
                                             <i class="fa-solid fa-folder-open text-xs"></i>
                                         </button>
@@ -2420,7 +2478,7 @@
         const titleEl = document.getElementById('quickDocTitle');
 
         if (rejectBox) rejectBox.classList.add('hidden');
-        if (btnDetail) btnDetail.href = '<?= site_url("dosenwali/detail_mahasiswa/"); ?>' + mhs.nim;
+        if (btnDetail) btnDetail.href = '<?= site_url("dosen/wali/detail_mahasiswa/"); ?>' + mhs.nim;
 
         // Header icon & title
         if (iconEl) iconEl.className = 'fa-solid fa-file-pdf';
@@ -2896,66 +2954,6 @@
                 `;
             }).join('');
 
-            // Footer Keputusan Mahasiswa
-            let studentFooterHtml = '';
-            if (isLocked) {
-                studentFooterHtml = `
-                    <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-2xs">
-                        <div class="flex items-center gap-1.5">
-                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                            <span>Pengajuan Disetujui</span>
-                        </div>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-900 font-mono">
-                            ${mhs.current_stage || 'Admin Layanan'}
-                        </span>
-                    </div>
-                `;
-            } else {
-                studentFooterHtml = `
-                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
-                        <span class="flex items-center gap-1">
-                            <i class="fa-solid fa-stamp text-orange-500 text-xs"></i> Keputusan Pendaftaran:
-                        </span>
-                        <span id="mhsValidCounter_${nim}" class="text-[10px] ${validCount === totalDocs ? 'text-emerald-600 font-bold' : 'text-slate-500 font-medium'}">
-                            ${validCount}/${totalDocs} Berkas Valid
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" 
-                                onclick="toggleStudentRejectBox('${nim}')" 
-                                id="btnRejectMhs_${nim}" 
-                                class="py-2 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-2xs">
-                            <i class="fa-solid fa-xmark text-xs"></i>
-                            <span>Tolak</span>
-                        </button>
-                        <button type="button" 
-                                onclick="confirmApproveStudentWali('${nim}')" 
-                                id="btnApproveMhs_${nim}" 
-                                class="py-2 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs shadow-emerald-600/20">
-                            <i class="fa-solid fa-check text-xs"></i>
-                            <span>Setujui</span>
-                        </button>
-                    </div>
-                    <!-- Box Catatan Revisi Mahasiswa (Expandable) -->
-                    <div id="studentRejectBox_${nim}" class="hidden pt-2 border-t border-rose-100 flex flex-col gap-1.5 animate-fade-in">
-                        <div class="flex items-center justify-between text-[10px] font-bold text-rose-700">
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-comment-dots text-[9px]"></i> Alasan Penolakan / Revisi:</span>
-                            <div class="flex items-center gap-1">
-                                <button type="button" onclick="setStudentPresetNote('${nim}', 'Berkas persyaratan belum lengkap/sesuai')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Berkas Kurang</button>
-                                <button type="button" onclick="setStudentPresetNote('${nim}', 'Silakan perbaiki dokumen yang ditandai revisi')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Perbaiki Berkas</button>
-                            </div>
-                        </div>
-                        <textarea id="catatanMhs_${nim}" rows="2" placeholder="Tuliskan catatan perbaikan pendaftaran mahasiswa..." class="w-full text-xs p-2 rounded-lg border border-rose-300 focus:outline-none focus:ring-1 focus:ring-rose-500 bg-rose-50/20 text-slate-800">${mhs.catatan_wali || ''}</textarea>
-                        <div class="flex items-center justify-end gap-1.5">
-                            <button type="button" onclick="toggleStudentRejectBox('${nim}')" class="px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700 cursor-pointer">Batal</button>
-                            <button type="button" onclick="submitStudentRejectWali('${nim}')" id="btnSubmitRejectMhs_${nim}" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg shadow-2xs cursor-pointer flex items-center gap-1">
-                                <i class="fa-solid fa-paper-plane text-[9px]"></i> Kirim Penolakan
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
             return `
                 <div id="cardMhs_${nim}" class="student-card-item pointer-events-auto ${cardWidthClass} bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden flex flex-col shrink-0">
                     <!-- Header -->
@@ -2981,11 +2979,6 @@
                     <div class="p-2.5 space-y-1.5 bg-slate-50/50 overflow-y-auto max-h-[50vh] sm:max-h-[55vh]">
                         ${itemsHtml}
                     </div>
-
-                    <!-- Footer Keputusan Mahasiswa -->
-                    <div class="mt-auto border-t border-slate-200/90 bg-white p-2.5 px-3 rounded-b-2xl shrink-0 flex flex-col gap-2">
-                        ${studentFooterHtml}
-                    </div>
                 </div>
             `;
         }).join('');
@@ -3005,18 +2998,121 @@
             return;
         }
 
-        // Tambahkan ke slot (maksimal 2 pratinjau berdampingan)
-        if (window.activePreviews.length >= 2) {
+        // Tambahkan ke slot (maksimal 5 pratinjau berdampingan seperti Admin LAA)
+        if (window.activePreviews.length >= 5) {
             window.activePreviews.shift();
             window.activePreviews.push({ nim, docKey });
             if (typeof showDWToast === 'function') {
-                showDWToast(`Maksimal 2 pratinjau. Menampilkan 2 dokumen terbaru.`, true);
+                showDWToast(`Maksimal 5 pratinjau. Menampilkan 5 dokumen terbaru.`, true);
             }
         } else {
             window.activePreviews.push({ nim, docKey });
         }
 
         refreshLihatBerkasView();
+
+        setTimeout(() => {
+            const previewWrapper = document.getElementById('wrapperPreviewBerkas');
+            if (previewWrapper) {
+                previewWrapper.scrollLeft = previewWrapper.scrollWidth;
+            }
+        }, 100);
+    }
+
+    async function openStudentBerkasPreview(nim, docKey) {
+        if (!nim) return;
+        nim = String(nim).trim();
+
+        if (!window.activeLihatBerkasNims) window.activeLihatBerkasNims = [];
+        if (!window.activePreviews) window.activePreviews = [];
+
+        // Pastikan panel mahasiswa terbuka
+        const activeNims = window.activeLihatBerkasNims.map(n => String(n).trim());
+        if (!activeNims.includes(nim)) {
+            if (window.activeLihatBerkasNims.length >= 4) {
+                window.activeLihatBerkasNims.shift();
+            }
+            window.activeLihatBerkasNims.push(nim);
+        }
+
+        const showAndRender = () => {
+            showLihatBerkasContainer();
+            if (docKey) {
+                docKey = String(docKey).trim();
+                const isPreviewed = window.activePreviews.some(p => String(p.nim).trim() === nim && String(p.docKey).trim() === docKey);
+                if (!isPreviewed) {
+                    if (window.activePreviews.length >= 5) {
+                        window.activePreviews.shift();
+                    }
+                    window.activePreviews.push({ nim, docKey });
+                }
+            }
+            refreshLihatBerkasView();
+            if (docKey) {
+                setTimeout(() => {
+                    const previewWrapper = document.getElementById('wrapperPreviewBerkas');
+                    if (previewWrapper) {
+                        previewWrapper.scrollLeft = previewWrapper.scrollWidth;
+                    }
+                }, 100);
+            }
+        };
+
+        if (!window.mhsDataMap || !window.mhsDataMap[nim]) {
+            try {
+                const res = await fetch('<?= site_url("dosenwali/get_batch_details"); ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new URLSearchParams({ 'nims[]': nim })
+                }).then(r => r.json());
+
+                const list = Array.isArray(res) ? res : (res.data || []);
+                if (list && list.length > 0) {
+                    if (!window.mhsDataMap) window.mhsDataMap = {};
+                    window.mhsDataMap[nim] = list[0];
+                    showAndRender();
+                } else {
+                    alert('Data mahasiswa tidak ditemukan.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Gagal memuat berkas mahasiswa.');
+            }
+            return;
+        }
+
+        showAndRender();
+    }
+
+    function updateTableBerkasSummaryBadges(nim) {
+        if (!nim) return;
+        const container = document.getElementById(`berkas_summary_badges_${nim}`);
+        if (!container) return;
+
+        const docList = getDocList();
+        let vCnt = 0, iCnt = 0, pCnt = 0;
+        docList.forEach(d => {
+            const st = getMhsDocStatus(nim, d.key);
+            if (st === 'Approved') vCnt++;
+            else if (st === 'Rejected') iCnt++;
+            else pCnt++;
+        });
+
+        let summaryBadgesHtml = '';
+        if (vCnt > 0) {
+            summaryBadgesHtml += `<button type="button" onclick="openStudentBerkasPreview('${nim}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="${vCnt} Berkas Disetujui/Valid — Klik untuk Lihat Berkas"><i class="fa-solid fa-circle-check text-emerald-500 text-[9px]"></i> <span>${vCnt} Valid</span></button>`;
+        }
+        if (iCnt > 0) {
+            summaryBadgesHtml += `<button type="button" onclick="openStudentBerkasPreview('${nim}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="${iCnt} Berkas Ditolak/Direvisi — Klik untuk Lihat Berkas"><i class="fa-solid fa-circle-xmark text-rose-500 text-[9px]"></i> <span>${iCnt} Direvisi</span></button>`;
+        }
+        if (pCnt > 0) {
+            summaryBadgesHtml += `<button type="button" onclick="openStudentBerkasPreview('${nim}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:scale-105 transition-all cursor-pointer shadow-2xs" title="${pCnt} Berkas Menunggu Verifikasi — Klik untuk Lihat Berkas"><i class="fa-solid fa-clock text-amber-500 text-[9px]"></i> <span>${pCnt} Menunggu</span></button>`;
+        }
+        if (vCnt === 0 && iCnt === 0 && pCnt === 0) {
+            summaryBadgesHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">Belum ada berkas</span>`;
+        }
+
+        container.innerHTML = summaryBadgesHtml;
     }
 
     function renderAllPreviewCards() {
@@ -3030,9 +3126,10 @@
         }
 
         wrapper.classList.remove('hidden');
+        wrapper.className = 'flex items-center gap-3 shrink-0 max-w-[65vw] sm:max-w-[70vw] overflow-x-auto p-1.5 scroll-smooth';
 
         const totalPreviews = window.activePreviews.length;
-        const panelWidthClass = totalPreviews > 1 ? 'w-[430px] sm:w-[470px] lg:w-[490px]' : 'w-[500px] sm:w-[540px]';
+        const panelWidthClass = totalPreviews >= 3 ? 'w-[340px] sm:w-[370px] lg:w-[400px] shrink-0' : (totalPreviews > 1 ? 'w-[400px] sm:w-[440px] lg:w-[470px] shrink-0' : 'w-[500px] sm:w-[540px] shrink-0');
 
         const docList = getDocList();
 
@@ -3304,40 +3401,16 @@
                     }
                 }
 
-                // 1. Update Preview Card Badge & close reject box
-                const previewBadge = document.getElementById(`previewStatusBadge_${nim}_${docKey}`);
-                if (previewBadge) {
-                    previewBadge.innerHTML = getDocStatusBadgeHtml(status);
-                }
-                const rejectBox = document.getElementById(`previewRejectBox_${nim}_${docKey}`);
-                if (rejectBox) rejectBox.classList.add('hidden');
-
-                // 2. Update Student Card Badge
-                const cardBadge = document.getElementById(`cardDocBadge_${nim}_${docKey}`);
-                if (cardBadge) {
-                    if (status === 'Approved') {
-                        cardBadge.innerHTML = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Valid</span>';
-                    } else if (status === 'Rejected') {
-                        cardBadge.innerHTML = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Revisi</span>';
-                    } else {
-                        cardBadge.innerHTML = '<span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-slate-100 text-slate-500 border border-slate-200">Pending</span>';
-                    }
+                // 1. Tutup / hilangkan tab preview berkas yang baru saja di-aksi
+                const pIdx = (window.activePreviews || []).findIndex(p => String(p.nim).trim() === String(nim).trim() && String(p.docKey).trim() === String(docKey).trim());
+                if (pIdx > -1) {
+                    window.activePreviews.splice(pIdx, 1);
                 }
 
-                // 3. Update Valid Counter in Student Card Footer
-                const countEl = document.getElementById(`mhsValidCounter_${nim}`);
-                if (countEl) {
-                    const docList = getDocList();
-                    const vCount = getMhsValidDocCount(nim, docList);
-                    countEl.textContent = `${vCount}/${docList.length} Berkas Valid`;
-                    if (vCount === docList.length) {
-                        countEl.className = 'text-[10px] text-emerald-600 font-bold';
-                    } else {
-                        countEl.className = 'text-[10px] text-slate-500 font-medium';
-                    }
-                }
+                // 2. Refresh tampilan panel berkas & sisa kartu preview
+                refreshLihatBerkasView();
 
-                // 4. Update Main Table Badge
+                // 3. Update Main Table Badge & Summary Badges
                 const tableBadge = document.getElementById(`badge_doc_${nim}_${docKey}`);
                 if (tableBadge) {
                     if (status === 'Approved') {
@@ -3348,9 +3421,10 @@
                         tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60';
                     }
                 }
+                updateTableBerkasSummaryBadges(nim);
 
                 const docTitle = docKey.toUpperCase();
-                showDWToast((status === 'Approved') ? `Berkas ${docTitle} disetujui (Valid)!` : `Catatan revisi berkas ${docTitle} berhasil dikirim.`, true);
+                showDWToast((status === 'Approved') ? `Berkas ${docTitle} disetujui (Valid)! Tab pratinjau ditutup.` : `Catatan revisi berkas ${docTitle} berhasil dikirim! Tab pratinjau ditutup.`, true);
             } else {
                 showDWToast(res.message || 'Gagal memperbarui status berkas.', false);
             }
@@ -3420,7 +3494,10 @@
                     window.mhsDataMap[nim].current_stage = 'Dosen Wali (Revisi)';
                 }
 
-                renderAllLihatBerkasCards();
+                // Tutup semua tab preview berkas milik mahasiswa ini jika ada
+                window.activePreviews = (window.activePreviews || []).filter(p => String(p.nim).trim() !== String(nim).trim());
+                refreshLihatBerkasView();
+                updateTableBerkasSummaryBadges(nim);
                 showDWToast(`Catatan revisi pendaftaran mahasiswa ${nim} berhasil dikirim!`, true);
 
                 if (typeof pollRealtimeData === 'function') {
@@ -3519,8 +3596,10 @@
                     });
                 }
 
-                renderAllLihatBerkasCards();
-                renderAllPreviewCards();
+                // Tutup semua tab preview berkas milik mahasiswa ini jika ada
+                window.activePreviews = (window.activePreviews || []).filter(p => String(p.nim).trim() !== String(nim).trim());
+                refreshLihatBerkasView();
+                updateTableBerkasSummaryBadges(nim);
 
                 showDWToast(`Pendaftaran ${fullName} (${nim}) berhasil disetujui!`, true);
 
@@ -3646,6 +3725,9 @@
     window.togglePreviewRejectBox = togglePreviewRejectBox;
     window.setPreviewPresetNote = setPreviewPresetNote;
     window.submitPreviewDocApproval = submitPreviewDocApproval;
+    window.openStudentBerkasPreview = openStudentBerkasPreview;
+    window.openQuickDocReview = openStudentBerkasPreview;
+    window.updateTableBerkasSummaryBadges = updateTableBerkasSummaryBadges;
     window.toggleStudentRejectBox = toggleStudentRejectBox;
     window.setStudentPresetNote = setStudentPresetNote;
     window.submitStudentRejectWali = submitStudentRejectWali;

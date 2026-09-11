@@ -2262,8 +2262,14 @@
                     
                     updateMhsDataDocStatus(nim, kode_berkas, normStatus);
 
+                    // Tutup / hilangkan tab preview berkas yang baru saja di-aksi
+                    const pIdx = (window.activePreviews || []).findIndex(p => String(p.nim).trim() === String(nim).trim() && String(p.docKey).trim() === String(kode_berkas).trim());
+                    if (pIdx > -1) {
+                        window.activePreviews.splice(pIdx, 1);
+                    }
+
                     if (typeof showLAAToast === 'function') {
-                        const msg = (normStatus === 'Valid') ? 'Dokumen berhasil disetujui (Valid)!' : 'Catatan revisi berhasil dikirim!';
+                        const msg = (normStatus === 'Valid') ? 'Dokumen berhasil disetujui (Valid)! Tab pratinjau ditutup.' : 'Catatan revisi berhasil dikirim! Tab pratinjau ditutup.';
                         showLAAToast(msg, normStatus === 'Valid');
                     }
 

@@ -1879,6 +1879,51 @@
             document.querySelectorAll('.dropdown-arrow').forEach(a => a.style.transform = 'rotate(0deg)');
         }
 
+        // Dependent Dropdown for Ruangan (Tambah Peminjaman)
+        $(document).ready(function() {
+            $('#kategoriSelect').change(function() {
+                let id_kategori = $(this).val();
+                if(id_kategori != '') {
+                    $.ajax({
+                        url: "<?= base_url('kelolabooking/get_ruangan') ?>",
+                        method: "POST",
+                        data: {id_kategori: id_kategori},
+                        dataType: "json",
+                        success: function(data) {
+                            if(data.length === 1 && (!data[0].kode_ruangan || data[0].kode_ruangan.indexOf(',') === -1)) {
+                                let room = data[0];
+                                let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
+                                let html = `<option value="${room.id}" selected>${roomLabel}</option>`;
+                                $('#ruanganSelect').html(html);
+                                $('#ruanganSelect').css({'background-color': '#e2e8f0', 'pointer-events': 'none', 'color': '#64748b'});
+                            } else {
+                                let html = '<option value="">Pilih Ruangan</option>';
+                                $.each(data, function(i, room) {
+                                    if (room.kode_ruangan && room.kode_ruangan.indexOf(',') > -1) {
+                                        let codes = room.kode_ruangan.split(',');
+                                        $.each(codes, function(ci, c) {
+                                            let codeTrim = c.trim();
+                                            if (codeTrim) {
+                                                html += `<option value="${room.id}">${room.nama_ruangan} (Ruang: ${codeTrim})</option>`;
+                                            }
+                                        });
+                                    } else {
+                                        let roomLabel = room.kode_ruangan ? `${room.nama_ruangan} (Ruang: ${room.kode_ruangan})` : room.nama_ruangan;
+                                        html += `<option value="${room.id}">${roomLabel}</option>`;
+                                    }
+                                });
+                                $('#ruanganSelect').html(html);
+                                $('#ruanganSelect').css({'background-color': '#f8fafc', 'pointer-events': 'auto', 'color': 'var(--text-color)'});
+                            }
+                        }
+                    });
+                } else {
+                    $('#ruanganSelect').html('<option value="">Pilih Kategori Dahulu</option>');
+                    $('#ruanganSelect').css({'background-color': '#f8fafc', 'pointer-events': 'auto', 'color': 'var(--text-color)'});
+                }
+            });
+        });
+
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.custom-dropdown-container') && !e.target.closest('.extra-rows-card') && !e.target.closest('#standaloneAddBtn')) {
                 closeAllCustomDropdowns();
@@ -2781,5 +2826,58 @@
             }, { passive: true });
         }
     </script>
+    <!-- Modal Popup Form Tambah Ruangan Khusus Admin -->
+    <div id="modalTambahRuanganAdmin" class="modal-backdrop" onclick="if(event.target===this)closeTambahRuanganModalAdmin()">
+        <div class="modal-card" style="max-width: 480px; padding: 0; overflow: hidden;">
+            <div style="padding: 18px 24px; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: space-between;">
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800;">🏢 Tambah Ruangan / Lab Baru</h3>
+                <button type="button" onclick="closeTambahRuanganModalAdmin()" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <form id="formTambahRuanganAdmin" onsubmit="handleTambahRuanganSubmitAdmin(event)" style="padding: 20px 24px;">
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Nama Ruangan / Lab *</label>
+                        <input type="text" name="nama_ruangan" placeholder="Contoh: Lab AR/VR &amp; Metaverse" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Ruangan Fisik (Nomor LK) *</label>
+                        <input type="text" name="kode_ruangan" placeholder="Contoh: LK.01.01, LK.01.02" required class="form-control">
+                        <small style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Dapat diisi lebih dari satu ruangan, pisahkan dengan koma.</small>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Kategori Ruangan *</label>
+                        <select name="id_kategori" required class="form-control">
+                            <option value="1">Laboratorium Komputer</option>
+                            <option value="2">Laboratorium Desain</option>
+                            <option value="3">Ruang Rapat &amp; Seminar</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Kapasitas (Orang)</label>
+                        <input type="number" name="kapasitas" value="35" min="1" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Lokasi Ruangan</label>
+                        <input type="text" name="lokasi" value="Gedung Sebatik (FIK)" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; text-transform: uppercase;">Status Ketersediaan</label>
+                        <select name="status" class="form-control">
+                            <option value="Tersedia">Tersedia</option>
+                            <option value="Tidak Tersedia">Tidak Tersedia</option>
+                            <option value="Perbaikan">Perbaikan</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="closeTambahRuanganModalAdmin()" style="padding: 8px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #64748b; font-weight: 700; cursor: pointer;">Batal</button>
+                    <button type="submit" style="padding: 8px 22px; border-radius: 8px; border: none; background: #ea580c; color: #fff; font-weight: 700; cursor: pointer;">Simpan Ruangan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global Custom Circle Cursor -->
+    <?php $this->load->view('partials/custom_cursor'); ?>
 </body>
 </html>

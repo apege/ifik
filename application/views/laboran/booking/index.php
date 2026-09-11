@@ -3055,7 +3055,17 @@
                     success: function(data){
                         var html = '<option value="">Pilih Ruangan</option>';
                         for(var i=0; i<data.length; i++){
-                            html += '<option value="'+data[i].id+'">'+data[i].kode_ruangan+' - '+data[i].nama_ruangan+'</option>';
+                            if (data[i].kode_ruangan && data[i].kode_ruangan.indexOf(',') > -1) {
+                                var codes = data[i].kode_ruangan.split(',');
+                                for(var c=0; c<codes.length; c++){
+                                    var codeTrim = codes[c].trim();
+                                    if(codeTrim) {
+                                        html += '<option value="'+data[i].id+'">'+codeTrim+' - '+data[i].nama_ruangan+'</option>';
+                                    }
+                                }
+                            } else {
+                                html += '<option value="'+data[i].id+'">'+(data[i].kode_ruangan ? data[i].kode_ruangan + ' - ' : '')+data[i].nama_ruangan+'</option>';
+                            }
                         }
                         $('#ruanganSelect').html(html);
                     }
