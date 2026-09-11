@@ -4,23 +4,29 @@ let selectedMinute = 30;
 let isSelectingHour = true; // true = hour mode, false = minute mode
 
 function initTimePicker() {
+    if (!document.getElementById('tpClockNumbers') || !document.getElementById('tpDisplayHour')) {
+        return;
+    }
     renderClock();
     updateDisplay();
 }
 
 function openTimePicker(target) {
     activeTarget = target;
-    document.getElementById('timePickerModal').classList.add('active');
+    const modal = document.getElementById('timePickerModal');
+    if (modal) modal.classList.add('active');
     
     // Set date label
-    let d = document.querySelector('input[name="tanggal_peminjaman"]').value;
-    if(d) {
-        document.getElementById('tpDateDisplay').innerText = d; // Simple format
+    let dInput = document.querySelector('input[name="tanggal_peminjaman"]');
+    if (dInput && dInput.value) {
+        const tpDate = document.getElementById('tpDateDisplay');
+        if (tpDate) tpDate.innerText = dInput.value;
     }
 }
 
 function closeTimePicker() {
-    document.getElementById('timePickerModal').classList.remove('active');
+    const modal = document.getElementById('timePickerModal');
+    if (modal) modal.classList.remove('active');
 }
 
 function applyTimePicker() {
@@ -28,9 +34,11 @@ function applyTimePicker() {
     let mm = selectedMinute.toString().padStart(2, '0');
     
     if(activeTarget === 'mulai') {
-        document.getElementById('inputJamMulai').value = hh + ':' + mm;
+        const el = document.getElementById('inputJamMulai');
+        if (el) el.value = hh + ':' + mm;
     } else {
-        document.getElementById('inputJamSelesai').value = hh + ':' + mm;
+        const el = document.getElementById('inputJamSelesai');
+        if (el) el.value = hh + ':' + mm;
     }
     
     closeTimePicker();
@@ -38,8 +46,10 @@ function applyTimePicker() {
 
 function setMode(mode) {
     isSelectingHour = (mode === 'hour');
-    document.getElementById('tpTabHour').classList.toggle('active', isSelectingHour);
-    document.getElementById('tpTabMinute').classList.toggle('active', !isSelectingHour);
+    const tabH = document.getElementById('tpTabHour');
+    const tabM = document.getElementById('tpTabMinute');
+    if (tabH) tabH.classList.toggle('active', isSelectingHour);
+    if (tabM) tabM.classList.toggle('active', !isSelectingHour);
     renderClock();
 }
 
@@ -50,10 +60,13 @@ function setQuickTime(hh, mm) {
 }
 
 function updateDisplay() {
+    const elH = document.getElementById('tpDisplayHour');
+    const elM = document.getElementById('tpDisplayMinute');
+    if (!elH || !elM) return;
     let hh = selectedHour.toString().padStart(2, '0');
     let mm = selectedMinute.toString().padStart(2, '0');
-    document.getElementById('tpDisplayHour').innerText = hh;
-    document.getElementById('tpDisplayMinute').innerText = mm;
+    elH.innerText = hh;
+    elM.innerText = mm;
     renderClock();
 }
 
@@ -192,40 +205,40 @@ document.addEventListener('DOMContentLoaded', function() {
     initTimePicker();
     
     const clockContainer = document.getElementById('tpClockContainer');
-    
-    // Mouse Events
-    clockContainer.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        handleClockEvent(e);
-    });
-    document.addEventListener('mousemove', handleClockEvent);
-    document.addEventListener('mouseup', function(e) {
-        if(isDragging && isSelectingHour) {
-            setMode('minute'); // Auto switch after hour drop
-        }
-        isDragging = false;
-    });
-    
-    // Touch Events
-    clockContainer.addEventListener('touchstart', function(e) {
-        isDragging = true;
-        handleClockEvent(e);
-    }, {passive: false});
-    document.addEventListener('touchmove', handleClockEvent, {passive: false});
-    document.addEventListener('touchend', function(e) {
-        if(isDragging && isSelectingHour) {
-            setMode('minute');
-        }
-        isDragging = false;
-    });
+    if (clockContainer) {
+        // Mouse Events
+        clockContainer.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            handleClockEvent(e);
+        });
+        document.addEventListener('mousemove', handleClockEvent);
+        document.addEventListener('mouseup', function(e) {
+            if(isDragging && isSelectingHour) {
+                setMode('minute'); // Auto switch after hour drop
+            }
+            isDragging = false;
+        });
+        
+        // Touch Events
+        clockContainer.addEventListener('touchstart', function(e) {
+            isDragging = true;
+            handleClockEvent(e);
+        }, {passive: false});
+        document.addEventListener('touchmove', handleClockEvent, {passive: false});
+        document.addEventListener('touchend', function(e) {
+            if(isDragging && isSelectingHour) {
+                setMode('minute');
+            }
+            isDragging = false;
+        });
+    }
     
     let dateInput = document.querySelector('input[name="tanggal_peminjaman"]');
     if(dateInput) {
         dateInput.addEventListener('change', function() {
-            if(this.value) {
-                document.getElementById('timeSelectionGroup').style.display = 'block';
-            } else {
-                document.getElementById('timeSelectionGroup').style.display = 'none';
+            const timeGroup = document.getElementById('timeSelectionGroup');
+            if(timeGroup) {
+                timeGroup.style.display = this.value ? 'block' : 'none';
             }
         });
     }
