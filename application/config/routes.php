@@ -192,6 +192,13 @@ $route['news/get_all_json'] = 'News/get_all_json';
 // About / Baca Selengkapnya Route
 $route['dashboard/about'] = 'Dashboard/about';
 
+// Public Document Verification Routes (E-Verify QR Code)
+$route['surat/(:num)'] = 'Verifikasi/surat/$1';
+$route['verifikasi/surat/(:num)'] = 'Verifikasi/surat/$1';
+$route['verifikasi/surat/cetak/(:num)'] = 'Verifikasi/cetak/$1';
+$route['validasi/surat/(:num)'] = 'Verifikasi/surat/$1';
+$route['verifikasi/(:num)'] = 'Verifikasi/surat/$1';
+
 // Laboran & Kaur Dedicated Routes
 $route['laboran'] = 'Laboran/booking';
 $route['laboran/booking'] = 'Laboran/booking';
