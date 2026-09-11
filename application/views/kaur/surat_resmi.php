@@ -67,14 +67,14 @@
         }
 
         .qr-box {
-            text-align: center;
-            border: 1px dashed #64748b;
-            padding: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
-            display: inline-block;
+            background: #ffffff;
         }
-
-        .qr-box span { font-size: 8pt; display: block; margin-top: 4px; color: #475569; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         .signature-box {
             text-align: center;
@@ -183,7 +183,6 @@
         <div class="signature-section">
             <div class="qr-box">
                 <div id="qrcode"></div>
-                <span>Pindai QR untuk Verifikasi Keabsahan</span>
             </div>
 
             <div class="signature-box">

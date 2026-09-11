@@ -129,7 +129,7 @@ class Laboran extends CI_Controller {
 
         $data['title'] = 'Surat Resmi Peminjaman Ruangan - ' . ($data['booking']->kode_ruangan ?? 'IFIK');
         $data['nomor_surat'] = 'SURAT/LAB-IFIK/' . date('Y', strtotime($data['booking']->created_at)) . '/' . sprintf('%04d', $data['booking']->id);
-        $data['qr_data'] = site_url('laboran/surat/' . $id);
+        $data['qr_data'] = site_url('verifikasi/surat/' . $id);
         $data['penandatangan'] = $this->Booking_model->get_penandatangan($data['booking']->status);
 
         $this->load->view('kaur/surat_resmi', $data);
