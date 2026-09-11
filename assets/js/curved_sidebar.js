@@ -49,10 +49,14 @@
                 this.panel.classList.add('is-active');
                 this.toggleBtn.classList.add('is-active');
                 this.toggleBtn.setAttribute('aria-expanded', 'true');
+                this.setPath(0);
+                if (this.svg) this.svg.style.opacity = '0';
             } else {
                 this.panel.classList.remove('is-active');
                 this.toggleBtn.classList.remove('is-active');
                 this.toggleBtn.setAttribute('aria-expanded', 'false');
+                this.setPath(70);
+                if (this.svg) this.svg.style.opacity = '0';
             }
 
             // Bind events
@@ -227,8 +231,11 @@
             }
             this.panel.classList.add('is-active');
 
+            if (this.svg) this.svg.style.opacity = '1';
             // Morph curve from bulging (70) to flat (0)
-            this.animateSvgCurve(70, 0, 800);
+            this.animateSvgCurve(70, 0, 800, () => {
+                if (this.svg) this.svg.style.opacity = '0';
+            });
         }
 
         close() {
@@ -241,8 +248,11 @@
             if (this.backdrop) this.backdrop.classList.remove('is-active');
             this.panel.classList.remove('is-active');
 
+            if (this.svg) this.svg.style.opacity = '1';
             // Morph curve from flat (0) back to bulging (70)
-            this.animateSvgCurve(0, 70, 700);
+            this.animateSvgCurve(0, 70, 700, () => {
+                if (this.svg) this.svg.style.opacity = '0';
+            });
         }
     }
 
