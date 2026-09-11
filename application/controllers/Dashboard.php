@@ -27,8 +27,7 @@ class Dashboard extends CI_Controller {
         $this->load->helper('url');
         $data['lab_key'] = strtolower($id);
 
-        // Load ruangan data from DB for dynamic rooms (non-hardcoded keys)
-        $this->db->where('status', 'Tersedia');
+        // Load all ruangan data from DB to sync details
         $data['all_ruangan'] = $this->db->get('ruangan')->result();
 
         $this->load->view('dashboard/lab_detail', $data);
@@ -98,7 +97,7 @@ class Dashboard extends CI_Controller {
             $c = $conflicts[0];
             $jMulai = substr($c->jam_mulai, 0, 5);
             $jSelesai = substr($c->jam_selesai, 0, 5);
-            $roomName = $c->kode_ruangan ? "{$c->kode_ruangan} - {$c->nama_ruangan}" : "Ruangan ini";
+            $roomName = $c->kode_ruangan ? "{$c->nama_ruangan} (Ruang: {$c->kode_ruangan})" : ($c->nama_ruangan ? $c->nama_ruangan : "Ruangan ini");
             echo json_encode([
                 'status' => 'error',
                 'message' => "Bentrok! {$roomName} sudah diajukan/dipinjam pada jam {$jMulai} - {$jSelesai} oleh {$c->nama_lengkap}. Silakan pilih jam atau ruangan lain."
@@ -219,14 +218,46 @@ class Dashboard extends CI_Controller {
         $lokasi       = $this->input->post('lokasi', true);
         $status       = $this->input->post('status', true);
 
-        if (empty($nama_ruangan) || empty($kode_ruangan) || empty($id_kategori)) {
-            echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan, Kode Ruangan, dan Kategori!']);
+        $rooms = array_filter(array_map('trim', explode(',', (string)$kode_ruangan)));
+        $clean_kode_ruangan = !empty($rooms) ? implode(', ', array_map('strtoupper', $rooms)) : strtoupper(trim((string)$kode_ruangan));
+
+        if (empty($nama_ruangan) || empty($clean_kode_ruangan) || empty($id_kategori)) {
+            echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan/Lab, Ruangan Fisik (Nomor LK), dan Kategori!']);
             return;
+        }
+
+        // Cek duplikasi ruangan fisik (1 ruangan fisik = 1 fasilitas)
+        $this->db->select('id, nama_ruangan, kode_ruangan');
+        $existing_ruangan = $this->db->get('ruangan')->result();
+        $canonicalize = function($str) {
+            return strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', (string)$str));
+        };
+        $check_rooms = !empty($rooms) ? $rooms : [$clean_kode_ruangan];
+        foreach ($check_rooms as $target) {
+            $target_clean = strtoupper(trim($target));
+            $target_canon = $canonicalize($target);
+            if (empty($target_clean)) continue;
+
+            foreach ($existing_ruangan as $row) {
+                if (empty($row->kode_ruangan)) continue;
+                $row_rooms = array_filter(array_map('trim', explode(',', $row->kode_ruangan)));
+                foreach ($row_rooms as $r) {
+                    $r_clean = strtoupper(trim($r));
+                    $r_canon = $canonicalize($r);
+                    if ($target_clean === $r_clean || (!empty($target_canon) && $target_canon === $r_canon)) {
+                        echo json_encode([
+                            'status'  => 'error',
+                            'message' => "Ruangan fisik '{$target_clean}' sudah digunakan oleh fasilitas '{$row->nama_ruangan}'! Satu nomor ruangan fisik hanya dapat digunakan oleh 1 fasilitas."
+                        ]);
+                        return;
+                    }
+                }
+            }
         }
 
         $data_ruangan = array(
             'nama_ruangan' => $nama_ruangan,
-            'kode_ruangan' => strtoupper($kode_ruangan),
+            'kode_ruangan' => $clean_kode_ruangan,
             'id_kategori'  => $id_kategori,
             'kapasitas'    => $kapasitas ? $kapasitas : 30,
             'lokasi'       => $lokasi ? $lokasi : 'Gedung Sebatik (FIK)',

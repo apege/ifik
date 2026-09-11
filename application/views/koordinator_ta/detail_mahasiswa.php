@@ -46,20 +46,20 @@
 <body class="bg-slate-50 text-slate-800 antialiased pb-20">
 
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 glass-header px-6 py-4 mb-6">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-orange-100 text-brand-600 flex items-center justify-center font-bold text-lg shadow-sm">
+    <header class="sticky top-0 z-40 glass-header px-4 sm:px-6 py-3 sm:py-4 mb-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-100 text-brand-600 flex items-center justify-center font-bold text-base sm:text-lg shadow-sm shrink-0">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Detail Mahasiswa & Plotting Tugas Akhir</h1>
-                    <p class="text-xs text-slate-500 font-normal">Gunakan menu dock di sebelah kiri untuk berpindah tab peninjauan.</p>
+                <div class="min-w-0">
+                    <h1 class="text-sm sm:text-base md:text-xl font-bold text-slate-900 tracking-tight truncate sm:whitespace-normal">Detail Mahasiswa &amp; Plotting Tugas Akhir</h1>
+                    <p class="text-[10px] sm:text-xs text-slate-500 font-normal line-clamp-1 sm:line-clamp-none">Gunakan menu dock di sebelah kiri untuk berpindah tab peninjauan.</p>
                 </div>
             </div>
 
-            <a href="<?= site_url('koordinatorta'); ?>" class="text-xs font-bold text-slate-700 hover:text-orange-600 bg-white hover:bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-xl shadow-xs transition flex items-center gap-2">
-                <i class="fa-solid fa-arrow-left text-xs"></i> Kembali ke Dashboard
+            <a href="<?= site_url('koordinatorta'); ?>" class="text-xs font-bold text-slate-700 hover:text-orange-600 bg-white hover:bg-slate-100 border border-slate-200 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl shadow-xs transition flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <i class="fa-solid fa-arrow-left text-xs"></i> <span class="hidden sm:inline">Kembali ke Dashboard</span><span class="sm:hidden">Kembali</span>
             </a>
         </div>
     </header>

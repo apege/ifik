@@ -5,7 +5,7 @@
 
     $role_names = [
         1 => 'Super Admin System',
-        2 => 'Dosen Wali Akademik',
+        2 => 'Dosen',
         3 => 'Admin Layanan (LAA)',
         4 => 'Koordinator Tugas Akhir',
         5 => 'Ketua Kelompok Keahlian',
@@ -41,12 +41,15 @@
                     <span>Beranda Utama</span>
                 </a>
 
-                <!-- Dosen Wali - Role 1 or 2 -->
+                <!-- Dosen - Role 1 or 2 -->
                 <?php if (in_array($role_id, [1, 2])): ?>
-                <a href="<?= site_url('dosenwali'); ?>" 
-                   class="whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors py-1 <?= $current_uri === 'dosenwali' ? 'text-orange-600 font-bold border-b-2 border-orange-600' : 'text-slate-600 hover:text-orange-600'; ?>">
-                    <i class="bi bi-person-check-fill <?= $current_uri === 'dosenwali' ? 'text-orange-600' : 'text-slate-400'; ?>"></i>
-                    <span>Dosen Wali</span>
+                <?php 
+                    $is_active_dosen = in_array($current_uri, ['dosen', 'dosenwali']) || ($this->uri->segment(1) === 'dosen') || ($this->uri->segment(1) === 'dosenwali');
+                ?>
+                <a href="<?= site_url('dosen/bimbingan'); ?>" 
+                   class="whitespace-nowrap text-xs font-semibold flex items-center gap-1.5 transition-colors py-1 <?= $is_active_dosen ? 'text-orange-600 font-bold border-b-2 border-orange-600' : 'text-slate-600 hover:text-orange-600'; ?>">
+                    <i class="bi bi-person-workspace <?= $is_active_dosen ? 'text-orange-600' : 'text-slate-400'; ?>"></i>
+                    <span>Dosen</span>
                 </a>
                 <?php endif; ?>
 

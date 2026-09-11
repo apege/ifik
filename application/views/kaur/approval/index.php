@@ -318,14 +318,14 @@
 
         .filter-pill:hover { border-color: #cbd5e1; background: #f8fafc; }
         .filter-pill.active {
-            background: #166534;
-            border-color: #166534;
+            background: #0f172a;
+            border-color: #0f172a;
             color: #ffffff;
-            box-shadow: 0 2px 8px rgba(22, 101, 52, 0.2);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
         }
 
         .filter-pill.active .pill-count {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             color: #ffffff;
         }
 
@@ -1015,16 +1015,20 @@
             transform: translateX(-50%) translateY(120px);
             background: #0f172a;
             color: #ffffff;
-            padding: 12px 24px;
+            padding: 10px 18px 10px 22px;
             border-radius: 999px;
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.45);
             z-index: 9999;
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            width: max-content;
+            max-width: 95vw;
+            flex-wrap: nowrap;
+            white-space: nowrap;
         }
 
         .floating-batch-bar.show {
@@ -1032,12 +1036,14 @@
         }
 
         .batch-count-badge {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: #f8fafc;
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .batch-count-badge span {
@@ -1049,52 +1055,59 @@
             font-weight: 800;
         }
 
-        .btn-batch-acc {
-            background: #16a34a;
-            color: #ffffff;
+        .btn-batch-acc, .btn-batch-rej, .btn-batch-del {
             border: none;
-            padding: 8px 16px;
+            padding: 7px 15px;
             border-radius: 999px;
             font-weight: 700;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            white-space: nowrap;
+            color: #ffffff;
+            line-height: 1.4;
         }
 
+        .btn-batch-acc {
+            background: #16a34a;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+        }
         .btn-batch-acc:hover {
             background: #15803d;
+            transform: translateY(-1px);
         }
 
         .btn-batch-rej {
             background: #dc2626;
-            color: #ffffff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: 0.82rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
         }
-
         .btn-batch-rej:hover {
             background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .btn-batch-del {
+            background: #ef4444;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        .btn-batch-del:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
         }
 
         .btn-batch-cancel {
             background: transparent;
             color: #94a3b8;
             border: none;
-            padding: 6px 10px;
+            padding: 6px 12px;
             font-size: 0.8rem;
             cursor: pointer;
             font-weight: 600;
+            white-space: nowrap;
+            transition: color 0.15s;
         }
 
         .btn-batch-cancel:hover {
@@ -1145,6 +1158,131 @@
             border: 1.5px solid var(--border-color);
             font-size: 0.85rem;
             font-family: inherit;
+        }
+
+        /* Stat Slider Dots Indicator */
+        .stat-slider-dots {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            margin-bottom: 24px;
+        }
+
+        .stat-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .stat-dot.active {
+            width: 22px;
+            background: #ea580c;
+            border-radius: 999px;
+        }
+
+        /* Filter Pills Scroll Dots Indicator */
+        .filter-pills-dots {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-top: -4px;
+            margin-bottom: 4px;
+        }
+
+        .filter-pills-dots .pill-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .filter-pills-dots .pill-dot.active {
+            width: 18px;
+            background: #ea580c;
+            border-radius: 999px;
+        }
+
+        /* Mobile Responsive Styles & Card Slider */
+        @media (max-width: 900px) {
+            body {
+                padding: 68px 14px 110px 14px;
+            }
+            .table-responsive {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            table.kaur-table {
+                min-width: 820px;
+                table-layout: auto;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+            .stat-cards-grid {
+                display: flex !important;
+                flex-direction: row !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: 16px !important;
+                padding: 4px 2px 10px 2px;
+                margin-bottom: 6px !important;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                width: 100%;
+            }
+            .stat-cards-grid::-webkit-scrollbar {
+                display: none;
+            }
+            .stat-card-highlight {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+                scroll-snap-align: start;
+                scroll-snap-stop: always;
+            }
+            .stat-slider-dots {
+                display: flex;
+            }
+            .filter-pills-wrap {
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 2px 2px 6px 2px;
+                width: 100%;
+                gap: 8px;
+            }
+            .filter-pills-wrap::-webkit-scrollbar {
+                display: none;
+            }
+            .filter-pill {
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+            }
+            .filter-pills-dots {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-search-pill {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -1276,11 +1414,14 @@
             </div>
         </div>
 
+        <!-- Mobile Stat Slider Pagination Dots -->
+        <div class="stat-slider-dots" id="statSliderDots"></div>
+
         <!-- Toolbar (Koordinator TA Style) -->
         <div class="toolbar-card" style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 18px 20px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);">
-            <div class="filter-pills-wrap">
+            <div class="filter-pills-wrap" id="filterPillsWrap">
                 <button type="button" class="filter-pill active" data-status="all" onclick="setFilterStatus('all')">
-                    <span>Semua Permohonan</span>
+                    <span>Semua</span>
                     <span class="pill-count"><?= $totalCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="ready" onclick="setFilterStatus('ready')">
@@ -1296,6 +1437,9 @@
                     <span class="pill-count"><?= $rejectedCount ?></span>
                 </button>
             </div>
+
+            <!-- Mobile Filter Pills Dots Indicator -->
+            <div class="filter-pills-dots" id="filterPillsDots"></div>
 
             <!-- Row 1: Unified Multi-Search Pill Component & Standalone Add Button (+ 1/4) -->
             <div class="search-pill-container">
@@ -1524,7 +1668,7 @@
                                 data-status="<?= strtolower(htmlspecialchars($s . ' ' . $label)) ?>"
                                 data-search="<?= strtolower(htmlspecialchars(($p->nama_lengkap ?? '') . ' ' . ($p->kode_ruangan ?? '') . ' ' . ($p->nama_ruangan ?? '') . ' ' . ($p->keterangan ?? '') . ' ' . ($p->status ?? '') . ' ' . $dateFormatted)) ?>">
                                 <td style="text-align: center; padding: 11px 6px;">
-                                    <input type="checkbox" class="custom-checkbox row-checkbox" data-id="<?= $p->id ?>" data-status="<?= $p->status ?>" onchange="updateBatchBar()">
+                                    <input type="checkbox" class="custom-checkbox row-checkbox" data-id="<?= $p->id ?>" data-status="<?= $p->status ?>" data-status-category="<?= $statusCategory ?>" onchange="updateBatchBar()">
                                 </td>
                                 <td>
                                     <div class="tr-room-col">
@@ -1597,19 +1741,26 @@
                                             <i class="fa-solid fa-ellipsis-vertical"></i>
                                         </button>
                                         <div class="action-dropdown-menu" id="actionMenu_<?= $p->id ?>">
-                                            <?php if (!$isApprovedKaur && !$isRejected): ?>
+                                            <?php if ($statusCategory === 'ready'): ?>
                                                 <button type="button" class="action-dropdown-item item-acc" onclick="kaurApprove(<?= $p->id ?>)">
-                                                    <i class="fa-solid fa-stamp"></i> ACC Resmi Ka. Ur
+                                                    <i class="fa-solid fa-check"></i> Setujui (Ka. Ur)
                                                 </button>
                                                 <button type="button" class="action-dropdown-item item-rej" onclick="openKaurRejectModal(<?= $p->id ?>)">
                                                     <i class="fa-solid fa-ban"></i> Tolak Permohonan
                                                 </button>
                                             <?php endif; ?>
-                                            <?php if ($isApprovedKaur): ?>
+                                            <?php if ($isApprovedKaur || $statusCategory === 'kaur'): ?>
                                                 <button type="button" class="action-dropdown-item item-qr" onclick="openSuratModal(<?= $p->id ?>)">
                                                     <i class="fa-solid fa-qrcode"></i> Cetak Surat QR
                                                 </button>
                                             <?php endif; ?>
+                                            <button type="button" class="action-dropdown-item" onclick="openDetailModal(<?= htmlspecialchars(json_encode($p)) ?>)">
+                                                <i class="fa-solid fa-eye" style="color:#3b82f6;"></i> Detail Permohonan
+                                            </button>
+                                            <div class="action-dropdown-divider"></div>
+                                            <button type="button" class="action-dropdown-item item-del" onclick="deleteBooking(<?= $p->id ?>)">
+                                                <i class="fa-solid fa-trash-can"></i> Hapus Data
+                                            </button>
                                         </div>
                                     </div>
                                 </td>
@@ -1638,16 +1789,65 @@
             <i class="fa-solid fa-circle-check"></i>
             <span id="selectedCountBadge">0</span> Data Terpilih
         </div>
-        <div style="display: flex; gap: 8px;">
-            <button type="button" class="btn-batch-acc" onclick="submitBatchApprove()">
-                <i class="fa-solid fa-check-double"></i> ACC Massal (Ka. Ur)
+        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <button type="button" id="btnBatchAcc" class="btn-batch-acc" onclick="submitBatchApprove()">
+                <i class="fa-solid fa-check"></i> Setujui Massal
             </button>
-            <button type="button" class="btn-batch-rej" onclick="openBatchRejectModal()">
+            <button type="button" id="btnBatchRej" class="btn-batch-rej" onclick="openBatchRejectModal()">
                 <i class="fa-solid fa-ban"></i> Tolak Massal
+            </button>
+            <button type="button" class="btn-batch-del" onclick="openBatchDeleteConfirm()">
+                <i class="fa-solid fa-trash-can"></i> Hapus Massal
             </button>
             <button type="button" class="btn-batch-cancel" onclick="deselectAll()">
                 Batal
             </button>
+        </div>
+    </div>
+
+    <!-- Modal Detail Permohonan -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-card" style="max-width: 540px; width: 95%;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-eye" style="color:#3b82f6;"></i> Detail Permohonan</h3>
+                <button type="button" onclick="closeDetailModal()" style="background:none;border:none;font-size:1.3rem;color:#94a3b8;cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Peminjam</span>
+                    <span id="dtlNama" style="font-size:0.82rem;font-weight:700;color:#0f172a;">-</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Ruangan</span>
+                    <span id="dtlRuangan" style="font-size:0.82rem;font-weight:700;color:#0f172a;">-</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Tanggal</span>
+                    <span id="dtlTanggal" style="font-size:0.82rem;font-weight:700;color:#0f172a;">-</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Waktu</span>
+                    <span id="dtlWaktu" style="font-size:0.82rem;font-weight:700;color:#0f172a;">-</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Keperluan</span>
+                    <span id="dtlKeterangan" style="font-size:0.82rem;font-weight:700;color:#0f172a;">-</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Status</span>
+                    <span id="dtlStatus" style="font-size:0.82rem;font-weight:700;color:#0f172a;">-</span>
+                </div>
+                <div id="dtlAlasanRow" style="display:none;flex-direction:row;gap:10px;align-items:flex-start;">
+                    <span style="min-width:110px;font-size:0.78rem;color:#64748b;font-weight:600;">Alasan Tolak</span>
+                    <span id="dtlAlasan" style="font-size:0.82rem;font-weight:700;color:#dc2626;">-</span>
+                </div>
+            </div>
+            <div style="padding: 12px 24px 20px; display: flex; gap: 8px; justify-content: flex-end;">
+                <button type="button" id="dtlSuratBtn" onclick="openSuratModalFromDetail()" style="display:none;background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+                    <i class="fa-solid fa-qrcode"></i> Cetak Surat QR
+                </button>
+                <button type="button" onclick="closeDetailModal()" style="background:#f1f5f9;color:#475569;border:none;padding:8px 16px;border-radius:10px;font-size:0.78rem;font-weight:700;cursor:pointer;">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -1661,6 +1861,7 @@
             <div class="modal-body">
                 <input type="hidden" id="kaurRejectTargetIds">
                 <input type="hidden" id="kaurRejectIsBatch" value="0">
+                <div id="kaurRejectCountInfo" style="margin-bottom: 12px; padding: 10px 14px; background: #fef2f2; border-radius: 10px; border: 1px solid #fee2e2; font-size: 0.8rem; color: #991b1b; font-weight: 600;"></div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label style="font-size:0.82rem; font-weight:700; color:#991b1b; display:block; margin-bottom:6px;">Alasan Penolakan Resmi (Wajib Diisi) <span style="color:red;">*</span></label>
                     <textarea id="kaurAlasanInput" rows="3" class="form-control" placeholder="Tuliskan catatan alasan penolakan secara jelas..." required></textarea>
@@ -2002,7 +2203,11 @@
         function setFilterStatus(st) {
             currentFilterStatus = st;
             document.querySelectorAll('.filter-pill').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-status') === st);
+                const isActive = btn.getAttribute('data-status') === st;
+                btn.classList.toggle('active', isActive);
+                if (isActive && window.innerWidth <= 900) {
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
             });
             currentPage = 1;
             filterTable();
@@ -2173,13 +2378,34 @@
             return selected;
         }
 
+        function getSelectedItems() {
+            const items = [];
+            document.querySelectorAll('.row-checkbox:checked').forEach(cb => {
+                items.push({
+                    id: cb.getAttribute('data-id'),
+                    statusCategory: cb.getAttribute('data-status-category'),
+                    status: cb.getAttribute('data-status')
+                });
+            });
+            return items;
+        }
+
         function updateBatchBar() {
-            const selectedIds = getSelectedIds();
+            const selectedItems = getSelectedItems();
             const bar = document.getElementById('floatingBatchBar');
             const countBadge = document.getElementById('selectedCountBadge');
+            const btnAcc = document.getElementById('btnBatchAcc');
+            const btnRej = document.getElementById('btnBatchRej');
 
-            if (selectedIds.length > 0) {
-                if (countBadge) countBadge.innerText = selectedIds.length;
+            if (selectedItems.length > 0) {
+                if (countBadge) countBadge.innerText = selectedItems.length;
+
+                // Cek apakah ada item yang berstatus 'ready' (bisa disetujui / ditolak oleh Ka. Ur)
+                const hasReadyItems = selectedItems.some(item => item.statusCategory === 'ready');
+
+                if (btnAcc) btnAcc.style.display = hasReadyItems ? 'inline-flex' : 'none';
+                if (btnRej) btnRej.style.display = hasReadyItems ? 'inline-flex' : 'none';
+
                 if (bar) bar.classList.add('show');
             } else {
                 if (bar) bar.classList.remove('show');
@@ -2278,24 +2504,115 @@
         }
 
         // ==========================================
-        // BATCH APPROVE & REJECT ACTIONS
+        // DETAIL MODAL
+        // ==========================================
+        let currentDetailBookingId = null;
+
+        function openDetailModal(data) {
+            currentDetailBookingId = data.id;
+            document.getElementById('dtlNama').innerText = data.nama_lengkap || '-';
+            document.getElementById('dtlRuangan').innerText = (data.kode_ruangan ? data.kode_ruangan + ' - ' : '') + (data.nama_ruangan || '-');
+            const tgl = (data.tanggal_mulai === data.tanggal_selesai)
+                ? data.tanggal_mulai
+                : `${data.tanggal_mulai} s/d ${data.tanggal_selesai}`;
+            document.getElementById('dtlTanggal').innerText = tgl;
+            document.getElementById('dtlWaktu').innerText = `${(data.jam_mulai || '').substring(0,5)} - ${(data.jam_selesai || '').substring(0,5)}`;
+            document.getElementById('dtlKeterangan').innerText = data.keterangan || '-';
+            document.getElementById('dtlStatus').innerText = data.status || '-';
+            const alasanRow = document.getElementById('dtlAlasanRow');
+            if (data.status === 'Ditolak' && data.alasan_penolakan) {
+                document.getElementById('dtlAlasan').innerText = data.alasan_penolakan;
+                alasanRow.style.display = 'flex';
+            } else {
+                alasanRow.style.display = 'none';
+            }
+            const suratBtn = document.getElementById('dtlSuratBtn');
+            const st = data.status || '';
+            if (st.includes('Laboran') || st.includes('Ka. Ur') || st.includes('Kaur') || st.includes('Admin')) {
+                suratBtn.style.display = 'inline-flex';
+            } else {
+                suratBtn.style.display = 'none';
+            }
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function openSuratModalFromDetail() {
+            if (currentDetailBookingId) {
+                closeDetailModal();
+                openSuratModal(currentDetailBookingId);
+            }
+        }
+
+        // ==========================================
+        // DELETE BOOKING
+        // ==========================================
+        function deleteBooking(id) {
+            Swal.fire({
+                title: 'Hapus Data Peminjaman?',
+                text: 'Data yang dihapus tidak dapat dikembalikan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    $.post(BASE_URL + 'kaur/delete/' + id, function(resp) {
+                        if (resp.status === 'success') {
+                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' })
+                            .then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
+                }
+            });
+        }
+
+        // ==========================================
+        // BATCH APPROVE, REJECT & DELETE ACTIONS
         // ==========================================
         function submitBatchApprove() {
-            const ids = getSelectedIds();
-            if (ids.length === 0) return;
+            const selectedItems = getSelectedItems();
+            if (selectedItems.length === 0) return;
+
+            // Filter hanya data yang statusCategory === 'ready' (siap disetujui Ka. Ur)
+            const readyItems = selectedItems.filter(item => item.statusCategory === 'ready');
+            const alreadyApproved = selectedItems.filter(item => item.statusCategory === 'kaur');
+
+            if (readyItems.length === 0) {
+                Swal.fire({
+                    title: 'Tidak Ada yang Perlu Disetujui',
+                    text: 'Semua data yang dipilih sudah berstatus Disetujui Ka. Ur atau belum dalam antrean persetujuan.',
+                    icon: 'info',
+                    confirmButtonColor: '#16a34a'
+                });
+                return;
+            }
+
+            const readyIds = readyItems.map(item => item.id);
+            let confirmMsg = `Semua ${readyIds.length} permohonan terpilih akan disetujui dan surat peminjaman QR code akan diterbitkan.`;
+            if (alreadyApproved.length > 0) {
+                confirmMsg = `Ditemukan ${readyIds.length} permohonan yang belum disetujui (${alreadyApproved.length} data lainnya sudah disetujui sebelumnya). Lanjutkan menyetujui ${readyIds.length} data ini?`;
+            }
 
             Swal.fire({
-                title: `ACC ${ids.length} Permohonan Sekaligus?`,
-                text: `Semua ${ids.length} permohonan terpilih akan disetujui resmi oleh Ka. Ur dan surat ber-QR code akan diterbitkan.`,
+                title: `Setujui ${readyIds.length} Permohonan?`,
+                text: confirmMsg,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#16a34a',
                 cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Ya, ACC Semua',
+                confirmButtonText: 'Ya, Setujui',
                 cancelButtonText: 'Batal'
             }).then((res) => {
                 if (res.isConfirmed) {
-                    $.post(BASE_URL + 'kaur/batch_approve', { ids: ids }, function(resp) {
+                    $.post(BASE_URL + 'kaur/batch_approve', { ids: readyIds }, function(resp) {
                         if (resp.status === 'success') {
                             Swal.fire({ title: 'Berhasil!', text: resp.message, icon: 'success', confirmButtonColor: '#16a34a' })
                             .then(() => location.reload());
@@ -2307,14 +2624,80 @@
             });
         }
 
-        function openBatchRejectModal() {
+        function openBatchDeleteConfirm() {
             const ids = getSelectedIds();
             if (ids.length === 0) return;
 
-            document.getElementById('kaurRejectTargetIds').value = JSON.stringify(ids);
+            Swal.fire({
+                title: `Hapus ${ids.length} Data Terpilih?`,
+                text: 'Data yang dihapus tidak dapat dikembalikan lagi.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus Semua',
+                cancelButtonText: 'Batal'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    $.post(BASE_URL + 'kaur/batch_delete', { ids: ids }, function(resp) {
+                        if (resp.status === 'success') {
+                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' })
+                            .then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal', resp.message, 'error');
+                        }
+                    }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
+                }
+            });
+        }
+
+        function openBatchRejectModal() {
+            const selectedItems = getSelectedItems();
+            if (selectedItems.length === 0) return;
+
+            const readyItems = selectedItems.filter(item => item.statusCategory === 'ready');
+            const otherItems = selectedItems.filter(item => item.statusCategory !== 'ready');
+
+            if (readyItems.length === 0) {
+                Swal.fire({
+                    title: 'Tidak Dapat Ditolak',
+                    text: 'Semua data yang dipilih sudah berstatus Disetujui atau Ditolak sehingga tidak dapat diproses lagi.',
+                    icon: 'info',
+                    confirmButtonColor: '#ea580c'
+                });
+                return;
+            }
+
+            const readyIds = readyItems.map(item => item.id);
+            document.getElementById('kaurRejectTargetIds').value = JSON.stringify(readyIds);
             document.getElementById('kaurRejectIsBatch').value = '1';
             document.getElementById('kaurAlasanInput').value = '';
+
+            const infoEl = document.getElementById('kaurRejectCountInfo');
+            if (infoEl) {
+                let infoHtml = `<i class="fa-solid fa-users"></i> Menolak <strong>${readyIds.length}</strong> permohonan peminjaman terpilih.`;
+                if (otherItems.length > 0) {
+                    infoHtml += `<div style="font-size: 0.74rem; color: #64748b; font-weight: normal; margin-top: 4px;">(${otherItems.length} data lainnya dilewati karena sudah selesai/diproses).</div>`;
+                }
+                infoEl.innerHTML = infoHtml;
+            }
             document.getElementById('kaurRejectModal').classList.add('active');
+        }
+
+        function openSingleRejectModal(id) {
+            document.getElementById('kaurRejectTargetIds').value = JSON.stringify([id]);
+            document.getElementById('kaurRejectIsBatch').value = '0';
+            document.getElementById('kaurAlasanInput').value = '';
+            closeAllActionDropdowns();
+            const infoEl = document.getElementById('kaurRejectCountInfo');
+            if (infoEl) {
+                infoEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> Menolak <strong>1</strong> permohonan peminjaman terpilih.`;
+            }
+            document.getElementById('kaurRejectModal').classList.add('active');
+        }
+
+        function openKaurRejectModal(id) {
+            openSingleRejectModal(id);
         }
 
         function submitKaurRejectConfirm() {
@@ -2332,36 +2715,44 @@
                 return;
             }
 
-            if (isBatch) {
-                $.post(BASE_URL + 'kaur/batch_reject', { ids: ids, alasan_penolakan: alasan }, function(resp) {
-                    if (resp.status === 'success') {
-                        closeKaurRejectModal();
-                        Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
-                        .then(() => location.reload());
+            const count = ids.length;
+            Swal.fire({
+                title: isBatch ? `Tolak ${count} Permohonan Sekaligus?` : 'Tolak Permohonan Peminjaman?',
+                text: isBatch 
+                    ? `Sebanyak ${count} permohonan peminjaman akan resmi ditolak dengan alasan yang Anda masukkan.`
+                    : `Permohonan peminjaman ini akan ditolak dengan alasan: "${alasan}".`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: isBatch ? `Ya, Tolak ${count} Permohonan` : 'Ya, Tolak',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (isBatch) {
+                        $.post(BASE_URL + 'kaur/batch_reject', { ids: ids, alasan_penolakan: alasan }, function(resp) {
+                            if (resp.status === 'success') {
+                                closeKaurRejectModal();
+                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
+                                .then(() => location.reload());
+                            } else {
+                                Swal.fire('Gagal', resp.message, 'error');
+                            }
+                        }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
                     } else {
-                        Swal.fire('Gagal', resp.message, 'error');
+                        const singleId = ids[0];
+                        $.post(BASE_URL + 'kaur/reject/' + singleId, { alasan_penolakan: alasan }, function(resp) {
+                            if (resp.status === 'success') {
+                                closeKaurRejectModal();
+                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
+                                .then(() => location.reload());
+                            } else {
+                                Swal.fire('Gagal', resp.message, 'error');
+                            }
+                        }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
                     }
-                }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
-            } else {
-                const singleId = ids[0];
-                $.post(BASE_URL + 'kaur/reject/' + singleId, { alasan_penolakan: alasan }, function(resp) {
-                    if (resp.status === 'success') {
-                        closeKaurRejectModal();
-                        Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
-                        .then(() => location.reload());
-                    } else {
-                        Swal.fire('Gagal', resp.message, 'error');
-                    }
-                }, 'json').fail(() => Swal.fire('Error', 'Terjadi kesalahan pada server', 'error'));
-            }
-        }
-
-        function openSingleRejectModal(id) {
-            document.getElementById('kaurRejectTargetIds').value = JSON.stringify([id]);
-            document.getElementById('kaurRejectIsBatch').value = '0';
-            document.getElementById('kaurAlasanInput').value = '';
-            closeAllActionDropdowns();
-            document.getElementById('kaurRejectModal').classList.add('active');
+                }
+            });
         }
 
         // ==========================================
@@ -2389,6 +2780,92 @@
                 closeAllActionDropdowns();
             }
         });
+
+        // ==========================================
+        // MOBILE STAT CARDS SLIDER & DOTS LOGIC
+        // ==========================================
+        function initStatSliderDots() {
+            const grid = document.querySelector('.stat-cards-grid');
+            const dotsContainer = document.getElementById('statSliderDots');
+            if (!grid || !dotsContainer) return;
+
+            const cards = grid.querySelectorAll('.stat-card-highlight');
+            if (cards.length <= 1) return;
+
+            dotsContainer.innerHTML = '';
+            cards.forEach((_, idx) => {
+                const dot = document.createElement('span');
+                dot.className = 'stat-dot' + (idx === 0 ? ' active' : '');
+                dot.setAttribute('title', `Slide ${idx + 1}`);
+                dot.addEventListener('click', () => {
+                    cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = dotsContainer.querySelectorAll('.stat-dot');
+            grid.addEventListener('scroll', () => {
+                const scrollLeft = grid.scrollLeft;
+                const cardWidth = grid.offsetWidth || 1;
+                const activeIndex = Math.min(Math.max(0, Math.round(scrollLeft / cardWidth)), cards.length - 1);
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            }, { passive: true });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initStatSliderDots();
+            initFilterPillsDots();
+        });
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            initStatSliderDots();
+            initFilterPillsDots();
+        }
+
+        // ==========================================
+        // MOBILE FILTER PILLS DOTS LOGIC
+        // ==========================================
+        function initFilterPillsDots() {
+            const wrap = document.getElementById('filterPillsWrap') || document.querySelector('.filter-pills-wrap');
+            const dotsContainer = document.getElementById('filterPillsDots');
+            if (!wrap || !dotsContainer) return;
+
+            const pills = Array.from(wrap.querySelectorAll('.filter-pill'));
+            if (pills.length <= 1) return;
+
+            dotsContainer.innerHTML = '';
+            pills.forEach((pill, idx) => {
+                const dot = document.createElement('span');
+                dot.className = 'pill-dot' + (idx === 0 ? ' active' : '');
+                dot.setAttribute('title', pill.textContent.trim());
+                dot.addEventListener('click', () => {
+                    pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = dotsContainer.querySelectorAll('.pill-dot');
+            wrap.addEventListener('scroll', () => {
+                const wrapCenter = wrap.getBoundingClientRect().left + wrap.clientWidth / 2;
+                let closestIdx = 0;
+                let minDiff = Infinity;
+
+                pills.forEach((pill, i) => {
+                    const rect = pill.getBoundingClientRect();
+                    const pillCenter = rect.left + rect.width / 2;
+                    const diff = Math.abs(wrapCenter - pillCenter);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestIdx = i;
+                    }
+                });
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === closestIdx);
+                });
+            }, { passive: true });
+        }
     </script>
 </body>
 </html>

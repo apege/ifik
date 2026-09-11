@@ -162,12 +162,10 @@
                 </p>
 
                 <?php 
-                    $current_jenis = $pendaftaran['jenis_ta'] ?? 'Tugas Akhir Reguler';
+                    $current_jenis = $pendaftaran['jenis_ta'] ?? 'Pengkaryaan';
                     $opsi_jenis = [
-                        'Proyek Akhir',
-                        'Tugas Akhir Reguler',
-                        'Tugas Akhir jalur Magang (MBKM)',
-                        'Tugas Akhir jalur Prestasi / Lomba'
+                        'Pengkaryaan',
+                        'Penulisan'
                     ];
                 ?>
 

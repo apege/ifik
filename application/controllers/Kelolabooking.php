@@ -66,7 +66,7 @@ class Kelolabooking extends CI_Controller {
             $c = $conflicts[0];
             $jMulai = substr($c->jam_mulai, 0, 5);
             $jSelesai = substr($c->jam_selesai, 0, 5);
-            $roomName = $c->kode_ruangan ? "{$c->kode_ruangan} - {$c->nama_ruangan}" : "Ruangan ini";
+            $roomName = $c->kode_ruangan ? "{$c->nama_ruangan} (Ruang: {$c->kode_ruangan})" : ($c->nama_ruangan ? $c->nama_ruangan : "Ruangan ini");
             echo json_encode([
                 'status' => 'error',
                 'message' => "Bentrok! {$roomName} sudah diajukan/dipinjam pada jam {$jMulai} - {$jSelesai} oleh {$c->nama_lengkap}. Silakan pilih jam atau ruangan lain."

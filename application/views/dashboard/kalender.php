@@ -1980,8 +1980,8 @@
             $backLabel = 'Dashboard Admin';
             break;
         case 4: // Dosen
-            $backUrl = site_url('dosenwali');
-            $backLabel = 'Menu Dosen Wali';
+            $backUrl = site_url('dosen/bimbingan');
+            $backLabel = 'Menu Dosen Pembimbing';
             break;
         case 6: // Koordinator TA
             $backUrl = site_url('koordinatorta');
@@ -2185,7 +2185,7 @@
                     switch ($sessionRoleId) {
                         case 3: // Kaur / Ka Lab
                             $navItems = [
-                                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Bimbingan TA', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
                                 ['heading' => 'Approval Peminjaman', 'href' => site_url('kaur/approval'), 'icon_3d' => 'assets/images/icons_3d/approval.png'],
                                 ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
                                 ['heading' => 'Respon Ticketing Lab', 'href' => site_url('kaur#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png'],
@@ -2221,8 +2221,7 @@
 
                         case 4: // Dosen
                             $navItems = [
-                                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosenwali'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
-                                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/home.png'],
                                 ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
                                 ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
                                 ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
@@ -3591,15 +3590,17 @@
                     `;
                 }
 
+                const roomCodesBadge = (b.kode_ruangan || '').split(',').map(c => c.trim()).filter(Boolean).map(c => `<span style="display:inline-block; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:1px 6px; font-size:0.68rem; font-weight:700; color:#334155; margin-right:3px;">${c}</span>`).join('');
+
                 html += `
                     <div class="table-row-card" onclick="openDetailBookingModal(${b.id})" title="Klik untuk melihat detail peminjaman">
                         <div class="tr-room-col">
                             <div class="tr-room-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             </div>
-                            <div class="tr-room-info" title="${(b.nama_ruangan || '') + ' (' + (b.kode_ruangan || '') + ')'}">
-                                <div class="tr-room-code">${b.kode_ruangan || '-'}</div>
-                                <div class="tr-room-name">${b.nama_ruangan || '-'}</div>
+                            <div class="tr-room-info" title="${(b.nama_ruangan || '') + (b.kode_ruangan ? ' (' + b.kode_ruangan + ')' : '')}">
+                                <div class="tr-room-name" style="font-weight:700; color:#0f172a;">${b.nama_ruangan || '-'}</div>
+                                <div class="tr-room-code" style="margin-top:2px;">${roomCodesBadge || '<span style="color:#94a3b8; font-size:0.75rem;">-</span>'}</div>
                             </div>
 
                             <!-- Floating Room Detail Tooltip on Hover (Direct child of tr-room-col) -->
@@ -4004,7 +4005,8 @@
 
             // Populate detail pane
             document.getElementById('detailBookingId').value = booking.id;
-            document.getElementById('detailKodeRuangan').innerText = booking.kode_ruangan || '';
+            document.getElementById('detailKodeRuangan').innerText = booking.kode_ruangan ? 'Ruang: ' + booking.kode_ruangan : '';
+            document.getElementById('detailKodeRuangan').style.display = booking.kode_ruangan ? 'inline-block' : 'none';
             document.getElementById('detailNamaRuangan').innerText = booking.nama_ruangan || '';
             document.getElementById('detailNamaLengkap').innerText = booking.nama_lengkap || '-';
 

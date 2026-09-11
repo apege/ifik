@@ -16,19 +16,32 @@
 
 $sessionRoleId = (int)$this->session->userdata('role_id');
 
+// Fallback cerdas: jika belum ada role sesi tetapi berada di halaman laboran, gunakan menu Laboran
+$currentUri = trim(uri_string(), '/');
+if ($sessionRoleId === 0 && (strpos($currentUri, 'laboran') === 0 || strpos($currentUri, 'kelolabooking') === 0)) {
+    $sessionRoleId = 2;
+}
+
 if (isset($navItems) && is_array($navItems) && !empty($navItems)) {
     $defaultNavItems = $navItems;
 } else {
     switch ($sessionRoleId) {
         case 2: // Laboran
             $defaultNavItems = [
-                ['heading' => 'Approval Peminjaman', 'href' => site_url('kelolabooking'), 'icon_3d' => 'assets/images/icons_3d/approval.png', 'index' => 1],
-                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png', 'index' => 2],
-                ['heading' => 'Import Email & Token', 'href' => site_url('importemail'), 'icon_3d' => 'assets/images/icons_3d/email_token.png', 'index' => 3],
-                ['heading' => 'Pengaturan Unit Ticketing', 'href' => site_url('admin#unit-ticketing'), 'icon_3d' => 'assets/images/icons_3d/unit_ticketing.png', 'index' => 4],
-                ['heading' => 'Respon Ticketing Lab', 'href' => site_url('laboran#ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png', 'index' => 5],
-                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png', 'index' => 6],
-                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png', 'index' => 7],
+                ['category' => 'Operasional Laboratorium'],
+                ['heading' => 'Approval Peminjaman', 'href' => site_url('kelolabooking'), 'icon_3d' => 'assets/images/icons_3d/approval.png'],
+                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png'],
+
+                ['category' => 'Layanan Ticketing', 'has_divider' => true],
+                ['heading' => 'Respon Ticketing Lab', 'href' => site_url('laboran/respon-ticketing'), 'icon_3d' => 'assets/images/icons_3d/ticketing.png'],
+                ['heading' => 'Buat Tiket Kendala', 'href' => site_url('laboran/ticketing/input'), 'icon_3d' => 'assets/images/icons_3d/daftar.png'],
+                ['heading' => 'Riwayat Tiket Saya', 'href' => site_url('laboran/ticketing/riwayat'), 'icon_3d' => 'assets/images/icons_3d/preview.png'],
+
+                ['category' => 'Sistem & Jadwal', 'has_divider' => true],
+                ['heading' => 'Import Email & Token', 'href' => site_url('importemail'), 'icon_3d' => 'assets/images/icons_3d/email_token.png'],
+                ['heading' => 'Pengaturan Unit Ticketing', 'href' => site_url('admin#unit-ticketing'), 'icon_3d' => 'assets/images/icons_3d/unit_ticketing.png'],
+                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png'],
+                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png'],
             ];
             break;
 
@@ -57,11 +70,10 @@ if (isset($navItems) && is_array($navItems) && !empty($navItems)) {
 
         case 4: // Dosen
             $defaultNavItems = [
-                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosenwali'), 'icon_3d' => 'assets/images/icons_3d/home.png', 'index' => 1],
-                ['heading' => 'Bimbingan Mahasiswa', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/daftar.png', 'index' => 2],
-                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png', 'index' => 3],
-                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png', 'index' => 4],
-                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png', 'index' => 5],
+                ['heading' => 'Menu Dosen Utama', 'href' => site_url('dosen/bimbingan'), 'icon_3d' => 'assets/images/icons_3d/home.png', 'index' => 1],
+                ['heading' => 'Ajukan Peminjaman Ruangan', 'href' => site_url('ajukan-booking'), 'icon_3d' => 'assets/images/icons_3d/ruangan.png', 'index' => 2],
+                ['heading' => 'Kalender Jadwal', 'href' => site_url('kalender'), 'icon_3d' => 'assets/images/icons_3d/kalender.png', 'index' => 3],
+                ['heading' => 'Keluar', 'href' => site_url('login/logout'), 'icon_3d' => 'assets/images/icons_3d/logout.png', 'index' => 4],
             ];
             break;
 
@@ -93,6 +105,40 @@ if (isset($navItems) && is_array($navItems) && !empty($navItems)) {
 <!-- Curved Sidebar Stylesheet -->
 <link rel="stylesheet" href="<?= base_url('assets/css/curved_sidebar.css?v=' . time()); ?>">
 
+<style>
+    /* Category Section Headers / Tagline */
+    .curved-nav-category {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 8px 10px 4px 10px;
+        margin-top: 4px;
+        user-select: none;
+    }
+    .curved-nav-category.has-divider {
+        border-top: 1px solid rgba(241, 245, 249, 0.95);
+        margin-top: 8px;
+        padding-top: 10px;
+    }
+
+    .curved-nav-item.is-current {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .curved-nav-item.is-current .curved-nav-heading,
+    .curved-nav-item.is-current .curved-nav-letter {
+        color: #ea580c !important;
+        font-weight: 800 !important;
+    }
+    .curved-nav-item.is-current .curved-nav-3d-wrap {
+        transform: translateY(-1px) scale(1.08);
+        filter: drop-shadow(0 4px 8px rgba(234, 88, 12, 0.22));
+    }
+</style>
+
 <!-- Floating Trigger Button (Top Left) -->
 <button type="button" id="curvedSidebarToggle" class="curved-sidebar-toggle-btn" aria-label="Toggle Sidebar Menu" title="Buka Menu Navigasi">
     <div class="curved-sidebar-burger">
@@ -115,12 +161,27 @@ if (isset($navItems) && is_array($navItems) && !empty($navItems)) {
             </div>
             
             <nav class="curved-sidebar-nav">
-                <?php foreach ($defaultNavItems as $idx => $item): 
-                    $num = isset($item['index']) ? sprintf('%02d', $item['index']) : sprintf('%02d', $idx + 1);
+                <?php 
+                $curr_uri = trim(uri_string(), '/');
+                $navCount = 1;
+                foreach ($defaultNavItems as $idx => $item): 
+                    if (isset($item['category'])):
+                ?>
+                    <div class="curved-nav-category <?= !empty($item['has_divider']) ? 'has-divider' : '' ?>">
+                        <?= htmlspecialchars($item['category']); ?>
+                    </div>
+                <?php 
+                    continue;
+                    endif;
+
+                    $num = isset($item['index']) ? sprintf('%02d', $item['index']) : sprintf('%02d', $navCount++);
                     $icon = isset($item['icon']) ? $item['icon'] : null;
                     $icon3d = isset($item['icon_3d']) ? $item['icon_3d'] : null;
+
+                    $cleanHref = trim(str_replace([site_url(), base_url()], '', $item['href']), '/');
+                    $isCurrent = (!empty($cleanHref) && ($curr_uri === $cleanHref || strpos($curr_uri, $cleanHref) === 0));
                 ?>
-                    <a href="<?= htmlspecialchars($item['href']); ?>" class="curved-nav-item">
+                    <a href="<?= htmlspecialchars($item['href']); ?>" class="curved-nav-item <?= $isCurrent ? 'is-current' : '' ?>">
                         <div class="curved-nav-content">
                             <?php if (!empty($icon3d)): ?>
                                 <div class="curved-nav-3d-wrap">

@@ -646,7 +646,7 @@
                                 </td>
                                 <td class="py-5 px-6 whitespace-nowrap">
                                     <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200">
-                                        <?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Reguler TA'); ?>
+                                        <?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Pengkaryaan'); ?>
                                     </span>
                                     <div class="text-xs text-slate-500 font-semibold mt-1">
                                         <?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? 'Desain Grafis'); ?>
@@ -1117,7 +1117,7 @@
                                                 <div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 text-xs">
                                                     <div class="flex items-center gap-2">
                                                         <i class="bi <?= ($st_jen === 'Approved') ? 'bi-check-circle-fill text-emerald-600' : 'bi-clock-history text-slate-400'; ?> text-sm"></i>
-                                                        <span class="font-bold text-slate-800">Jenis &amp; Skema TA (<?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Reguler'); ?>)</span>
+                                                        <span class="font-bold text-slate-800">Jenis &amp; Skema TA (<?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Pengkaryaan'); ?>)</span>
                                                     </div>
                                                     <span class="px-2.5 py-0.5 <?= ($st_jen === 'Approved') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'; ?> border rounded-full text-[10px] font-bold"><?= ($st_jen === 'Approved') ? 'Disetujui' : 'Menunggu Review'; ?></span>
                                                 </div>
@@ -1164,7 +1164,7 @@
                                             <div class="min-w-0">
                                                 <h4 class="font-extrabold text-xs sm:text-sm text-slate-900 truncate">Jenis &amp; Skema Tugas Akhir</h4>
                                                 <p class="text-[11px] text-slate-500 font-medium truncate mt-0.5">
-                                                    Skema: <strong class="text-slate-700"><?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Reguler TA'); ?></strong> &bull; Konsentrasi: <strong class="text-slate-700"><?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? 'Informatika'); ?></strong>
+                                                    Skema: <strong class="text-slate-700"><?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Pengkaryaan'); ?></strong> &bull; Konsentrasi: <strong class="text-slate-700"><?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? 'Informatika'); ?></strong>
                                                 </p>
                                             </div>
                                         </div>

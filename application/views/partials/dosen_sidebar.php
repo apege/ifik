@@ -1,118 +1,386 @@
 <?php
-$current_uri = uri_string();
+$current_uri = trim(uri_string(), '/');
 $role_id = (int)$this->session->userdata('role_id');
-$active_bimbingan = (strpos($current_uri, 'bimbingan') !== false);
-$active_penguji   = (strpos($current_uri, 'penguji') !== false);
-$active_wali      = (strpos($current_uri, 'dosenwali') !== false);
-$active_approval  = (strpos($current_uri, 'kaur') !== false || strpos($current_uri, 'approval') !== false);
-$active_booking   = (strpos($current_uri, 'ajukan') !== false || strpos($current_uri, 'booking') !== false);
-$active_kalender  = (strpos($current_uri, 'kalender') !== false);
+
+$active_bimbingan    = (strpos($current_uri, 'bimbingan') !== false);
+$active_penguji      = (strpos($current_uri, 'penguji') !== false);
+$active_tanda_tangan = (strpos($current_uri, 'tanda-tangan') !== false || strpos($current_uri, 'signature') !== false);
+$active_wali         = ((strpos($current_uri, 'wali') !== false || strpos($current_uri, 'dosenwali') !== false)) && !$active_tanda_tangan;
+$active_approval     = (strpos($current_uri, 'kaur') !== false || strpos($current_uri, 'approval') !== false);
+$active_booking      = (strpos($current_uri, 'ajukan') !== false || strpos($current_uri, 'booking') !== false);
+$active_kalender     = (strpos($current_uri, 'kalender') !== false);
+$active_respon_ticketing = (strpos($current_uri, 'respon-ticketing') !== false || strpos($current_uri, 'ticketing/respon') !== false);
+$active_ticketing    = (strpos($current_uri, 'ticketing') !== false && !$active_respon_ticketing);
+$active_ticketing_input = (strpos($current_uri, 'ticketing/input') !== false || $current_uri === 'dosen/ticketing');
+$active_ticketing_riwayat = (strpos($current_uri, 'ticketing/riwayat') !== false || strpos($current_uri, 'dosen/ticketing/detail') !== false);
 ?>
 
-<!-- Dosen Sidebar -->
-<aside class="fixed left-0 top-0 h-screen w-64 bg-white/90 backdrop-blur-xl border-r border-orange-100 shadow-xl z-50 flex flex-col transition-all duration-300">
-    
-    <!-- Brand -->
-    <div class="h-20 flex items-center px-6 border-b border-orange-100/60 bg-gradient-to-r from-orange-50/50 to-transparent">
-        <a href="<?= site_url('dashboard') ?>" class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-tr from-orange-600 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <span class="text-white font-extrabold text-xl">I</span>
-            </div>
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 leading-none">IFIK Portal</h2>
-                <p class="text-[10px] uppercase font-bold text-orange-500 tracking-wider mt-1">
-                    <?= ($role_id === 3) ? 'Kaur / Ka Lab' : 'Dosen Dashboard' ?>
-                </p>
-            </div>
-        </a>
-    </div>
+<!-- Curved Sidebar Stylesheet -->
+<link rel="stylesheet" href="<?= base_url('assets/css/curved_sidebar.css?v=' . time()); ?>">
 
-    <!-- Navigation Menu -->
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <div class="px-2 mb-2">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Navigasi Peran</span>
-        </div>
-        
-        <a href="<?= site_url('dosen/bimbingan') ?>" 
-           class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_bimbingan ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_bimbingan ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
-                <i class="bi bi-person-workspace text-lg"></i>
-            </div>
-            Dosen Pembimbing
-        </a>
-
-        <a href="<?= site_url('dosen/penguji') ?>" 
-           class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_penguji ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_penguji ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
-                <i class="bi bi-clipboard-check text-lg"></i>
-            </div>
-            Dosen Penguji
-        </a>
-
-        <a href="<?= site_url('dosenwali') ?>" 
-           class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_wali ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_wali ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
-                <i class="bi bi-people-fill text-lg"></i>
-            </div>
-            Dosen Wali
-        </a>
-
-        <div class="px-2 pt-4 mb-2 border-t border-slate-100">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Layanan & Fasilitas</span>
-        </div>
-
-        <?php if ($role_id === 3): ?>
-        <a href="<?= site_url('kaur/approval') ?>" 
-           class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_approval ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_approval ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
-                <i class="bi bi-patch-check-fill text-lg"></i>
-            </div>
-            Approval Peminjaman
-        </a>
-        <?php endif; ?>
-
-        <a href="<?= site_url('ajukan-booking') ?>" 
-           class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_booking ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_booking ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
-                <i class="bi bi-building-fill-add text-lg"></i>
-            </div>
-            Ajukan Peminjaman
-        </a>
-
-        <a href="<?= site_url('kalender') ?>" 
-           class="flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all group <?= $active_kalender ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-orange-500' ?>">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors <?= $active_kalender ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-500' ?>">
-                <i class="bi bi-calendar2-range-fill text-lg"></i>
-            </div>
-            Kalender Jadwal
-        </a>
-    </nav>
-
-    <!-- User Section -->
-    <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-        <div class="flex items-center gap-3 p-3 bg-white rounded-2xl shadow-sm border border-slate-100">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold shrink-0">
-                <?= strtoupper(substr($this->session->userdata('name') ?: 'D', 0, 1)) ?>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-bold text-slate-800 truncate"><?= htmlspecialchars($this->session->userdata('name') ?: 'User') ?></p>
-                <p class="text-xs text-slate-500 truncate"><?= htmlspecialchars($this->session->userdata('nidn_nim') ?: 'NIDN') ?></p>
-            </div>
-        </div>
-        <a href="<?= site_url('login/logout') ?>" class="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-rose-500 hover:bg-rose-50 text-sm font-bold transition-colors">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
-    </div>
-</aside>
-
-<!-- Spacer for sidebar to push main content -->
 <style>
-    /* Prevent body from overflowing under sidebar */
-    body { padding-left: 16rem !important; }
-    
-    /* Responsive adjustment */
-    @media (max-width: 1024px) {
-        aside { transform: translateX(-100%); }
-        body { padding-left: 0 !important; }
+    /* Reset padding statis agar layout halaman dosen fleksibel dan luas */
+    body {
+        padding-left: 0 !important;
+    }
+
+    /* Category Section Headers */
+    .curved-nav-category {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 8px 10px 4px 10px;
+        margin-top: 4px;
+        user-select: none;
+    }
+    .curved-nav-category.has-divider {
+        border-top: 1px solid rgba(241, 245, 249, 0.95);
+        margin-top: 8px;
+        padding-top: 10px;
+    }
+
+    /* Active State: Hanya tulisan yang jadi oranye, tanpa kotak/border oranye */
+    .curved-nav-item.is-current {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .curved-nav-item.is-current .curved-nav-heading,
+    .curved-nav-item.is-current .curved-nav-letter {
+        color: #ea580c !important;
+        font-weight: 800 !important;
+    }
+    .curved-nav-item.is-current .curved-nav-3d-wrap {
+        transform: translateY(-1px) scale(1.08);
+        filter: drop-shadow(0 4px 8px rgba(234, 88, 12, 0.22));
+    }
+
+    /* Ticketing Dropdown Submenu */
+    .curved-nav-submenu {
+        padding: 4px 6px 6px 52px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .curved-nav-submenu.hidden {
+        display: none;
+    }
+    .curved-subitem {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .curved-subitem:hover {
+        color: #ea580c;
+        background: rgba(255, 247, 237, 0.6);
+        transform: translateX(2px);
+    }
+    .curved-subitem.is-current {
+        color: #ea580c !important;
+        font-weight: 800 !important;
+    }
+
+    /* User Profile Card inside Sidebar */
+    .curved-sidebar-user-card {
+        margin: 12px 0 10px 0;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border-radius: 14px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .curved-sidebar-user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: #ffffff;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.25);
+    }
+    .curved-sidebar-user-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .curved-sidebar-user-name {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+    }
+    .curved-sidebar-user-role {
+        font-size: 0.68rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Role Badge in Header */
+    .curved-header-role-badge {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #ea580c;
+        background: #fff7ed;
+        border: 1px solid #ffedd5;
+        padding: 2px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
     }
 </style>
+
+<!-- Floating Trigger Button (Top Left) -->
+<button type="button" id="curvedSidebarToggle" class="curved-sidebar-toggle-btn" aria-label="Toggle Sidebar Menu" title="Buka Menu Navigasi">
+    <div class="curved-sidebar-burger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<!-- Backdrop Blur Overlay -->
+<div id="curvedSidebarBackdrop" class="curved-sidebar-backdrop"></div>
+
+<!-- Sliding Sidebar Panel with Morphing Curved SVG (Left Side) -->
+<aside id="curvedSidebarPanel" class="curved-sidebar-panel" aria-label="Sidebar Navigasi Dosen">
+    <div class="curved-sidebar-inner">
+        <!-- Top Section: Header & Nav Links -->
+        <div>
+            <div class="curved-sidebar-header">
+                <p>Navigation</p>
+                <div class="curved-header-role-badge">
+                    <span><?= ($role_id === 3) ? 'Kaur / Ka Lab' : 'Portal Dosen' ?></span>
+                </div>
+            </div>
+            
+            <nav class="curved-sidebar-nav">
+                <!-- Section 1: Navigasi Peran -->
+                <div class="curved-nav-category">Navigasi Peran</div>
+
+                <!-- 1. Dosen Pembimbing -->
+                <a href="<?= site_url('dosen/bimbingan'); ?>" class="curved-nav-item <?= $active_bimbingan ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/daftar.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Dosen Pembimbing</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 2. Dosen Penguji -->
+                <a href="<?= site_url('dosen/penguji'); ?>" class="curved-nav-item <?= $active_penguji ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/sidang.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Dosen Penguji</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 3. Dosen Wali -->
+                <a href="<?= site_url('dosen/wali'); ?>" class="curved-nav-item <?= $active_wali ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/approval.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Dosen Wali</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 4. Tanda Tangan -->
+                <a href="<?= site_url('dosen/tanda-tangan'); ?>" class="curved-nav-item <?= $active_tanda_tangan ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/preview.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Tanda Tangan</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Section 2: Layanan & Bantuan -->
+                <div class="curved-nav-category has-divider">Layanan & Bantuan</div>
+
+                <!-- 5. Ticketing Dropdown -->
+                <div class="curved-nav-dropdown">
+                    <button type="button" 
+                            id="curvedTicketingToggle" 
+                            onclick="toggleCurvedTicketing(event)" 
+                            class="curved-nav-item w-full <?= $active_ticketing ? 'is-current' : '' ?>" 
+                            style="background: transparent; border: none; text-align: left; width: 100%;">
+                        <div class="curved-nav-content justify-between">
+                            <div class="flex items-center gap-3.5">
+                                <div class="curved-nav-3d-wrap">
+                                    <img src="<?= base_url('assets/images/icons_3d/ticketing.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                                </div>
+                                <span class="curved-nav-heading">Ticketing</span>
+                            </div>
+                            <i id="curvedTicketingChevron" class="bi bi-chevron-down text-xs text-slate-400 transition-transform duration-200 <?= $active_ticketing ? 'rotate-180 text-orange-600' : '' ?>" style="margin-right: 4px;"></i>
+                        </div>
+                    </button>
+
+                    <!-- Submenu: Input Ticketing & Riwayat -->
+                    <div id="curvedTicketingSubmenu" class="curved-nav-submenu <?= $active_ticketing ? '' : 'hidden' ?>">
+                        <a href="<?= site_url('dosen/ticketing/input'); ?>" class="curved-subitem <?= $active_ticketing_input ? 'is-current' : '' ?>">
+                            <i class="bi bi-pencil-square text-xs"></i>
+                            <span>Input Ticketing</span>
+                        </a>
+                        <a href="<?= site_url('dosen/ticketing/riwayat'); ?>" class="curved-subitem <?= $active_ticketing_riwayat ? 'is-current' : '' ?>">
+                            <i class="bi bi-clock-history text-xs"></i>
+                            <span>Riwayat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 6. Respon Ticketing -->
+                <a href="<?= site_url('dosen/respon-ticketing'); ?>" class="curved-nav-item <?= $active_respon_ticketing ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/unit_ticketing.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Respon Ticketing</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Section 3: Layanan & Fasilitas -->
+                <div class="curved-nav-category has-divider">Layanan & Fasilitas</div>
+
+                <!-- 6. Approval Peminjaman (Role 3 only) -->
+                <?php if ($role_id === 3): ?>
+                <a href="<?= site_url('kaur/approval'); ?>" class="curved-nav-item <?= $active_approval ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/approval.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Approval Peminjaman</span>
+                        </div>
+                    </div>
+                </a>
+                <?php endif; ?>
+
+                <!-- 7. Ajukan Peminjaman -->
+                <a href="<?= site_url('ajukan-booking'); ?>" class="curved-nav-item <?= $active_booking ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/ruangan.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Ajukan Peminjaman</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 8. Kalender Jadwal -->
+                <a href="<?= site_url('kalender'); ?>" class="curved-nav-item <?= $active_kalender ? 'is-current' : '' ?>">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/kalender.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Kalender Jadwal</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 9. Keluar -->
+                <a href="<?= site_url('login/logout'); ?>" class="curved-nav-item">
+                    <div class="curved-nav-content">
+                        <div class="curved-nav-3d-wrap">
+                            <img src="<?= base_url('assets/images/icons_3d/logout.png'); ?>" alt="" class="curved-nav-3d-img" loading="lazy" />
+                        </div>
+                        <div class="curved-nav-text">
+                            <span class="curved-nav-heading">Keluar</span>
+                        </div>
+                    </div>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Bottom Section: User Profile & Portal Info -->
+        <div>
+            <!-- User Profile Summary Card -->
+            <div class="curved-sidebar-user-card">
+                <div class="curved-sidebar-user-avatar">
+                    <?= strtoupper(substr($this->session->userdata('name') ?: 'D', 0, 1)) ?>
+                </div>
+                <div class="curved-sidebar-user-info">
+                    <div class="curved-sidebar-user-name" title="<?= htmlspecialchars($this->session->userdata('name') ?: 'Dosen') ?>">
+                        <?= htmlspecialchars($this->session->userdata('name') ?: 'Dosen FIK') ?>
+                    </div>
+                    <div class="curved-sidebar-user-role">
+                        <?= htmlspecialchars($this->session->userdata('nidn_nim') ?: 'Dosen') ?> • <?= ($role_id === 3) ? 'Kaur / Ka Lab' : 'Dosen' ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portal Branding & Version -->
+            <div class="curved-sidebar-footer">
+                <div class="curved-sidebar-footer-brand">
+                    <i class="fa-solid fa-graduation-cap text-orange-500"></i>
+                    <span>Portal Tugas Akhir • IFIK</span>
+                </div>
+                <span class="curved-sidebar-footer-version">v2.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Morphing Bezier Curve SVG (Right Edge of Left Sidebar) -->
+    <svg id="curvedSidebarSvg" class="curved-sidebar-svg">
+        <path id="curvedSidebarPath" />
+    </svg>
+</aside>
+
+<!-- Curved Sidebar Core Script -->
+<script src="<?= base_url('assets/js/curved_sidebar.js?v=' . time()); ?>"></script>
+
+<script>
+function toggleCurvedTicketing(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) {
+            e.stopImmediatePropagation();
+        }
+    }
+    var submenu = document.getElementById('curvedTicketingSubmenu');
+    var chevron = document.getElementById('curvedTicketingChevron');
+    if (submenu) {
+        submenu.classList.toggle('hidden');
+    }
+    if (chevron) {
+        chevron.classList.toggle('rotate-180');
+    }
+}
+</script>

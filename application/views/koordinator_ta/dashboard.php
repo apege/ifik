@@ -81,6 +81,16 @@
             scrollbar-width: none;
         }
 
+        .stats-slider-container {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        .stats-slider-container::-webkit-scrollbar {
+            display: none !important;
+        }
+
         /* Radial Analog Clock Styles (Tahap Preview 2) */
         #p2TpClockHand {
             position: absolute;
@@ -178,7 +188,8 @@
         .btn-standalone-add {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: space-between;
+            gap: 10px;
             background: #fff7ed;
             border: 1.5px solid #ffedd5;
             border-radius: 14px;
@@ -191,6 +202,7 @@
             transition: all 0.2s ease;
             white-space: nowrap;
             box-shadow: 0 2px 8px rgba(234, 88, 12, 0.06);
+            flex-shrink: 0;
         }
         .btn-standalone-add:hover {
             background: #ffedd5;
@@ -203,8 +215,12 @@
             color: #ffffff;
             font-size: 0.72rem;
             font-weight: 800;
-            padding: 1.5px 8px;
+            padding: 2px 8px;
             border-radius: 99px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
         }
 
         .btn-remove-row {
@@ -254,6 +270,43 @@
         }
         .custom-dropdown-container.open {
             z-index: 130 !important;
+        }
+
+        @media (max-width: 640px) {
+            .search-pill-container {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+            }
+            .unified-search-pill {
+                padding: 2px 6px 2px 10px;
+                height: 42px;
+                border-radius: 14px;
+                width: 100%;
+            }
+            .unified-divider {
+                margin: 0 6px;
+                height: 18px;
+            }
+            .btn-standalone-add {
+                width: 100%;
+                height: 42px;
+                padding: 0 14px;
+                border-radius: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.8rem;
+            }
+            .btn-remove-row {
+                width: 38px;
+                height: 38px;
+                border-radius: 12px;
+            }
+            .extra-rows-card {
+                padding: 12px;
+                border-radius: 14px;
+            }
         }
 
         @keyframes spinRotatingBorder {
@@ -696,27 +749,27 @@
     ]); ?>
 
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 glass-header px-6 py-4 mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 pl-14 md:pl-16">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-orange-100 text-brand-600 flex items-center justify-center font-bold text-lg shadow-sm">
+    <header class="sticky top-0 z-40 glass-header px-4 sm:px-8 py-3 sm:py-4 mb-6 sm:mb-8">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4 pl-12 sm:pl-14 md:pl-16">
+            <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-100 text-brand-600 flex items-center justify-center font-bold text-base sm:text-lg shadow-sm shrink-0">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
-                <div>
+                <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Portal Koordinator Tugas Akhir</h1>
+                        <h1 class="text-sm sm:text-base md:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate sm:whitespace-normal">Portal Koordinator Tugas Akhir</h1>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Peninjauan berkas pendaftaran dan persetujuan alur Tugas Akhir mahasiswa IFIK.</p>
+                    <p class="text-[10px] sm:text-xs text-slate-500 mt-0.5 line-clamp-1 sm:line-clamp-none">Peninjauan berkas pendaftaran dan persetujuan alur Tugas Akhir mahasiswa IFIK.</p>
                 </div>
             </div>
 
             <!-- Profile Badge Right -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
                 <div class="hidden sm:flex flex-col text-right">
                     <span class="text-xs font-bold text-slate-800 leading-tight">Koordinator TA IFIK</span>
                     <span class="text-[10px] font-semibold text-slate-500">NIP: <?= $nip_koor ?? '19800202002'; ?></span>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-brand-600 flex items-center justify-center font-bold text-base shadow-xs">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-50 border border-orange-200 text-brand-600 flex items-center justify-center font-bold text-sm sm:text-base shadow-xs" title="Koordinator TA">
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
             </div>
@@ -785,150 +838,160 @@
             }
         ?>
 
-        <!-- Stats Overview Cards (Exact Interactive Design from Import Akun) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <!-- 1. Total Mahasiswa TA Card -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5">
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-brand-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-brand-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Mahasiswa TA</p>
-                            <h3 id="statTotalCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalMhs; ?></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Pengajuan Tugas Akhir</p>
+        <!-- Stats Overview Cards (Exact Interactive Design with Mobile Slider) -->
+        <div class="relative mb-8">
+            <div id="statsCardsSliderTab1" class="stats-slider-container flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 overflow-x-auto sm:overflow-visible snap-x snap-mandatory py-1 scrollbar-none">
+                <!-- 1. Total Mahasiswa TA Card -->
+                <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-orange-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-brand-500/40 hover:shadow-2xl hover:shadow-brand-500/10 p-5 h-full">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-brand-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-brand-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-brand-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                         </div>
-                        
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-users text-lg"></i>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Mahasiswa TA</p>
+                                <h3 id="statTotalCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalMhs; ?></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Pengajuan Tugas Akhir</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-brand-500/20 blur-md group-hover:blur-lg group-hover:bg-brand-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50 to-orange-100/70 shadow-md text-brand-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-users text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-brand-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-brand-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <!-- 2. Siap Diplot Pembimbing Card (Cyan) -->
+                <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5 h-full">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Siap Diplot Pembimbing</p>
+                                <h3 id="statPendingCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $siapDiplotCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($siapDiplotCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lolos Wali &amp; Admin Layanan</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-user-plus text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Disetujui Card (Emerald) -->
+                <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5 h-full">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui Koordinator</p>
+                                <h3 id="statApprovedCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Ketua KK</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-check-circle text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Persetujuan Ketua KK Card (Indigo / Amber) -->
+                <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5 h-full">
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-indigo-500/10 blur-lg"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                        </div>
+
+                        <div class="relative z-10 flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Persetujuan Ketua KK</p>
+                                <h3 id="statKkCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $kkApprovedCount; ?> <span class="text-xs font-semibold text-indigo-600 font-normal">(<?= $totalMhs > 0 ? round(($kkApprovedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
+                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Disetujui Final oleh KK</p>
+                            </div>
+                            
+                            <div class="relative shrink-0">
+                                <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
+                                <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                    <i class="fa-solid fa-user-shield text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Siap Diplot Pembimbing Card (Cyan) -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-cyan-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-cyan-500/40 hover:shadow-2xl hover:shadow-cyan-500/10 p-5">
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-cyan-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-cyan-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Siap Diplot Pembimbing</p>
-                            <h3 id="statPendingCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $siapDiplotCount; ?> <span class="text-xs font-semibold text-cyan-600 font-normal">(<?= $totalMhs > 0 ? round(($siapDiplotCount/$totalMhs)*100) : 0; ?>%)</span></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lolos Wali &amp; Admin Layanan</p>
-                        </div>
-                        
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-cyan-500/20 blur-md group-hover:blur-lg group-hover:bg-cyan-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-cyan-50 to-cyan-100/70 shadow-md text-cyan-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-user-plus text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-cyan-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Disetujui Card (Emerald) -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Disetujui Koordinator</p>
-                            <h3 id="statApprovedCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $approvedCount; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $totalMhs > 0 ? round(($approvedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Lanjut ke Ketua KK</p>
-                        </div>
-                        
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-check-circle text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Persetujuan Ketua KK Card (Indigo / Amber) -->
-            <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5">
-                    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                        <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                        <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                        <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-indigo-500/10 blur-lg"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                    </div>
-
-                    <div class="relative z-10 flex items-start justify-between gap-3">
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Persetujuan Ketua KK</p>
-                            <h3 id="statKkCount" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $kkApprovedCount; ?> <span class="text-xs font-semibold text-indigo-600 font-normal">(<?= $totalMhs > 0 ? round(($kkApprovedCount/$totalMhs)*100) : 0; ?>%)</span></h3>
-                            <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Disetujui Final oleh KK</p>
-                        </div>
-                        
-                        <div class="relative shrink-0">
-                            <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
-                            <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                <i class="fa-solid fa-user-shield text-lg"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                        <div class="w-1/3 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                        <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
-                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                            <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Mobile Indicator Dots -->
+            <div class="flex sm:hidden items-center justify-center gap-1.5 mt-2" id="statsSliderIndicatorsTab1">
+                <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab1', 'statsSliderIndicatorsTab1', 0, 'bg-brand-500')" class="stats-indicator-dot h-1.5 w-6 rounded-full bg-brand-500 transition-all duration-300 border-0 p-0" aria-label="Slide 1"></button>
+                <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab1', 'statsSliderIndicatorsTab1', 1, 'bg-brand-500')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 2"></button>
+                <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab1', 'statsSliderIndicatorsTab1', 2, 'bg-brand-500')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 3"></button>
+                <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab1', 'statsSliderIndicatorsTab1', 3, 'bg-brand-500')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 4"></button>
             </div>
         </div>
 
@@ -997,9 +1060,12 @@
                     </button>
                 </div>
 
-                <!-- Standalone Add Filter Button (+ 1/4) -->
+                <!-- Standalone Add Filter Button (Filter Tambahan 1/4) -->
                 <button type="button" id="standaloneAddBtn" onclick="toggleOrAddFilterRow(event)" class="btn-standalone-add" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
-                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span class="btn-standalone-label inline-flex items-center gap-2">
+                        <i class="fa-solid fa-filter text-brand-500 text-xs"></i>
+                        <span class="font-bold text-xs text-brand-700">Filter Tambahan</span>
+                    </span>
                     <span id="filterCountBadge" class="badge-standalone-count">1/4</span>
                 </button>
 
@@ -1043,7 +1109,7 @@
         </div>
 
         <!-- Table with Rotating Conic-Gradient Border (Exact Import Akun Style) -->
-        <div class="table-rotating-border-wrap">
+        <div class="table-rotating-border-wrap hidden sm:block">
             <span class="table-rotating-border-spin"></span>
             <div class="table-rotating-border-inner overflow-x-auto no-scrollbar">
                 <table class="table-custom-rounded text-left text-xs w-full">
@@ -1068,6 +1134,11 @@
             </div>
         </div>
 
+        <!-- Mobile Cards View (Tab 1: Pendaftaran TA) -->
+        <div id="mobileStudentCards" class="sm:hidden space-y-3">
+            <!-- Injected via JS renderTable() -->
+        </div>
+
         <!-- Table Bottom Pagination Bar -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
             <div>
@@ -1078,32 +1149,35 @@
             </div>
         </div>
         <!-- FLOATING BATCH ACTION BAR (Tab 1: Pendaftaran TA) -->
-        <div id="floatingBatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
-            <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-                <div class="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] aspect-square rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-orange-600/30 shrink-0">
+        <div id="floatingBatchBar" class="hidden fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] sm:w-full max-w-4xl px-0 sm:px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+            <div class="bg-slate-950/95 sm:bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-white">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 min-w-[2rem] sm:min-w-[2.5rem] rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-md shadow-orange-600/30 shrink-0">
                         <span id="selectedCountBadge">0</span>
                     </div>
-                    <div class="min-w-0">
-                        <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih</h4>
-                        <div id="selectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1"></div>
+                    <div class="min-w-0 flex-1">
+                        <h4 class="text-[11px] sm:text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih</h4>
+                        <div id="selectedStudentsPreview" class="flex flex-wrap items-center gap-1 mt-0.5 max-h-6 overflow-hidden"></div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
-                    <!-- Button 1: Cek Dokumen Massal (Multi-Detail Review) -->
-                    <button type="button" onclick="event.stopPropagation(); openP1BatchReviewModal();" class="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-extrabold rounded-xl text-xs shadow-md shadow-orange-600/30 transition flex items-center gap-2 cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-layer-group text-sm"></i> 📂 Cek Dokumen Massal (Multi-Detail)
+                <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
+                    <!-- Button 1: Cek Dokumen Massal -->
+                    <button type="button" onclick="event.stopPropagation(); openP1BatchReviewModal();" class="col-span-2 sm:col-auto h-9 sm:h-10 px-3.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 active:scale-95 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-folder-open text-xs text-amber-200"></i>
+                        <span>Cek Dokumen Massal</span>
                     </button>
 
                     <!-- Button 2: Quick Batch Plotting -->
-                    <button type="button" onclick="event.stopPropagation(); openBatchModal('Approved');" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5 cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-bolt text-amber-300"></i> Plot Cepat
+                    <button type="button" onclick="event.stopPropagation(); openBatchModal('Approved');" class="h-9 sm:h-10 px-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-bold rounded-xl text-xs shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-bolt text-amber-300 text-xs"></i>
+                        <span>Plot Cepat</span>
                     </button>
 
                     <!-- Button 3: Cancel -->
-                    <button type="button" onclick="event.stopPropagation(); clearAllSelection();" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
-                        <i class="fa-solid fa-xmark"></i> Batal
+                    <button type="button" onclick="event.stopPropagation(); clearAllSelection();" class="h-9 sm:h-10 px-3 bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer" title="Batal Pilihan">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                        <span>Batal</span>
                     </button>
                 </div>
             </div>
@@ -1137,158 +1211,168 @@
                 $pctBelum   = $totalP2 > 0 ? round(($belumPenguji   / $totalP2) * 100) : 0;
             ?>
 
-            <!-- Stats Overview Cards (Tab 2 — Penguji & Jadwal Preview 2) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <!-- Stats Overview Cards (Tab 2 — Penguji & Jadwal Preview 2 with Mobile Slider) -->
+            <div class="relative mb-8">
+                <div id="statsCardsSliderTab2" class="stats-slider-container flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 overflow-x-auto sm:overflow-visible snap-x snap-mandatory py-1 scrollbar-none">
 
-                <!-- 1. Total Mahasiswa Preview 2 (Indigo) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-indigo-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Total Mahasiswa Siap Plot</p>
-                                <h3 id="statP2Total" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalP2; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Masuk antrian plotting penguji</p>
+                    <!-- 1. Total Mahasiswa Preview 2 (Indigo) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-indigo-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-indigo-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                             </div>
 
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-users text-lg"></i>
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Total Mahasiswa Siap Plot</p>
+                                    <h3 id="statP2Total" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalP2; ?></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Masuk antrian plotting penguji</p>
+                                </div>
+
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-indigo-500/20 blur-md group-hover:blur-lg group-hover:bg-indigo-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-indigo-100/70 shadow-md text-indigo-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-users text-lg"></i>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Penguji Lengkap Card (Emerald) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Penguji Lengkap</p>
-                                <h3 id="statP2Terjadwal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pengujiLengkap; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $pctLengkap; ?>%)</span></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Penguji 1 &amp; 2 sudah ditetapkan ✓</p>
-                            </div>
-
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-circle-check text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Belum Diplot Penguji Card (Rose) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Diplot Penguji</p>
-                                <h3 id="statP2Belum" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $belumPenguji; ?> <span class="text-xs font-semibold text-rose-600 font-normal">(<?= $pctBelum; ?>%)</span></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu segera ditetapkan penguji</p>
-                            </div>
-
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-user-xmark text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. Progress Plotting Card (Violet) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-violet-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-violet-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-violet-600 transition-colors">Progress Plotting</p>
-                                <h3 id="statP2ProgressPct" class="text-2xl font-black text-violet-700 mt-1 tracking-tight"><?= $pctLengkap; ?>%</h3>
-                                <p id="statP2ProgressSub" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1"><?= $pengujiLengkap; ?> dari <?= $totalP2; ?> sudah diplot</p>
-                            </div>
-
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-violet-500/20 blur-md group-hover:blur-lg group-hover:bg-violet-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-violet-100/70 shadow-md text-violet-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-chart-pie text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 mt-3 pt-2 border-t border-slate-100">
-                            <div class="flex items-center gap-2">
-                                <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                    <div id="statP2ProgressBar" class="h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-violet-400 transition-all duration-700"
-                                         style="width: <?= $pctLengkap; ?>%"></div>
-                                </div>
-                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300 shrink-0">
-                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
-                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-indigo-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 2. Penguji Lengkap Card (Emerald) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                            </div>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Penguji Lengkap</p>
+                                    <h3 id="statP2Terjadwal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $pengujiLengkap; ?> <span class="text-xs font-semibold text-emerald-600 font-normal">(<?= $pctLengkap; ?>%)</span></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Penguji 1 &amp; 2 sudah ditetapkan ✓</p>
+                                </div>
+
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-circle-check text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Belum Diplot Penguji Card (Rose) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                            </div>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Diplot Penguji</p>
+                                    <h3 id="statP2Belum" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $belumPenguji; ?> <span class="text-xs font-semibold text-rose-600 font-normal">(<?= $pctBelum; ?>%)</span></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu segera ditetapkan penguji</p>
+                                </div>
+
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-user-xmark text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Progress Plotting Card (Violet) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-violet-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-violet-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                            </div>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-violet-600 transition-colors">Progress Plotting</p>
+                                    <h3 id="statP2ProgressPct" class="text-2xl font-black text-violet-700 mt-1 tracking-tight"><?= $pctLengkap; ?>%</h3>
+                                    <p id="statP2ProgressSub" class="text-xs font-medium text-slate-500 mt-1 line-clamp-1"><?= $pengujiLengkap; ?> dari <?= $totalP2; ?> sudah diplot</p>
+                                </div>
+
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-violet-500/20 blur-md group-hover:blur-lg group-hover:bg-violet-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-violet-100/70 shadow-md text-violet-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-chart-pie text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 mt-3 pt-2 border-t border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                        <div id="statP2ProgressBar" class="h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-violet-400 transition-all duration-700"
+                                             style="width: <?= $pctLengkap; ?>%"></div>
+                                    </div>
+                                    <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300 shrink-0">
+                                        <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
+                                        <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                        <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
+                <!-- Mobile Indicator Dots -->
+                <div class="flex sm:hidden items-center justify-center gap-1.5 mt-2" id="statsSliderIndicatorsTab2">
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab2', 'statsSliderIndicatorsTab2', 0, 'bg-indigo-600')" class="stats-indicator-dot h-1.5 w-6 rounded-full bg-indigo-600 transition-all duration-300 border-0 p-0" aria-label="Slide 1"></button>
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab2', 'statsSliderIndicatorsTab2', 1, 'bg-indigo-600')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 2"></button>
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab2', 'statsSliderIndicatorsTab2', 2, 'bg-indigo-600')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 3"></button>
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab2', 'statsSliderIndicatorsTab2', 3, 'bg-indigo-600')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 4"></button>
+                </div>
             </div>
 
             <!-- Table Toolbar & Filters (Exact Card Container from Import Akun / Tab 1) -->
@@ -1356,10 +1440,13 @@
                         </button>
                     </div>
 
-                    <!-- Standalone Add Filter Button (+ 1/4) -->
-                    <button type="button" id="standaloneAddBtnP2" onclick="toggleOrAddFilterRowP2(event)" class="btn-standalone-add hover:border-indigo-500 hover:text-indigo-600" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                        <span id="filterCountBadgeP2" class="badge-standalone-count bg-indigo-600">1/4</span>
+                    <!-- Standalone Add Filter Button (Filter Tambahan 1/4) -->
+                    <button type="button" id="standaloneAddBtnP2" onclick="toggleOrAddFilterRowP2(event)" class="btn-standalone-add bg-indigo-50/70 border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 text-indigo-700" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                        <span class="btn-standalone-label inline-flex items-center gap-2">
+                            <i class="fa-solid fa-filter text-indigo-600 text-xs"></i>
+                            <span class="font-bold text-xs text-indigo-800">Filter Tambahan</span>
+                        </span>
+                        <span id="filterCountBadgeP2" class="badge-standalone-count bg-indigo-600 text-white">1/4</span>
                     </button>
 
                     <!-- Extra Filter Rows Card Popover -->
@@ -1402,7 +1489,7 @@
             </div>
 
             <!-- Table with Rotating Conic-Gradient Border (Exact Import Akun Style) -->
-            <div class="table-rotating-border-wrap">
+            <div class="table-rotating-border-wrap hidden sm:block">
                 <span class="table-rotating-border-spin"></span>
                 <div class="table-rotating-border-inner overflow-hidden">
                     <table class="table-custom-rounded text-left text-xs w-full">
@@ -1427,6 +1514,11 @@
                 </div>
             </div>
 
+            <!-- Mobile Cards View (Tab 2: Tahap Preview 2) -->
+            <div id="mobileP2Cards" class="sm:hidden space-y-3">
+                <!-- Injected via JS renderP2Table() -->
+            </div>
+
             <!-- Table Bottom Pagination Bar -->
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
                 <div>
@@ -1437,24 +1529,26 @@
                 </div>
             </div>
             <!-- FLOATING BATCH ACTION BAR (Tab 2: Preview 2) -->
-            <div id="floatingP2BatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
-                <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
-                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
-                        <div class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] aspect-square rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-600/30 shrink-0">
+            <div id="floatingP2BatchBar" class="hidden fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] sm:w-full max-w-4xl px-0 sm:px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+                <div class="bg-slate-950/95 sm:bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-white">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 min-w-[2rem] sm:min-w-[2.5rem] rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-md shadow-indigo-600/30 shrink-0">
                             <span id="p2SelectedCountBadge">0</span>
                         </div>
-                        <div class="min-w-0">
-                            <h4 class="text-xs font-bold text-white tracking-wide">Mahasiswa Terpilih untuk Penetapan Penguji Massal</h4>
-                            <div id="p2SelectedStudentsPreview" class="flex flex-wrap items-center gap-1.5 mt-1"></div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-[11px] sm:text-xs font-bold text-white tracking-wide">Penetapan Penguji Massal</h4>
+                            <div id="p2SelectedStudentsPreview" class="flex flex-wrap items-center gap-1 mt-0.5 max-h-6 overflow-hidden"></div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2.5 shrink-0">
-                        <button type="button" onclick="event.stopPropagation(); openP2BatchModal();" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer">
-                            <i class="fa-solid fa-users-gear"></i> Plot Penguji Massal
+                    <div class="grid grid-cols-3 sm:flex sm:items-center gap-2 shrink-0">
+                        <button type="button" onclick="event.stopPropagation(); openP2BatchModal();" class="col-span-2 sm:col-auto h-9 sm:h-10 px-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-95 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-users-gear text-xs"></i>
+                            <span>Plot Penguji Massal</span>
                         </button>
-                        <button type="button" onclick="event.stopPropagation(); clearAllP2Selection();" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer" title="Batal Pilihan">
-                            <i class="fa-solid fa-xmark"></i> Batal
+                        <button type="button" onclick="event.stopPropagation(); clearAllP2Selection();" class="h-9 sm:h-10 px-3 bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer" title="Batal Pilihan">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                            <span>Batal</span>
                         </button>
                     </div>
                 </div>
@@ -1487,150 +1581,160 @@
                 }
             ?>
 
-            <!-- Stats Overview Cards (Tahap Sidang & Penilaian) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                <!-- 1. Total Mahasiswa Sidang (Amber) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Total Mahasiswa Sidang</p>
-                                <h3 id="statSidangTotal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalSidang; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Pendaftar Sidang (Lulus P3)</p>
+            <!-- Stats Overview Cards (Tahap Sidang & Penilaian with Mobile Slider) -->
+            <div class="relative mb-8">
+                <div id="statsCardsSliderTab3" class="stats-slider-container flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 overflow-x-auto sm:overflow-visible snap-x snap-mandatory py-1 scrollbar-none">
+                    <!-- 1. Total Mahasiswa Sidang (Amber) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-amber-500/40 hover:shadow-2xl hover:shadow-amber-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-amber-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-amber-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
                             </div>
-                            
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-amber-600 transition-colors">Total Mahasiswa Sidang</p>
+                                    <h3 id="statSidangTotal" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $totalSidang; ?></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Pendaftar Sidang (Lulus P3)</p>
+                                </div>
+                                
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-amber-500/20 blur-md group-hover:blur-lg group-hover:bg-amber-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-amber-100/70 shadow-md text-amber-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-graduation-cap text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-amber-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    <!-- 2. Terjadwal Sidang (Emerald) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                            </div>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Sudah Terjadwal</p>
+                                    <h3 id="statSidangTerjadwal" class="text-2xl font-black text-emerald-600 mt-1 tracking-tight"><?= $terjadwalSidang; ?></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Waktu &amp; Ruangan Lengkap</p>
+                                </div>
+                                
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-calendar-check text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Belum Dijadwalkan (Rose) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                            </div>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Dijadwalkan</p>
+                                    <h3 id="statSidangBelumSet" class="text-2xl font-black text-rose-600 mt-1 tracking-tight"><?= $belumSetSidang; ?></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Penentuan Jadwal</p>
+                                </div>
+                                
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Selesai & Sudah Dinilai (Violet) -->
+                    <div class="stats-slide-item min-w-[82vw] xs:min-w-[75vw] sm:min-w-0 snap-center shrink-0 w-full sm:w-auto group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
+                        <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 p-5 h-full">
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
+                                <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-violet-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
+                                <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-violet-500/10 blur-lg"></div>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
+                            </div>
+
+                            <div class="relative z-10 flex items-start justify-between gap-3">
+                                <div class="flex-1">
+                                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-violet-600 transition-colors">Sudah Dinilai (Selesai)</p>
+                                    <h3 id="statSidangSudahDinilai" class="text-2xl font-black text-violet-600 mt-1 tracking-tight"><?= $sudahDinilaiSidang; ?></h3>
+                                    <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Nilai &amp; Grade Terbit</p>
+                                </div>
+                                
+                                <div class="relative shrink-0">
+                                    <div class="absolute inset-0 rounded-2xl bg-violet-500/20 blur-md group-hover:blur-lg group-hover:bg-violet-500/30 transition-all"></div>
+                                    <div class="relative p-3.5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-violet-100/70 shadow-md text-violet-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
+                                        <i class="fa-solid fa-award text-lg"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                                <div class="w-1/3 h-0.5 bg-gradient-to-r from-violet-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
+                                <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
+                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                    <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Terjadwal Sidang (Emerald) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-emerald-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-emerald-500/40 hover:shadow-2xl hover:shadow-emerald-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-emerald-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-emerald-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Sudah Terjadwal</p>
-                                <h3 id="statSidangTerjadwal" class="text-2xl font-black text-emerald-600 mt-1 tracking-tight"><?= $terjadwalSidang; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Waktu &amp; Ruangan Lengkap</p>
-                            </div>
-                            
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-emerald-500/20 blur-md group-hover:blur-lg group-hover:bg-emerald-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-emerald-100/70 shadow-md text-emerald-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-calendar-check text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-emerald-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Belum Dijadwalkan (Rose) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-rose-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-rose-500/40 hover:shadow-2xl hover:shadow-rose-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-rose-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-rose-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-rose-600 transition-colors">Belum Dijadwalkan</p>
-                                <h3 id="statSidangBelumSet" class="text-2xl font-black text-rose-600 mt-1 tracking-tight"><?= $belumSetSidang; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Perlu Penentuan Jadwal</p>
-                            </div>
-                            
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-rose-500/20 blur-md group-hover:blur-lg group-hover:bg-rose-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 to-rose-100/70 shadow-md text-rose-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-rose-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. Selesai & Sudah Dinilai (Violet) -->
-                <div class="group cursor-pointer transform transition-all duration-500 hover:scale-[1.03] hover:-translate-y-1">
-                    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-violet-50/20 to-white shadow-xl relative backdrop-blur-xl overflow-hidden hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-500/10 p-5">
-                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                            <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-transparent opacity-40 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            <div class="absolute -bottom-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-tr from-violet-500/20 to-transparent blur-2xl opacity-30 group-hover:opacity-60 transform group-hover:scale-125 transition-all duration-700"></div>
-                            <div class="absolute top-3 left-3 w-8 h-8 rounded-full bg-violet-500/10 blur-lg"></div>
-                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -skew-x-12 translate-x-full group-hover:translate-x-[-200%] transition-transform duration-1000"></div>
-                        </div>
-
-                        <div class="relative z-10 flex items-start justify-between gap-3">
-                            <div class="flex-1">
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-violet-600 transition-colors">Sudah Dinilai (Selesai)</p>
-                                <h3 id="statSidangSudahDinilai" class="text-2xl font-black text-violet-600 mt-1 tracking-tight"><?= $sudahDinilaiSidang; ?></h3>
-                                <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Nilai &amp; Grade Terbit</p>
-                            </div>
-                            
-                            <div class="relative shrink-0">
-                                <div class="absolute inset-0 rounded-2xl bg-violet-500/20 blur-md group-hover:blur-lg group-hover:bg-violet-500/30 transition-all"></div>
-                                <div class="relative p-3.5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-violet-100/70 shadow-md text-violet-600 transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500">
-                                    <i class="fa-solid fa-award text-lg"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative z-10 flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <div class="w-1/3 h-0.5 bg-gradient-to-r from-violet-500 to-transparent rounded-full transform group-hover:w-2/3 transition-all duration-500"></div>
-                            <div class="flex space-x-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce"></div>
-                                <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                                <div class="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Mobile Indicator Dots -->
+                <div class="flex sm:hidden items-center justify-center gap-1.5 mt-2" id="statsSliderIndicatorsTab3">
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab3', 'statsSliderIndicatorsTab3', 0, 'bg-amber-600')" class="stats-indicator-dot h-1.5 w-6 rounded-full bg-amber-600 transition-all duration-300 border-0 p-0" aria-label="Slide 1"></button>
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab3', 'statsSliderIndicatorsTab3', 1, 'bg-amber-600')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 2"></button>
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab3', 'statsSliderIndicatorsTab3', 2, 'bg-amber-600')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 3"></button>
+                    <button type="button" onclick="scrollToStatSlideTab('statsCardsSliderTab3', 'statsSliderIndicatorsTab3', 3, 'bg-amber-600')" class="stats-indicator-dot h-1.5 w-2 rounded-full bg-slate-300 transition-all duration-300 border-0 p-0" aria-label="Slide 4"></button>
                 </div>
             </div>
 
@@ -1704,10 +1808,13 @@
                         </button>
                     </div>
 
-                    <!-- Standalone Add Filter Button (+ 1/4) -->
-                    <button type="button" id="standaloneAddBtnSidang" onclick="toggleOrAddFilterRowSidang(event)" class="btn-standalone-add hover:border-amber-500 hover:text-amber-600" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                        <span id="filterCountBadgeSidang" class="badge-standalone-count bg-amber-600">1/4</span>
+                    <!-- Standalone Add Filter Button (Filter Tambahan 1/4) -->
+                    <button type="button" id="standaloneAddBtnSidang" onclick="toggleOrAddFilterRowSidang(event)" class="btn-standalone-add bg-amber-50/70 border-amber-100 hover:bg-amber-100 hover:border-amber-200 text-amber-800" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
+                        <span class="btn-standalone-label inline-flex items-center gap-2">
+                            <i class="fa-solid fa-filter text-amber-600 text-xs"></i>
+                            <span class="font-bold text-xs text-amber-800">Filter Tambahan</span>
+                        </span>
+                        <span id="filterCountBadgeSidang" class="badge-standalone-count bg-amber-600 text-white">1/4</span>
                     </button>
 
                     <!-- Extra Filter Rows Card Popover -->
@@ -1750,7 +1857,7 @@
             </div>
 
             <!-- Table with Rotating Conic-Gradient Border (Exact Tab 1 & Tab 2 Style) -->
-            <div class="table-rotating-border-wrap">
+            <div class="table-rotating-border-wrap hidden sm:block">
                 <span class="table-rotating-border-spin"></span>
                 <div class="table-rotating-border-inner overflow-hidden">
                     <table class="table-custom-rounded text-left text-xs w-full">
@@ -1777,6 +1884,11 @@
                 </div>
             </div>
 
+            <!-- Mobile Cards View (Tab 3: Penjadwalan Sidang TA) -->
+            <div id="mobileSidangCards" class="sm:hidden space-y-3">
+                <!-- Injected via JS renderSidangTable() -->
+            </div>
+
             <!-- Table Bottom Pagination Bar -->
             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 font-medium">
                 <div>
@@ -1788,24 +1900,31 @@
             </div>
 
             <!-- Floating Action Bar for Sidang Multi-Selection -->
-            <div id="floatingSidangBatchBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-slate-700/60 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
-                <div class="flex items-center gap-2">
-                    <span id="floatingSidangCount" class="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center">0</span>
-                    <span class="text-xs font-bold text-slate-200">Mahasiswa Terpilih</span>
-                </div>
-                <div class="h-4 w-px bg-slate-700"></div>
-                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                    <button type="button" onclick="openBatchTerapkanRubrikModal()" class="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-violet-600/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
-                        <i class="fa-solid fa-list-check"></i>
-                        <span>Terapkan Rubrik Massal</span>
-                    </button>
-                    <button type="button" onclick="openModalBatchSidang()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-500/20 transition cursor-pointer flex items-center gap-2 active:scale-95">
-                        <i class="fa-solid fa-calendar-days"></i>
-                        <span>Atur Jadwal Terpilih (<span id="floatingSidangBatchCountText">0</span>)</span>
-                    </button>
-                    <button type="button" onclick="clearAllSidangSelection()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition cursor-pointer">
-                        Batal
-                    </button>
+            <div id="floatingSidangBatchBar" class="hidden fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] sm:w-auto max-w-4xl px-0 sm:px-4 animate-in fade-in slide-in-from-bottom-5 duration-200">
+                <div class="bg-slate-950/95 sm:bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 shadow-2xl rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 text-white">
+                    <div class="flex items-center justify-between sm:justify-start gap-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <span id="floatingSidangCount" class="w-8 h-8 rounded-xl bg-amber-500 text-white font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/30">0</span>
+                            <span class="text-xs font-bold text-slate-200">Mahasiswa Terpilih</span>
+                        </div>
+                        <button type="button" onclick="clearAllSidangSelection()" class="sm:hidden px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold rounded-lg transition">
+                            <i class="fa-solid fa-xmark mr-1"></i>Batal
+                        </button>
+                    </div>
+                    <div class="hidden sm:block h-5 w-px bg-slate-700"></div>
+                    <div class="grid grid-cols-1 sm:flex sm:items-center gap-2">
+                        <button type="button" onclick="openBatchTerapkanRubrikModal()" class="h-9 sm:h-10 px-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-md shadow-violet-600/20 transition cursor-pointer flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-list-check text-xs"></i>
+                            <span>Terapkan Rubrik Massal</span>
+                        </button>
+                        <button type="button" onclick="openModalBatchSidang()" class="h-9 sm:h-10 px-3.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-calendar-days text-xs"></i>
+                            <span>Atur Jadwal Terpilih (<span id="floatingSidangBatchCountText">0</span>)</span>
+                        </button>
+                        <button type="button" onclick="clearAllSidangSelection()" class="hidden sm:flex h-10 px-3 bg-slate-800/90 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition items-center justify-center cursor-pointer">
+                            Batal
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1945,7 +2064,7 @@
     <!-- ========================================================= -->
     <!-- MODAL 1C: TERAPKAN RUBRIK MASSAL KE MAHASISWA TERPILIH   -->
     <!-- ========================================================= -->
-    <div id="modalBatchTerapkanRubrik" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+    <div id="modalBatchTerapkanRubrik" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeBatchTerapkanRubrikModal()"></div>
 
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 overflow-hidden">
@@ -1997,7 +2116,7 @@
     <!-- ========================================================= -->
     <!-- MODAL 2: SET JADWAL SIDANG SINGLE MAHASISWA               -->
     <!-- ========================================================= -->
-    <div id="modalSingleSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+    <div id="modalSingleSidang" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalSingleSidang()"></div>
 
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden">
@@ -2151,7 +2270,7 @@
     <!-- ========================================================= -->
     <!-- MODAL 3: BATCH PENJADWALAN SIDANG INDIVIDUAL PER MAHASISWA -->
     <!-- ========================================================= -->
-    <div id="modalBatchSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+    <div id="modalBatchSidang" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalBatchSidang()"></div>
 
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
@@ -2217,7 +2336,7 @@
     <!-- ========================================================= -->
     <!-- MODAL POPUP: RADIAL CLOCK & QUICK SLOTS FOR BATCH CARDS -->
     <!-- ========================================================= -->
-    <div id="modalBatchTimePicker" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-backdrop overflow-hidden">
+    <div id="modalBatchTimePicker" class="hidden fixed inset-0 z-[100005] flex items-center justify-center p-4 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeBatchCardTimePicker()"></div>
 
         <div class="relative z-10 bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
@@ -2303,7 +2422,7 @@
     <!-- ========================================================= -->
     <!-- MODAL 4: PENILAIAN AKHIR SIDANG TA (BERBASIS PRODI & PEMINATAN) -->
     <!-- ========================================================= -->
-    <div id="modalPenilaianSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+    <div id="modalPenilaianSidang" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalPenilaianSidang()"></div>
 
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
@@ -2419,7 +2538,7 @@
                                    required>
                             <datalist id="listTahunAkademik">
                                 <?php for ($y = $cYear + 3; $y >= $cYear - 5; $y--): 
-                                    $optTa = "{$y}/" . ($y + 1);
+                                     $optTa = "{$y}/" . ($y + 1);
                                 ?>
                                     <option value="<?= $optTa; ?>"><?= $optTa; ?><?= ($optTa === $defaultActiveTa) ? ' (Aktif)' : ''; ?></option>
                                 <?php endfor; ?>
@@ -2576,7 +2695,7 @@
     <!-- ========================================================= -->
     <!-- MODAL 4B: RIWAYAT VERSI PENILAIAN SIDANG TA (HISTORY) -->
     <!-- ========================================================= -->
-    <div id="modalHistoryPenilaianSidang" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
+    <div id="modalHistoryPenilaianSidang" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs" onclick="closeModalHistoryPenilaian()"></div>
 
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[88vh] flex flex-col overflow-hidden">
@@ -2611,7 +2730,7 @@
     </div>
 
     <!-- PREVIEW 2 PLOTTING MODAL (PER-MAHASISWA PLOTTING SAMA SEPERTI TA) -->
-    <div id="modalPreview2Plotting" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeP2Modal()">
+    <div id="modalPreview2Plotting" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeP2Modal()">
 
         <!-- Modal Dialog Card -->
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
@@ -2659,17 +2778,17 @@
                 <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/60">
                     <!-- Top Bar: Summary & Action -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200">
-                        <div>
-                            <div class="flex items-center gap-2">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daftar Mahasiswa &amp; Plotting Penguji:</label>
-                                <span id="p2ModalSelectedCountBadge" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Mahasiswa</span>
+                                <span id="p2ModalSelectedCountBadge" class="text-[10px] sm:text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200 whitespace-nowrap shrink-0">0 Mahasiswa</span>
                             </div>
                             <p class="text-[11px] text-slate-500 mt-0.5">Pilih Dosen Penguji 1 &amp; 2 secara mandiri pada setiap kartu mahasiswa di bawah.</p>
                         </div>
                         
                         <div class="flex items-center gap-2 shrink-0">
-                            <button type="button" onclick="applyQuickFirstP2ToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen penguji dari Mahasiswa #1 ke semua mahasiswa lainnya">
-                                <i class="fa-solid fa-copy"></i> Salin Mahasiswa #1 ke Semua
+                            <button type="button" onclick="applyQuickFirstP2ToAll()" class="w-full sm:w-auto px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen penguji dari Mahasiswa #1 ke semua mahasiswa lainnya">
+                                <i class="fa-solid fa-copy"></i> <span>Salin Mahasiswa #1 ke Semua</span>
                             </button>
                         </div>
                     </div>
@@ -2701,7 +2820,7 @@
     </div>
 
     <!-- BATCH APPROVAL & DOSEN PLOTTING MODAL -->
-    <div id="batchApprovalModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeBatchModal()">
+    <div id="batchApprovalModal" class="hidden fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 modal-backdrop overflow-hidden" onclick="if(event.target===this)closeBatchModal()">
 
         <!-- Modal Dialog Card -->
         <div class="relative z-10 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl max-w-3xl sm:max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
@@ -2751,17 +2870,17 @@
 
                     <!-- Top Bar: Summary & Action -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200">
-                        <div>
-                            <div class="flex items-center gap-2">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <label class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Daftar Mahasiswa &amp; Plotting Pembimbing:</label>
-                                <span id="modalSelectedCountBadge" class="text-[11px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">0 Mahasiswa</span>
+                                <span id="modalSelectedCountBadge" class="text-[10px] sm:text-[11px] font-bold text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200 whitespace-nowrap shrink-0">0 Mahasiswa</span>
                             </div>
                             <p class="text-[11px] text-slate-500 mt-0.5">Pilih Dosen Pembimbing 1 &amp; 2 secara mandiri pada setiap kartu mahasiswa di bawah.</p>
                         </div>
                         
                         <div class="flex items-center gap-2 shrink-0">
-                            <button type="button" onclick="applyQuickFirstToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing dari Mahasiswa #1 ke semua mahasiswa lainnya">
-                                <i class="fa-solid fa-copy"></i> Salin Mahasiswa #1 ke Semua
+                            <button type="button" onclick="applyQuickFirstToAll()" class="w-full sm:w-auto px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing dari Mahasiswa #1 ke semua mahasiswa lainnya">
+                                <i class="fa-solid fa-copy"></i> <span>Salin Mahasiswa #1 ke Semua</span>
                             </button>
                         </div>
                     </div>
@@ -2793,60 +2912,60 @@
     </div>
 
     <!-- MULTI-STUDENT BATCH REVIEW MODAL (CEK DOKUMEN & PLOTTING INDIVIDU MASSAL) -->
-    <div id="p1BatchReviewModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 overflow-y-auto" onclick="if(event.target===this)closeP1BatchReviewModal()">
-        <div class="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+    <div id="p1BatchReviewModal" class="fixed inset-0 z-[100000] bg-slate-900/80 backdrop-blur-md hidden items-center justify-center p-0 sm:p-5 overflow-y-auto" onclick="if(event.target===this)closeP1BatchReviewModal()">
+        <div class="bg-white rounded-none sm:rounded-3xl max-w-6xl w-full h-full sm:h-auto sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border-0 sm:border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             
             <!-- Modal Header: Multi-Student Summary & Quick Nav Anchors -->
             <div class="bg-slate-900 text-white shrink-0 border-b border-slate-800">
                 <!-- Top Row: Title & Action -->
-                <div class="p-4 sm:p-5 px-6 flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3.5 min-w-0">
-                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-orange-600/30 shrink-0">
+                <div class="p-3 sm:p-5 px-3.5 sm:px-6 flex items-center justify-between gap-2.5 sm:gap-3">
+                    <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center font-extrabold text-sm sm:text-lg shadow-md shadow-orange-600/30 shrink-0">
                             <i class="fa-solid fa-layer-group"></i>
                         </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2.5 flex-wrap">
-                                <h3 class="text-base font-extrabold text-white tracking-tight leading-snug">
-                                    Peninjauan Dokumen &amp; Penetapan Pembimbing Massal
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <h3 class="text-xs sm:text-base font-extrabold text-white tracking-tight leading-snug">
+                                    Peninjauan Dokumen &amp; Penetapan Pembimbing
                                 </h3>
-                                <span class="bg-orange-500/90 text-white px-3 py-0.5 rounded-full text-xs font-bold whitespace-nowrap shadow-xs" id="p1ModalStudentCounter">
+                                <span class="bg-orange-500/90 text-white px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap shadow-xs" id="p1ModalStudentCounter">
                                     0 Mahasiswa Terpilih
                                 </span>
                             </div>
-                            <p class="text-xs text-slate-400 mt-0.5">Tinjau berkas persyaratan dan tetapkan Dosen Pembimbing 1 &amp; 2 per individu mahasiswa.</p>
+                            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5 leading-tight">Tinjau berkas persyaratan dan tetapkan Dosen Pembimbing 1 &amp; 2 per mahasiswa.</p>
                         </div>
                     </div>
 
-                    <button type="button" onclick="closeP1BatchReviewModal()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer shrink-0">
-                        <i class="fa-solid fa-xmark text-base"></i>
+                    <button type="button" onclick="closeP1BatchReviewModal()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer shrink-0 ml-1">
+                        <i class="fa-solid fa-xmark text-sm sm:text-base"></i>
                     </button>
                 </div>
 
                 <!-- Sub Navigation Bar: Quick Jump Toolbar with Navigation Arrows -->
-                <div class="px-4 sm:px-6 py-2.5 bg-slate-950/80 border-t border-slate-800/80 flex items-center gap-2.5 relative">
+                <div class="px-3 sm:px-6 py-2 sm:py-2.5 bg-slate-950/80 border-t border-slate-800/80 flex items-center gap-2 sm:gap-2.5 relative">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1.5 hidden sm:flex">
                         <i class="fa-solid fa-compass text-orange-400"></i> Lompat Cepat:
                     </span>
 
                     <!-- Left Scroll Arrow -->
-                    <button type="button" id="btnScrollP1Left" onclick="scrollP1StudentTabs('left')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95" title="Geser ke kiri">
+                    <button type="button" id="btnScrollP1Left" onclick="scrollP1StudentTabs('left')" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-[10px] sm:text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95" title="Geser ke kiri">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
 
                     <!-- Scroll Container with Grab/Wheel support -->
-                    <div id="p1ModalStudentTabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 min-w-0 select-none cursor-grab">
+                    <div id="p1ModalStudentTabs" class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 flex-1 min-w-0 select-none cursor-grab">
                         <!-- Quick Jump Anchors injected dynamically via JS -->
                     </div>
 
                     <!-- Right Scroll Arrow -->
-                    <button type="button" id="btnScrollP1Right" onclick="scrollP1StudentTabs('right')" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95 animate-pulse hover:animate-none" title="Geser ke kanan">
+                    <button type="button" id="btnScrollP1Right" onclick="scrollP1StudentTabs('right')" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-slate-800 hover:bg-orange-600 border border-slate-700 hover:border-orange-500 text-slate-300 hover:text-white flex items-center justify-center text-[10px] sm:text-xs transition-all cursor-pointer shrink-0 shadow-xs active:scale-95 animate-pulse hover:animate-none" title="Geser ke kanan">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Modal Content Body (Stacked View for All Selected Students) -->
-            <div class="p-5 sm:p-6 overflow-y-auto space-y-8 flex-1 bg-slate-100/80 custom-scrollbar" id="p1BatchModalBody">
+            <div class="p-3.5 sm:p-6 overflow-y-auto space-y-5 sm:space-y-8 flex-1 bg-slate-100/80 custom-scrollbar pb-6" id="p1BatchModalBody">
                 <div class="py-16 text-center text-slate-400">
                     <i class="fa-solid fa-spinner fa-spin text-3xl text-orange-500 mb-3 block"></i>
                     Memuat data dokumen &amp; profil seluruh mahasiswa terpilih...
@@ -2854,20 +2973,20 @@
             </div>
 
             <!-- Modal Footer Actions Bar -->
-            <div class="p-4 px-6 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="applyFirstStudentDosenToAll()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing yang dipilih pada Mahasiswa #1 ke seluruh mahasiswa lainnya">
-                        <i class="fa-solid fa-copy"></i> Salin Pembimbing Mahasiswa #1 ke Semua
+            <div class="p-3 sm:p-4 px-4 sm:px-6 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 shrink-0 shadow-lg sm:shadow-none z-10">
+                <div class="flex items-center w-full sm:w-auto">
+                    <button type="button" onclick="applyFirstStudentDosenToAll()" class="w-full sm:w-auto justify-center px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shadow-2xs" title="Salin dosen pembimbing yang dipilih pada Mahasiswa #1 ke seluruh mahasiswa lainnya">
+                        <i class="fa-solid fa-copy"></i> <span>Salin Pembimbing Mahasiswa #1 ke Semua</span>
                     </button>
                 </div>
 
-                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                    <button type="button" onclick="closeP1BatchReviewModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer">
+                <div class="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <button type="button" onclick="closeP1BatchReviewModal()" class="col-span-1 sm:col-auto py-2.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer text-center">
                         Batal
                     </button>
-                    <button type="button" id="btnSubmitP1BatchReview" onclick="submitP1MultiDetailPlottings()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition cursor-pointer active:scale-95">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span id="btnSubmitP1BatchReviewText">SIMPAN SEMUA PEMBIMBING &amp; SETUJUI</span>
+                    <button type="button" id="btnSubmitP1BatchReview" onclick="submitP1MultiDetailPlottings()" class="col-span-2 sm:col-auto py-2.5 px-4 sm:px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5 sm:gap-2 transition cursor-pointer active:scale-95 text-center">
+                        <i class="fa-solid fa-floppy-disk text-xs"></i>
+                        <span id="btnSubmitP1BatchReviewText" class="truncate">SIMPAN &amp; SETUJUI</span>
                     </button>
                 </div>
             </div>
@@ -2876,24 +2995,24 @@
     </div>
 
     <!-- DOCUMENT PDF PREVIEW MODAL -->
-    <div id="p1PdfModal" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-xs hidden items-center justify-center p-3 sm:p-5">
-        <div class="bg-white rounded-2xl max-w-5xl w-full h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
-            <div class="p-3.5 px-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-sm">
+    <div id="p1PdfModal" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-xs hidden items-center justify-center p-0 sm:p-5" onclick="if(event.target===this)closeP1PdfModal()">
+        <div class="bg-white rounded-none sm:rounded-2xl max-w-5xl w-full h-full sm:h-[88vh] flex flex-col overflow-hidden shadow-2xl border-0 sm:border border-slate-200">
+            <div class="p-3.5 px-4 sm:px-5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-orange-600/30 border border-orange-500/50 text-orange-400 flex items-center justify-center font-bold text-sm shrink-0">
                         <i class="fa-solid fa-file-pdf"></i>
                     </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-white flex items-center gap-2" id="p1PdfModalTitle">Pratinjau Dokumen PDF</h3>
-                        <p class="text-[10px] text-slate-400" id="p1PdfModalSubtitle">Memuat tampilan dokumen...</p>
+                    <div class="min-w-0">
+                        <h3 class="text-xs font-bold text-white flex items-center gap-2 truncate" id="p1PdfModalTitle">Pratinjau Dokumen PDF</h3>
+                        <p class="text-[10px] text-slate-400 truncate" id="p1PdfModalSubtitle">Memuat tampilan dokumen...</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeP1PdfModal()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                <button type="button" onclick="closeP1PdfModal()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs sm:text-sm transition cursor-pointer shrink-0">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div class="flex-1 bg-slate-100 p-2 overflow-hidden">
-                <iframe id="p1PdfModalFrame" src="about:blank" class="w-full h-full border-none rounded-xl bg-white shadow-inner"></iframe>
+            <div class="flex-1 bg-slate-100 p-1 sm:p-2 overflow-hidden">
+                <iframe id="p1PdfModalFrame" src="about:blank" class="w-full h-full border-none rounded-none sm:rounded-xl bg-white shadow-inner"></iframe>
             </div>
         </div>
     </div>
