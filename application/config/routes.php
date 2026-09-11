@@ -120,9 +120,17 @@ $route['koordinator/detail_mahasiswa/(:any)'] = 'KoordinatorTA/detail_mahasiswa/
 $route['koordinator/(:any)'] = 'KoordinatorTA/$1';
 $route['koordinator/(:any)/(:any)'] = 'KoordinatorTA/$1/$2';
 
-// Admin Import Email & Token Routes
+// Admin & Laboran Import Email & Token Routes
 $route['import-email'] = 'ImportEmail';
 $route['import-email/(:any)'] = 'ImportEmail/$1';
+$route['importemail'] = 'ImportEmail';
+$route['importemail/(:any)'] = 'ImportEmail/$1';
+$route['laboran/import-email'] = 'ImportEmail';
+$route['laboran/import-email/(:any)'] = 'ImportEmail/$1';
+$route['laboran/importemail'] = 'ImportEmail';
+$route['laboran/importemail/(:any)'] = 'ImportEmail/$1';
+$route['laboran/import'] = 'ImportEmail';
+$route['laboran/import/(:any)'] = 'ImportEmail/$1';
 $route['admin/import-email'] = 'ImportEmail';
 $route['admin/import-email/(:any)'] = 'ImportEmail/$1';
 $route['admin/import'] = 'ImportEmail';
@@ -184,6 +192,13 @@ $route['news/get_all_json'] = 'News/get_all_json';
 // About / Baca Selengkapnya Route
 $route['dashboard/about'] = 'Dashboard/about';
 
+// Public Document Verification Routes (E-Verify QR Code)
+$route['surat/(:num)'] = 'Verifikasi/surat/$1';
+$route['verifikasi/surat/(:num)'] = 'Verifikasi/surat/$1';
+$route['verifikasi/surat/cetak/(:num)'] = 'Verifikasi/cetak/$1';
+$route['validasi/surat/(:num)'] = 'Verifikasi/surat/$1';
+$route['verifikasi/(:num)'] = 'Verifikasi/surat/$1';
+
 // Laboran & Kaur Dedicated Routes
 $route['laboran'] = 'Laboran/booking';
 $route['laboran/booking'] = 'Laboran/booking';
@@ -192,6 +207,19 @@ $route['kaur/approval'] = 'Kaur/approval';
 $route['kaur/surat/(:num)'] = 'Kaur/surat/$1';
 $route['laboran/surat/(:num)'] = 'Laboran/surat/$1';
 $route['kelolabooking/surat/(:num)'] = 'Kelolabooking/surat/$1';
+
+// Laboran Digital Signature Routes
+$route['laboran/tanda-tangan'] = 'Laboran/tanda_tangan';
+$route['laboran/tanda-tangan/simpan'] = 'Laboran/simpan_tanda_tangan';
+$route['laboran/tanda-tangan/hapus'] = 'Laboran/hapus_tanda_tangan';
+$route['laboran/tanda-tangan/download'] = 'Laboran/download_tanda_tangan';
+$route['laboran/signature'] = 'Laboran/tanda_tangan';
+
+// Kaur Digital Signature Routes Alias
+$route['kaur/tanda-tangan'] = 'DosenWali/tanda_tangan';
+$route['kaur/tanda-tangan/simpan'] = 'DosenWali/simpan_tanda_tangan';
+$route['kaur/tanda-tangan/hapus'] = 'DosenWali/hapus_tanda_tangan';
+$route['kaur/tanda-tangan/download'] = 'DosenWali/download_tanda_tangan';
 
 // Laboran Ticketing & Respon Routes
 $route['laboran/respon-ticketing'] = 'LaboranTicketing/index';

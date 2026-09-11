@@ -55,7 +55,8 @@
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px 12px;
         }
 
         .header-title-wrap h1 .role-badge {
@@ -68,12 +69,18 @@
             border-radius: 999px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            flex-shrink: 0;
+            line-height: 1.2;
         }
 
         .header-title-wrap p {
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-top: 4px;
+            line-height: 1.45;
         }
 
         /* Stat Cards */
@@ -352,10 +359,10 @@
             align-items: center;
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 2px 12px;
+            border-radius: 16px;
+            padding: 4px 6px 4px 14px;
             flex: 1;
-            height: 44px;
+            height: 48px;
             transition: all 0.2s ease;
             position: relative;
         }
@@ -367,22 +374,26 @@
 
         .unified-divider {
             width: 1.5px;
-            height: 20px;
+            height: 22px;
             background-color: #cbd5e1;
             margin: 0 10px;
             flex-shrink: 0;
         }
 
+        .standalone-btn-text {
+            display: none;
+        }
+
         .btn-standalone-add {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background: #fff7ed;
             border: 1.5px solid #ffedd5;
-            border-radius: 14px;
-            padding: 6px 14px;
-            height: 44px;
-            font-size: 0.8rem;
+            border-radius: 16px;
+            padding: 6px 16px;
+            height: 48px;
+            font-size: 0.85rem;
             font-weight: 700;
             color: #ea580c;
             cursor: pointer;
@@ -399,9 +410,9 @@
         .badge-standalone-count {
             background: #ea580c;
             color: #ffffff;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            padding: 1.5px 8px;
+            padding: 2px 9px;
             border-radius: 99px;
         }
 
@@ -409,9 +420,9 @@
             display: none;
             position: absolute;
             top: calc(100% + 8px);
+            left: 0;
             right: 0;
             width: 100%;
-            max-width: 660px;
             background: #ffffff;
             border: 1.5px solid #fed7aa;
             border-radius: 16px;
@@ -907,18 +918,25 @@
         }
 
         .btn-action-dots {
-            width: 32px;
-            height: 32px;
+            height: 30px;
+            padding: 4px 10px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             background: #ffffff;
-            color: #475569;
+            color: #334155;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 5px;
             cursor: pointer;
             transition: all 0.18s ease;
-            font-size: 0.95rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .btn-action-dots i {
+            color: #64748b;
+            font-size: 0.8rem;
         }
 
         .btn-action-dots:hover, .btn-action-dots.active {
@@ -1210,23 +1228,157 @@
             border-radius: 999px;
         }
 
+        /* =========================================================
+           SURAT RESMI MODAL STYLING (BASE / DESKTOP)
+           ========================================================= */
+        .surat-modal-card {
+            max-width: 860px;
+            width: 95%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+        }
+
+        .surat-modal-header {
+            padding: 14px 20px;
+            background: #ffffff;
+            border-bottom: 1.5px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .surat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .surat-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .surat-header-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .surat-header-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .surat-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-surat-print {
+            padding: 7px 14px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-surat-print:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .btn-surat-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-surat-icon:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-surat-close {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-surat-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
         /* Mobile Responsive Styles & Card Slider */
         @media (max-width: 900px) {
             body {
-                padding: 68px 14px 110px 14px;
-            }
-            .table-responsive {
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-            }
-            table.kaur-table {
-                min-width: 820px;
-                table-layout: auto;
+                padding: 16px 14px 110px 14px;
             }
             .page-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 14px;
+                gap: 10px;
+                padding-left: 48px; /* Clearance for fixed burger button */
+                margin-bottom: 20px;
+                min-height: 42px;
+            }
+            .header-title-wrap h1 {
+                font-size: 1.25rem;
+                gap: 8px;
+            }
+            .header-title-wrap h1 .role-badge {
+                font-size: 0.65rem;
+                padding: 2px 8px;
+            }
+            .header-title-wrap p {
+                font-size: 0.8rem;
+                line-height: 1.4;
             }
             .stat-cards-grid {
                 display: flex !important;
@@ -1276,6 +1428,474 @@
             }
             .filter-pills-dots {
                 display: flex;
+            }
+
+            /* Multi-Search Mobile Optimization */
+            .search-pill-container {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+
+            .unified-search-pill {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 48px !important;
+                padding: 4px 6px 4px 12px !important;
+                border-radius: 14px !important;
+                box-sizing: border-box !important;
+            }
+
+            #label-filter-main-cat, .extra-category-label {
+                max-width: 110px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                font-size: 0.82rem !important;
+            }
+
+            .btn-search-cari {
+                margin-left: 6px !important;
+                padding: 6px 14px !important;
+                font-size: 0.78rem !important;
+                gap: 4px !important;
+                border-radius: 10px !important;
+                white-space: nowrap !important;
+            }
+
+            .standalone-btn-text {
+                display: inline !important;
+            }
+
+            .btn-standalone-add {
+                width: 100% !important;
+                height: 44px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 0 16px !important;
+                font-size: 0.84rem !important;
+                border-radius: 14px !important;
+                box-sizing: border-box !important;
+            }
+
+            .extra-rows-card {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+                width: 100% !important;
+                border-radius: 16px !important;
+                margin-top: 6px !important;
+                padding: 14px 12px !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+                z-index: 50 !important;
+                box-sizing: border-box !important;
+            }
+
+            .extra-filter-row {
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .extra-filter-row .unified-search-pill {
+                flex: 1 !important;
+                width: auto !important;
+                min-width: 0 !important;
+                height: 46px !important;
+            }
+
+            .extra-filter-row .btn-remove-row {
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 12px !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* =========================================================
+               RESPONSIVE TABLE TO MOBILE CARDS TRANSFORMATION (<900px)
+               ========================================================= */
+            .table-card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            table.kaur-table, table.laboran-table {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                border: none !important;
+            }
+
+            table.kaur-table colgroup, table.laboran-table colgroup,
+            table.kaur-table thead, table.laboran-table thead {
+                display: none !important;
+            }
+
+            table.kaur-table tbody, table.laboran-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .kaur-row, .booking-row {
+                display: flex !important;
+                flex-direction: column !important;
+                background: #ffffff !important;
+                border: 1.5px solid #e2e8f0 !important;
+                border-radius: 16px !important;
+                padding: 14px 14px 14px 14px !important;
+                box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+                gap: 10px !important;
+                position: relative !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s !important;
+            }
+
+            .kaur-row[style*="display: none"],
+            .booking-row[style*="display: none"] {
+                display: none !important;
+            }
+
+            .kaur-row:hover, .booking-row:hover {
+                border-color: #cbd5e1 !important;
+                box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08) !important;
+            }
+
+            .kaur-row:has(.row-checkbox:checked),
+            .booking-row:has(.row-checkbox:checked) {
+                border-color: #fdba74 !important;
+                background: #fffbf7 !important;
+                box-shadow: 0 4px 16px rgba(234, 88, 12, 0.09) !important;
+            }
+
+            .kaur-row td, .booking-row td {
+                display: block !important;
+                padding: 0 !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+            }
+
+            /* TD 1: Checkbox (Top Left Absolute) */
+            .kaur-row td:nth-child(1),
+            .booking-row td:nth-child(1) {
+                position: absolute !important;
+                top: 14px !important;
+                left: 14px !important;
+                width: auto !important;
+                z-index: 2 !important;
+            }
+
+            .kaur-row td:nth-child(1) .custom-checkbox,
+            .booking-row td:nth-child(1) .custom-checkbox {
+                margin: 0 !important;
+                width: 20px !important;
+                height: 20px !important;
+            }
+
+            /* TD 6: Status Badge (Top Bar, Next to Checkbox) */
+            .kaur-row td:nth-child(6),
+            .booking-row td:nth-child(6) {
+                order: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                padding-left: 30px !important;
+                padding-right: 80px !important;
+                min-height: 28px !important;
+            }
+
+            .kaur-row .status-badge,
+            .booking-row .status-badge {
+                width: auto !important;
+                max-width: 100% !important;
+                height: 26px !important;
+                padding: 2px 10px !important;
+                font-size: 0.72rem !important;
+                justify-content: flex-start !important;
+            }
+
+            /* TD 7: Aksi (Top Right Absolute) */
+            .kaur-row td:nth-child(7),
+            .booking-row td:nth-child(7) {
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                width: auto !important;
+                z-index: 20 !important;
+                padding: 0 !important;
+            }
+
+            .kaur-row .btn-action-dots,
+            .booking-row .btn-action-dots {
+                height: 30px !important;
+                padding: 4px 10px !important;
+                font-size: 0.76rem !important;
+                border-radius: 8px !important;
+            }
+
+            .kaur-row .action-dropdown-menu,
+            .booking-row .action-dropdown-menu {
+                right: 0 !important;
+                left: auto !important;
+                top: calc(100% + 4px) !important;
+            }
+
+            /* TD 2: Ruangan (Order 2) */
+            .kaur-row td:nth-child(2),
+            .booking-row td:nth-child(2) {
+                order: 2 !important;
+                margin-top: 4px !important;
+            }
+
+            .kaur-row .tr-room-col,
+            .booking-row .tr-room-col {
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+
+            .kaur-row .tr-room-icon,
+            .booking-row .tr-room-icon {
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 10px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .kaur-row .tr-room-info,
+            .booking-row .tr-room-info {
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+
+            .kaur-row .tr-room-code,
+            .booking-row .tr-room-code {
+                font-size: 0.92rem !important;
+                font-weight: 800 !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                line-height: 1.3 !important;
+            }
+
+            .kaur-row .tr-room-name,
+            .booking-row .tr-room-name {
+                font-size: 0.78rem !important;
+                font-weight: 500 !important;
+                color: #64748b !important;
+                white-space: normal !important;
+                line-height: 1.3 !important;
+            }
+
+            /* TD 3: Peminjam & Waktu (Order 3) */
+            .kaur-row td:nth-child(3),
+            .booking-row td:nth-child(3) {
+                order: 3 !important;
+            }
+
+            .kaur-row .tr-user-time-col,
+            .booking-row .tr-user-time-col {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .kaur-row .tr-pill-user,
+            .kaur-row .tr-pill-time,
+            .booking-row .tr-pill-user,
+            .booking-row .tr-pill-time {
+                flex: 1 1 calc(50% - 4px) !important;
+                min-width: 120px !important;
+                width: auto !important;
+                height: 28px !important;
+                font-size: 0.76rem !important;
+                padding: 3px 10px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* TD 4: Tanggal (Order 4) */
+            .kaur-row td:nth-child(4),
+            .booking-row td:nth-child(4) {
+                order: 4 !important;
+            }
+
+            .kaur-row .tr-date-col,
+            .booking-row .tr-date-col {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                font-size: 0.78rem !important;
+                font-weight: 700 !important;
+                color: #334155 !important;
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 10px !important;
+                padding: 6px 12px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .kaur-row .tr-date-col::before,
+            .booking-row .tr-date-col::before {
+                content: '📅';
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+
+            /* TD 5: Keterangan (Order 5) */
+            .kaur-row td:nth-child(5),
+            .booking-row td:nth-child(5) {
+                order: 5 !important;
+            }
+
+            .kaur-row .tr-desc-col,
+            .booking-row .tr-desc-col {
+                display: block !important;
+                width: 100% !important;
+                background: #f8fafc !important;
+                border-left: 3.5px solid #ea580c !important;
+                border-radius: 0 10px 10px 0 !important;
+                padding: 8px 12px !important;
+                box-sizing: border-box !important;
+            }
+
+            .kaur-row .tr-desc-text,
+            .booking-row .tr-desc-text {
+                white-space: normal !important;
+                font-size: 0.78rem !important;
+                color: #334155 !important;
+                line-height: 1.4 !important;
+                word-break: break-word !important;
+            }
+
+            /* Floating Batch Bar Mobile */
+            .floating-batch-bar {
+                width: calc(100% - 24px) !important;
+                max-width: calc(100% - 24px) !important;
+                left: 12px !important;
+                bottom: 16px !important;
+                transform: translateX(0) translateY(120px) !important;
+                padding: 10px 14px !important;
+                border-radius: 16px !important;
+                gap: 10px !important;
+                box-sizing: border-box !important;
+                justify-content: space-between !important;
+                flex-wrap: wrap !important;
+            }
+            .floating-batch-bar.show {
+                transform: translateX(0) translateY(0) !important;
+            }
+            .floating-batch-bar .batch-count-badge {
+                font-size: 0.76rem !important;
+            }
+            .floating-batch-bar .btn-batch-acc,
+            .floating-batch-bar .btn-batch-rej,
+            .floating-batch-bar .btn-batch-del {
+                padding: 6px 12px !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* Pagination Bar Mobile */
+            .pagination-bar {
+                flex-direction: column !important;
+                gap: 10px !important;
+                align-items: center !important;
+                padding: 14px 12px !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 14px !important;
+                margin-top: 12px !important;
+            }
+
+            /* Surat Resmi Modal Responsive Mobile */
+            .surat-modal-card {
+                width: 95% !important;
+                max-width: 95% !important;
+                height: 92vh !important;
+                max-height: 94vh !important;
+                border-radius: 16px !important;
+                margin: 0 auto !important;
+            }
+
+            .surat-modal-card .modal-header {
+                padding: 10px 12px !important;
+                gap: 8px !important;
+            }
+
+            .surat-header-left {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                min-width: 0 !important;
+                flex: 1 !important;
+            }
+
+            .surat-header-icon {
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 8px !important;
+                background: #ecfdf5 !important;
+                color: #16a34a !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 0.95rem !important;
+                flex-shrink: 0 !important;
+            }
+
+            .surat-header-title {
+                font-size: 0.86rem !important;
+                font-weight: 800 !important;
+                color: #0f172a !important;
+                margin: 0 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .surat-header-desc {
+                display: none !important;
+            }
+
+            .surat-header-actions {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .btn-surat-print {
+                padding: 6px 10px !important;
+                font-size: 0.74rem !important;
+                border-radius: 8px !important;
+                gap: 5px !important;
+            }
+
+            .btn-surat-icon, .btn-surat-close {
+                width: 30px !important;
+                height: 30px !important;
+                border-radius: 8px !important;
             }
         }
 
@@ -1328,7 +1948,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Total Permohonan</div>
-                        <div class="stat-card-val" id="statTotalCount"><?= $totalCount ?></div>
+                        <div class="stat-card-val" id="statTotalVal"><?= $totalCount ?></div>
                         <div class="stat-card-desc">Semua berkas pengajuan lab</div>
                     </div>
                     <div class="stat-card-3d-icon">
@@ -1347,7 +1967,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Perlu ACC Ka. Ur</div>
-                        <div class="stat-card-val">
+                        <div class="stat-card-val" id="statReadyVal">
                             <?= $readyForKaurCount ?>
                             <?php if ($totalCount > 0): ?>
                                 <span class="stat-card-percent">(<?= round(($readyForKaurCount / $totalCount) * 100) ?>%)</span>
@@ -1371,7 +1991,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Surat QR Terbit (ACC)</div>
-                        <div class="stat-card-val">
+                        <div class="stat-card-val" id="statApprovedVal">
                             <?= $approvedKaurCount ?>
                             <?php if ($totalCount > 0): ?>
                                 <span class="stat-card-percent">(<?= round(($approvedKaurCount / $totalCount) * 100) ?>%)</span>
@@ -1395,7 +2015,7 @@
                 <div class="stat-card-top">
                     <div class="stat-card-meta">
                         <div class="stat-card-label">Ditolak</div>
-                        <div class="stat-card-val">
+                        <div class="stat-card-val" id="statRejectedVal">
                             <?= $rejectedCount ?>
                             <?php if ($totalCount > 0): ?>
                                 <span class="stat-card-percent">(<?= round(($rejectedCount / $totalCount) * 100) ?>%)</span>
@@ -1422,19 +2042,19 @@
             <div class="filter-pills-wrap" id="filterPillsWrap">
                 <button type="button" class="filter-pill active" data-status="all" onclick="setFilterStatus('all')">
                     <span>Semua</span>
-                    <span class="pill-count"><?= $totalCount ?></span>
+                    <span class="pill-count" id="pillCountAll"><?= $totalCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="ready" onclick="setFilterStatus('ready')">
                     <span>⚡ Perlu ACC Ka. Ur</span>
-                    <span class="pill-count"><?= $readyForKaurCount ?></span>
+                    <span class="pill-count" id="pillCountReady"><?= $readyForKaurCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="kaur" onclick="setFilterStatus('kaur')">
                     <span>📄 Surat QR Terbit</span>
-                    <span class="pill-count"><?= $approvedKaurCount ?></span>
+                    <span class="pill-count" id="pillCountKaur"><?= $approvedKaurCount ?></span>
                 </button>
                 <button type="button" class="filter-pill" data-status="rejected" onclick="setFilterStatus('rejected')">
                     <span>🔴 Ditolak</span>
-                    <span class="pill-count"><?= $rejectedCount ?></span>
+                    <span class="pill-count" id="pillCountRejected"><?= $rejectedCount ?></span>
                 </button>
             </div>
 
@@ -1447,9 +2067,9 @@
                     <!-- Category Dropdown Container -->
                     <div class="custom-dropdown-container">
                         <input type="hidden" id="mainCategoryVal" value="query">
-                        <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                        <button type="button" onclick="toggleCustomDropdown('main-cat', event)" class="flex items-center gap-1.5 bg-transparent border-none font-bold text-slate-800 cursor-pointer py-1 px-1 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.84rem;color:#1e293b;">
                             <span id="label-filter-main-cat">Cari Kata Kunci</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-main-cat"></i>
+                            <i class="fa-solid fa-chevron-down text-[11px] text-slate-400 dropdown-arrow" id="arrow-filter-main-cat"></i>
                         </button>
                         <div id="menu-filter-main-cat" class="custom-dropdown-menu">
                             <div onclick="selectMainCategory('query', '🔍 Kata Kunci (Semua)', this)" class="dropdown-item active"><span>🔍 Kata Kunci (Semua)</span></div>
@@ -1467,26 +2087,26 @@
                     <div id="mainValueContainer" style="flex: 1; display: flex; align-items: center; min-width: 0; position: relative;">
                         <!-- MODE 1: Text Search (default) -->
                         <div id="modeText" style="flex:1;display:flex;align-items:center;min-width:0;">
-                            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 0.75rem; margin-right: 8px; flex-shrink:0;"></i>
-                            <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik kata kunci lalu tekan Enter atau klik Cari..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 0.85rem; margin-right: 10px; flex-shrink:0;"></i>
+                            <input type="text" id="mainSearchInput" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Cari kata kunci..." style="width: 100%; font-size: 0.85rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
                         </div>
                         <!-- MODE 2: Date Range Picker (single input, range mode) -->
-                        <div id="modeTanggal" style="flex:1;display:none;align-items:center;min-width:0;gap:6px;">
-                            <i class="fa-solid fa-calendar-days" style="color: #94a3b8; font-size: 0.75rem; flex-shrink:0; margin-right:6px;"></i>
-                            <input type="text" id="dateRangePicker" placeholder="Pilih rentang tanggal..." readonly style="flex:1;font-size:0.78rem;font-weight:500;background:transparent;border:none;outline:none;color:#1e293b;cursor:pointer;min-width:0;">
-                            <button type="button" id="btnClearDateRange" onclick="clearDateRange()" style="display:none;background:none;border:none;color:#94a3b8;cursor:pointer;padding:2px 4px;font-size:0.75rem;flex-shrink:0;" title="Hapus filter tanggal">
+                        <div id="modeTanggal" style="flex:1;display:none;align-items:center;min-width:0;gap:8px;">
+                            <i class="fa-solid fa-calendar-days" style="color: #94a3b8; font-size: 0.85rem; flex-shrink:0; margin-right:4px;"></i>
+                            <input type="text" id="dateRangePicker" placeholder="Pilih rentang tanggal..." readonly style="flex:1;font-size:0.85rem;font-weight:600;background:transparent;border:none;outline:none;color:#1e293b;cursor:pointer;min-width:0;">
+                            <button type="button" id="btnClearDateRange" onclick="clearDateRange()" style="display:none;background:none;border:none;color:#94a3b8;cursor:pointer;padding:2px 4px;font-size:0.8rem;flex-shrink:0;" title="Hapus filter tanggal">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
                         <!-- MODE 3: Status Dropdown -->
                         <div id="modeStatus" style="flex:1;display:none;align-items:center;min-width:0;position:relative;">
-                            <i class="fa-solid fa-circle-half-stroke" style="color: #94a3b8; font-size: 0.75rem; margin-right: 8px; flex-shrink:0;"></i>
-                            <button type="button" id="statusDropdownTrigger" onclick="toggleMainStatusDropdown(event)" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;outline:none;cursor:pointer;font-size:0.78rem;font-weight:600;color:#1e293b;padding:0;">
-                                <span id="statusDropdownLabel" style="display:flex;align-items:center;gap:6px;">
+                            <i class="fa-solid fa-circle-half-stroke" style="color: #94a3b8; font-size: 0.85rem; margin-right: 10px; flex-shrink:0;"></i>
+                            <button type="button" id="statusDropdownTrigger" onclick="toggleMainStatusDropdown(event)" style="flex:1;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;outline:none;cursor:pointer;font-size:0.85rem;font-weight:700;color:#1e293b;padding:0;">
+                                <span id="statusDropdownLabel" style="display:flex;align-items:center;gap:8px;">
                                     <span id="statusDropdownDot" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;flex-shrink:0;"></span>
                                     <span id="statusDropdownText">Semua Status</span>
                                 </span>
-                                <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;color:#94a3b8;margin-right:4px;"></i>
+                                <i class="fa-solid fa-chevron-down" style="font-size:0.7rem;color:#94a3b8;margin-right:4px;"></i>
                             </button>
                             <input type="hidden" id="statusDropdownVal" value="">
                             <!-- Status Dropdown Menu -->
@@ -1494,7 +2114,10 @@
                                 <div onclick="selectStatusFilter('','Semua Status','#94a3b8',this)" class="status-filter-opt active" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
                                     <span style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;flex-shrink:0;"></span> Semua Status
                                 </div>
-                                <div onclick="selectStatusFilter('ready','Disetujui Laboran','#3b82f6',this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <div onclick="selectStatusFilter('pending','Menunggu Persetujuan','#f59e0b',this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                    <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;flex-shrink:0;"></span> Menunggu Persetujuan
+                                </div>
+                                <div onclick="selectStatusFilter('laboran','Disetujui Laboran','#3b82f6',this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
                                     <span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block;flex-shrink:0;"></span> Disetujui Laboran
                                 </div>
                                 <div onclick="selectStatusFilter('kaur','Disetujui Ka. Ur','#22c55e',this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
@@ -1509,14 +2132,17 @@
 
 
                     <!-- Tombol Cari -->
-                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="padding: 6px 14px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.75rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(234,88,12,0.25);">
-                        <i class="fa-solid fa-magnifying-glass text-[11px]"></i> Cari
+                    <button type="button" onclick="filterTable()" class="btn-search-cari" style="margin-left: 8px; padding: 7px 18px; background: linear-gradient(135deg, #ea580c, #f97316); color: #fff; font-size: 0.82rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 7px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(234,88,12,0.25);">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i> Cari
                     </button>
                 </div>
 
                 <!-- Standalone Add Filter Button (+ 1/4) -->
                 <button type="button" id="standaloneAddBtn" onclick="toggleOrAddFilterRow(event)" class="btn-standalone-add" title="Buka / Tutup / Tambah Filter Baru (Maks 4)">
-                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span class="standalone-btn-content" style="display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-filter text-[11px]" style="color: #ea580c; font-size: 0.75rem;"></i>
+                        <span class="standalone-btn-text">Filter Tambahan</span>
+                    </span>
                     <span id="filterCountBadge" class="badge-standalone-count">1/4</span>
                 </button>
 
@@ -1568,24 +2194,24 @@
                 <table class="kaur-table" id="kaurTable">
                     <colgroup>
                         <col style="width: 44px;">
-                        <col style="width: 25%;">
+                        <col style="width: 24%;">
                         <col style="width: 18%;">
-                        <col style="width: 16%;">
-                        <col style="width: 23%;">
+                        <col style="width: 15%;">
+                        <col style="width: 22%;">
                         <col style="width: 13%;">
-                        <col style="width: 50px;">
+                        <col style="width: 85px;">
                     </colgroup>
                     <thead>
                         <tr>
                             <th style="width: 44px; text-align: center; padding: 12px 6px;">
                                 <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)">
                             </th>
-                            <th style="width: 25%;">Ruangan</th>
+                            <th style="width: 24%;">Ruangan</th>
                             <th style="width: 18%;">Peminjam & Waktu</th>
-                            <th style="width: 16%;">Tanggal</th>
-                            <th style="width: 23%;">Keterangan / Keperluan</th>
+                            <th style="width: 15%;">Tanggal</th>
+                            <th style="width: 22%;">Keterangan / Keperluan</th>
                             <th style="width: 13%;">Status</th>
-                            <th style="width: 50px; text-align: center;">Aksi</th>
+                            <th style="width: 85px; text-align: center; padding-right: 14px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1640,10 +2266,10 @@
                                     $statusCategory = 'kaur';
                                     $dot = '#22c55e'; $bg = '#f0fdf4'; $color = '#166534'; $label = 'Disetujui Ka. Ur';
                                 } elseif ($isLaboranAcc) {
-                                    $statusCategory = 'ready';
+                                    $statusCategory = 'laboran';
                                     $dot = '#3b82f6'; $bg = '#eff6ff'; $color = '#1d4ed8'; $label = 'Disetujui Laboran';
                                 } elseif ($isPending) {
-                                    $statusCategory = 'ready';
+                                    $statusCategory = 'pending';
                                     $dot = '#f59e0b'; $bg = '#fffbeb'; $color = '#b45309'; $label = 'Menunggu Persetujuan';
                                 } elseif ($isRejected) {
                                     $statusCategory = 'rejected';
@@ -1735,13 +2361,14 @@
                                         <span class="status-text"><?= $label ?></span>
                                     </span>
                                 </td>
-                                <td style="text-align: center; overflow: visible; position: relative;">
+                                <td style="width: 85px; text-align: center; overflow: visible; position: relative; padding-right: 14px;">
                                     <div class="action-dropdown-wrap">
                                         <button type="button" class="btn-action-dots" onclick="toggleActionDropdown(<?= $p->id ?>, event)" title="Menu Aksi">
                                             <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            <span>Aksi</span>
                                         </button>
                                         <div class="action-dropdown-menu" id="actionMenu_<?= $p->id ?>">
-                                            <?php if ($statusCategory === 'ready'): ?>
+                                            <?php if ($isPending || $isLaboranAcc): ?>
                                                 <button type="button" class="action-dropdown-item item-acc" onclick="kaurApprove(<?= $p->id ?>)">
                                                     <i class="fa-solid fa-check"></i> Setujui (Ka. Ur)
                                                 </button>
@@ -1749,7 +2376,7 @@
                                                     <i class="fa-solid fa-ban"></i> Tolak Permohonan
                                                 </button>
                                             <?php endif; ?>
-                                            <?php if ($isApprovedKaur || $statusCategory === 'kaur'): ?>
+                                            <?php if ($isApprovedKaur || $isLaboranAcc || stripos($s, 'Disetujui') !== false || stripos($s, 'Approved') !== false): ?>
                                                 <button type="button" class="action-dropdown-item item-qr" onclick="openSuratModal(<?= $p->id ?>)">
                                                     <i class="fa-solid fa-qrcode"></i> Cetak Surat QR
                                                 </button>
@@ -1881,29 +2508,35 @@
          MODAL POPUP PRATINJAU & CETAK SURAT RESMI QR
          ========================================================= -->
     <div class="modal-overlay" id="suratModal" style="z-index: 100050;">
-        <div class="modal-card surat-modal-card" style="max-width: 860px; width: 95%; height: 90vh; display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);">
-            <div class="modal-header" style="padding: 14px 20px; background: #ffffff; border-bottom: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #ecfdf5; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+        <div class="modal-card surat-modal-card">
+            <div class="modal-header surat-modal-header">
+                <div class="surat-header-left">
+                    <div class="surat-header-icon">
                         <i class="fa-solid fa-file-circle-check"></i>
                     </div>
-                    <div>
-                        <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0;">Surat Resmi Ber-QR Code</h3>
-                        <p style="font-size: 0.75rem; color: #64748b; margin: 0;">Pratinjau dokumen legalitas peminjaman laboratorium</p>
+                    <div style="min-width: 0; flex: 1;">
+                        <h3 class="surat-header-title">Surat Resmi Ber-QR Code</h3>
+                        <p class="surat-header-desc">Pratinjau dokumen legalitas peminjaman laboratorium</p>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <button type="button" onclick="printSuratIframe()" style="padding: 7px 14px; background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: none; border-radius: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);">
-                        <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                <div class="surat-header-actions">
+                    <button type="button" class="btn-surat-print" onclick="printSuratIframe()">
+                        <i class="fa-solid fa-print"></i> <span>Cetak / PDF</span>
                     </button>
-                    <a id="suratNewTabBtn" href="#" target="_blank" title="Buka di Tab Baru" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                    <a id="suratNewTabBtn" href="#" target="_blank" title="Buka di Tab Baru" class="btn-surat-icon">
                         <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75rem;"></i>
                     </a>
-                    <button type="button" onclick="closeSuratModal()" style="width: 34px; height: 34px; border-radius: 8px; border: none; background: #f1f5f9; color: #64748b; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    <button type="button" onclick="closeSuratModal()" class="btn-surat-close">&times;</button>
                 </div>
             </div>
             <div class="modal-body" style="flex: 1; padding: 0; background: #525659; position: relative; overflow: hidden;">
-                <iframe id="suratIframe" src="about:blank" style="width: 100%; height: 100%; border: none; display: block;" onload="hideSuratLoader()"></iframe>
+                <script>
+                    function hideSuratLoader() {
+                        const loader = document.getElementById('suratLoader');
+                        if (loader) loader.style.display = 'none';
+                    }
+                </script>
+                <iframe id="suratIframe" src="about:blank" style="width: 100%; height: 100%; border: none; display: block;" onload="if(typeof hideSuratLoader==='function')hideSuratLoader();"></iframe>
                 <div id="suratLoader" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 10;">
                     <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: #16a34a;"></i>
                     <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">Memuat Surat Resmi...</span>
@@ -2012,11 +2645,138 @@
             document.getElementById('statusDropdownMenu').style.display = 'none';
         }
 
+        let extraFpInstances = {};
+
+        function getExtraRowInputHtml(rowId, catKey, defaultVal = '') {
+            const catObj = SEARCH_CATEGORIES.find(c => c.key === catKey) || SEARCH_CATEGORIES[0];
+            const cleanLabel = catObj.label.replace(/^[^\s]+\s*/, '');
+
+            if (catKey === 'tanggal') {
+                return `
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0; gap: 8px; position: relative;">
+                        <i class="fa-regular fa-calendar-days text-slate-400" style="font-size: 0.85rem; flex-shrink: 0;"></i>
+                        <input type="text" id="extraDateInput_${rowId}" class="extra-date-picker-input" placeholder="Pilih rentang tanggal..." readonly style="width: 100%; font-size: 0.84rem; font-weight: 600; background: transparent; border: none; outline: none; color: #1e293b; cursor: pointer;">
+                        <button type="button" id="extraDateClear_${rowId}" onclick="clearExtraDateRange('${rowId}')" style="display: none; background: none; border: none; color: #94a3b8; font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 4px;" title="Reset Tanggal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+            } else if (catKey === 'status') {
+                return `
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0; position: relative;" id="extraStatusWrapper_${rowId}">
+                        <input type="hidden" class="extra-status-val" id="extraStatusVal_${rowId}" value="${defaultVal || ''}">
+                        <button type="button" onclick="toggleExtraStatusDropdown('${rowId}', event)" style="background: none; border: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.84rem; font-weight: 700; color: #1e293b; width: 100%; text-align: left; padding: 0;">
+                            <span id="extraStatusDot_${rowId}" style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block; flex-shrink: 0;"></span>
+                            <span id="extraStatusText_${rowId}" style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Semua Status</span>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; color: #94a3b8; margin-right: 4px;"></i>
+                        </button>
+                        <div id="extraStatusMenu_${rowId}" class="extra-status-menu" style="display: none; position: absolute; top: calc(100% + 8px); left: 0; min-width: 220px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; box-shadow: 0 16px 40px rgba(0,0,0,0.18); z-index: 100030; padding: 6px;">
+                            <div onclick="selectExtraStatus('${rowId}', '', 'Semua Status', '#94a3b8', this)" class="status-filter-opt active" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;flex-shrink:0;"></span> Semua Status
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'pending', 'Menunggu Persetujuan', '#f59e0b', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;flex-shrink:0;"></span> Menunggu Persetujuan
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'laboran', 'Disetujui Laboran', '#3b82f6', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block;flex-shrink:0;"></span> Disetujui Laboran
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'kaur', 'Disetujui Ka. Ur', '#22c55e', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;flex-shrink:0;"></span> Disetujui Ka. Ur
+                            </div>
+                            <div onclick="selectExtraStatus('${rowId}', 'rejected', 'Ditolak', '#ef4444', this)" class="status-filter-opt" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all 0.15s;">
+                                <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;flex-shrink:0;"></span> Ditolak
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        <input type="text" class="extra-search-input" value="${defaultVal}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik ${cleanLabel.toLowerCase()}..." style="width: 100%; font-size: 0.84rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    </div>
+                `;
+            }
+        }
+
+        function initExtraRowInput(rowId, catKey) {
+            if (extraFpInstances[rowId]) {
+                extraFpInstances[rowId].destroy();
+                delete extraFpInstances[rowId];
+            }
+
+            if (catKey === 'tanggal') {
+                setTimeout(() => {
+                    const el = document.getElementById('extraDateInput_' + rowId);
+                    if (el) {
+                        extraFpInstances[rowId] = flatpickr(el, {
+                            mode: 'range',
+                            locale: { firstDayOfWeek: 1 },
+                            dateFormat: 'Y-m-d',
+                            altInput: true,
+                            altFormat: 'd M Y',
+                            allowInput: false,
+                            disableMobile: true,
+                            onClose: function(selectedDates) {
+                                const btn = document.getElementById('extraDateClear_' + rowId);
+                                if (btn) btn.style.display = selectedDates.length > 0 ? 'inline-flex' : 'none';
+                            }
+                        });
+                    }
+                }, 10);
+            }
+        }
+
+        function clearExtraDateRange(rowId) {
+            if (extraFpInstances[rowId]) {
+                extraFpInstances[rowId].clear();
+            }
+            const btn = document.getElementById('extraDateClear_' + rowId);
+            if (btn) btn.style.display = 'none';
+        }
+
+        function toggleExtraStatusDropdown(rowId, e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('extraStatusMenu_' + rowId);
+            if (!menu) return;
+            const isShown = menu.style.display === 'block';
+            document.querySelectorAll('.extra-status-menu').forEach(m => m.style.display = 'none');
+            const mainStatusMenu = document.getElementById('statusDropdownMenu');
+            if (mainStatusMenu) mainStatusMenu.style.display = 'none';
+            closeAllCustomDropdowns();
+            menu.style.display = isShown ? 'none' : 'block';
+        }
+
+        function selectExtraStatus(rowId, val, label, color, el) {
+            const valInput = document.getElementById('extraStatusVal_' + rowId);
+            const dot = document.getElementById('extraStatusDot_' + rowId);
+            const text = document.getElementById('extraStatusText_' + rowId);
+            const menu = document.getElementById('extraStatusMenu_' + rowId);
+            if (valInput) valInput.value = val;
+            if (dot) dot.style.background = color;
+            if (text) text.innerText = label;
+            if (menu) {
+                menu.querySelectorAll('.status-filter-opt').forEach(o => {
+                    o.style.background = '';
+                    o.style.color = '#334155';
+                });
+                if (el) {
+                    el.style.background = '#fff7ed';
+                    el.style.color = '#ea580c';
+                }
+                menu.style.display = 'none';
+            }
+        }
+
         document.addEventListener('click', function(e) {
             if (!e.target.closest('#modeStatus')) {
                 const m = document.getElementById('statusDropdownMenu');
                 if (m) m.style.display = 'none';
             }
+            document.querySelectorAll('.extra-status-menu').forEach(menu => {
+                if (!e.target.closest('#' + menu.parentElement.id)) {
+                    menu.style.display = 'none';
+                }
+            });
         }, true);
 
         function switchMainMode(mode) {
@@ -2093,28 +2853,29 @@
             rowHtml.className = 'extra-filter-row';
             rowHtml.id = rowId;
             rowHtml.innerHTML = `
-                <div class="unified-search-pill" style="height: 40px;">
+                <div class="unified-search-pill" style="height: 44px;">
                     <div class="custom-dropdown-container">
                         <input type="hidden" class="extra-category-val" value="${defaultKey}">
-                        <button type="button" onclick="toggleCustomDropdown('${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none text-xs font-bold text-slate-800 cursor-pointer py-1 px-0.5 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.75rem;color:#1e293b;">
+                        <button type="button" onclick="toggleCustomDropdown('${rowId}', event)" class="flex items-center gap-1.5 bg-transparent border-none font-bold text-slate-800 cursor-pointer py-1 px-1 hover:text-orange-600 focus:outline-none" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-weight:700;font-size:0.84rem;color:#1e293b;">
                             <span class="extra-category-label">${cleanLabel}</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 dropdown-arrow" id="arrow-filter-${rowId}"></i>
+                            <i class="fa-solid fa-chevron-down text-[11px] text-slate-400 dropdown-arrow" id="arrow-filter-${rowId}"></i>
                         </button>
                         <div id="menu-filter-${rowId}" class="custom-dropdown-menu">
                             ${dropdownItems}
                         </div>
                     </div>
-                    <div class="unified-divider" style="height: 16px;"></div>
-                    <div style="flex: 1; display: flex; align-items: center; min-width: 0;">
-                        <input type="text" class="extra-search-input" value="${defaultVal}" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); filterTable(); }" placeholder="Ketik filter tambahan..." style="width: 100%; font-size: 0.78rem; font-weight: 500; background: transparent; border: none; outline: none; color: #1e293b;">
+                    <div class="unified-divider" style="height: 20px;"></div>
+                    <div id="extraInputContainer_${rowId}" style="flex: 1; display: flex; align-items: center; min-width: 0;">
+                        ${getExtraRowInputHtml(rowId, defaultKey, defaultVal)}
                     </div>
                 </div>
                 <button type="button" onclick="removeFilterRow('${rowId}')" class="btn-remove-row" title="Hapus kriteria ini">
-                    <i class="fa-solid fa-trash-can text-xs"></i>
+                    <i class="fa-solid fa-trash-can text-sm"></i>
                 </button>
             `;
 
             container.appendChild(rowHtml);
+            initExtraRowInput(rowId, defaultKey);
             updateFilterCountBadge();
         }
 
@@ -2128,9 +2889,19 @@
                 el.classList.add('active');
             }
             closeAllCustomDropdowns();
+
+            const inputContainer = document.getElementById('extraInputContainer_' + rowId);
+            if (inputContainer) {
+                inputContainer.innerHTML = getExtraRowInputHtml(rowId, catKey, '');
+                initExtraRowInput(rowId, catKey);
+            }
         }
 
         function removeFilterRow(rowId) {
+            if (extraFpInstances[rowId]) {
+                extraFpInstances[rowId].destroy();
+                delete extraFpInstances[rowId];
+            }
             const row = document.getElementById(rowId);
             if (row) {
                 row.remove();
@@ -2153,6 +2924,14 @@
             if (btnClear) btnClear.style.display = 'none';
             selectStatusFilter('', 'Semua Status', '#94a3b8', null);
             selectMainCategory('query', '🔍 Kata Kunci (Semua)', null);
+            
+            Object.keys(extraFpInstances).forEach(rowId => {
+                if (extraFpInstances[rowId]) {
+                    extraFpInstances[rowId].destroy();
+                }
+            });
+            extraFpInstances = {};
+
             const container = document.getElementById('additionalFilterRowsContainer');
             if (container) container.innerHTML = '';
             updateFilterCountBadge();
@@ -2187,10 +2966,26 @@
             }
 
             document.querySelectorAll('#additionalFilterRowsContainer .extra-filter-row').forEach(row => {
+                const rowId = row.id;
                 const key = row.querySelector('.extra-category-val').value;
-                const val = (row.querySelector('.extra-search-input').value || '').toLowerCase().trim();
-                if (val) {
-                    filters.push({ key: key, val: val });
+                if (key === 'tanggal') {
+                    const fp = extraFpInstances[rowId];
+                    const dates = fp ? fp.selectedDates : [];
+                    const fromVal = dates[0] || null;
+                    const toVal = dates[1] || dates[0] || null;
+                    if (fromVal) {
+                        filters.push({ key: 'tanggal_range', from: fromVal, to: toVal });
+                    }
+                } else if (key === 'status') {
+                    const statusVal = (row.querySelector('.extra-status-val')?.value || '').trim();
+                    if (statusVal) {
+                        filters.push({ key: 'status_category', val: statusVal });
+                    }
+                } else {
+                    const val = (row.querySelector('.extra-search-input')?.value || '').toLowerCase().trim();
+                    if (val) {
+                        filters.push({ key: key, val: val });
+                    }
                 }
             });
 
@@ -2220,7 +3015,14 @@
             // 1. Filter matching rows
             const matchingRows = allRows.filter(row => {
                 const cat = row.getAttribute('data-status-category') || '';
-                const matchStatus = (currentFilterStatus === 'all') || (cat === currentFilterStatus);
+                let matchStatus = false;
+                if (currentFilterStatus === 'all') {
+                    matchStatus = true;
+                } else if (currentFilterStatus === 'ready') {
+                    matchStatus = (cat === 'ready' || cat === 'pending' || cat === 'laboran');
+                } else {
+                    matchStatus = (cat === currentFilterStatus);
+                }
                 if (!matchStatus) return false;
 
                 if (filters.length === 0) return true;
@@ -2264,6 +3066,23 @@
             matchingRows.slice(startIndex, endIndex).forEach(row => {
                 row.style.display = '';
             });
+
+            let noDataRow = document.getElementById('noDataFilterRow');
+            if (totalItems === 0 && allRows.length > 0) {
+                if (!noDataRow) {
+                    const tbody = document.querySelector('#laboranBookingTable tbody') || document.querySelector('table.kaur-table tbody');
+                    if (tbody) {
+                        noDataRow = document.createElement('tr');
+                        noDataRow.id = 'noDataFilterRow';
+                        noDataRow.innerHTML = `<td colspan="7" style="text-align: center; padding: 36px 16px; color: #94a3b8; background: #ffffff; border-radius: 16px; border: 1.5px solid #e2e8f0; display: block; width: 100%; box-sizing: border-box;"><i class="fa-solid fa-magnifying-glass" style="font-size: 1.8rem; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>Tidak ada data permohonan yang sesuai dengan filter pencarian.</td>`;
+                        tbody.appendChild(noDataRow);
+                    }
+                } else {
+                    noDataRow.style.display = '';
+                }
+            } else if (noDataRow) {
+                noDataRow.style.display = 'none';
+            }
 
             // 3. Update Toolbar and Pagination Info Counters
             const toolbarCount = document.getElementById('toolbarTotalCount');
@@ -2400,11 +3219,16 @@
             if (selectedItems.length > 0) {
                 if (countBadge) countBadge.innerText = selectedItems.length;
 
-                // Cek apakah ada item yang berstatus 'ready' (bisa disetujui / ditolak oleh Ka. Ur)
-                const hasReadyItems = selectedItems.some(item => item.statusCategory === 'ready');
+                // Cek apakah ada item yang siap disetujui / ditolak oleh Ka. Ur (belum berstatus kaur/ditolak)
+                const hasApprovableItems = selectedItems.some(item => 
+                    item.statusCategory === 'pending' || 
+                    item.statusCategory === 'laboran' || 
+                    item.statusCategory === 'ready' || 
+                    (item.statusCategory !== 'kaur' && item.statusCategory !== 'rejected')
+                );
 
-                if (btnAcc) btnAcc.style.display = hasReadyItems ? 'inline-flex' : 'none';
-                if (btnRej) btnRej.style.display = hasReadyItems ? 'inline-flex' : 'none';
+                if (btnAcc) btnAcc.style.display = hasApprovableItems ? 'inline-flex' : 'none';
+                if (btnRej) btnRej.style.display = hasApprovableItems ? 'inline-flex' : 'none';
 
                 if (bar) bar.classList.add('show');
             } else {
@@ -2412,6 +3236,174 @@
                 const masterCb = document.getElementById('selectAllCheckbox');
                 if (masterCb) masterCb.checked = false;
             }
+        }
+
+        // ==========================================
+        // REALTIME DOM UPDATE HELPERS (NO PAGE RELOAD)
+        // ==========================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function updateRowToApproved(id) {
+            const row = document.querySelector(`.kaur-row[data-id="${id}"]`);
+            if (!row) return;
+
+            // 1. Update data attributes
+            row.setAttribute('data-status-category', 'kaur');
+            row.setAttribute('data-status', 'disetujui ka. ur');
+            const searchAttr = row.getAttribute('data-search') || '';
+            row.setAttribute('data-search', searchAttr.replace(/pending|laboran/gi, 'disetujui ka. ur'));
+
+            // 2. Update status column badge (TD 6)
+            const statusCell = row.querySelector('td:nth-child(6)');
+            if (statusCell) {
+                statusCell.innerHTML = `
+                    <span class="status-badge" style="background: #f0fdf4; color: #166534;" title="Disetujui Ka. Ur">
+                        <span class="status-dot" style="background: #22c55e;"></span>
+                        <span class="status-text">Disetujui Ka. Ur</span>
+                    </span>
+                `;
+            }
+
+            // 3. Update action dropdown menu
+            const menu = document.getElementById(`actionMenu_${id}`);
+            if (menu) {
+                // Remove approve and reject buttons
+                menu.querySelectorAll('.item-acc, .item-rej').forEach(el => el.remove());
+
+                // Add Surat QR button if not already present
+                if (!menu.querySelector('.item-qr')) {
+                    const qrBtn = document.createElement('button');
+                    qrBtn.type = 'button';
+                    qrBtn.className = 'action-dropdown-item item-qr';
+                    qrBtn.onclick = () => openSuratModal(id);
+                    qrBtn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Cetak Surat QR`;
+                    
+                    const detailBtn = menu.querySelector('button[onclick*="openDetailModal"]');
+                    if (detailBtn) {
+                        menu.insertBefore(qrBtn, detailBtn);
+                    } else {
+                        menu.prepend(qrBtn);
+                    }
+                }
+            }
+
+            // 4. Update checkbox
+            const cb = row.querySelector('.row-checkbox');
+            if (cb) {
+                cb.setAttribute('data-status', 'Disetujui Ka. Ur');
+                cb.setAttribute('data-status-category', 'kaur');
+                cb.checked = false;
+            }
+        }
+
+        function updateRowToRejected(id, alasan) {
+            const row = document.querySelector(`.kaur-row[data-id="${id}"]`);
+            if (!row) return;
+
+            // 1. Update data attributes
+            row.setAttribute('data-status-category', 'rejected');
+            row.setAttribute('data-status', 'ditolak');
+
+            // 2. Update status column badge (TD 6)
+            const statusCell = row.querySelector('td:nth-child(6)');
+            if (statusCell) {
+                statusCell.innerHTML = `
+                    <span class="status-badge" style="background: #fef2f2; color: #991b1b;" title="Ditolak">
+                        <span class="status-dot" style="background: #ef4444;"></span>
+                        <span class="status-text">Ditolak</span>
+                    </span>
+                `;
+            }
+
+            // 3. Update keterangan column (TD 5) with rejection note
+            const descCol = row.querySelector('.tr-desc-col');
+            if (descCol) {
+                let note = descCol.querySelector('.tr-alasan-note');
+                if (!note) {
+                    note = document.createElement('div');
+                    note.className = 'tr-alasan-note';
+                    note.style.cssText = 'font-size: 0.75rem; color: #dc2626; margin-top: 4px;';
+                    descCol.appendChild(note);
+                }
+                note.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ` + escapeHtml(alasan);
+            }
+
+            // 4. Update action dropdown menu
+            const menu = document.getElementById(`actionMenu_${id}`);
+            if (menu) {
+                menu.querySelectorAll('.item-acc, .item-rej, .item-qr').forEach(el => el.remove());
+            }
+
+            // 5. Update checkbox
+            const cb = row.querySelector('.row-checkbox');
+            if (cb) {
+                cb.setAttribute('data-status', 'Ditolak');
+                cb.setAttribute('data-status-category', 'rejected');
+                cb.checked = false;
+            }
+        }
+
+        function removeRowFromDom(id) {
+            const row = document.querySelector(`.kaur-row[data-id="${id}"]`);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function recalculateKaurStats() {
+            const allRows = Array.from(document.querySelectorAll('.kaur-row'));
+            const total = allRows.length;
+            let ready = 0;
+            let approved = 0;
+            let rejected = 0;
+
+            allRows.forEach(row => {
+                const cat = row.getAttribute('data-status-category') || '';
+                if (cat === 'pending' || cat === 'laboran' || cat === 'ready') ready++;
+                else if (cat === 'kaur') approved++;
+                else if (cat === 'rejected') rejected++;
+            });
+
+            // Update Stat Cards Values & Percents
+            const statTotalVal = document.getElementById('statTotalVal');
+            if (statTotalVal) statTotalVal.innerText = total;
+
+            const statReadyVal = document.getElementById('statReadyVal');
+            if (statReadyVal) {
+                const pct = total > 0 ? Math.round((ready / total) * 100) : 0;
+                statReadyVal.innerHTML = `${ready} ${total > 0 ? `<span class="stat-card-percent">(${pct}%)</span>` : ''}`;
+            }
+
+            const statApprovedVal = document.getElementById('statApprovedVal');
+            if (statApprovedVal) {
+                const pct = total > 0 ? Math.round((approved / total) * 100) : 0;
+                statApprovedVal.innerHTML = `${approved} ${total > 0 ? `<span class="stat-card-percent">(${pct}%)</span>` : ''}`;
+            }
+
+            const statRejectedVal = document.getElementById('statRejectedVal');
+            if (statRejectedVal) {
+                const pct = total > 0 ? Math.round((rejected / total) * 100) : 0;
+                statRejectedVal.innerHTML = `${rejected} ${total > 0 ? `<span class="stat-card-percent">(${pct}%)</span>` : ''}`;
+            }
+
+            // Update Filter Pills Badges
+            const pillAll = document.getElementById('pillCountAll');
+            if (pillAll) pillAll.innerText = total;
+            const pillReady = document.getElementById('pillCountReady');
+            if (pillReady) pillReady.innerText = ready;
+            const pillKaur = document.getElementById('pillCountKaur');
+            if (pillKaur) pillKaur.innerText = approved;
+            const pillRejected = document.getElementById('pillCountRejected');
+            if (pillRejected) pillRejected.innerText = rejected;
+
+            // Update Toolbar Total
+            const toolbarCount = document.getElementById('toolbarTotalCount');
+            if (toolbarCount) toolbarCount.innerText = total;
         }
 
         // ==========================================
@@ -2430,6 +3422,12 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/approve/' + id, function(resp) {
                         if (resp.status === 'success') {
+                            // Realtime DOM Update
+                            updateRowToApproved(id);
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
                             Swal.fire({
                                 title: 'Berhasil Disetujui!',
                                 text: resp.message,
@@ -2442,8 +3440,6 @@
                             }).then((action) => {
                                 if (action.isConfirmed) {
                                     openSuratModal(id);
-                                } else {
-                                    location.reload();
                                 }
                             });
                         } else {
@@ -2551,6 +3547,7 @@
         // DELETE BOOKING
         // ==========================================
         function deleteBooking(id) {
+            closeAllActionDropdowns();
             Swal.fire({
                 title: 'Hapus Data Peminjaman?',
                 text: 'Data yang dihapus tidak dapat dikembalikan.',
@@ -2564,8 +3561,12 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/delete/' + id, function(resp) {
                         if (resp.status === 'success') {
-                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' })
-                            .then(() => location.reload());
+                            removeRowFromDom(id);
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
+                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' });
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
@@ -2581,14 +3582,22 @@
             const selectedItems = getSelectedItems();
             if (selectedItems.length === 0) return;
 
-            // Filter hanya data yang statusCategory === 'ready' (siap disetujui Ka. Ur)
-            const readyItems = selectedItems.filter(item => item.statusCategory === 'ready');
-            const alreadyApproved = selectedItems.filter(item => item.statusCategory === 'kaur');
+            // Filter data yang belum disetujui Ka. Ur (bisa pending atau disetujui laboran)
+            const readyItems = selectedItems.filter(item => 
+                item.statusCategory === 'pending' || 
+                item.statusCategory === 'laboran' || 
+                item.statusCategory === 'ready' ||
+                (item.statusCategory !== 'kaur' && item.statusCategory !== 'rejected')
+            );
+            const alreadyApproved = selectedItems.filter(item => 
+                item.statusCategory === 'kaur' || 
+                (item.status && item.status.toLowerCase().includes('ka. ur'))
+            );
 
             if (readyItems.length === 0) {
                 Swal.fire({
                     title: 'Tidak Ada yang Perlu Disetujui',
-                    text: 'Semua data yang dipilih sudah berstatus Disetujui Ka. Ur atau belum dalam antrean persetujuan.',
+                    text: 'Semua data yang dipilih sudah berstatus Disetujui Ka. Ur atau telah ditolak.',
                     icon: 'info',
                     confirmButtonColor: '#16a34a'
                 });
@@ -2596,9 +3605,9 @@
             }
 
             const readyIds = readyItems.map(item => item.id);
-            let confirmMsg = `Semua ${readyIds.length} permohonan terpilih akan disetujui dan surat peminjaman QR code akan diterbitkan.`;
+            let confirmMsg = `Semua ${readyIds.length} permohonan terpilih akan disetujui resmi oleh Ka. Ur dan surat QR code akan diterbitkan.`;
             if (alreadyApproved.length > 0) {
-                confirmMsg = `Ditemukan ${readyIds.length} permohonan yang belum disetujui (${alreadyApproved.length} data lainnya sudah disetujui sebelumnya). Lanjutkan menyetujui ${readyIds.length} data ini?`;
+                confirmMsg = `Ditemukan ${readyIds.length} permohonan yang belum disetujui Ka. Ur (${alreadyApproved.length} data lainnya sudah disetujui sebelumnya). Lanjutkan menyetujui ${readyIds.length} data ini?`;
             }
 
             Swal.fire({
@@ -2614,8 +3623,17 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/batch_approve', { ids: readyIds }, function(resp) {
                         if (resp.status === 'success') {
-                            Swal.fire({ title: 'Berhasil!', text: resp.message, icon: 'success', confirmButtonColor: '#16a34a' })
-                            .then(() => location.reload());
+                            readyIds.forEach(id => updateRowToApproved(id));
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
+                            Swal.fire({ 
+                                title: 'Berhasil!', 
+                                text: resp.message, 
+                                icon: 'success', 
+                                confirmButtonColor: '#16a34a' 
+                            });
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
@@ -2641,8 +3659,12 @@
                 if (res.isConfirmed) {
                     $.post(BASE_URL + 'kaur/batch_delete', { ids: ids }, function(resp) {
                         if (resp.status === 'success') {
-                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' })
-                            .then(() => location.reload());
+                            ids.forEach(id => removeRowFromDom(id));
+                            recalculateKaurStats();
+                            deselectAll();
+                            filterTable();
+
+                            Swal.fire({ title: 'Terhapus!', text: resp.message, icon: 'success', confirmButtonColor: '#ea580c' });
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
@@ -2655,13 +3677,18 @@
             const selectedItems = getSelectedItems();
             if (selectedItems.length === 0) return;
 
-            const readyItems = selectedItems.filter(item => item.statusCategory === 'ready');
-            const otherItems = selectedItems.filter(item => item.statusCategory !== 'ready');
+            const readyItems = selectedItems.filter(item => 
+                item.statusCategory === 'pending' || 
+                item.statusCategory === 'laboran' || 
+                item.statusCategory === 'ready' ||
+                item.statusCategory !== 'rejected'
+            );
+            const otherItems = selectedItems.filter(item => item.statusCategory === 'rejected');
 
             if (readyItems.length === 0) {
                 Swal.fire({
                     title: 'Tidak Dapat Ditolak',
-                    text: 'Semua data yang dipilih sudah berstatus Disetujui atau Ditolak sehingga tidak dapat diproses lagi.',
+                    text: 'Semua data yang dipilih sudah berstatus Ditolak.',
                     icon: 'info',
                     confirmButtonColor: '#ea580c'
                 });
@@ -2677,7 +3704,7 @@
             if (infoEl) {
                 let infoHtml = `<i class="fa-solid fa-users"></i> Menolak <strong>${readyIds.length}</strong> permohonan peminjaman terpilih.`;
                 if (otherItems.length > 0) {
-                    infoHtml += `<div style="font-size: 0.74rem; color: #64748b; font-weight: normal; margin-top: 4px;">(${otherItems.length} data lainnya dilewati karena sudah selesai/diproses).</div>`;
+                    infoHtml += `<div style="font-size: 0.74rem; color: #64748b; font-weight: normal; margin-top: 4px;">(${otherItems.length} data lainnya dilewati karena sudah ditolak sebelumnya).</div>`;
                 }
                 infoEl.innerHTML = infoHtml;
             }
@@ -2733,8 +3760,12 @@
                         $.post(BASE_URL + 'kaur/batch_reject', { ids: ids, alasan_penolakan: alasan }, function(resp) {
                             if (resp.status === 'success') {
                                 closeKaurRejectModal();
-                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
-                                .then(() => location.reload());
+                                ids.forEach(id => updateRowToRejected(id, alasan));
+                                recalculateKaurStats();
+                                deselectAll();
+                                filterTable();
+
+                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' });
                             } else {
                                 Swal.fire('Gagal', resp.message, 'error');
                             }
@@ -2744,8 +3775,12 @@
                         $.post(BASE_URL + 'kaur/reject/' + singleId, { alasan_penolakan: alasan }, function(resp) {
                             if (resp.status === 'success') {
                                 closeKaurRejectModal();
-                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' })
-                                .then(() => location.reload());
+                                updateRowToRejected(singleId, alasan);
+                                recalculateKaurStats();
+                                deselectAll();
+                                filterTable();
+
+                                Swal.fire({ title: 'Ditolak!', text: resp.message, icon: 'success', confirmButtonColor: '#dc2626' });
                             } else {
                                 Swal.fire('Gagal', resp.message, 'error');
                             }
@@ -2846,25 +3881,30 @@
             });
 
             const dots = dotsContainer.querySelectorAll('.pill-dot');
-            wrap.addEventListener('scroll', () => {
-                const wrapCenter = wrap.getBoundingClientRect().left + wrap.clientWidth / 2;
-                let closestIdx = 0;
-                let minDiff = Infinity;
-
-                pills.forEach((pill, i) => {
-                    const rect = pill.getBoundingClientRect();
-                    const pillCenter = rect.left + rect.width / 2;
-                    const diff = Math.abs(wrapCenter - pillCenter);
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        closestIdx = i;
-                    }
-                });
+            const updateDots = () => {
+                const maxScroll = wrap.scrollWidth - wrap.clientWidth;
+                if (maxScroll <= 0) {
+                    dots.forEach((dot, i) => dot.classList.toggle('active', i === 0));
+                    return;
+                }
+                const scrollLeft = wrap.scrollLeft;
+                let activeIdx = 0;
+                if (scrollLeft <= 5) {
+                    activeIdx = 0;
+                } else if (scrollLeft >= maxScroll - 5) {
+                    activeIdx = dots.length - 1;
+                } else {
+                    activeIdx = Math.min(Math.max(0, Math.round((scrollLeft / maxScroll) * (dots.length - 1))), dots.length - 1);
+                }
 
                 dots.forEach((dot, i) => {
-                    dot.classList.toggle('active', i === closestIdx);
+                    dot.classList.toggle('active', i === activeIdx);
                 });
-            }, { passive: true });
+            };
+
+            wrap.addEventListener('scroll', updateDots, { passive: true });
+            window.addEventListener('resize', updateDots, { passive: true });
+            updateDots();
         }
     </script>
 </body>

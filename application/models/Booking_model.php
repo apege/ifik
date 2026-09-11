@@ -226,5 +226,64 @@ class Booking_model extends CI_Model {
 
         return $this->db->get()->result();
     }
+
+    /**
+     * Dapatkan informasi penandatangan resmi surat (Laboran vs Ka. Ur) beserta tanda tangan digitalnya
+     */
+    public function get_penandatangan($status = '')
+    {
+        $is_laboran = (stripos($status, 'Laboran') !== false);
+        $target_role = $is_laboran ? 2 : 3;
+
+        // Cek jika session user yang sedang login sesuai dengan role penandatangan
+        $current_user_id = $this->session->userdata('user_id');
+        $current_role_id = $this->session->userdata('role_id');
+        
+        $penandatangan = null;
+
+        if ($current_user_id && $current_role_id == $target_role) {
+            $user = $this->db->get_where('users', ['id' => $current_user_id])->row();
+            if ($user) {
+                $penandatangan = [
+                    'role_id'       => $user->role_id,
+                    'jabatan'       => $is_laboran ? 'Laboran / Pengelola Laboratorium' : 'Kepala Urusan Laboratorium',
+                    'jabatan_resmi' => $is_laboran ? 'Laboran / Petugas Pengelola Fasilitas Laboratorium' : 'Kepala Urusan / Kepala Laboratorium',
+                    'nama'          => $user->name,
+                    'nip'           => $user->nidn_nim ?: '-',
+                    'tanda_tangan'  => $user->tanda_tangan
+                ];
+            }
+        }
+
+        if (!$penandatangan) {
+            // Cari user aktif dengan role yang sesuai (prioritaskan yang memiliki file tanda tangan digital)
+            $this->db->where('role_id', $target_role);
+            $this->db->order_by("(tanda_tangan IS NOT NULL AND tanda_tangan != '')", 'DESC', false);
+            $this->db->order_by('id', 'ASC');
+            $user = $this->db->get('users')->row();
+
+            if ($user) {
+                $penandatangan = [
+                    'role_id'       => $user->role_id,
+                    'jabatan'       => $is_laboran ? 'Laboran / Pengelola Laboratorium' : 'Kepala Urusan Laboratorium',
+                    'jabatan_resmi' => $is_laboran ? 'Laboran / Petugas Pengelola Fasilitas Laboratorium' : 'Kepala Urusan / Kepala Laboratorium',
+                    'nama'          => $user->name,
+                    'nip'           => $user->nidn_nim ?: '-',
+                    'tanda_tangan'  => $user->tanda_tangan
+                ];
+            } else {
+                $penandatangan = [
+                    'role_id'       => $target_role,
+                    'jabatan'       => $is_laboran ? 'Laboran / Pengelola Laboratorium' : 'Kepala Urusan Laboratorium',
+                    'jabatan_resmi' => $is_laboran ? 'Laboran / Petugas Pengelola Fasilitas Laboratorium' : 'Kepala Urusan / Kepala Laboratorium',
+                    'nama'          => $is_laboran ? 'Laboran FIK' : 'Kaur / Ka. Lab FIK',
+                    'nip'           => $is_laboran ? '19850101004' : '198203152010121002',
+                    'tanda_tangan'  => null
+                ];
+            }
+        }
+
+        return $penandatangan;
+    }
 }
 

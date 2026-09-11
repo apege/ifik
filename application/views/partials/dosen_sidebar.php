@@ -152,7 +152,7 @@ $active_ticketing_riwayat = (strpos($current_uri, 'ticketing/riwayat') !== false
 </style>
 
 <!-- Floating Trigger Button (Top Left) -->
-<button type="button" id="curvedSidebarToggle" class="curved-sidebar-toggle-btn" aria-label="Toggle Sidebar Menu" title="Buka Menu Navigasi">
+<button type="button" id="curvedSidebarToggle" class="curved-sidebar-toggle-btn is-active" aria-expanded="true" aria-label="Toggle Sidebar Menu" title="Buka Menu Navigasi">
     <div class="curved-sidebar-burger">
         <span></span>
         <span></span>
@@ -164,7 +164,7 @@ $active_ticketing_riwayat = (strpos($current_uri, 'ticketing/riwayat') !== false
 <div id="curvedSidebarBackdrop" class="curved-sidebar-backdrop"></div>
 
 <!-- Sliding Sidebar Panel with Morphing Curved SVG (Left Side) -->
-<aside id="curvedSidebarPanel" class="curved-sidebar-panel" aria-label="Sidebar Navigasi Dosen">
+<aside id="curvedSidebarPanel" class="curved-sidebar-panel is-active" aria-label="Sidebar Navigasi Dosen">
     <div class="curved-sidebar-inner">
         <!-- Top Section: Header & Nav Links -->
         <div>
