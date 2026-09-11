@@ -967,18 +967,25 @@
         }
 
         .btn-action-dots {
-            width: 32px;
-            height: 32px;
+            height: 30px;
+            padding: 4px 10px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             background: #ffffff;
-            color: #475569;
+            color: #334155;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 5px;
             cursor: pointer;
             transition: all 0.18s ease;
-            font-size: 0.95rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .btn-action-dots i {
+            color: #64748b;
+            font-size: 0.8rem;
         }
 
         .btn-action-dots:hover, .btn-action-dots.active {
@@ -1758,24 +1765,24 @@
                 <table class="laboran-table" id="laboranBookingTable">
                     <colgroup>
                         <col style="width: 44px;">
-                        <col style="width: 25%;">
+                        <col style="width: 24%;">
                         <col style="width: 18%;">
-                        <col style="width: 16%;">
-                        <col style="width: 23%;">
+                        <col style="width: 15%;">
+                        <col style="width: 22%;">
                         <col style="width: 13%;">
-                        <col style="width: 50px;">
+                        <col style="width: 85px;">
                     </colgroup>
                     <thead>
                         <tr>
                             <th style="width: 44px; text-align: center; padding: 12px 6px;">
                                 <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox" onchange="toggleSelectAll(this)">
                             </th>
-                            <th style="width: 25%;">Ruangan</th>
+                            <th style="width: 24%;">Ruangan</th>
                             <th style="width: 18%;">Peminjam & Waktu</th>
-                            <th style="width: 16%;">Tanggal</th>
-                            <th style="width: 23%;">Keterangan / Keperluan</th>
+                            <th style="width: 15%;">Tanggal</th>
+                            <th style="width: 22%;">Keterangan / Keperluan</th>
                             <th style="width: 13%;">Status</th>
-                            <th style="width: 50px; text-align: center;">Aksi</th>
+                            <th style="width: 85px; text-align: center; padding-right: 14px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1920,10 +1927,11 @@
                                         <span class="status-text"><?= $label ?></span>
                                     </span>
                                 </td>
-                                <td style="text-align: center; overflow: visible; position: relative;">
+                                <td style="width: 85px; text-align: center; overflow: visible; position: relative; padding-right: 14px;">
                                     <div class="action-dropdown-wrap">
                                         <button type="button" class="btn-action-dots" onclick="toggleActionDropdown(<?= $p->id ?>, event)" title="Menu Aksi">
                                             <i class="fa-solid fa-ellipsis-vertical"></i>
+                                            <span>Aksi</span>
                                         </button>
                                         <div class="action-dropdown-menu" id="actionMenu_<?= $p->id ?>">
                                             <?php if ($isPending): ?>

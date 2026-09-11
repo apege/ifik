@@ -130,6 +130,7 @@ class Laboran extends CI_Controller {
         $data['title'] = 'Surat Resmi Peminjaman Ruangan - ' . ($data['booking']->kode_ruangan ?? 'IFIK');
         $data['nomor_surat'] = 'SURAT/LAB-IFIK/' . date('Y', strtotime($data['booking']->created_at)) . '/' . sprintf('%04d', $data['booking']->id);
         $data['qr_data'] = site_url('laboran/surat/' . $id);
+        $data['penandatangan'] = $this->Booking_model->get_penandatangan($data['booking']->status);
 
         $this->load->view('kaur/surat_resmi', $data);
     }
@@ -220,5 +221,184 @@ class Laboran extends CI_Controller {
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus data terpilih']);
         }
+    }
+
+    /**
+     * Halaman Pengaturan Tanda Tangan Digital Laboran
+     */
+    public function tanda_tangan()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', 'Silakan login terlebih dahulu.');
+            redirect('login');
+            return;
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+
+        $nip_laboran = $user ? ($user->nidn_nim ?: $this->session->userdata('nidn_nim')) : $this->session->userdata('nidn_nim');
+        $nama_laboran = $user ? $user->name : $this->session->userdata('name');
+        $tanda_tangan = $user ? $user->tanda_tangan : null;
+
+        $data = [
+            'title'        => 'Pengaturan Tanda Tangan Digital - Panel Laboran',
+            'user'         => $user,
+            'nama'         => $nama_laboran,
+            'nip'          => $nip_laboran,
+            'tanda_tangan' => $tanda_tangan
+        ];
+
+        $this->load->view('laboran/tanda_tangan', $data);
+    }
+
+    /**
+     * Simpan Tanda Tangan Digital Laboran (Canvas Base64 atau Upload File)
+     */
+    public function simpan_tanda_tangan()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', 'Silakan login terlebih dahulu.');
+            redirect('login');
+            return;
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+        $nip_laboran = $user ? ($user->nidn_nim ?: $this->session->userdata('nidn_nim')) : $this->session->userdata('nidn_nim');
+        $tipe = $this->input->post('tipe'); // 'canvas' atau 'upload'
+
+        $uploadDir = FCPATH . 'uploads/signatures/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $filename = '';
+
+        if ($tipe === 'canvas') {
+            $signatureData = $this->input->post('signature_data');
+            if (empty($signatureData) || strpos($signatureData, 'data:image/png;base64,') !== 0) {
+                $this->session->set_flashdata('error', 'Silakan goreskan tanda tangan pada canvas terlebih dahulu.');
+                redirect('laboran/tanda-tangan');
+                return;
+            }
+
+            // Decode base64 image
+            $imageData = str_replace('data:image/png;base64,', '', $signatureData);
+            $imageData = str_replace(' ', '+', $imageData);
+            $decoded = base64_decode($imageData);
+
+            if (!$decoded) {
+                $this->session->set_flashdata('error', 'Format gambar tanda tangan tidak valid.');
+                redirect('laboran/tanda-tangan');
+                return;
+            }
+
+            $cleanNip = preg_replace('/[^a-zA-Z0-9_-]/', '', $nip_laboran ?: 'laboran');
+            $filename = 'ttd_laboran_' . $cleanNip . '_' . time() . '.png';
+            file_put_contents($uploadDir . $filename, $decoded);
+
+        } else {
+            // Upload file
+            if (empty($_FILES['file_ttd']['name'])) {
+                $this->session->set_flashdata('error', 'Pilih file gambar tanda tangan terlebih dahulu.');
+                redirect('laboran/tanda-tangan');
+                return;
+            }
+
+            $cleanNip = preg_replace('/[^a-zA-Z0-9_-]/', '', $nip_laboran ?: 'laboran');
+            $config = [
+                'upload_path'   => $uploadDir,
+                'allowed_types' => 'png|jpg|jpeg',
+                'max_size'      => 3072, // 3MB
+                'file_name'     => 'ttd_laboran_' . $cleanNip . '_' . time()
+            ];
+
+            $this->load->library('upload', $config);
+
+            if ($this->upload->do_upload('file_ttd')) {
+                $uploadData = $this->upload->data();
+                $filename = $uploadData['file_name'];
+            } else {
+                $err = $this->upload->display_errors('', '');
+                $this->session->set_flashdata('error', 'Gagal mengunggah file tanda tangan: ' . $err);
+                redirect('laboran/tanda-tangan');
+                return;
+            }
+        }
+
+        if (!empty($filename)) {
+            // Hapus file tanda tangan lama jika ada
+            $oldTtd = $user ? $user->tanda_tangan : null;
+            if (!empty($oldTtd) && file_exists($uploadDir . $oldTtd)) {
+                @unlink($uploadDir . $oldTtd);
+            }
+
+            $this->db->where('id', $user_id)->update('users', ['tanda_tangan' => $filename]);
+            $this->session->set_flashdata('success', 'Tanda tangan digital Laboran berhasil disimpan dan siap digunakan pada surat resmi!');
+        }
+
+        redirect('laboran/tanda-tangan');
+    }
+
+    /**
+     * Hapus Tanda Tangan Digital Laboran
+     */
+    public function hapus_tanda_tangan()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+            return;
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+        $oldTtd = $user ? $user->tanda_tangan : null;
+
+        if (!empty($oldTtd)) {
+            $filePath = FCPATH . 'uploads/signatures/' . $oldTtd;
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+            $this->db->where('id', $user_id)->update('users', ['tanda_tangan' => null]);
+            $this->session->set_flashdata('success', 'Tanda tangan digital berhasil dihapus.');
+        }
+
+        redirect('laboran/tanda-tangan');
+    }
+
+    /**
+     * Unduh File Tanda Tangan Digital Laboran
+     */
+    public function download_tanda_tangan()
+    {
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+            return;
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        $user = $this->db->get_where('users', ['id' => $user_id])->row();
+        $tanda_tangan = $user ? $user->tanda_tangan : null;
+
+        if (empty($tanda_tangan)) {
+            $this->session->set_flashdata('error', 'Belum ada tanda tangan yang tersimpan untuk diunduh.');
+            redirect('laboran/tanda-tangan');
+            return;
+        }
+
+        $filePath = FCPATH . 'uploads/signatures/' . $tanda_tangan;
+        if (!file_exists($filePath)) {
+            $this->session->set_flashdata('error', 'File tanda tangan fisik tidak ditemukan di server.');
+            redirect('laboran/tanda-tangan');
+            return;
+        }
+
+        $this->load->helper('download');
+        $namaBersih = preg_replace('/[^a-zA-Z0-9_-]/', '_', $user->name ?? 'laboran');
+        $cleanNip = preg_replace('/[^a-zA-Z0-9_-]/', '', $user->nidn_nim ?? 'nip');
+        $downloadName = 'TTD_Laboran_' . $namaBersih . '_' . $cleanNip . '.png';
+
+        force_download($downloadName, file_get_contents($filePath));
     }
 }

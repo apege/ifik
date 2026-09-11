@@ -78,11 +78,23 @@
 
         .signature-box {
             text-align: center;
-            width: 240px;
+            width: 260px;
         }
 
-        .signature-box p { margin-bottom: 60px; }
-        .signature-name { font-weight: bold; text-decoration: underline; }
+        .signature-box p { margin-bottom: 6px; }
+        .signature-img-wrap {
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px auto;
+        }
+        .signature-img-wrap img {
+            max-height: 70px;
+            max-width: 200px;
+            object-fit: contain;
+        }
+        .signature-name { font-weight: bold; text-decoration: underline; margin-top: 4px; }
 
         .print-btn-bar {
             text-align: center;
@@ -127,7 +139,7 @@
 
         <!-- Isi Surat -->
         <div class="content">
-            <p>Berdasarkan permohonan peminjaman ruangan yang telah diverifikasi oleh petugas laboratorium, dengan ini Kepala Urusan / Kepala Laboratorium Fakultas Industri Kreatif memberikan <strong>Persetujuan Resmi (ACC)</strong> atas penggunaan fasilitas laboratorium kepada:</p>
+            <p>Berdasarkan permohonan peminjaman ruangan yang telah diverifikasi oleh petugas laboratorium, dengan ini <?= htmlspecialchars($penandatangan['jabatan_resmi'] ?? 'Kepala Urusan / Kepala Laboratorium') ?> Fakultas Industri Kreatif memberikan <strong>Persetujuan Resmi (ACC)</strong> atas penggunaan fasilitas laboratorium kepada:</p>
 
             <table class="detail-table">
                 <tr>
@@ -175,9 +187,14 @@
             </div>
 
             <div class="signature-box">
-                <p>Bandung, <?= date('d F Y') ?><br>Kepala Urusan Laboratorium,</p>
-                <div class="signature-name">Kaur / Ka. Lab FIK</div>
-                <div style="font-size: 9pt;">NIP. 198203152010121002</div>
+                <p>Bandung, <?= date('d F Y', strtotime($booking->updated_at ?? $booking->created_at ?? date('Y-m-d'))) ?><br><?= htmlspecialchars($penandatangan['jabatan'] ?? 'Kepala Urusan Laboratorium') ?>,</p>
+                <div class="signature-img-wrap">
+                    <?php if (!empty($penandatangan['tanda_tangan']) && file_exists(FCPATH . 'uploads/signatures/' . $penandatangan['tanda_tangan'])): ?>
+                        <img src="<?= base_url('uploads/signatures/' . $penandatangan['tanda_tangan']) ?>" alt="Tanda Tangan Digital">
+                    <?php endif; ?>
+                </div>
+                <div class="signature-name"><?= htmlspecialchars($penandatangan['nama'] ?? 'Kaur / Ka. Lab FIK') ?></div>
+                <div style="font-size: 9pt;">NIP. <?= htmlspecialchars($penandatangan['nip'] ?? '198203152010121002') ?></div>
             </div>
         </div>
     </div>
