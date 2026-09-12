@@ -58,6 +58,15 @@ $route['reset_password'] = 'login/reset_password';
 $route['reset-password'] = 'login/reset_password';
 $route['ajukan-booking'] = 'dashboard/ajukan';
 $route['kalender'] = 'dashboard/kalender';
+$route['riwayat-booking'] = 'dashboard/riwayat';
+$route['riwayat-booking/live-data'] = 'dashboard/get_my_bookings_json';
+$route['riwayat-booking/cancel/(:num)'] = 'dashboard/cancel_booking/$1';
+$route['riwayat-booking/bulk-cancel'] = 'dashboard/bulk_cancel_booking';
+$route['peminjaman/riwayat'] = 'dashboard/riwayat';
+$route['laboran/live-data'] = 'laboran/live_data';
+$route['kaur/live-data'] = 'kaur/live_data';
+$route['kelolabooking/live-data'] = 'kelolabooking/live_data';
+$route['admin/live-data'] = 'kelolabooking/live_data';
 // Mahasiswa Routes
 $route['mahasiswa/detail'] = 'Mahasiswa/detail_pendaftaran';
 $route['mahasiswa/detail_pendaftaran'] = 'Mahasiswa/detail_pendaftaran';

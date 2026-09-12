@@ -107,6 +107,7 @@ class Dashboard extends CI_Controller {
 
 
         $data_peminjaman = array(
+            'id_user' => $this->session->userdata('user_id'),
             'nama_lengkap' => $nama_lengkap,
             'id_ruangan' => $id_ruangan,
             'keterangan' => $keterangan,
@@ -280,6 +281,256 @@ class Dashboard extends CI_Controller {
         $data['header_settings'] = $this->Header_model->get_settings();
         $data['title'] = 'Tentang Fakultas Industri Kreatif';
         $this->load->view('dashboard/about', $data);
+    }
+
+    public function riwayat()
+    {
+        $this->load->helper('url');
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', 'Silakan login terlebih dahulu untuk melihat riwayat peminjaman.');
+            redirect('login');
+            return;
+        }
+
+        $this->load->model('Booking_model');
+        $user_id = $this->session->userdata('user_id');
+        $nama_lengkap = $this->session->userdata('name');
+
+        $raw_riwayat = $this->Booking_model->get_peminjaman_by_user($user_id, $nama_lengkap);
+
+        $totalCount = count($raw_riwayat);
+        $pendingCount = 0;
+        $approvedCount = 0;
+        $rejectedCount = 0;
+
+        $peminjaman = array();
+        foreach ($raw_riwayat as $p) {
+            $s = $p->status;
+            $statusCategory = 'menunggu';
+            if ($s === 'Pending') {
+                $pendingCount++;
+                $statusCategory = 'menunggu';
+            } elseif (stripos($s, 'Disetujui') !== false || stripos($s, 'Approved') !== false || stripos($s, 'Ka. Ur') !== false || stripos($s, 'Laboran') !== false || stripos($s, 'Admin') !== false) {
+                $approvedCount++;
+                $statusCategory = 'disetujui';
+            } elseif ($s === 'Ditolak' || $s === 'Dibatalkan') {
+                $rejectedCount++;
+                $statusCategory = 'ditolak';
+            }
+
+            $dateFormatted = '';
+            if (!empty($p->tanggal_mulai)) {
+                if ($p->tanggal_mulai === $p->tanggal_selesai || empty($p->tanggal_selesai)) {
+                    $dateFormatted = date('d M Y', strtotime($p->tanggal_mulai));
+                } else {
+                    $dateFormatted = date('d M Y', strtotime($p->tanggal_mulai)) . ' - ' . date('d M Y', strtotime($p->tanggal_selesai));
+                }
+            }
+
+            $timeFormatted = '';
+            if (!empty($p->jam_mulai) && !empty($p->jam_selesai)) {
+                $timeFormatted = substr($p->jam_mulai, 0, 5) . ' - ' . substr($p->jam_selesai, 0, 5) . ' WIB';
+            }
+
+            $roomName = $p->nama_ruangan ?: ($p->kode_ruangan ?: 'Ruangan Lab');
+
+            $peminjaman[] = array(
+                'id' => (int)$p->id,
+                'id_ruangan' => $p->id_ruangan,
+                'nama_lengkap' => $p->nama_lengkap,
+                'ruangan' => $roomName,
+                'nama_ruangan' => $p->nama_ruangan,
+                'kode_ruangan' => $p->kode_ruangan,
+                'kategori' => $p->nama_kategori ?? 'Ruangan',
+                'nama_kategori' => $p->nama_kategori ?? 'Ruangan',
+                'lokasi' => $p->lokasi ?? '',
+                'kapasitas' => $p->kapasitas ?? '',
+                'keterangan' => $p->keterangan,
+                'agenda' => $p->keterangan,
+                'status' => $p->status,
+                'status_category' => $statusCategory,
+                'alasan_penolakan' => $p->alasan_penolakan ?? '',
+                'tanggal' => $p->tanggal_mulai,
+                'tanggal_booking' => $p->tanggal_mulai,
+                'tanggal_mulai' => $p->tanggal_mulai,
+                'tanggal_selesai' => $p->tanggal_selesai,
+                'tanggal_raw' => $p->tanggal_mulai,
+                'tanggal_formatted' => $dateFormatted,
+                'waktu_mulai' => $p->jam_mulai,
+                'waktu_selesai' => $p->jam_selesai,
+                'time_formatted' => $timeFormatted,
+                'dokumen_pendukung' => $p->dokumen_pendukung ?? '',
+                'created_at' => $p->created_at
+            );
+        }
+
+        $data['title'] = 'Riwayat Peminjaman Ruangan Saya - IFIK';
+        $data['peminjaman'] = $peminjaman;
+        $data['riwayat'] = $peminjaman;
+        $data['total_pengajuan'] = $totalCount;
+        $data['totalCount'] = $totalCount;
+        $data['total_menunggu'] = $pendingCount;
+        $data['pendingCount'] = $pendingCount;
+        $data['total_disetujui'] = $approvedCount;
+        $data['approvedCount'] = $approvedCount;
+        $data['total_ditolak'] = $rejectedCount;
+        $data['rejectedCount'] = $rejectedCount;
+
+        $this->load->view('dashboard/riwayat_booking', $data);
+    }
+
+    public function cancel_booking($id)
+    {
+        header('Content-Type: application/json');
+        if (!$this->session->userdata('logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Silakan login terlebih dahulu.']);
+            return;
+        }
+
+        $this->load->model('Booking_model');
+        $user_id = $this->session->userdata('user_id');
+        $nama_lengkap = $this->session->userdata('name');
+
+        $cancel = $this->Booking_model->cancel_booking((int)$id, $user_id, $nama_lengkap);
+
+        if ($cancel) {
+            echo json_encode(['status' => 'success', 'success' => true, 'message' => 'Pengajuan peminjaman berhasil dibatalkan.']);
+        } else {
+            echo json_encode(['status' => 'error', 'success' => false, 'message' => 'Gagal membatalkan pengajuan. Hanya pengajuan berstatus "Pending" yang dapat dibatalkan.']);
+        }
+    }
+
+    public function bulk_cancel_booking()
+    {
+        header('Content-Type: application/json');
+        if (!$this->session->userdata('logged_in')) {
+            echo json_encode(['status' => 'error', 'success' => false, 'message' => 'Silakan login terlebih dahulu.']);
+            return;
+        }
+
+        $this->load->model('Booking_model');
+        $user_id = $this->session->userdata('user_id');
+        $nama_lengkap = $this->session->userdata('name');
+
+        $ids = $this->input->post('ids');
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['status' => 'error', 'success' => false, 'message' => 'Tidak ada pengajuan yang dipilih.']);
+            return;
+        }
+
+        $successCount = 0;
+        $failedCount = 0;
+        foreach ($ids as $id) {
+            $cancel = $this->Booking_model->cancel_booking((int)$id, $user_id, $nama_lengkap);
+            if ($cancel) {
+                $successCount++;
+            } else {
+                $failedCount++;
+            }
+        }
+
+        if ($successCount > 0) {
+            $msg = $successCount . ' pengajuan peminjaman berhasil dibatalkan.';
+            if ($failedCount > 0) {
+                $msg .= " ($failedCount pengajuan dilewati karena sudah tidak berstatus Pending).";
+            }
+            echo json_encode([
+                'status' => 'success',
+                'success' => true,
+                'message' => $msg,
+                'cancelled_count' => $successCount
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'success' => false,
+                'message' => 'Tidak ada pengajuan yang dapat dibatalkan (hanya pengajuan berstatus "Pending" yang bisa dibatalkan).'
+            ]);
+        }
+    }
+
+    public function get_my_bookings_json()
+    {
+        header('Content-Type: application/json');
+        if (!$this->session->userdata('logged_in')) {
+            echo json_encode(['status' => 'error', 'message' => 'Unauthorized', 'data' => []]);
+            return;
+        }
+
+        $this->load->model('Booking_model');
+        $user_id = $this->session->userdata('user_id');
+        $nama_lengkap = $this->session->userdata('name');
+
+        $riwayat = $this->Booking_model->get_peminjaman_by_user($user_id, $nama_lengkap);
+
+        $totalCount = count($riwayat);
+        $pendingCount = 0;
+        $approvedCount = 0;
+        $rejectedCount = 0;
+
+        $formatted = array();
+        foreach ($riwayat as $p) {
+            $s = $p->status;
+            $statusCategory = 'menunggu';
+            if ($s === 'Pending') {
+                $pendingCount++;
+                $statusCategory = 'menunggu';
+            } elseif (stripos($s, 'Disetujui') !== false || stripos($s, 'Approved') !== false || stripos($s, 'Ka. Ur') !== false || stripos($s, 'Laboran') !== false || stripos($s, 'Admin') !== false) {
+                $approvedCount++;
+                $statusCategory = 'disetujui';
+            } elseif ($s === 'Ditolak' || $s === 'Dibatalkan') {
+                $rejectedCount++;
+                $statusCategory = 'ditolak';
+            }
+
+            $dateFormatted = '';
+            if (!empty($p->tanggal_mulai)) {
+                if ($p->tanggal_mulai === $p->tanggal_selesai || empty($p->tanggal_selesai)) {
+                    $dateFormatted = date('d M Y', strtotime($p->tanggal_mulai));
+                } else {
+                    $dateFormatted = date('d M Y', strtotime($p->tanggal_mulai)) . ' - ' . date('d M Y', strtotime($p->tanggal_selesai));
+                }
+            }
+
+            $timeFormatted = '';
+            if (!empty($p->jam_mulai) && !empty($p->jam_selesai)) {
+                $timeFormatted = substr($p->jam_mulai, 0, 5) . ' - ' . substr($p->jam_selesai, 0, 5) . ' WIB';
+            }
+
+            $formatted[] = array(
+                'id' => (int)$p->id,
+                'id_ruangan' => $p->id_ruangan,
+                'nama_lengkap' => $p->nama_lengkap,
+                'nama_ruangan' => $p->nama_ruangan,
+                'kode_ruangan' => $p->kode_ruangan,
+                'nama_kategori' => $p->nama_kategori ?? 'Ruangan',
+                'lokasi' => $p->lokasi ?? '',
+                'kapasitas' => $p->kapasitas ?? '',
+                'keterangan' => $p->keterangan,
+                'agenda' => $p->keterangan,
+                'status' => $p->status,
+                'status_category' => $statusCategory,
+                'alasan_penolakan' => $p->alasan_penolakan ?? '',
+                'tanggal_mulai' => $p->tanggal_mulai,
+                'tanggal_selesai' => $p->tanggal_selesai,
+                'tanggal_raw' => $p->tanggal_mulai,
+                'tanggal_formatted' => $dateFormatted,
+                'waktu_mulai' => $p->jam_mulai,
+                'waktu_selesai' => $p->jam_selesai,
+                'time_formatted' => $timeFormatted,
+                'dokumen_pendukung' => $p->dokumen_pendukung ?? '',
+                'created_at' => $p->created_at
+            );
+        }
+
+        echo json_encode(array(
+            'status' => 'success',
+            'totalCount' => $totalCount,
+            'pendingCount' => $pendingCount,
+            'approvedCount' => $approvedCount,
+            'rejectedCount' => $rejectedCount,
+            'data' => $formatted
+        ));
     }
 
     public function sidebar_demo()

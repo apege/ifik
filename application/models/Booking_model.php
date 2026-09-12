@@ -74,6 +74,7 @@ class Booking_model extends CI_Model {
         if (!$this->db->table_exists('peminjaman')) {
             $this->db->query("CREATE TABLE IF NOT EXISTS `peminjaman` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `id_user` INT NULL,
                 `id_ruangan` INT NOT NULL,
                 `nama_lengkap` VARCHAR(150) NOT NULL,
                 `keterangan` TEXT NULL,
@@ -88,6 +89,12 @@ class Booking_model extends CI_Model {
 
             $this->db->query("INSERT IGNORE INTO `peminjaman` (`id_ruangan`, `nama_lengkap`, `keterangan`, `tanggal_mulai`, `tanggal_selesai`, `jam_mulai`, `jam_selesai`, `status`) VALUES
                 (1, 'Alif Mahasiswa', 'Kegiatan Pameran Interaktif 3D', CURDATE(), CURDATE(), '08:00:00', '12:00:00', 'Disetujui Admin')");
+        } else {
+            // Auto-migrasi: pastikan kolom id_user tersedia
+            $fields_peminjaman = $this->db->list_fields('peminjaman');
+            if (!in_array('id_user', $fields_peminjaman)) {
+                $this->db->query("ALTER TABLE `peminjaman` ADD COLUMN `id_user` INT NULL AFTER `id`");
+            }
         }
 
         if (!$this->db->table_exists('slot_waktu')) {
@@ -133,6 +140,56 @@ class Booking_model extends CI_Model {
         $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
         $this->db->order_by('peminjaman.created_at', 'DESC');
         return $this->db->get()->result();
+    }
+
+    public function get_peminjaman_by_user($user_id, $nama_lengkap = null)
+    {
+        $this->db->select('peminjaman.*, ruangan.nama_ruangan, ruangan.kode_ruangan, ruangan.id_kategori, ruangan.lokasi, ruangan.kapasitas, ruangan.foto, kategori_ruangan.nama_kategori');
+        $this->db->from('peminjaman');
+        $this->db->join('ruangan', 'ruangan.id = peminjaman.id_ruangan', 'left');
+        $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
+
+        $this->db->group_start();
+        if (!empty($user_id)) {
+            $this->db->where('peminjaman.id_user', $user_id);
+        }
+        if (!empty($nama_lengkap)) {
+            if (!empty($user_id)) {
+                $this->db->or_where('LOWER(TRIM(peminjaman.nama_lengkap))', strtolower(trim($nama_lengkap)));
+            } else {
+                $this->db->where('LOWER(TRIM(peminjaman.nama_lengkap))', strtolower(trim($nama_lengkap)));
+            }
+        }
+        $this->db->group_end();
+
+        $this->db->order_by('peminjaman.created_at', 'DESC');
+        return $this->db->get()->result();
+    }
+
+    public function cancel_booking($id, $user_id = null, $nama_lengkap = null)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('status', 'Pending');
+
+        if (!empty($user_id) || !empty($nama_lengkap)) {
+            $this->db->group_start();
+            if (!empty($user_id)) {
+                $this->db->where('id_user', $user_id);
+            }
+            if (!empty($nama_lengkap)) {
+                if (!empty($user_id)) {
+                    $this->db->or_group_start();
+                    $this->db->where('id_user IS NULL', null, false);
+                    $this->db->where('LOWER(nama_lengkap)', strtolower(trim($nama_lengkap)));
+                    $this->db->group_end();
+                } else {
+                    $this->db->where('LOWER(nama_lengkap)', strtolower(trim($nama_lengkap)));
+                }
+            }
+            $this->db->group_end();
+        }
+
+        return $this->db->delete('peminjaman');
     }
 
     public function insert_booking($data)
