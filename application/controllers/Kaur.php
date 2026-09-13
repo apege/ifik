@@ -23,6 +23,98 @@ class Kaur extends CI_Controller {
         $this->load->view('kaur/approval/index', $data);
     }
 
+    public function live_data()
+    {
+        header('Content-Type: application/json');
+        $data = $this->Booking_model->get_all_peminjaman();
+        
+        $totalCount = count($data);
+        $pendingCount = 0;
+        $laboranCount = 0;
+        $kaurCount = 0;
+        $adminCount = 0;
+        $rejectedCount = 0;
+
+        $indoMonths = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        $formatted = [];
+
+        foreach ($data as $row) {
+            $st = $row->status;
+            $statusCategory = 'pending';
+            if (strpos($st, 'Laboran') !== false) {
+                $statusCategory = 'laboran';
+                $laboranCount++;
+            } elseif (strpos($st, 'Ka. Ur') !== false || strpos($st, 'Kaur') !== false) {
+                $statusCategory = 'kaur';
+                $kaurCount++;
+            } elseif (strpos($st, 'Admin') !== false) {
+                $statusCategory = 'admin';
+                $adminCount++;
+            } elseif ($st === 'Ditolak') {
+                $statusCategory = 'rejected';
+                $rejectedCount++;
+            } else {
+                $pendingCount++;
+            }
+
+            // Format tanggal
+            $tglM = $row->tanggal_mulai;
+            $tglS = $row->tanggal_selesai;
+            $dM = (int)date('j', strtotime($tglM));
+            $mM = $indoMonths[(int)date('n', strtotime($tglM))];
+            $yM = date('Y', strtotime($tglM));
+            $tglFormatted = "{$dM} {$mM} {$yM}";
+
+            if ($tglM !== $tglS && !empty($tglS)) {
+                $dS = (int)date('j', strtotime($tglS));
+                $mS = $indoMonths[(int)date('n', strtotime($tglS))];
+                $yS = date('Y', strtotime($tglS));
+                if ($yM === $yS && $mM === $mS) {
+                    $tglFormatted = "{$dM} - {$dS} {$mM} {$yM}";
+                } else {
+                    $tglFormatted = "{$dM} {$mM} {$yM} s/d {$dS} {$mS} {$yS}";
+                }
+            }
+
+            $waktuFormatted = substr($row->jam_mulai, 0, 5) . ' - ' . substr($row->jam_selesai, 0, 5);
+
+            $formatted[] = [
+                'id' => (int)$row->id,
+                'id_user' => $row->id_user ? (int)$row->id_user : null,
+                'id_ruangan' => (int)$row->id_ruangan,
+                'nama_lengkap' => $row->nama_lengkap,
+                'nama_ruangan' => $row->nama_ruangan,
+                'kode_ruangan' => $row->kode_ruangan,
+                'lokasi' => $row->lokasi,
+                'kapasitas' => $row->kapasitas,
+                'nama_kategori' => $row->nama_kategori,
+                'keterangan' => $row->keterangan,
+                'tanggal_mulai' => $row->tanggal_mulai,
+                'tanggal_selesai' => $row->tanggal_selesai,
+                'tanggal_formatted' => $tglFormatted,
+                'jam_mulai' => $row->jam_mulai,
+                'jam_selesai' => $row->jam_selesai,
+                'waktu_formatted' => $waktuFormatted,
+                'status' => $row->status,
+                'status_category' => $statusCategory,
+                'alasan_penolakan' => $row->alasan_penolakan,
+                'created_at' => $row->created_at,
+                'created_at_formatted' => date('d/m/Y H:i', strtotime($row->created_at))
+            ];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'totalCount' => $totalCount,
+            'pendingCount' => $pendingCount,
+            'laboranCount' => $laboranCount,
+            'kaurCount' => $kaurCount,
+            'adminCount' => $adminCount,
+            'rejectedCount' => $rejectedCount,
+            'data' => $formatted
+        ]);
+    }
+
     public function approve($id)
     {
         header('Content-Type: application/json');
