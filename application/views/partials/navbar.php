@@ -244,9 +244,10 @@
             height: 100vh;
             width: 300px; max-width: 85vw;
             margin: 0;
-            background: #ffffff;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
+            /* ✅ Background lebih transparan + efek frosted glass */
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
             flex-direction: column;
             align-items: stretch;
             justify-content: flex-start;
@@ -255,6 +256,7 @@
             padding: 90px 20px 24px;
             overflow-y: auto;
             box-shadow: 6px 0 30px rgba(0, 0, 0, 0.18);
+            border-right: 1px solid rgba(255, 255, 255, 0.4);
             border-bottom: none;
             transform: translateX(-100%);
             transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
@@ -267,7 +269,7 @@
             margin-left: 0;
             margin-top: auto;
             padding-top: 16px;
-            border-top: 1px solid #f1f5f9;
+            border-top: 1px solid rgba(148, 163, 184, 0.35);
         }
 
         .nav-link, .nav-link-login {
@@ -317,6 +319,9 @@
             box-shadow: none;
             min-width: 0;
             border-radius: 8px;
+            /* sedikit transparan agar menyatu dgn sidebar */
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
         .nav-dropdown a .btn-box { width: 30px; height: 30px; }
     }
