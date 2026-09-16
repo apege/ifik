@@ -52,6 +52,10 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/koordinator_ta.css?v=' . time()); ?>">
 
     <style>
+        .swal2-container {
+            z-index: 9999999 !important;
+        }
+
         body {
             background-color: #fbf7f1;
             color: #1e293b;

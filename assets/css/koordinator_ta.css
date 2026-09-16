@@ -172,3 +172,8 @@ body {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
+
+/* SWEETALERT2 OVERLAY Z-INDEX (MUST BE ABOVE ALL MODALS & BACKDROPS) */
+.swal2-container {
+    z-index: 9999999 !important;
+}

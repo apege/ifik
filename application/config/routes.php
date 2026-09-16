@@ -266,6 +266,15 @@ $route['mahasiswa/ticketing/simpan'] = 'Mahasiswa/ticketing_simpan';
 $route['mahasiswa/ticketing/riwayat'] = 'Mahasiswa/ticketing_riwayat';
 $route['mahasiswa/ticketing/detail/(:any)'] = 'Mahasiswa/ticketing_detail/$1';
 
+// Laboran Help Desk / Live Chat Routes
+$route['laboran/help'] = 'LaboranHelp/index';
+$route['laboran/help/conversations'] = 'LaboranHelp/get_conversations_ajax';
+$route['laboran/help/messages/(:num)'] = 'LaboranHelp/get_messages_ajax/$1';
+$route['laboran/help/send'] = 'LaboranHelp/send_message_ajax';
+$route['laboran/help/toggle-status'] = 'LaboranHelp/toggle_status_ajax';
+$route['laboran/help/quick-replies'] = 'LaboranHelp/quick_replies_ajax';
+$route['laboran/help/sample'] = 'LaboranHelp/create_sample_ajax';
+
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
