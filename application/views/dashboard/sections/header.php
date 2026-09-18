@@ -644,25 +644,16 @@
     <?php
         $all_rooms = [];
         $seen_keys = [];
-        $featured_keys = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
 
         if (!empty($ruangan)) {
             foreach ($ruangan as $r) {
-                $n = strtolower(trim(isset($r->nama_ruangan) ? $r->nama_ruangan : ''));
-                $c_code = strtolower(trim(isset($r->kode_ruangan) ? $r->kode_ruangan : ''));
-                if ($n !== 'ss' && $c_code !== 'ss' && strpos($n, 'test') === false && strpos($n, 'qqq') === false) {
-                    $lab_code = '';
-                    if (strpos($n, 'multimedia') !== false && !in_array('multimedia', $seen_keys)) $lab_code = 'multimedia';
-                    elseif (strpos($n, 'aula') !== false && !in_array('aula', $seen_keys)) $lab_code = 'aula';
-                    elseif ((strpos($n, 'cintiq') !== false || strpos($n, 'tablet') !== false || strpos($n, 'sablon') !== false) && !in_array('cintiq', $seen_keys)) $lab_code = 'cintiq';
-                    elseif (strpos($n, 'green') !== false && !in_array('greenscreen', $seen_keys)) $lab_code = 'greenscreen';
-                    elseif ((strpos($n, 'inkubator') !== false || strpos($n, 'incubator') !== false) && !in_array('incubator', $seen_keys)) $lab_code = 'incubator';
-                    elseif (strpos($n, 'mac') !== false && !in_array('mac', $seen_keys)) $lab_code = 'mac';
-                    else {
-                        $lab_code = preg_replace('/[^a-z0-9]/', '', $c_code);
-                        if (empty($lab_code)) $lab_code = 'room_' . $r->id;
-                    }
-                    if (!empty($lab_code) && !in_array($lab_code, $seen_keys)) {
+                $n = trim(isset($r->nama_ruangan) ? $r->nama_ruangan : '');
+                $c_code = trim(isset($r->kode_ruangan) ? $r->kode_ruangan : '');
+                if (!empty($n)) {
+                    $lab_code = preg_replace('/[^a-z0-9]/', '', strtolower($c_code));
+                    if (empty($lab_code)) $lab_code = 'room_' . $r->id;
+
+                    if (!in_array($lab_code, $seen_keys)) {
                         $seen_keys[] = $lab_code;
                         $r->mapped_key = $lab_code;
                         $all_rooms[] = $r;
@@ -670,14 +661,6 @@
                 }
             }
         }
-        usort($all_rooms, function($a, $b) use ($featured_keys) {
-            $posA = array_search($a->mapped_key, $featured_keys);
-            $posB = array_search($b->mapped_key, $featured_keys);
-            if ($posA !== false && $posB !== false) return $posA - $posB;
-            if ($posA !== false) return -1;
-            if ($posB !== false) return 1;
-            return $a->id - $b->id;
-        });
         $total_slides_count = !empty($header_slides) && count($header_slides) >= 3 ? count($header_slides) : 3;
         $tabs_all = [
             ['type' => 'overview', 'index' => 0, 'id' => 'dotOverview', 'label' => 'Overview'],
@@ -697,18 +680,19 @@
         <div class="carousel-indicators-track" id="dotsTrack">
             <?php foreach ($tabs_all as $pos => $tab): ?>
                 <?php if ($tab['type'] === 'fasilitas_full'): ?>
+                    <?php $room_count = count($tab['rooms'] ?? []); ?>
                     <div class="dot dot-fasilitas <?= ($tab['index'] === 0) ? 'active' : '' ?>" data-index="<?= $tab['index'] ?>" id="<?= $tab['id'] ?>">
                         <div class="dot-label-row">
                             <span class="dot-label"><?= htmlspecialchars($tab['label']) ?></span>
                             <div class="fasilitas-controls-group">
-                                <span class="fasilitas-counter" id="fasilitasCounterFull">01/<?= sprintf('%02d', count($tab['rooms'] ?? [])) ?></span>
-                                <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause">
+                                <span class="fasilitas-counter" id="fasilitasCounterFull"><?= $room_count > 0 ? ('01/' . sprintf('%02d', $room_count)) : '00/00' ?></span>
+                                <button class="lab-play-pause-btn-side" id="labAutoPlayBtn" title="Auto Play / Pause" style="<?= $room_count <= 1 ? 'display: none;' : '' ?>">
                                     <svg id="playPauseIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                 </button>
                             </div>
                         </div>
                         <div class="dot-track-continuous" id="labIndicatorsFull">
-                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasFull"><span>Lab Multimedia</span></div>
+                            <div class="fasilitas-scrub-tooltip" id="tooltipFasilitasFull"><span><?= $room_count > 0 ? htmlspecialchars($tab['rooms'][0]->nama_ruangan) : 'Fasilitas' ?></span></div>
                             <div class="thumb" id="thumbFasilitasFull">
                                 <div class="progress"></div>
                             </div>

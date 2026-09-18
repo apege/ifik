@@ -15,10 +15,16 @@
  */
 
 $sessionRoleId = (int)$this->session->userdata('role_id');
+$sessionEmail  = (string)$this->session->userdata('email');
 $currentUri = trim(uri_string(), '/');
 
 // Tentukan active role ID (utamakan rute modul aktif jika berada di portal spesifik, atau session role)
 $activeRoleId = $sessionRoleId;
+
+// Jika role 2 tapi mengakses modul laboran / akun laboran, arahkan ke role 21 (Laboran)
+if ($sessionRoleId === 2 && (strpos($currentUri, 'laboran') === 0 || strpos($sessionEmail, 'laboran') !== false)) {
+    $activeRoleId = 21;
+}
 
 if (strpos($currentUri, 'laboran') === 0) {
     $activeRoleId = 21; // Laboran

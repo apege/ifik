@@ -594,38 +594,21 @@
 
 <script>
     <?php
-        $featured_keys = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
         $dyn_lab_data = [];
         $seen_keys = [];
 
         if (!empty($ruangan)) {
             foreach ($ruangan as $r) {
-                $name = strtolower(trim(isset($r->nama_ruangan) ? $r->nama_ruangan : ''));
-                $code = strtolower(trim(isset($r->kode_ruangan) ? $r->kode_ruangan : ''));
+                $name = trim(isset($r->nama_ruangan) ? $r->nama_ruangan : '');
+                $code = trim(isset($r->kode_ruangan) ? $r->kode_ruangan : '');
 
-                if ($name === 'ss' || $code === 'ss' || strpos($name, 'test') !== false || strpos($name, 'qqq') !== false) continue;
+                if (empty($name)) continue;
 
-                $key = '';
-                if (strpos($name, 'multimedia') !== false && !in_array('multimedia', $seen_keys)) $key = 'multimedia';
-                elseif (strpos($name, 'aula') !== false && !in_array('aula', $seen_keys)) $key = 'aula';
-                elseif ((strpos($name, 'cintiq') !== false || strpos($name, 'tablet') !== false || strpos($name, 'sablon') !== false) && !in_array('cintiq', $seen_keys)) $key = 'cintiq';
-                elseif (strpos($name, 'green') !== false && !in_array('greenscreen', $seen_keys)) $key = 'greenscreen';
-                elseif ((strpos($name, 'inkubator') !== false || strpos($name, 'incubator') !== false) && !in_array('incubator', $seen_keys)) $key = 'incubator';
-                elseif (strpos($name, 'mac') !== false && !in_array('mac', $seen_keys)) $key = 'mac';
-                else {
-                    $key = preg_replace('/[^a-z0-9]/', '', $code);
-                    if (empty($key)) $key = 'room_' . $r->id;
-                }
+                $key = preg_replace('/[^a-z0-9]/', '', strtolower($code));
+                if (empty($key)) $key = 'room_' . $r->id;
 
-                if (!empty($key) && !isset($dyn_lab_data[$key])) {
-                    $seen_keys[] = $key;
+                if (!isset($dyn_lab_data[$key])) {
                     $default_img = base_url('assets/images/multimedia.jpg');
-                    if ($key === 'aula') $default_img = file_exists(FCPATH . 'assets/images/Aula1.jpg') ? base_url('assets/images/Aula1.jpg') : base_url('assets/images/aula.jpg');
-                    elseif ($key === 'cintiq') $default_img = file_exists(FCPATH . 'assets/images/sintiq.jpg') ? base_url('assets/images/sintiq.jpg') : base_url('assets/images/cintiq.jpg');
-                    elseif ($key === 'greenscreen') $default_img = base_url('assets/images/greenscreen.jpg');
-                    elseif ($key === 'incubator') $default_img = base_url('assets/images/incubator.jpg');
-                    elseif ($key === 'mac') $default_img = base_url('assets/images/mac.jpg');
-
                     $detail_url = site_url('dashboard/lab_detail/' . $key);
 
                     $dyn_lab_data[$key] = [
@@ -635,43 +618,20 @@
                         'desc'    => !empty($r->tagline) ? $r->tagline : (!empty($r->deskripsi) ? substr($r->deskripsi, 0, 95) . '...' : 'Fasilitas Laboratorium Fakultas Industri Kreatif'),
                         'btnText' => 'Lihat Detail &rarr;',
                         'url'     => $detail_url,
-                        'img'     => !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : $default_img
+                        'img'     => !empty($r->foto) ? (strpos($r->foto, 'http') === 0 ? $r->foto : base_url($r->foto)) : $default_img,
+                        'has_3d'  => !empty($r->model_3d)
                     ];
                 }
             }
         }
 
-        // Sort: 6 Lab Utama di depan, lalu diikuti seluruh ruangan lainnya
-        uksort($dyn_lab_data, function($k1, $k2) use ($dyn_lab_data, $featured_keys) {
-            $posA = array_search($k1, $featured_keys);
-            $posB = array_search($k2, $featured_keys);
-            if ($posA !== false && $posB !== false) return $posA - $posB;
-            if ($posA !== false) return -1;
-            if ($posB !== false) return 1;
-            $idA = $dyn_lab_data[$k1]['id'] ?? 0;
-            $idB = $dyn_lab_data[$k2]['id'] ?? 0;
-            return $idA - $idB;
-        });
-
         $dyn_lab_keys = array_keys($dyn_lab_data);
         $total_labs_count = count($dyn_lab_keys);
-        $split_point_lab = !empty($dyn_lab_keys) ? (int)ceil($total_labs_count / 2) : 3;
+        $split_point_lab = $total_labs_count > 0 ? (int)ceil($total_labs_count / 2) : 0;
     ?>
 
-    <?php if (!empty($dyn_lab_data)): ?>
-        const LAB_DATA = <?= json_encode($dyn_lab_data) ?>;
-        const LAB_KEYS = <?= json_encode(array_values($dyn_lab_keys)) ?>;
-    <?php else: ?>
-        const LAB_DATA = {
-            multimedia: { key: 'multimedia', title: 'Lab Multimedia & Game', desc: '36 Workstation PC RTX GPU untuk animasi digital &amp; 3D modelling.', btnText: 'Lihat Lab &rarr;', url: '<?= site_url('dashboard/lab_detail/multimedia') ?>', img: '<?= base_url('assets/images/multimedia.jpg') ?>' },
-            aula: { key: 'aula', title: 'Aula Utama Fakultas', desc: 'Kapasitas 300+ orang dengan Sound System pro &amp; Stage LED.', btnText: 'Lihat Aula &rarr;', url: '<?= site_url('dashboard/lab_detail/aula') ?>', img: '<?= file_exists(FCPATH . 'assets/images/Aula1.jpg') ? base_url('assets/images/Aula1.jpg') : base_url('assets/images/aula.jpg') ?>' },
-            cintiq: { key: 'cintiq', title: 'Lab Tablet Cintiq', desc: 'Studio Wacom Cintiq Pro 8K Pen Display untuk komik &amp; 2D art.', btnText: 'Lihat Lab &rarr;', url: '<?= site_url('dashboard/lab_detail/cintiq') ?>', img: '<?= file_exists(FCPATH . 'assets/images/sintiq.jpg') ? base_url('assets/images/sintiq.jpg') : base_url('assets/images/cintiq.jpg') ?>' },
-            greenscreen: { key: 'greenscreen', title: 'Lab Green Screen Studio', desc: 'Dinding Cyclorama Chroma Key &amp; Lighting Rig DMX.', btnText: 'Lihat Lab &rarr;', url: '<?= site_url('dashboard/lab_detail/greenscreen') ?>', img: '<?= base_url('assets/images/greenscreen.jpg') ?>' },
-            incubator: { key: 'incubator', title: 'Lab Inkubator Bisnis & Tech', desc: 'Ruang Pitching Investor, Co-Working Space, &amp; Wifi 6E.', btnText: 'Lihat Lab &rarr;', url: '<?= site_url('dashboard/lab_detail/incubator') ?>', img: '<?= base_url('assets/images/incubator.jpg') ?>' },
-            mac: { key: 'mac', title: 'Lab Workstation Apple Mac', desc: 'Apple Mac Studio M2 Max &amp; Studio Display Retina 5K.', btnText: 'Lihat Lab &rarr;', url: '<?= site_url('dashboard/lab_detail/mac') ?>', img: '<?= base_url('assets/images/mac.jpg') ?>' }
-        };
-        const LAB_KEYS = ['multimedia', 'aula', 'cintiq', 'greenscreen', 'incubator', 'mac'];
-    <?php endif; ?>
+    const LAB_DATA = <?= json_encode(!empty($dyn_lab_data) ? $dyn_lab_data : (object)[]) ?>;
+    const LAB_KEYS = <?= json_encode(!empty($dyn_lab_keys) ? array_values($dyn_lab_keys) : []) ?>;
     const TOTAL_LABS = LAB_KEYS.length;
     const SPLIT_POINT_LAB = <?= $split_point_lab ?>;
     const DEKANAT_IMG_URL = "<?= base_url('assets/images/' . (!empty($header_settings->dekanat_image) ? $header_settings->dekanat_image : 'dekanat2.png')) ?>";
@@ -688,14 +648,17 @@
     function buildCardHTML(labKey) {
         const data = LAB_DATA[labKey];
         if (!data) return '';
-        return `
-            <img src="${data.img}" alt="${data.title}" class="lab-card-bg-img">
-            <div class="lab-card-overlay">
-                <div class="lab-card-top-content">
+        const badge3DHTML = data.has_3d ? `
                     <span class="badge-3d-tag-overlay">
                         <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         3D Model
                     </span>
+        ` : '';
+        return `
+            <img src="${data.img}" alt="${data.title}" class="lab-card-bg-img">
+            <div class="lab-card-overlay">
+                <div class="lab-card-top-content">
+                    ${badge3DHTML}
                     <h3 class="lab-card-title-text" style="margin-top: 14px;">${data.title}</h3>
                     <div class="lab-card-desc-text">${data.desc}</div>
                 </div>
@@ -737,9 +700,28 @@
         const counterRight = document.getElementById('fasilitasCounterRight');
         const counterFull = document.getElementById('fasilitasCounterFull');
 
+        if (totalCount === 0) {
+            if (counterLeft) counterLeft.textContent = '00/00';
+            if (counterRight) counterRight.textContent = '00/00';
+            if (counterFull) counterFull.textContent = '00/00';
+            if (thumbFull) {
+                thumbFull.style.width = '0%';
+                thumbFull.style.opacity = '0';
+            }
+            if (thumbLeft) {
+                thumbLeft.style.width = '0%';
+                thumbLeft.style.opacity = '0';
+            }
+            if (thumbRight) {
+                thumbRight.style.width = '0%';
+                thumbRight.style.opacity = '0';
+            }
+            return;
+        }
+
         if (dotLeft && dotRight && thumbLeft && thumbRight) {
-            const countLeft = splitPoint;
-            const countRight = totalCount - splitPoint;
+            const countLeft = splitPoint || 1;
+            const countRight = (totalCount - splitPoint) || 1;
 
             // Ukuran thumb proporsional terhadap total data dalam part masing-masing
             const thumbWidthLeftPct = Math.max(8, (1 / countLeft) * 100);
@@ -865,6 +847,30 @@
             document.getElementById('cardSlot6')
         ];
 
+        if (TOTAL_LABS === 0) {
+            slots.forEach((slotEl, idx) => {
+                if (slotEl) {
+                    if (idx === CENTER_SLOT_INDEX) {
+                        slotEl.innerHTML = `
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:rgba(255,255,255,0.75); text-align:center; padding: 24px; background: rgba(18, 22, 34, 0.85); border-radius: 24px; border: 1px dashed rgba(255,255,255,0.15); backdrop-filter: blur(12px);">
+                                <svg style="width: 52px; height: 52px; margin-bottom: 14px; opacity: 0.5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9 22 9 12 15 12 15 22"/>
+                                </svg>
+                                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 6px; color: #fff;">Belum Ada Fasilitas Ruangan</h3>
+                                <p style="font-size: 0.85rem; max-width: 320px; line-height: 1.45; color: rgba(255,255,255,0.6);">Data fasilitas ruangan di database masih kosong. Data akan otomatis muncul setelah ditambahkan melalui panel Kelola Ruangan.</p>
+                            </div>
+                        `;
+                        slotEl.classList.add('active-card');
+                    } else {
+                        slotEl.innerHTML = '';
+                        slotEl.classList.remove('active-card');
+                    }
+                }
+            });
+            return;
+        }
+
         const relativeIndices = [-3, -2, -1, 0, 1, 2, 3];
 
         relativeIndices.forEach((rel, slotIdx) => {
@@ -946,10 +952,26 @@
 
     function startLabSequence() {
         activeLabIndex = 0;
-        isPlaying = !isMobileView(); // Di HP/mobile auto-play otomatis dimatikan
         isMoving = false;
         renderTrackPosition(CENTER_SLOT_INDEX, false);
         updateAllSlots(0);
+
+        const prevBtn = document.getElementById('labPrevBtn');
+        const nextBtn = document.getElementById('labNextBtn');
+        const playPauseBtn = document.getElementById('labAutoPlayBtn');
+
+        if (TOTAL_LABS <= 1) {
+            isPlaying = false;
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            if (playPauseBtn) playPauseBtn.style.display = 'none';
+        } else {
+            if (prevBtn) prevBtn.style.display = '';
+            if (nextBtn) nextBtn.style.display = '';
+            if (playPauseBtn) playPauseBtn.style.display = '';
+            isPlaying = !isMobileView();
+        }
+
         const playPauseIcon = document.getElementById('playPauseIcon');
         if (playPauseIcon) {
             playPauseIcon.innerHTML = isPlaying 
@@ -961,7 +983,7 @@
     window.startLabSequence = startLabSequence;
 
     function startAutoPlay() {
-        if (isMobileView()) {
+        if (TOTAL_LABS <= 1 || isMobileView()) {
             isPlaying = false;
             return;
         }
@@ -1063,18 +1085,20 @@
     }
 
     function shiftNext() {
+        if (TOTAL_LABS <= 1 || isMoving) return;
         const nextLabIndex = (activeLabIndex + 1) % TOTAL_LABS;
         navigateToIndex(nextLabIndex);
     }
 
     function shiftPrev() {
+        if (TOTAL_LABS <= 1 || isMoving) return;
         const prevLabIndex = (activeLabIndex - 1 + TOTAL_LABS) % TOTAL_LABS;
         navigateToIndex(prevLabIndex);
     }
 
     // 1:1 REAL-TIME PHYSICAL DRAG ENGINE
     function onDragStart(clientX) {
-        if (isMoving) return;
+        if (TOTAL_LABS <= 1 || isMoving) return;
         isDragging = true;
         startX = clientX;
         dragOffset = 0;
@@ -1138,7 +1162,7 @@
             viewport.addEventListener('wheel', (e) => {
                 if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 15) {
                     e.preventDefault();
-                    if (!wheelThrottle && !isMoving) {
+                    if (!wheelThrottle && !isMoving && TOTAL_LABS > 1) {
                         wheelThrottle = true;
                         if (e.deltaX > 0) {
                             shiftNext();
@@ -1156,6 +1180,7 @@
                 let isScrubbing = false;
 
                 function updateScrub(clientX, commit = false) {
+                    if (TOTAL_LABS === 0) return;
                     const rect = track.getBoundingClientRect();
                     const ratio = Math.max(0, Math.min(0.999, (clientX - rect.left) / rect.width));
                     const part = track.getAttribute('data-part');
@@ -1189,6 +1214,7 @@
                 }
 
                 track.addEventListener('pointerdown', (e) => {
+                    if (TOTAL_LABS === 0) return;
                     e.stopPropagation();
                     e.preventDefault();
                     isScrubbing = true;

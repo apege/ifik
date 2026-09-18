@@ -2107,6 +2107,10 @@
     // Tentukan active role ID (utamakan rute modul aktif jika berada di portal spesifik, atau session role)
     $activeRoleId = $sessionRoleId;
 
+    if ($sessionRoleId === 2 && (strpos($currentUri, 'laboran') === 0 || strpos((string)$this->session->userdata('email'), 'laboran') !== false)) {
+        $activeRoleId = 21;
+    }
+
     if (strpos($currentUri, 'laboran') === 0) {
         $activeRoleId = 21; // Laboran
     } elseif (strpos($currentUri, 'kaur') === 0) {
@@ -2200,6 +2204,7 @@
             ];
             break;
 
+>>>>>>> upstream/refactor-backend-v2
         case 6: // Koordinator TA
             $backUrl = site_url('koordinatorta');
             $backLabel = 'Portal Koordinator TA';

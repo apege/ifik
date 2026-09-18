@@ -486,6 +486,27 @@ class DosenTicketing extends CI_Controller {
             $status = 'Diproses';
         }
 
+        // Backend Guard: Status Stepper Satu Arah (Non-reversible)
+        $statusWeight = [
+            'Menunggu' => 1,
+            'Diproses' => 2,
+            'Selesai'  => 3,
+            'Ditutup'  => 4
+        ];
+
+        $currentTicket = $this->DosenTicketing_model->get_by_id($idTiket);
+        if ($currentTicket) {
+            $currentStatus = $currentTicket->status ?? 'Menunggu';
+            $curW = $statusWeight[$currentStatus] ?? 1;
+            $newW = $statusWeight[$status] ?? 1;
+
+            if ($newW < $curW) {
+                $this->session->set_flashdata('error', "Status tiket tidak dapat dimundurkan kembali dari {$currentStatus} ke {$status}.");
+                redirect('dosen/respon-ticketing');
+                return;
+            }
+        }
+
         $this->DosenTicketing_model->update_respon($idTiket, $status, $tanggapan);
 
         $msg = ($tanggapan !== '')

@@ -13,6 +13,9 @@ class News_model extends CI_Model {
     /** Semua berita (untuk admin) — urut terbaru */
     public function get_all()
     {
+        if (!$this->db->table_exists('berita')) {
+            return [];
+        }
         return $this->db
             ->order_by('tanggal', 'DESC')
             ->order_by('id', 'DESC')
@@ -23,6 +26,9 @@ class News_model extends CI_Model {
     /** Hanya yang published = 1 (untuk dashboard publik) */
     public function get_published()
     {
+        if (!$this->db->table_exists('berita')) {
+            return [];
+        }
         return $this->db
             ->where('published', 1)
             ->order_by('tanggal', 'DESC')
@@ -34,6 +40,9 @@ class News_model extends CI_Model {
     /** Satu berita berdasarkan ID */
     public function get_by_id($id)
     {
+        if (!$this->db->table_exists('berita')) {
+            return null;
+        }
         return $this->db
             ->where('id', (int)$id)
             ->get('berita')

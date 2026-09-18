@@ -162,6 +162,23 @@ class LaboranTicketing extends CI_Controller {
             $status = 'Diproses';
         }
 
+        // Backend Guard: Status Stepper Satu Arah (Non-reversible)
+        $statusWeight = [
+            'Menunggu' => 1,
+            'Diproses' => 2,
+            'Selesai'  => 3,
+            'Ditutup'  => 4
+        ];
+        $currentStatus = $ticket->status ?? 'Menunggu';
+        $curW = $statusWeight[$currentStatus] ?? 1;
+        $newW = $statusWeight[$status] ?? 1;
+
+        if ($newW < $curW) {
+            $this->session->set_flashdata('error', "Status tiket tidak dapat dimundurkan kembali dari {$currentStatus} ke {$status}.");
+            redirect('laboran/respon-ticketing');
+            return;
+        }
+
         $updateData = [
             'status'     => $status,
             'updated_at' => date('Y-m-d H:i:s')

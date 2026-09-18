@@ -546,12 +546,57 @@
                         <strong id="modalPrioritas" class="text-slate-700 font-semibold block">-</strong>
                     </div>
                     <div>
-                        <span class="text-slate-400 block mb-0.5">Status:</span>
+                        <span class="text-slate-400 block mb-0.5">Status Terkini:</span>
                         <strong id="modalStatus" class="text-slate-700 font-semibold block">-</strong>
                     </div>
                     <div>
                         <span class="text-slate-400 block mb-0.5">Diajukan Pada:</span>
                         <strong id="modalWaktu" class="text-slate-700 font-semibold block">-</strong>
+                    </div>
+                </div>
+
+                <!-- Card Stepper Progress Tracking (4 Tahap) -->
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <span>Alur Progres Penanganan</span>
+                        <span class="text-[10px] text-emerald-600 font-bold"><i class="bi bi-shield-check"></i> Terverifikasi Sistem</span>
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="mhsStepperContainer">
+                        <!-- Step 1: Menunggu -->
+                        <div id="mhsStep_Menunggu" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">1. Menunggu</span>
+                            <span class="text-[8px] text-slate-400 step-desc">Antrean Masuk</span>
+                        </div>
+
+                        <!-- Step 2: Diproses -->
+                        <div id="mhsStep_Diproses" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
+                                <i class="bi bi-gear-wide-connected"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">2. Diproses</span>
+                            <span class="text-[8px] text-slate-400 step-desc">Sedang Ditangani</span>
+                        </div>
+
+                        <!-- Step 3: Selesai -->
+                        <div id="mhsStep_Selesai" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
+                                <i class="bi bi-check2-circle"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">3. Selesai</span>
+                            <span class="text-[8px] text-slate-400 step-desc">Telah Diatasi</span>
+                        </div>
+
+                        <!-- Step 4: Ditutup -->
+                        <div id="mhsStep_Ditutup" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
+                                <i class="bi bi-archive-fill"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">4. Ditutup</span>
+                            <span class="text-[8px] text-slate-400 step-desc">Arsip Final</span>
+                        </div>
                     </div>
                 </div>
 
@@ -596,6 +641,60 @@
 
     <!-- Client-side Scripts for Filtering & Modal -->
     <script>
+        const MHS_STATUS_WEIGHT = {
+            'Menunggu': 1,
+            'Diproses': 2,
+            'Selesai':  3,
+            'Ditutup':  4
+        };
+
+        function updateMhsStepperProgress(status) {
+            const currentWeight = MHS_STATUS_WEIGHT[status] || 1;
+
+            ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'].forEach(st => {
+                const card = document.getElementById('mhsStep_' + st);
+                if (!card) return;
+
+                const stepWeight = MHS_STATUS_WEIGHT[st];
+                const iconBox = card.querySelector('.step-icon');
+                const desc = card.querySelector('.step-desc');
+
+                // Reset kelas dasar
+                card.className = 'p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1';
+
+                if (stepWeight < currentWeight) {
+                    // Sudah terlewati (Tahap Selesai)
+                    card.classList.add('bg-emerald-50/70', 'border-emerald-200');
+                    if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-emerald-500 text-white';
+                    if (desc) desc.innerHTML = '<span class="text-emerald-700 font-bold"><i class="bi bi-check2"></i> Terlewati</span>';
+                } else if (stepWeight === currentWeight) {
+                    // Sedang aktif saat ini
+                    if (st === 'Menunggu') {
+                        card.classList.add('bg-amber-50', 'border-amber-400', 'ring-2', 'ring-amber-400/20');
+                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-amber-500 text-white animate-pulse';
+                        if (desc) desc.innerHTML = '<span class="text-amber-700 font-extrabold">Antrean Aktif</span>';
+                    } else if (st === 'Diproses') {
+                        card.classList.add('bg-blue-50', 'border-blue-500', 'ring-2', 'ring-blue-500/20');
+                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-blue-600 text-white animate-pulse';
+                        if (desc) desc.innerHTML = '<span class="text-blue-700 font-extrabold">Sedang Ditangani</span>';
+                    } else if (st === 'Selesai') {
+                        card.classList.add('bg-emerald-50', 'border-emerald-500', 'ring-2', 'ring-emerald-500/20');
+                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-emerald-600 text-white';
+                        if (desc) desc.innerHTML = '<span class="text-emerald-700 font-extrabold">Selesai Ditindak</span>';
+                    } else {
+                        card.classList.add('bg-purple-50', 'border-purple-500', 'ring-2', 'ring-purple-500/20');
+                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-purple-600 text-white';
+                        if (desc) desc.innerHTML = '<span class="text-purple-700 font-extrabold">Ditutup Resmi</span>';
+                    }
+                } else {
+                    // Belum tercapai (Masa Datang)
+                    card.classList.add('bg-slate-50', 'border-slate-200', 'opacity-60');
+                    if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-400';
+                    if (desc) desc.innerHTML = '<span class="text-slate-400">Tahap Berikutnya</span>';
+                }
+            });
+        }
+
         function showTicketDetail(kodeTiket) {
             fetch('<?= site_url("mahasiswa/ticketing/detail/") ?>' + encodeURIComponent(kodeTiket))
                 .then(response => response.json())
@@ -632,6 +731,9 @@
                             respBox.innerHTML = '<span class="text-slate-400 italic">Belum ada tanggapan dari unit terkait. Tiket Anda sedang dalam antrean penanganan.</span>';
                             respTime.textContent = '';
                         }
+
+                        // Render Card Stepper Progress
+                        updateMhsStepperProgress(d.status || 'Menunggu');
 
                         document.getElementById('detailModal').classList.remove('hidden');
                     } else {

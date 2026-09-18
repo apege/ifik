@@ -19,7 +19,60 @@ class Booking_model extends CI_Model {
         return [];
     }
 
-    public function get_ruangan_by_kategori($id_kategori)
+    
+    public function get_all_ruangan()
+    {
+        $this->db->select("r.id, r.id_kategori, r.ruangan, r.kapasitas, r.akses, r.images, r.date, k.nama_kategori");
+        $this->db->from("ruangan r");
+        if ($this->db->table_exists("kategori_ruangan")) {
+            $this->db->join("kategori_ruangan k", "k.id = r.id_kategori", "left");
+        } elseif ($this->db->table_exists("kategori")) {
+            $this->db->join("kategori k", "k.id_kategori = r.id_kategori", "left");
+        }
+        $this->db->order_by("r.id", "ASC");
+        $results = $this->db->get()->result();
+        foreach ($results as &$r) {
+            $r->nama_ruangan = $r->ruangan;
+            $r->kode_ruangan = $r->id;
+            $r->status = !empty($r->akses) ? $r->akses : "Tersedia";
+            $r->foto = $r->images;
+            $r->lokasi = "Gedung Sebatik (FIK)";
+            $r->model_3d = "";
+            $r->tagline = "";
+            $r->jumlah_unit = ($r->kapasitas ?: "0") . " Orang";
+            $r->jam_operasional = "08:00 - 17:00 WIB";
+            $r->deskripsi = "";
+            $r->spesifikasi_fasilitas = "";
+            $r->tata_tertib = "";
+            $r->nama_kategori = !empty($r->nama_kategori) ? $r->nama_kategori : "Umum";
+            $this->parse_room_media($r);
+        }
+        return $results;
+    }
+
+    public function parse_room_media(&$r)
+    {
+        if (!$r) return;
+        $raw = isset($r->images) ? trim((string)$r->images) : (isset($r->foto) ? trim((string)$r->foto) : "");
+        if (strpos($raw, "|") !== false) {
+            list($foto, $model) = explode("|", $raw, 2);
+            $r->foto = !empty($foto) ? trim($foto) : "";
+            $r->model_3d = !empty($model) ? trim($model) : "";
+        } else {
+            $ext = strtolower(pathinfo($raw, PATHINFO_EXTENSION));
+            if (in_array($ext, ["glb", "gltf", "fbx", "obj"])) {
+                $r->foto = "";
+                $r->model_3d = $raw;
+            } else {
+                $r->foto = $raw;
+                if (!isset($r->model_3d) || empty($r->model_3d)) {
+                    $r->model_3d = "";
+                }
+            }
+        }
+    }
+
+public function get_ruangan_by_kategori($id_kategori)
     {
         $this->db->select('ruangan.*, ruangan.ruangan AS nama_ruangan, ruangan.id AS kode_ruangan');
         $this->db->where('id_kategori', $id_kategori);

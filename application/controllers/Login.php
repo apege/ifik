@@ -37,36 +37,34 @@ class Login extends CI_Controller {
 		// Fetch user from database
 		$user = $this->User_model->get_by_email($identity);
 
-		if ($user && $user->status === 'active') {
-			$isPasswordValid = password_verify($password, $user->password);
-			$isTokenLogin = false;
-
-			// If standard password didn't match, check user_token table for activation token
-			if (!$isPasswordValid && $this->db->table_exists('user_token')) {
-				$tokenRow = $this->db->get_where('user_token', ['email' => $user->email])->row();
-				if ($tokenRow && ($password === $tokenRow->token || password_verify($password, $tokenRow->token))) {
-					$isPasswordValid = true;
-					$isTokenLogin = true;
-				}
+		$is_active = false;
+		if ($user) {
+			if (isset($user->status) && $user->status === 'active') {
+				$is_active = true;
+			} elseif (isset($user->is_active) && (int)$user->is_active === 1) {
+				$is_active = true;
 			}
+		}
 
-			if ($isPasswordValid) {
+		if ($user && $is_active) {
+			// Verify bcrypt password hash
+			if (password_verify($password, $user->password)) {
 				// Set session data
 				$session_data = array(
 					'user_id'          => $user->id,
-					'role_id'          => $user->role_id,
+					'role_id'          => (int)$user->role_id,
 					'name'             => $user->name,
 					'email'            => $user->email,
-					'nidn_nim'         => $user->nidn_nim,
-					'nim'              => $user->nidn_nim,
-					'status'           => $user->status,
-					'password_changed' => $isTokenLogin ? 0 : (int)$user->password_changed,
+					'nidn_nim'         => isset($user->nidn_nim) ? $user->nidn_nim : (isset($user->nim) ? $user->nim : (isset($user->nip) ? $user->nip : '')),
+					'nim'              => isset($user->nim) ? $user->nim : (isset($user->nidn_nim) ? $user->nidn_nim : ''),
+					'status'           => 'active',
+					'password_changed' => isset($user->password_changed) ? (int)$user->password_changed : 1,
 					'logged_in'        => TRUE
 				);
 				$this->session->set_userdata($session_data);
 
-				// If user logged in using temporary token
-				if ($isTokenLogin || (int)$user->password_changed === 0) {
+				// If user still uses temporary token (password_changed == 0)
+				if ((int)$session_data['password_changed'] === 0) {
 					$this->session->set_flashdata('warning', 'Akun Anda masih menggunakan password sementara (token). Wajib buat password baru dan lengkapi biodata Anda.');
 					redirect('onboarding');
 					return;
@@ -78,70 +76,10 @@ class Login extends CI_Controller {
 			}
 		}
 
+
 		// Invalid credentials or inactive status
 		$this->session->set_flashdata('error', 'Email atau password salah.');
 		redirect('login');
-	}
-
-	/**
-	 * 1-Click Direct Login / Activation Link from Email
-	 */
-	public function activate()
-	{
-		$email = strtolower(trim($this->input->get('email', true)));
-		$token = trim($this->input->get('token', true));
-
-		if (empty($email) || empty($token)) {
-			$this->session->set_flashdata('error', 'Tautan aktivasi tidak valid atau telah kedaluwarsa.');
-			redirect('login');
-			return;
-		}
-
-		$user = $this->User_model->get_by_email($email);
-		if (!$user) {
-			$this->session->set_flashdata('error', 'Akun pengguna tidak ditemukan.');
-			redirect('login');
-			return;
-		}
-
-		// Verify token against user_token table or user.token
-		$isValidToken = false;
-		if ($this->db->table_exists('user_token')) {
-			$tokenRow = $this->db->get_where('user_token', ['email' => $email])->row();
-			if ($tokenRow) {
-				if ($token === $tokenRow->token || password_verify($token, $tokenRow->token)) {
-					$isValidToken = true;
-				}
-			}
-		}
-		if (!$isValidToken && !empty($user->token)) {
-			if ($token === $user->token || password_verify($token, $user->token)) {
-				$isValidToken = true;
-			}
-		}
-
-		if (!$isValidToken) {
-			$this->session->set_flashdata('error', 'Tautan aktivasi sudah tidak berlaku.');
-			redirect('login');
-			return;
-		}
-
-		// Direct 1-Click Login: set active session!
-		$session_data = array(
-			'user_id'          => $user->id,
-			'role_id'          => $user->role_id,
-			'name'             => $user->name,
-			'email'            => $user->email,
-			'nidn_nim'         => $user->nidn_nim,
-			'nim'              => $user->nidn_nim,
-			'status'           => $user->status,
-			'password_changed' => 0, // Directs to onboarding to setup password
-			'logged_in'        => TRUE
-		);
-		$this->session->set_userdata($session_data);
-
-		$this->session->set_flashdata('success', 'Aktivasi berhasil! Selamat datang, ' . htmlspecialchars($user->name) . '. Silakan buat password baru dan lengkapi biodata Anda.');
-		redirect('onboarding');
 	}
 
 	public function logout()
