@@ -1738,15 +1738,27 @@
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP status ' + res.status);
+            return res.text();
+        })
+        .then(text => {
+            let res = { success: true, message: 'Persetujuan massal berhasil disimpan!' };
+            try { res = JSON.parse(text); } catch(e) { console.warn('Batch approve response:', text); }
+            return res;
+        })
         .then(res => {
             unselectAllStudentsDW();
-            showDWToast(res.message || 'Persetujuan massal berhasil disimpan!');
-            setTimeout(() => location.reload(), 1200);
+            showDWToast(res.message || 'Persetujuan massal berhasil disimpan!', true);
+            if (typeof pollRealtimeData === 'function') {
+                lastDataHash = '';
+                pollRealtimeData();
+            }
+            setTimeout(() => location.reload(), 1000);
         })
         .catch(err => {
             console.error('Batch approve error:', err);
-            location.reload();
+            showDWToast('Gagal memproses persetujuan massal.', false);
         });
     }
 

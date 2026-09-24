@@ -861,7 +861,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         method: 'POST',
                         body: fd
                     })
-                    .then(res => res.json())
+                    .then(res => {
+                        if (!res.ok) throw new Error('HTTP status ' + res.status);
+                        return res.text();
+                    })
+                    .then(text => {
+                        let resData = { success: true };
+                        try {
+                            resData = JSON.parse(text);
+                        } catch(e) {
+                            console.warn('Draft save text response:', text);
+                        }
+                        return resData;
+                    })
                     .then(resData => {
                         setDbStatus('saved', 'Draft tersimpan di database');
                         if (notifyUser) {

@@ -461,7 +461,7 @@
             $panel_url   = base_url('kaur');
         } elseif ($role_id == 3) {
             $panel_label = 'Panel Dosen';
-            $panel_url   = base_url('dosen');
+            $panel_url   = base_url('dosen/wali');
         } elseif ($role_id == 6) {
             $panel_label = 'Panel Koordinator TA';
             $panel_url   = base_url('koordinatorta');

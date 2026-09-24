@@ -110,6 +110,7 @@ $route['dosenpenguji']                        = 'Dosen_bimbingan/dosen_penguji';
 $route['mahasiswa/dosen_penguji']             = 'Dosen_bimbingan/dosen_penguji';
 
 // Dosen Wali Routes
+$route['dosen'] = 'DosenWali';
 $route['dosen/wali'] = 'DosenWali';
 $route['dosen/wali/detail_mahasiswa/(:any)'] = 'DosenWali/detail_mahasiswa/$1';
 $route['dosen/wali/log_review_ajax'] = 'DosenWali/log_review_ajax';

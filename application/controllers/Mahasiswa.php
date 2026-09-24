@@ -964,20 +964,27 @@ class Mahasiswa extends CI_Controller {
         $db_saved = false;
 
         if ($this->db->table_exists('pendaftaran_ta')) {
+            $p_fields = $this->db->list_fields('pendaftaran_ta');
+            foreach ($data_update as $fk => $fv) {
+                if (!in_array($fk, $p_fields)) {
+                    unset($data_update[$fk]);
+                }
+            }
+
             $existing = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
             if ($existing) {
                 $this->db->where('nim', $nim)->update('pendaftaran_ta', $data_update);
                 $db_saved = true;
             } else {
                 if (!empty($jenis_ta) || !empty($judul_1) || $has_any_file) {
-                    $data_update['nim'] = $nim;
-                    $data_update['created_at'] = date('Y-m-d H:i:s');
-                    $data_update['is_submitted'] = 0;
-                    $data_update['status_approval_wali'] = 'Draft';
-                    $data_update['status_approval_admin'] = 'Pending';
-                    $data_update['status_approval_koor'] = 'Pending';
-                    $data_update['status_approval_kk'] = 'Pending';
-                    $data_update['current_stage'] = 'Draft';
+                    if (in_array('nim', $p_fields)) $data_update['nim'] = $nim;
+                    if (in_array('created_at', $p_fields)) $data_update['created_at'] = date('Y-m-d H:i:s');
+                    if (in_array('is_submitted', $p_fields)) $data_update['is_submitted'] = 0;
+                    if (in_array('status_approval_wali', $p_fields)) $data_update['status_approval_wali'] = 'Draft';
+                    if (in_array('status_approval_admin', $p_fields)) $data_update['status_approval_admin'] = 'Pending';
+                    if (in_array('status_approval_koor', $p_fields)) $data_update['status_approval_koor'] = 'Pending';
+                    if (in_array('status_approval_kk', $p_fields)) $data_update['status_approval_kk'] = 'Pending';
+                    if (in_array('current_stage', $p_fields)) $data_update['current_stage'] = 'Draft';
                     $this->db->insert('pendaftaran_ta', $data_update);
                     $db_saved = true;
                 }

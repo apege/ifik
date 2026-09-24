@@ -353,7 +353,7 @@ class Onboarding extends CI_Controller {
         if ($roleId === 6 || strpos($roleName, 'koordinator') !== false) {
             $targetRedirect = base_url('koordinatorta');
         } elseif ($roleId === 3 || strpos($roleName, 'dosen') !== false) {
-            $targetRedirect = base_url('dosen');
+            $targetRedirect = base_url('dosen/wali');
         } elseif ($roleId === 2 || strpos($roleName, 'kaur') !== false) {
             $targetRedirect = base_url('kaur');
         } elseif ($roleId === 21 || strpos($roleName, 'laboran') !== false) {

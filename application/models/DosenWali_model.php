@@ -40,203 +40,39 @@ class DosenWali_model extends CI_Model {
     public function update_judul_approval($nim, $status_judul, $catatan_judul = '') {
         if ($this->db->table_exists('guidance')) {
             $target_ids = ['usr_mhs_' . $nim, 'mhs_' . $nim, $nim];
-            $this->db->where_in('id_mhs', $target_ids)->update('guidance', [
-                'keterangan' => ($status_judul === 'Approved') ? 'Approved' : (($status_judul === 'Rejected') ? 'Rejected' : 'Pending'),
-                'komentar'   => $catatan_judul
-            ]);
+            $g_fields = $this->db->list_fields('guidance');
+            $g_up = array();
+            if (in_array('keterangan', $g_fields)) $g_up['keterangan'] = ($status_judul === 'Approved') ? 'Approved' : (($status_judul === 'Rejected') ? 'Rejected' : 'Pending');
+            if (in_array('komentar', $g_fields)) $g_up['komentar'] = $catatan_judul;
+            if (in_array('date_edit', $g_fields)) $g_up['date_edit'] = date('Y-m-d H:i:s');
+            if (!empty($g_up)) {
+                $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+            }
         }
 
         if (!$this->db->table_exists('pendaftaran_ta')) return true;
 
-        $data = array(
-            'status_judul'    => $status_judul,
-            'catatan_judul'   => $catatan_judul,
-            'updated_at'      => date('Y-m-d H:i:s')
-        );
+        $fields = $this->db->list_fields('pendaftaran_ta');
+        $data = array('updated_at' => date('Y-m-d H:i:s'));
+        if (in_array('status_judul', $fields)) $data['status_judul'] = $status_judul;
+        if (in_array('catatan_judul', $fields)) $data['catatan_judul'] = $catatan_judul;
 
-        $this->db->where('nim', $nim);
-        return $this->db->update('pendaftaran_ta', $data);
+        if (count($data) > 1) {
+            $this->db->where('nim', $nim)->update('pendaftaran_ta', $data);
+        }
+        return true;
     }
 
     public function get_mahasiswa_bimbingan($nip_dosen = null) {
-        $legacy_records = [];
-        if ($this->db->table_exists('file_pendaftaran')) {
-            $legacy_records = $this->_get_mahasiswa_bimbingan_from_file_pendaftaran($nip_dosen);
-        }
-
-        if (!$this->db->table_exists('pendaftaran_ta')) {
-            return $legacy_records;
-        }
-
-        $has_mhs = $this->db->table_exists('mahasiswa');
-        $has_depan = $has_mhs && $this->db->field_exists('nama_depan', 'mahasiswa');
-        $has_users = $this->db->table_exists('user') || $this->db->table_exists('users');
-        $user_tbl  = $this->db->table_exists('user') ? 'user' : ($this->db->table_exists('users') ? 'users' : null);
-
-        if ($has_depan) {
-            $select = 'p.*, COALESCE(m.nama_depan, "Mahasiswa") as nama_depan, COALESCE(m.nama_belakang, "") as nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, p.created_at as tgl_daftar';
-        } else if ($has_users) {
-            $select = 'p.*, COALESCE(u.name, p.nim) as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, p.created_at as tgl_daftar';
-        } else {
-            $select = 'p.*, p.nim as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, p.created_at as tgl_daftar';
-        }
-
-        $this->db->select($select);
-        $this->db->from('pendaftaran_ta p');
-        if ($has_depan) {
-            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        } else if ($user_tbl) {
-            $this->db->join($user_tbl . ' u', '(u.nim = p.nim OR u.username = p.nim OR u.id = CONCAT("usr_mhs_", p.nim))', 'left');
-        }
-
-        if ($this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
-            $this->db->where('p.is_submitted', 1);
-        }
-
-        if (!empty($nip_dosen)) {
-            $this->db->group_start();
-            if ($has_depan && $this->db->field_exists('nip_dosen_wali', 'mahasiswa')) {
-                $this->db->where('m.nip_dosen_wali', $nip_dosen);
-                $this->db->or_where('m.nip_dosen_wali IS NULL', null, false);
-                $this->db->or_where('m.nip_dosen_wali', '');
-            }
-            if ($this->db->field_exists('id_dosen_wali', 'pendaftaran_ta')) {
-                $this->db->or_where('p.id_dosen_wali', 1);
-            }
-            $this->db->or_where('1=1', null, false);
-            $this->db->group_end();
-        }
-        $this->db->order_by('p.id', 'DESC');
-        $query = $this->db->get();
-        $results = $query ? $query->result_array() : array();
-
-        if (!empty($results) && $this->db->table_exists('pendaftaran_berkas')) {
-            $nims = array_column($results, 'nim');
-            $this->db->where_in('nim', $nims);
-            $berkas_rows = $this->db->get('pendaftaran_berkas')->result_array();
-            $berkas_by_nim = [];
-            foreach ($berkas_rows as $br) {
-                $berkas_by_nim[$br['nim']][$br['kode_berkas']] = $br;
-            }
-            foreach ($results as &$row) {
-                $nim = $row['nim'];
-                $row['berkas_map'] = $berkas_by_nim[$nim] ?? [];
-                if (!empty($row['berkas_map'])) {
-                    foreach ($row['berkas_map'] as $kb => $bdata) {
-                        if (empty($row['file_' . $kb])) {
-                            $row['file_' . $kb] = $bdata['file_name'];
-                        }
-                        if (empty($row['status_file_' . $kb])) {
-                            $row['status_file_' . $kb] = ($bdata['status_verifikasi'] === 'Valid') ? 'Approved' : (($bdata['status_verifikasi'] === 'Invalid') ? 'Rejected' : 'Pending');
-                        }
-                        if (empty($row['catatan_file_' . $kb]) && !empty($bdata['catatan'])) {
-                            $row['catatan_file_' . $kb] = $bdata['catatan'];
-                        }
-                    }
-                }
-            }
-        }
-        // Gabungkan dengan record legacy file_pendaftaran (tanpa duplikasi NIM)
-        if (!empty($legacy_records)) {
-            $existing_nims = !empty($results) ? array_column($results, 'nim') : [];
-            foreach ($legacy_records as $leg) {
-                if (!in_array($leg['nim'], $existing_nims)) {
-                    $results[] = $leg;
-                }
-            }
-        }
-
-        foreach ($results as &$row) {
-            $st_wali = $row['status_approval_wali'] ?? '';
-            $st_jud  = $row['status_judul'] ?? '';
-            $st_jen  = $row['status_jenis_ta'] ?? '';
-            
-            if ($st_jud === 'Rejected' || $st_jen === 'Rejected') {
-                // Biarkan status tetap Rejected
-            } elseif ($st_wali === 'Approved' || $st_jud === 'Approved' || $st_jen === 'Approved') {
-                $row['status_judul']    = 'Approved';
-                $row['status_jenis_ta'] = 'Approved';
-            }
-        }
-        unset($row);
-
-        return $results;
+        return $this->_get_mahasiswa_bimbingan_from_file_pendaftaran($nip_dosen);
     }
 
     // Get Detail Mahasiswa dan Pendaftaran TA (Real Data from MySQL)
     public function get_detail_pendaftaran_mahasiswa($nim) {
-        if (!$this->db->table_exists('pendaftaran_ta')) {
-            if ($this->db->table_exists('file_pendaftaran')) {
-                return $this->_get_detail_from_file_pendaftaran($nim);
-            }
-            return null;
+        if ($this->db->table_exists('file_pendaftaran') || $this->db->table_exists('guidance')) {
+            return $this->_get_detail_from_file_pendaftaran($nim);
         }
-
-        $has_mhs = $this->db->table_exists('mahasiswa');
-        $has_depan = $has_mhs && $this->db->field_exists('nama_depan', 'mahasiswa');
-        $has_users = $this->db->table_exists('user') || $this->db->table_exists('users');
-        $user_tbl  = $this->db->table_exists('user') ? 'user' : ($this->db->table_exists('users') ? 'users' : null);
-
-        if ($has_depan) {
-            $select = 'p.*, m.nama_depan, m.nama_belakang, m.konsentrasi_dkv as mhs_konsentrasi, m.alamat, m.kota, m.provinsi';
-        } else if ($has_users) {
-            $select = 'p.*, COALESCE(u.name, p.nim) as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, "" as kota, "" as provinsi';
-        } else {
-            $select = 'p.*, p.nim as nama_depan, "" as nama_belakang, "" as mhs_konsentrasi, "" as alamat, "" as kota, "" as provinsi';
-        }
-
-        $this->db->select($select);
-        $this->db->from('pendaftaran_ta p');
-        if ($has_depan) {
-            $this->db->join('mahasiswa m', 'm.nim = p.nim', 'left');
-        } else if ($user_tbl) {
-            $this->db->join($user_tbl . ' u', '(u.nim = p.nim OR u.username = p.nim OR u.id = CONCAT("usr_mhs_", p.nim))', 'left');
-        }
-        $this->db->where('p.nim', $nim);
-        $query = $this->db->get();
-        $row = $query ? $query->row_array() : null;
-        if (!$row && $this->db->table_exists('file_pendaftaran')) {
-            $row = $this->_get_detail_from_file_pendaftaran($nim);
-        }
-
-        if (!$row && $has_mhs) {
-            $this->db->where('nim', $nim);
-            $row = $this->db->get('mahasiswa')->row_array();
-        }
-
-        if ($row && $this->db->table_exists('pendaftaran_berkas')) {
-            $berkas_rows = $this->db->get_where('pendaftaran_berkas', ['nim' => $nim])->result_array();
-            $berkas_map = [];
-            foreach ($berkas_rows as $br) {
-                $kb = $br['kode_berkas'];
-                $berkas_map[$kb] = $br;
-                if (empty($row['file_' . $kb])) {
-                    $row['file_' . $kb] = $br['file_name'];
-                }
-                if (empty($row['status_file_' . $kb])) {
-                    $row['status_file_' . $kb] = ($br['status_verifikasi'] === 'Valid') ? 'Approved' : (($br['status_verifikasi'] === 'Invalid') ? 'Rejected' : 'Pending');
-                }
-                if (empty($row['catatan_file_' . $kb]) && !empty($br['catatan'])) {
-                    $row['catatan_file_' . $kb] = $br['catatan'];
-                }
-            }
-            $row['berkas_map'] = $berkas_map;
-        }
-
-        if ($row) {
-            $st_wali = $row['status_approval_wali'] ?? '';
-            $st_jud  = $row['status_judul'] ?? '';
-            $st_jen  = $row['status_jenis_ta'] ?? '';
-            
-            if ($st_jud === 'Rejected' || $st_jen === 'Rejected') {
-                // Pertahankan status Rejected jika salah satu ditolak
-            } elseif ($st_wali === 'Approved' || $st_jud === 'Approved' || $st_jen === 'Approved') {
-                $row['status_judul']    = 'Approved';
-                $row['status_jenis_ta'] = 'Approved';
-            }
-        }
-
-        return $row;
+        return null;
     }
 
 
@@ -302,14 +138,14 @@ class DosenWali_model extends CI_Model {
             $this->_update_file_approval_file_pendaftaran($nim, $file_type, $ver, $comment);
         }
 
-        // 2. Update juga pendaftaran_berkas jika ada
-        if ($this->db->table_exists('pendaftaran_berkas')) {
+        // 2. Update pendaftaran_berkas (hanya jika ada kolom status_doswal khusus doswal)
+        if ($this->db->table_exists('pendaftaran_berkas') && $this->db->field_exists('status_doswal', 'pendaftaran_berkas')) {
             $berkasUpdate = [
-                'status_verifikasi' => $pb_ver,
-                'updated_at'        => date('Y-m-d H:i:s')
+                'status_doswal' => $ver,
+                'updated_at'    => date('Y-m-d H:i:s')
             ];
-            if ($this->db->field_exists('catatan', 'pendaftaran_berkas')) {
-                $berkasUpdate['catatan'] = ($status === 'Rejected') ? $comment : '';
+            if ($this->db->field_exists('catatan_doswal', 'pendaftaran_berkas')) {
+                $berkasUpdate['catatan_doswal'] = ($status === 'Rejected') ? $comment : '';
             }
             $this->db->where('nim', $nim)->where('kode_berkas', $file_type)->update('pendaftaran_berkas', $berkasUpdate);
         }
@@ -326,8 +162,10 @@ class DosenWali_model extends CI_Model {
             if (in_array($col_catatan, $fields)) $data[$col_catatan] = $comment;
             if (in_array($col_review, $fields) && $status !== 'Pending') $data[$col_review] = 1;
 
-            if ($status !== 'Pending') {
-                $data[$col_review] = 1;
+            foreach ($data as $dk => $dv) {
+                if (!in_array($dk, $fields)) {
+                    unset($data[$dk]);
+                }
             }
 
             $this->db->where('nim', $nim);
@@ -400,12 +238,12 @@ class DosenWali_model extends CI_Model {
             }
         }
 
-        // Sync ke pendaftaran_berkas jika ada
-        if ($this->db->table_exists('pendaftaran_berkas')) {
-            $pb_ver = ($status === 'Approved') ? 'Valid' : (($status === 'Rejected') ? 'Invalid' : 'Pending');
+        // Sync ke pendaftaran_berkas jika ada (hanya jika ada kolom status_doswal)
+        if ($this->db->table_exists('pendaftaran_berkas') && $this->db->field_exists('status_doswal', 'pendaftaran_berkas')) {
+            $pb_ver = ($status === 'Approved') ? 'Approved' : (($status === 'Rejected') ? 'Rejected' : 'Pending');
             $this->db->where('nim', $nim)->update('pendaftaran_berkas', [
-                'status_verifikasi' => $pb_ver,
-                'updated_at'        => date('Y-m-d H:i:s')
+                'status_doswal' => $pb_ver,
+                'updated_at'    => date('Y-m-d H:i:s')
             ]);
         }
 
@@ -449,10 +287,14 @@ class DosenWali_model extends CI_Model {
         if ($this->db->table_exists('guidance')) {
             $target_ids = ['usr_mhs_' . $nim, 'mhs_' . $nim, $nim];
             $g_status = ($status === 'Approved') ? 'Approved' : (($status === 'Rejected') ? 'Rejected' : 'Pending');
-            $this->db->where_in('id_mhs', $target_ids)->update('guidance', [
-                'keterangan' => $g_status,
-                'komentar'   => $catatan
-            ]);
+            $g_fields = $this->db->list_fields('guidance');
+            $g_up = array();
+            if (in_array('keterangan', $g_fields)) $g_up['keterangan'] = $g_status;
+            if (in_array('komentar', $g_fields)) $g_up['komentar'] = $catatan;
+            if (in_array('date_edit', $g_fields)) $g_up['date_edit'] = date('Y-m-d H:i:s');
+            if (!empty($g_up)) {
+                $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+            }
         }
 
         // Sync ke tabel file_pendaftaran & pendaftaran_berkas jika Approved atau eksplisit sync_files
@@ -595,16 +437,35 @@ class DosenWali_model extends CI_Model {
 
     // Update status approval Jenis TA oleh Dosen Wali
     public function approve_jenis_ta($nim, $status, $catatan = '') {
-        if (!$this->db->table_exists('pendaftaran_ta')) return false;
+        if ($this->db->table_exists('guidance')) {
+            $target_ids = ['usr_mhs_' . $nim, 'mhs_' . $nim, $nim];
+            $g_fields = $this->db->list_fields('guidance');
+            $g_up = array();
+            if (in_array('date_edit', $g_fields)) {
+                $g_up['date_edit'] = date('Y-m-d H:i:s');
+            }
+            if (in_array('keterangan', $g_fields)) {
+                $g_up['keterangan'] = ($status === 'Approved') ? 'Approved' : 'Rejected';
+            }
+            if (in_array('komentar', $g_fields) && $status === 'Rejected' && !empty($catatan)) {
+                $g_up['komentar'] = $catatan;
+            }
+            if (!empty($g_up)) {
+                $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+            }
+        }
 
-        $data = array(
-            'status_jenis_ta'  => $status,
-            'catatan_jenis_ta' => ($status === 'Approved') ? '' : $catatan,
-            'updated_at'       => date('Y-m-d H:i:s')
-        );
+        if (!$this->db->table_exists('pendaftaran_ta')) return true;
 
-        $this->db->where('nim', $nim);
-        return $this->db->update('pendaftaran_ta', $data);
+        $fields = $this->db->list_fields('pendaftaran_ta');
+        $data = array('updated_at' => date('Y-m-d H:i:s'));
+        if (in_array('status_jenis_ta', $fields)) $data['status_jenis_ta'] = $status;
+        if (in_array('catatan_jenis_ta', $fields)) $data['catatan_jenis_ta'] = ($status === 'Approved') ? '' : $catatan;
+
+        if (count($data) > 1) {
+            $this->db->where('nim', $nim)->update('pendaftaran_ta', $data);
+        }
+        return true;
     }
 
     // Direct Batch Approve Dosen Wali untuk beberapa NIM sekaligus
@@ -641,15 +502,43 @@ class DosenWali_model extends CI_Model {
             if (in_array('catatan_file_' . $fk, $fields)) $data['catatan_file_' . $fk] = '';
         }
 
-        $this->db->where_in('nim', $nims);
-        if ($this->db->field_exists('is_submitted', 'pendaftaran_ta')) {
-            $this->db->where('is_submitted', 1);
+        foreach ($data as $k => $v) {
+            if (!in_array($k, $fields)) {
+                unset($data[$k]);
+            }
         }
+
+        $this->db->where_in('nim', $nims);
         $this->db->update('pendaftaran_ta', $data);
 
+        // Sync to pendaftaran_berkas table
+        if ($this->db->table_exists('pendaftaran_berkas')) {
+            $berkasData = ['status_verifikasi' => 'Valid', 'updated_at' => date('Y-m-d H:i:s')];
+            if ($this->db->field_exists('catatan', 'pendaftaran_berkas')) {
+                $berkasData['catatan'] = '';
+            }
+            $this->db->where_in('nim', $nims)->update('pendaftaran_berkas', $berkasData);
+        }
 
+        // Sync to file_pendaftaran table
+        if ($this->db->table_exists('file_pendaftaran')) {
+            foreach ($nims as $nim) {
+                $this->db->group_start()
+                    ->where('id_mhs', $nim)
+                    ->or_where('id_mhs', 'usr_mhs_' . $nim)
+                    ->or_where('id_mhs', 'mhs_' . $nim)
+                    ->or_like('id_mhs', $nim)
+                    ->group_end()
+                    ->update('file_pendaftaran', [
+                        'status_doswal' => 'Approved',
+                        'komentar'      => '',
+                        'date_edit'     => date('Y-m-d H:i:s'),
+                        'view_doswal'   => 1
+                    ]);
+            }
+        }
 
-        return $this->db->affected_rows();
+        return count($nims);
     }
 
     // Simpan keputusan massal detail per section dari popup review
@@ -713,14 +602,14 @@ class DosenWali_model extends CI_Model {
                     $this->_update_file_approval_file_pendaftaran($nim, $fk, $fStatus, $fNote);
                 }
 
-                if ($this->db->table_exists('pendaftaran_berkas')) {
-                    $ver = ($fStatus === 'Approved') ? 'Valid' : (($fStatus === 'Rejected') ? 'Invalid' : 'Pending');
+                if ($this->db->table_exists('pendaftaran_berkas') && $this->db->field_exists('status_doswal', 'pendaftaran_berkas')) {
+                    $ver = ($fStatus === 'Approved') ? 'Approved' : (($fStatus === 'Rejected') ? 'Rejected' : 'Pending');
                     $berkasUpdate = [
-                        'status_verifikasi' => $ver,
-                        'updated_at'        => date('Y-m-d H:i:s')
+                        'status_doswal' => $ver,
+                        'updated_at'    => date('Y-m-d H:i:s')
                     ];
-                    if ($this->db->field_exists('catatan', 'pendaftaran_berkas')) {
-                        $berkasUpdate['catatan'] = $fNote;
+                    if ($this->db->field_exists('catatan_doswal', 'pendaftaran_berkas')) {
+                        $berkasUpdate['catatan_doswal'] = $fNote;
                     }
                     $this->db->where('nim', $nim)->where('kode_berkas', $fk)->update('pendaftaran_berkas', $berkasUpdate);
                 }
@@ -761,10 +650,20 @@ class DosenWali_model extends CI_Model {
             // Sync ke guidance
             if ($this->db->table_exists('guidance')) {
                 $target_ids = ['usr_mhs_' . $nim, 'mhs_' . $nim, $nim];
-                $this->db->where_in('id_mhs', $target_ids)->update('guidance', [
-                    'keterangan' => $updateData['status_approval_wali'],
-                    'komentar'   => $updateData['catatan_wali'] ?: $updateData['catatan_judul']
-                ]);
+                $g_fields = $this->db->list_fields('guidance');
+                $g_up = array();
+                if (in_array('keterangan', $g_fields)) {
+                    $g_up['keterangan'] = $updateData['status_approval_wali'];
+                }
+                if (in_array('komentar', $g_fields)) {
+                    $g_up['komentar'] = $updateData['catatan_wali'] ?: $updateData['catatan_judul'];
+                }
+                if (in_array('date_edit', $g_fields)) {
+                    $g_up['date_edit'] = date('Y-m-d H:i:s');
+                }
+                if (!empty($g_up)) {
+                    $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+                }
             }
 
             if ($this->db->table_exists('pendaftaran_ta')) {
@@ -1140,7 +1039,14 @@ class DosenWali_model extends CI_Model {
                 $status_wali = $has_rejected ? 'Rejected' : 'Pending';
             }
 
-            $stage = ($status_wali === 'Approved') ? 'Admin Layanan' : ($status_wali === 'Rejected' ? 'Dosen Wali (Ditolak)' : 'Dosen Wali');
+            $pt_info = null;
+            if ($this->db->table_exists('pendaftaran_ta')) {
+                $pt_info = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+            }
+            $st_admin  = $pt_info['status_approval_admin'] ?? 'Pending';
+            $st_koor   = $pt_info['status_approval_koor'] ?? 'Pending';
+            $st_kk     = $pt_info['status_approval_kk'] ?? 'Pending';
+            $cur_stage = !empty($pt_info['current_stage']) ? $pt_info['current_stage'] : (($status_wali === 'Approved') ? 'Admin Layanan' : ($status_wali === 'Rejected' ? 'Dosen Wali (Ditolak)' : 'Dosen Wali'));
 
             $results[] = [
                 'id'                     => $idMhs,
@@ -1153,10 +1059,10 @@ class DosenWali_model extends CI_Model {
                 'status_judul'           => $status_judul,
                 'catatan_judul'          => $catatan_judul,
                 'status_approval_wali'   => $status_wali,
-                'status_approval_admin'  => 'Pending',
-                'status_approval_koor'   => 'Pending',
-                'status_approval_kk'     => 'Pending',
-                'current_stage'          => $stage,
+                'status_approval_admin'  => $st_admin,
+                'status_approval_koor'   => $st_koor,
+                'status_approval_kk'     => $st_kk,
+                'current_stage'          => $cur_stage,
                 'tgl_daftar'             => $tgl_daftar,
                 'created_at'             => $tgl_daftar,
                 'file_ksm'               => $file_ksm,
@@ -1208,7 +1114,7 @@ class DosenWali_model extends CI_Model {
 
         $judul_1 = !empty($guidance['judul_1']) ? $guidance['judul_1'] : 'Usulan Judul Tugas Akhir';
         $judul_en = $guidance['judul_en'] ?? '';
-        $jenis_ta = !empty(trim($guidance['jenis_TA'] ?? '')) ? trim($guidance['jenis_TA']) : (!empty(trim($guidance['jenis_ta'] ?? '')) ? trim($guidance['jenis_ta']) : 'Pengkaryaan');
+        $jenis_ta = !empty(trim($guidance['jenis_TA'] ?? '')) ? trim($guidance['jenis_TA']) : (!empty(trim($guidance['jenis_ta'] ?? '')) ? trim($guidance['jenis_ta']) : '');
         $status_judul = !empty($guidance['keterangan']) ? $guidance['keterangan'] : 'Pending';
         $catatan_judul = $guidance['komentar'] ?? '';
         $konsentrasi = !empty($guidance['peminatan']) ? $guidance['peminatan'] : $prodiMhs;
@@ -1292,7 +1198,14 @@ class DosenWali_model extends CI_Model {
             $status_wali = $has_rejected ? 'Rejected' : 'Pending';
         }
 
-        $stage = ($status_wali === 'Approved') ? 'Admin Layanan' : ($status_wali === 'Rejected' ? 'Dosen Wali (Ditolak)' : 'Dosen Wali');
+        $pt_info = null;
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $pt_info = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+        }
+        $st_admin  = $pt_info['status_approval_admin'] ?? 'Pending';
+        $st_koor   = $pt_info['status_approval_koor'] ?? 'Pending';
+        $st_kk     = $pt_info['status_approval_kk'] ?? 'Pending';
+        $cur_stage = !empty($pt_info['current_stage']) ? $pt_info['current_stage'] : (($status_wali === 'Approved') ? 'Admin Layanan' : ($status_wali === 'Rejected' ? 'Dosen Wali (Ditolak)' : 'Dosen Wali'));
 
         return [
             'id'                     => 'usr_mhs_' . $nim,
@@ -1307,10 +1220,10 @@ class DosenWali_model extends CI_Model {
             'status_judul'           => $status_judul,
             'catatan_judul'          => $catatan_judul,
             'status_approval_wali'   => $status_wali,
-            'status_approval_admin'  => 'Pending',
-            'status_approval_koor'   => 'Pending',
-            'status_approval_kk'     => 'Pending',
-            'current_stage'          => $stage,
+            'status_approval_admin'  => $st_admin,
+            'status_approval_koor'   => $st_koor,
+            'status_approval_kk'     => $st_kk,
+            'current_stage'          => $cur_stage,
             'tgl_daftar'             => $tgl_daftar,
             'created_at'             => $tgl_daftar,
             'file_ksm'               => $file_ksm,

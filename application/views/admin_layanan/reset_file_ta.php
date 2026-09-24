@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -119,7 +119,10 @@
                 <span><i class="bi bi-diagram-3 mr-1"></i><?= htmlspecialchars($detail['kode_kk']??'-') ?></span>
             </div>
             <div class="mt-2 flex flex-wrap gap-2">
-                <?php $sa=$detail['status_approval_admin']??'Pending'; $bc=match($sa){'Approved'=>'bg-green-100 text-green-700 border-green-200','Rejected'=>'bg-red-100 text-red-700 border-red-200',default=>'bg-amber-100 text-amber-700 border-amber-200'}; ?>
+                <?php 
+                $sa = $detail['status_approval_admin'] ?? 'Pending'; 
+                $bc = ($sa === 'Approved') ? 'bg-green-100 text-green-700 border-green-200' : (($sa === 'Rejected') ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200'); 
+                ?>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border <?= $bc ?>">Status LAA: <?= $sa ?></span>
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-slate-100 text-slate-600 border-slate-200">Tahap: <?= htmlspecialchars($detail['current_stage']??'-') ?></span>
             </div>
@@ -141,7 +144,10 @@
             <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0"><i class="bi bi-file-earmark-pdf-fill"></i></div>
             <div class="min-w-0">
                 <p class="text-sm font-semibold text-slate-800 truncate"><?= htmlspecialchars($bk['nama_berkas']??strtoupper($kode)) ?></p>
-                <?php $st=$bk['status']??'Pending'; $sc=match($st){'Valid'=>'text-green-600','Invalid'=>'text-red-600',default=>'text-amber-600'}; ?>
+                <?php 
+                $st = $bk['status'] ?? 'Pending'; 
+                $sc = ($st === 'Valid') ? 'text-green-600' : (($st === 'Invalid') ? 'text-red-600' : 'text-amber-600'); 
+                ?>
                 <p class="text-[11px] text-slate-400 font-medium truncate"><?= htmlspecialchars($bk['file_name']??'-') ?> &middot; <span class="font-bold <?= $sc ?>"><?= $st ?></span></p>
             </div>
         </div>

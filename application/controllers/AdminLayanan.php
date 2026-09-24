@@ -433,7 +433,7 @@ class AdminLayanan extends CI_Controller {
         if ($action_submit === 'reject') {
             $this->AdminLayanan_model->update_verifikasi($nim, 'reject', $catatan_admin, null, $berkas_valid, $berkas_kurang);
         } else {
-            $this->AdminLayanan_model->update_verifikasi($nim, 'submit', $catatan_admin, null, $berkas_valid, $berkas_kurang);
+            $this->AdminLayanan_model->update_verifikasi($nim, $action_submit ?: 'approve', $catatan_admin, null, $berkas_valid, $berkas_kurang);
         }
 
 

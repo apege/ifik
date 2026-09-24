@@ -185,23 +185,29 @@ class DosenWali extends CI_Controller {
         $comment = trim($this->input->post('comment') ?? '');
 
         if (!$nim || !$file_type || !$status) {
-            echo json_encode(array('success' => false, 'message' => 'Parameter tidak lengkap.'));
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('success' => false, 'message' => 'Parameter tidak lengkap.')));
             return;
         }
 
         if ($this->_is_stage_locked($nim)) {
-            echo json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.'));
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('success' => false, 'message' => 'Pendaftaran telah disetujui dan berada di tahap berikutnya. Perubahan tidak diizinkan.')));
             return;
         }
 
         $res = $this->DosenWali_model->update_file_approval($nim, $file_type, $status, $comment);
-        echo json_encode(array(
-            'success' => $res,
-            'file_type' => $file_type,
-            'status' => $status,
-            'comment' => $comment,
-            'message' => 'Status berkas ' . strtoupper($file_type) . ' berhasil diperbarui ke ' . $status . '.'
-        ));
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array(
+                'success' => (bool)$res,
+                'file_type' => $file_type,
+                'status' => $status,
+                'comment' => $comment,
+                'message' => 'Status berkas ' . strtoupper($file_type) . ' berhasil diperbarui ke ' . $status . '.'
+            )));
     }
 
     // AJAX Endpoint: Approve Semua / Tolak Semua Berkas
