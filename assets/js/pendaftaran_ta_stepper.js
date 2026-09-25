@@ -1043,6 +1043,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Flag to prevent multiple submit clicks
             isSubmitting = true;
+            const inputSub = document.getElementById('inputIsSubmitted');
+            if (inputSub) inputSub.value = '1';
 
             // Immediately disable buttons and show loading status on submit button
             if (btnSubmit) {

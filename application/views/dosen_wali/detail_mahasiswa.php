@@ -585,7 +585,7 @@
 
                                 <!-- Per-Document Revision Note Field (Tampil saat Kurang/Revisi dicentang) -->
                                 <?php
-                                    $saved_note = $detail['catatan_file_' . $b['key']] ?? '';
+                                    $saved_note = !empty($detail['catatan_file_' . $b['key']]) ? $detail['catatan_file_' . $b['key']] : ($student_berkas[$b['key']]['catatan'] ?? '');
                                 ?>
                                 <div class="catatan-doc-box <?= $is_invalid ? '' : 'hidden'; ?> pt-2.5 border-t border-rose-200/80 space-y-1.5 transition-all">
                                     <label class="text-[10px] font-bold text-rose-700 uppercase tracking-wider flex items-center justify-between">

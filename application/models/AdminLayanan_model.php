@@ -142,7 +142,7 @@ class AdminLayanan_model extends CI_Model {
                     }
 
                     if ($kode) {
-                        $st = $fp['status_doswal'] ?? 'Pending';
+                        $st = $fp['status_adminlaa'] ?? ($fp['status_admin'] ?? ($fp['status_laa'] ?? 'Pending'));
                         $cleanSt = ($st === 'Approved' || $st === 'Valid') ? 'Valid' : (($st === 'Rejected' || $st === 'Invalid') ? 'Invalid' : 'Pending');
                         $map[$kode] = array(
                             'nim'               => $nim,
@@ -247,8 +247,11 @@ class AdminLayanan_model extends CI_Model {
             $target_ids = array_unique(['usr_mhs_' . $nim, 'mhs_' . $nim, $nim]);
             $fp_status = ($enum_status === 'Valid') ? 'Approved' : (($enum_status === 'Invalid') ? 'Rejected' : 'Pending');
             $fp_update = array();
-            if ($this->db->field_exists('status_doswal', 'file_pendaftaran')) {
-                $fp_update['status_doswal'] = $fp_status;
+            if ($this->db->field_exists('status_adminlaa', 'file_pendaftaran')) {
+                $fp_update['status_adminlaa'] = $fp_status;
+            }
+            if ($this->db->field_exists('view_adminlaa', 'file_pendaftaran')) {
+                $fp_update['view_adminlaa'] = 1;
             }
             if ($this->db->field_exists('status_admin', 'file_pendaftaran')) {
                 $fp_update['status_admin'] = $fp_status;
@@ -631,8 +634,9 @@ class AdminLayanan_model extends CI_Model {
 
             if (!empty($guidance_map[$nim])) {
                 $gi = $guidance_map[$nim];
-                if (!empty($gi['judul_1']) && (empty($r['judul_1']) || strpos($r['judul_1'], 'Perancangan Antarmuka dan Pengalaman Pengguna Platform Layanan Akademik') !== false)) {
+                if (!empty($gi['judul_1'])) {
                     $r['judul_1'] = $gi['judul_1'];
+                    $r['judul']   = $gi['judul_1'];
                 }
                 if (!empty($gi['peminatan']) && (empty($r['konsentrasi_dkv']) || $r['konsentrasi_dkv'] === 'Desain Komunikasi Visual')) {
                     $r['konsentrasi_dkv'] = $gi['peminatan'];
@@ -705,6 +709,22 @@ class AdminLayanan_model extends CI_Model {
                 $student_map[$nim]['status_admin'][] = $st_adm;
                 if (isset($fp['status_doswal'])) {
                     $student_map[$nim]['status_doswal'][] = $fp['status_doswal'];
+                    $namaDoc = strtolower($fp['nama'] ?? '');
+                    $kode = null;
+                    if (strpos($namaDoc, 'ksm') !== false) {
+                        $kode = 'ksm';
+                    } elseif (strpos($namaDoc, 'transkrip') !== false) {
+                        $kode = 'transkrip';
+                    } elseif (strpos($namaDoc, 'pernyataan') !== false) {
+                        $kode = 'pernyataan';
+                    } elseif (strpos($namaDoc, 'bebas_lab') !== false || strpos($namaDoc, 'lab') !== false) {
+                        $kode = 'bebas_lab';
+                    } else {
+                        $kode = preg_replace('/[^a-z0-9_]/', '_', trim($namaDoc));
+                    }
+                    if ($kode) {
+                        $student_map[$nim]['fp_doswal_map'][$kode] = $fp['status_doswal'];
+                    }
                 }
                 if (!empty($fp['komentar'])) {
                     $student_map[$nim]['komentar'][] = $fp['komentar'];
@@ -722,6 +742,7 @@ class AdminLayanan_model extends CI_Model {
             if ($this->db->field_exists('peminatan', 'guidance')) $g_cols[] = 'peminatan';
             if ($this->db->field_exists('jenis_TA', 'guidance')) $g_cols[] = 'jenis_TA';
             if ($this->db->field_exists('nama', 'guidance')) $g_cols[] = 'nama';
+            if ($this->db->field_exists('keterangan', 'guidance')) $g_cols[] = 'keterangan';
             if ($this->db->field_exists('date', 'guidance')) $g_cols[] = 'date';
 
             $g_rows = $this->db->select(implode(', ', $g_cols))->get('guidance')->result_array();
@@ -799,16 +820,40 @@ class AdminLayanan_model extends CI_Model {
                 $st_admin = 'Approved';
             }
 
-            $doswal_st_list = $info['status_doswal'];
-            $st_wali = 'Approved';
-            if (in_array('Rejected', $doswal_st_list) || in_array('Invalid', $doswal_st_list)) {
+            $g_data = $info['guidance'] ?? array();
+            $g_ket  = $g_data['keterangan'] ?? 'Pending';
+            if ($g_ket === 'Draft') continue; // Mahasiswa belum submit "Kirim Pendaftaran"
+
+            $active_syarat = $this->get_active_syarat_berkas();
+            $required_kodes = !empty($active_syarat) ? array_column($active_syarat, 'kode_berkas') : array('ksm', 'transkrip', 'pernyataan', 'bebas_lab');
+            $fp_doswal_map = $info['fp_doswal_map'] ?? array();
+
+            $all_files_approved = true;
+            $has_file_rejected = false;
+
+            if (empty($required_kodes)) {
+                $all_files_approved = false;
+            } else {
+                foreach ($required_kodes as $rk) {
+                    $st = $fp_doswal_map[$rk] ?? 'Pending';
+                    if ($st === 'Rejected' || $st === 'Invalid') {
+                        $has_file_rejected = true;
+                        $all_files_approved = false;
+                    } elseif ($st !== 'Approved' && $st !== 'Valid') {
+                        $all_files_approved = false;
+                    }
+                }
+            }
+
+            if ($g_ket === 'Rejected' || $has_file_rejected) {
                 $st_wali = 'Rejected';
-            } elseif (in_array('Pending', $doswal_st_list)) {
+            } elseif ($all_files_approved && $g_ket === 'Approved') {
+                $st_wali = 'Approved';
+            } else {
                 $st_wali = 'Pending';
             }
 
-            $current_stage = ($st_admin === 'Approved') ? 'Koordinator TA' : 'Admin Layanan';
-            $g_data = $info['guidance'] ?? array();
+            $current_stage = ($st_wali === 'Approved') ? (($st_admin === 'Approved') ? 'Koordinator TA' : 'Admin Layanan') : (($st_wali === 'Rejected') ? 'Dosen Wali (Ditolak)' : 'Dosen Wali');
             $created_at = $info['latest_date'] ?? ($g_data['date'] ?? date('Y-m-d H:i:s'));
 
             $results[] = array(
@@ -822,6 +867,7 @@ class AdminLayanan_model extends CI_Model {
                 'no_hp'                 => $mhs_map[$nim]['no_hp'] ?? '',
                 'alamat'                => $mhs_map[$nim]['alamat'] ?? '',
                 'judul_1'               => $g_data['judul_1'] ?? 'Perancangan Tugas Akhir Mahasiswa',
+                'judul'                 => $g_data['judul_1'] ?? 'Perancangan Tugas Akhir Mahasiswa',
                 'judul_en'              => $g_data['judul_en'] ?? '',
                 'status_approval_wali'  => $st_wali,
                 'status_approval_admin' => $st_admin,
@@ -1190,7 +1236,7 @@ class AdminLayanan_model extends CI_Model {
                     }
 
                     if ($kode) {
-                        $st = $fp['status_doswal'] ?? 'Pending';
+                        $st = $fp['status_adminlaa'] ?? ($fp['status_admin'] ?? ($fp['status_laa'] ?? 'Pending'));
                         $cleanSt = ($st === 'Approved' || $st === 'Valid') ? 'Valid' : (($st === 'Rejected' || $st === 'Invalid') ? 'Invalid' : 'Pending');
                         $student_maps[$c_nim][$kode] = array(
                             'nim'               => $c_nim,
@@ -1478,7 +1524,14 @@ class AdminLayanan_model extends CI_Model {
     // ==========================================
 
     public function get_students_lulus_sidang($search = '', $cat = 'query') {
-        if (!$this->db->table_exists('pendaftaran_ta')) return array();
+        if (!$this->db->table_exists('pendaftaran_ta')) {
+            $fallback = $this->_get_fallback_pengajuan_from_legacy();
+            return array_filter($fallback, function($item) {
+                return (strpos($item['current_stage'] ?? '', 'Lulus') !== false 
+                     || strpos($item['current_stage'] ?? '', 'Selesai') !== false 
+                     || ($item['status_approval_admin'] ?? '') === 'Approved');
+            });
+        }
 
         $this->db->select('p.*, COALESCE(CONCAT(m.nama_depan, " ", COALESCE(m.nama_belakang, "")), "Mahasiswa") as nama_lengkap, m.prodi, m.konsentrasi_dkv');
         $this->db->from('pendaftaran_ta p');
@@ -1519,7 +1572,9 @@ class AdminLayanan_model extends CI_Model {
     }
 
     public function get_status_peserta_ta($search = '', $filter_stage = 'all', $cat = 'query') {
-        if (!$this->db->table_exists('pendaftaran_ta')) return array();
+        if (!$this->db->table_exists('pendaftaran_ta')) {
+            return $this->_filter_and_sort_legacy_pengajuan(null, $search, $cat);
+        }
 
         $has_mhs = $this->db->table_exists('mahasiswa');
         $has_dos = $this->db->table_exists('dosen');
@@ -1570,7 +1625,19 @@ class AdminLayanan_model extends CI_Model {
         }
 
         if ($filter_stage && $filter_stage !== 'all') {
-            $this->db->like('p.current_stage', $filter_stage);
+            $f_stage = strtolower($filter_stage);
+            if ($f_stage === 'preview1') {
+                $this->db->group_start();
+                $this->db->like('p.current_stage', 'preview1');
+                $this->db->or_like('p.current_stage', 'Mahasiswa');
+                $this->db->or_like('p.current_stage', 'Dosen Wali');
+                $this->db->or_like('p.current_stage', 'Admin Layanan');
+                $this->db->or_like('p.current_stage', 'Koordinator TA');
+                $this->db->or_like('p.current_stage', 'Draft');
+                $this->db->group_end();
+            } else {
+                $this->db->like('p.current_stage', $filter_stage);
+            }
         }
 
         $this->db->order_by('p.updated_at', 'DESC');
@@ -1582,20 +1649,22 @@ class AdminLayanan_model extends CI_Model {
         foreach ($rows as &$r) {
             $nim = $r['nim'];
             
-            // Map stage name to display tag
+            // Map stage name to Bimbingan TA evaluation display tag (Preview 1, Preview 2, Preview 3, Pendaftaran Sidang)
             $stg = strtolower($r['current_stage'] ?? '');
             if (strpos($stg, 'preview 3') !== false || strpos($stg, 'preview3') !== false || strpos($stg, 'pra-sidang') !== false) {
-                $r['tahapan_display'] = 'preview3';
+                $r['tahapan_display'] = 'Preview 3';
             } elseif (strpos($stg, 'preview 2') !== false || strpos($stg, 'preview2') !== false) {
-                $r['tahapan_display'] = 'preview2';
+                $r['tahapan_display'] = 'Preview 2';
             } elseif (strpos($stg, 'preview 1') !== false || strpos($stg, 'preview1') !== false) {
-                $r['tahapan_display'] = 'preview1';
+                $r['tahapan_display'] = 'Preview 1';
             } elseif (strpos($stg, 'sidang') !== false) {
                 $r['tahapan_display'] = 'Pendaftaran Sidang';
             } elseif (strpos($stg, 'lulus') !== false || strpos($stg, 'selesai') !== false) {
                 $r['tahapan_display'] = 'Lulus Sidang';
             } else {
-                $r['tahapan_display'] = !empty($r['current_stage']) ? $r['current_stage'] : 'preview1';
+                // Fallback for document verification stages (Mahasiswa, Dosen Wali, Admin Layanan, etc.)
+                // Bimbingan TA evaluation stage starts at Preview 1
+                $r['tahapan_display'] = 'Preview 1';
             }
 
             // Dosen wali display

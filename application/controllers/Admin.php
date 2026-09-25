@@ -20,9 +20,7 @@ class Admin extends CI_Controller {
         $data['title']       = 'Central Admin Panel - IFIK Portal';
         
         // Metrik LAA
-        $data['laa_stats']   = $this->db->table_exists('pendaftaran_ta') 
-                               ? $this->AdminLayanan_model->get_stats() 
-                               : ['total' => 0, 'pending' => 0, 'approved' => 0, 'rejected' => 0];
+        $data['laa_stats']   = $this->AdminLayanan_model->get_stats();
         
         // Metrik Berita
         $data['total_news']  = $this->db->table_exists('berita') ? $this->db->count_all_results('berita') : 0;
@@ -32,18 +30,17 @@ class Admin extends CI_Controller {
         $data['total_ruangan'] = $this->db->table_exists('ruangan') ? $this->db->count_all_results('ruangan') : 0;
         
         // Metrik Mahasiswa TA
-        $data['total_mhs_ta']  = $this->db->table_exists('pendaftaran_ta') ? $this->db->count_all_results('pendaftaran_ta') : 0;
-        $data['ta_unlocked']   = ($this->db->table_exists('pendaftaran_ta') && $this->db->field_exists('is_bimbingan_unlocked', 'pendaftaran_ta')) 
-                               ? $this->db->where('is_bimbingan_unlocked', 1)->count_all_results('pendaftaran_ta') 
-                               : 0;
+        $data['total_mhs_ta']  = $this->db->table_exists('guidance') 
+                               ? $this->db->count_all_results('guidance') 
+                               : ($this->db->table_exists('pendaftaran_ta') ? $this->db->count_all_results('pendaftaran_ta') : 0);
+        $data['ta_unlocked']   = ($this->db->table_exists('guidance') && $this->db->field_exists('is_bimbingan_unlocked', 'guidance')) 
+                               ? $this->db->where('is_bimbingan_unlocked', 1)->count_all_results('guidance') 
+                               : (($this->db->table_exists('pendaftaran_ta') && $this->db->field_exists('is_bimbingan_unlocked', 'pendaftaran_ta'))
+                                   ? $this->db->where('is_bimbingan_unlocked', 1)->count_all_results('pendaftaran_ta') : 0);
 
         // Quick recent activities
-        if ($this->db->table_exists('pendaftaran_ta')) {
-            $data['recent_pengajuan'] = $this->AdminLayanan_model->get_all_pengajuan('all', null);
-            $data['recent_pengajuan'] = array_slice($data['recent_pengajuan'], 0, 5);
-        } else {
-            $data['recent_pengajuan'] = [];
-        }
+        $all_recent = $this->AdminLayanan_model->get_all_pengajuan('all', null);
+        $data['recent_pengajuan'] = !empty($all_recent) ? array_slice($all_recent, 0, 5) : [];
 
         $this->load->view('admin/dashboard', $data);
     }

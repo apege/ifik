@@ -534,12 +534,18 @@ class Mahasiswa extends CI_Controller {
                 ? $this->db->get_where('pendaftaran_ta', array('nim' => $nim))->row_array()
                 : $this->Mahasiswa_model->get_status_pendaftaran($nim);
 
-            $w_status  = isset($existing_ta['status_approval_wali']) ? $existing_ta['status_approval_wali'] : 'Pending';
+            $is_final_submit = ($this->input->post('is_submitted') == '1' || $this->input->post('submit_action') === 'submit');
+
+            $w_status  = isset($existing_ta['status_approval_wali']) ? $existing_ta['status_approval_wali'] : ($is_final_submit ? 'Pending' : 'Draft');
             $a_status  = isset($existing_ta['status_approval_admin']) ? $existing_ta['status_approval_admin'] : 'Pending';
             $k_status  = isset($existing_ta['status_approval_koor']) ? $existing_ta['status_approval_koor'] : 'Pending';
             $kk_status = isset($existing_ta['status_approval_kk']) ? $existing_ta['status_approval_kk'] : 'Pending';
 
-            if ($w_status === 'Rejected' || $w_status === 'Draft' || empty($w_status)) {
+            if ($w_status === 'Rejected') {
+                $w_status = 'Pending';
+            } elseif (!$is_final_submit) {
+                $w_status = 'Draft';
+            } elseif (empty($w_status) || $w_status === 'Draft') {
                 $w_status = 'Pending';
             }
 
@@ -551,7 +557,9 @@ class Mahasiswa extends CI_Controller {
             if ($k_status === 'Rejected') $k_status = 'Pending';
             if ($kk_status === 'Rejected') $kk_status = 'Pending';
 
-            if ($w_status !== 'Approved') {
+            if ($w_status === 'Draft') {
+                $current_stage = 'Draft';
+            } else if ($w_status !== 'Approved') {
                 $current_stage = 'Dosen Wali';
             } else if ($a_status !== 'Approved') {
                 $current_stage = 'Admin Layanan';
@@ -571,7 +579,7 @@ class Mahasiswa extends CI_Controller {
             $data_ta = array(
                 'nim'                  => $nim,
                 'id_dosen_wali'        => $id_dosen_wali,
-                'is_submitted'         => 1,
+                'is_submitted'         => $is_final_submit ? 1 : 0,
                 'jenis_ta'             => $this->input->post('jenis_ta'),
                 'judul_1'              => $this->input->post('judul_1'),
                 'judul_2'              => $this->input->post('judul_2'),
@@ -1018,7 +1026,7 @@ class Mahasiswa extends CI_Controller {
                     if (in_array('id_mhs', $g_fields)) $g_data['id_mhs'] = 'usr_mhs_' . $nim;
                     if (in_array('date', $g_fields)) $g_data['date'] = date('Y-m-d H:i:s');
                     if (in_array('tahun', $g_fields)) $g_data['tahun'] = date('Y');
-                    if (in_array('keterangan', $g_fields)) $g_data['keterangan'] = 'Pending';
+                    if (in_array('keterangan', $g_fields)) $g_data['keterangan'] = 'Draft';
                     $this->db->insert('guidance', $g_data);
                     $db_saved = true;
                 }

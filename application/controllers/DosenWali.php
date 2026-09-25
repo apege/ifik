@@ -107,19 +107,19 @@ class DosenWali extends CI_Controller {
                 }
             }
 
-            // Simpan status usulan Judul & Skema TA (Disatukan)
+            $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
+
+            // Simpan status usulan Judul & Skema TA (Disatukan) - Dijalankan setelah update_approval_wali agar tidak tertimpa!
             $status_judul_jenis  = $this->input->post('status_judul_jenis');
             $catatan_judul_jenis = trim($this->input->post('catatan_judul_jenis') ?? '');
 
-            if ($status_judul_jenis === 'Approved' || $status === 'Approved') {
+            if ($status_judul_jenis === 'Approved' || ($status === 'Approved' && $status_judul_jenis !== 'Rejected')) {
                 $this->DosenWali_model->approve_jenis_ta($nim, 'Approved', '');
                 $this->DosenWali_model->update_judul_approval($nim, 'Approved', '');
             } else if ($status_judul_jenis === 'Rejected') {
                 $this->DosenWali_model->approve_jenis_ta($nim, 'Rejected', $catatan_judul_jenis);
                 $this->DosenWali_model->update_judul_approval($nim, 'Rejected', $catatan_judul_jenis);
             }
-
-            $this->DosenWali_model->update_approval_wali($nim, $status, $catatan);
 
             // Record Approval History Log
             $this->load->model('Approval_log_model');

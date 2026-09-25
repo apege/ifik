@@ -192,7 +192,10 @@ class Mahasiswa_model extends CI_Model {
                 $g_data['peminatan'] = !empty(trim($data_ta['konsentrasi_dkv'] ?? '')) ? trim($data_ta['konsentrasi_dkv']) : 'Desain Komunikasi Visual';
             }
             if (in_array('tahun', $g_fields)) $g_data['tahun'] = date('Y');
-            if (in_array('keterangan', $g_fields)) $g_data['keterangan'] = $data_ta['status_approval_wali'] ?? 'Pending';
+            $is_sub_flag = !empty($data_ta['is_submitted']);
+            if (in_array('keterangan', $g_fields)) {
+                $g_data['keterangan'] = $is_sub_flag ? ($data_ta['status_approval_wali'] ?? 'Pending') : 'Draft';
+            }
             if (in_array('date',       $g_fields) && empty($existing_g)) $g_data['date'] = date('Y-m-d H:i:s');
 
             if ($existing_g) {
@@ -258,49 +261,13 @@ class Mahasiswa_model extends CI_Model {
             }
         }
 
-        // 3. pendaftaran_ta
-        if ($this->db->table_exists('pendaftaran_ta')) {
-            $existing_pt = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
-            $pt_fields = $this->db->list_fields('pendaftaran_ta');
-            $pt_data = [];
-            foreach ($data_ta as $col => $val) {
-                if (in_array($col, $pt_fields)) {
-                    $pt_data[$col] = $val;
-                }
-            }
-            $pt_data['updated_at'] = date('Y-m-d H:i:s');
-            if ($existing_pt) {
-                $this->db->where('nim', $nim)->update('pendaftaran_ta', $pt_data);
-            } else {
-                if (in_array('created_at', $pt_fields) && empty($pt_data['created_at'])) {
-                    $pt_data['created_at'] = date('Y-m-d H:i:s');
-                }
-                $this->db->insert('pendaftaran_ta', $pt_data);
-            }
-        }
-
         return true;
     }
 
-    // Get Status Pendaftaran & Approval Chain langsung dari guidance, file_pendaftaran, pendaftaran_berkas & pendaftaran_ta
+    // Get Status Pendaftaran & Approval Chain langsung dari guidance, file_pendaftaran, pendaftaran_berkas
     public function get_status_pendaftaran($nim) {
         $pt_data = array();
-        $prev_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
-
-        if ($this->db->table_exists('pendaftaran_ta')) {
-            try {
-                $pt_row = $this->db->get_where('pendaftaran_ta', array('nim' => $nim))->row_array();
-                if ($pt_row) {
-                    $pt_data = $pt_row;
-                }
-            } catch (Throwable $e) {
-                log_message('error', 'Error fetching pendaftaran_ta: ' . $e->getMessage());
-            }
-        }
-
         $userId = $this->_get_user_id_by_nim($nim);
-        $this->db->db_debug = $prev_debug;
 
         $guidance = null;
         if ($this->db->table_exists('guidance')) {
@@ -375,7 +342,13 @@ class Mahasiswa_model extends CI_Model {
         }
         $this->db->db_debug = $prev_debug;
 
-        $is_submitted = ($guidance !== null || !empty($files) || !empty($berkas_rows) || !empty($pt_data['judul_1'])) ? 1 : 0;
+        $g_ket = $guidance['keterangan'] ?? 'Draft';
+        $is_submitted = 0;
+        if (!empty($pt_data['is_submitted'])) {
+            $is_submitted = 1;
+        } elseif ($guidance && !empty($g_ket) && strtolower($g_ket) !== 'draft') {
+            $is_submitted = 1;
+        }
 
         // 1. Status Judul & Catatan Judul
         $status_judul = $pt_data['status_judul'] ?? null;
@@ -629,22 +602,6 @@ class Mahasiswa_model extends CI_Model {
                 }
             }
             $this->db->where('nim', $nim)->delete('pendaftaran_berkas');
-        }
-
-        // 6. pendaftaran_ta
-        if ($this->db->table_exists('pendaftaran_ta')) {
-            $pt_row = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
-            if ($pt_row) {
-                foreach (['file_ksm', 'file_transkrip', 'file_pernyataan', 'file_bebas_lab'] as $col) {
-                    if (!empty($pt_row[$col])) {
-                        $fp = FCPATH . $pt_row[$col];
-                        if (file_exists($fp) && is_file($fp)) @unlink($fp);
-                        $fp2 = $upload_path . basename($pt_row[$col]);
-                        if (file_exists($fp2) && is_file($fp2)) @unlink($fp2);
-                    }
-                }
-            }
-            $this->db->where('nim', $nim)->delete('pendaftaran_ta');
         }
 
         return true;

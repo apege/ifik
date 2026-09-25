@@ -821,11 +821,11 @@
                                 <!-- Kolom Rincian Review Berkas (Khusus Dokumen Berkas) -->
                                 <td class="py-4 px-4 text-center whitespace-nowrap align-middle">
                                     <?php
-                                        if ($file_rej_count > 0) {
-                                            $btn_summary_text = $file_rej_count . ' Revisi';
+                                        if ($rej_items > 0) {
+                                            $btn_summary_text = $rej_items . ' Revisi';
                                             $btn_badge_cls = 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200';
                                             $btn_icon = '<i class="bi bi-exclamation-triangle-fill text-rose-500"></i>';
-                                        } elseif ($file_app_count === $total_files_count) {
+                                        } elseif ($app_items === $total_eval_items) {
                                             $btn_summary_text = 'Valid';
                                             $btn_badge_cls = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200';
                                             $btn_icon = '<i class="bi bi-check-all text-emerald-600 font-bold text-sm"></i>';

@@ -105,6 +105,7 @@
     <p class="text-red-700 font-semibold">Mahasiswa dengan kata kunci <strong>"<?= htmlspecialchars($search) ?>"</strong> tidak ditemukan dalam data pendaftaran TA.</p>
 </div>
 <?php endif; ?>
+
 <?php if($detail): ?>
 <div class="bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -161,8 +162,126 @@
 <?php else: ?>
 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center"><i class="bi bi-folder-x text-slate-300 text-4xl mb-2"></i><p class="text-slate-500 font-semibold text-sm">Mahasiswa ini belum mengupload file apapun.</p></div>
 <?php endif; ?>
+
+<?php else: ?>
+<!-- Default view when no search filter active: Table of all TA applicants -->
+<?php if(!empty($allPengajuan)): ?>
+
+<!-- Sticky Floating Batch Reset Action Bar at Bottom -->
+<div id="batchResetBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] w-[calc(100%-2rem)] max-w-xl flex items-center justify-between bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-white/20 transition-all duration-300">
+    <div class="flex items-center gap-2.5">
+        <span class="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center font-extrabold text-xs shadow-inner shrink-0">
+            <i class="bi bi-check2-square text-sm"></i>
+        </span>
+        <div>
+            <h4 id="batchResetCountText" class="font-bold text-xs">0 Mahasiswa Dipilih</h4>
+            <span class="text-[10px] text-red-100 block sm:inline">Terpilih untuk reset file TA</span>
+        </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0 ml-3">
+        <button type="button" onclick="confirmBatchReset()" 
+                class="px-3.5 py-1.5 bg-white text-red-600 hover:bg-red-50 rounded-xl text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+            <i class="bi bi-arrow-counterclockwise text-xs"></i> Reset Terpilih
+        </button>
+    </div>
+</div>
+
+<div class="bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-2xl shadow-sm p-5 sm:p-6 mb-6">
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div>
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <i class="bi bi-people-fill text-orange-500"></i> Daftar Mahasiswa Pendaftar TA (<?= count($allPengajuan) ?> Mahasiswa)
+            </h2>
+            <span class="text-xs text-slate-500">Pilih satu atau beberapa mahasiswa di bawah ini untuk mereset file TA mereka sekaligus.</span>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead>
+                <tr class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                    <th class="py-3 px-4 w-10">
+                        <input type="checkbox" id="selectAllReset" onclick="toggleSelectAllReset(this)" 
+                               class="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 cursor-pointer" title="Pilih Semua">
+                    </th>
+                    <th class="py-3 px-4">MAHASISWA</th>
+                    <th class="py-3 px-4">PROGRAM STUDI & KK</th>
+                    <th class="py-3 px-4">JUDUL RENCANA TA</th>
+                    <th class="py-3 px-4 text-center">TAHAPAN FILE</th>
+                    <th class="py-3 px-4 text-center">STATUS LAA</th>
+                    <th class="py-3 px-4 text-right">AKSI</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <?php foreach($allPengajuan as $row): ?>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-4 w-10">
+                            <input type="checkbox" class="reset-mhs-checkbox w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 cursor-pointer" 
+                                   value="<?= htmlspecialchars($row['nim'] ?? '') ?>" 
+                                   data-name="<?= htmlspecialchars(trim(($row['nama_depan'] ?? '') . ' ' . ($row['nama_belakang'] ?? ''))) ?>"
+                                   onchange="updateBatchResetUI()">
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-slate-800"><?= htmlspecialchars(trim(($row['nama_depan'] ?? '') . ' ' . ($row['nama_belakang'] ?? ''))) ?></div>
+                            <div class="text-[11px] font-mono text-orange-600 font-semibold"><?= htmlspecialchars($row['nim'] ?? '') ?></div>
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-600">
+                            <div><?= htmlspecialchars($row['prodi'] ?? '-') ?></div>
+                            <div class="text-[11px] text-slate-400"><?= htmlspecialchars($row['konsentrasi_dkv'] ?? '-') ?></div>
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-700 max-w-xs truncate" title="<?= htmlspecialchars($row['judul_1'] ?? '-') ?>">
+                            <?= htmlspecialchars($row['judul_1'] ?? '-') ?>
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            <?php 
+                            $stg = $row['current_stage'] ?? 'Mahasiswa';
+                            $stgLower = strtolower($stg);
+                            if ($stgLower === 'mahasiswa') {
+                                $stgBadge = 'bg-slate-100 text-slate-700 border-slate-200';
+                            } elseif (strpos($stgLower, 'wali') !== false) {
+                                $stgBadge = 'bg-amber-100 text-amber-700 border-amber-200';
+                            } elseif (strpos($stgLower, 'admin') !== false || strpos($stgLower, 'laa') !== false) {
+                                $stgBadge = 'bg-blue-100 text-blue-700 border-blue-200';
+                            } elseif (strpos($stgLower, 'koordinator') !== false || strpos($stgLower, 'koor') !== false) {
+                                $stgBadge = 'bg-purple-100 text-purple-700 border-purple-200';
+                            } elseif (strpos($stgLower, 'approved') !== false || strpos($stgLower, 'selesai') !== false) {
+                                $stgBadge = 'bg-green-100 text-green-700 border-green-200';
+                            } else {
+                                $stgBadge = 'bg-slate-100 text-slate-700 border-slate-200';
+                            }
+                            ?>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap <?= $stgBadge ?>">
+                                <i class="bi bi-clock-history text-[9px]"></i> <?= htmlspecialchars($stg) ?>
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <?php 
+                            $sa = $row['status_approval_admin'] ?? 'Pending'; 
+                            $bc = ($sa === 'Approved') ? 'bg-green-100 text-green-700 border-green-200' : (($sa === 'Rejected') ? 'bg-red-100 text-red-700 border-red-200' : 'bg-amber-100 text-amber-700 border-amber-200'); 
+                            ?>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border <?= $bc ?>"><?= $sa ?></span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <a href="<?= site_url('adminlayanan/reset_file_ta?q=' . urlencode($row['nim'] ?? '') . '&cat=nim') ?>" 
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-bold transition-all active:scale-95">
+                                <i class="bi bi-arrow-counterclockwise"></i> Kelola & Reset File
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php else: ?>
+<div class="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center">
+    <i class="bi bi-folder-x text-slate-300 text-4xl mb-2"></i>
+    <p class="text-slate-500 font-semibold text-sm">Belum ada mahasiswa yang mendaftar TA.</p>
+</div>
+<?php endif; ?>
 <?php endif; ?>
 </main>
+
 <!-- Confirm Modal -->
 <div id="confirmModal" class="fixed inset-0 z-[99999] flex items-center justify-center hidden">
     <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
@@ -171,17 +290,19 @@
             <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0"><i class="bi bi-exclamation-triangle-fill text-lg"></i></div>
             <div><h3 class="font-extrabold text-slate-900 text-base" id="modalTitle">Konfirmasi Reset</h3><p class="text-xs text-slate-500">Tindakan ini tidak dapat dibatalkan</p></div>
         </div>
-        <p class="text-sm text-slate-600 mb-5" id="modalBody">Apakah kamu yakin?</p>
+        <div class="text-sm text-slate-600 mb-5 leading-relaxed" id="modalBody">Apakah kamu yakin?</div>
         <div class="flex gap-2">
             <button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition">Batal</button>
             <button id="modalConfirmBtn" class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition flex items-center justify-center gap-2"><i class="bi bi-arrow-counterclockwise"></i> Ya, Reset</button>
         </div>
     </div>
-</div><script>
+</div>
+
+<script>
 window.resetMhsData=<?= json_encode(array_map(function($r){return['nim'=>$r['nim']??'','nama'=>trim(($r['nama_depan']??'').' '.($r['nama_belakang']??'')),'judul'=>$r['judul_1']??'','prodi'=>($r['prodi']??'').' '.($r['konsentrasi_dkv']??'')];}, $allPengajuan??[])); ?>;
 const AJAX_RESET_URL='<?= site_url('adminlayanan/ajax_reset_file_ta') ?>';
 const BASE_RESET_URL='<?= site_url('adminlayanan/reset_file_ta') ?>';
-let extraRowCounterReset=0,_pendingNim='',_pendingKode='';
+let extraRowCounterReset=0,_pendingNim='',_pendingKode='',_pendingBatchNims=[];
 
 function toggleResetCatDropdown(e){e.stopPropagation();const m=document.getElementById('menuCatReset'),a=document.getElementById('arrowCatReset');m.classList.toggle('hidden');a.style.transform=m.classList.contains('hidden')?'rotate(0deg)':'rotate(180deg)';}
 function selectResetMainCategory(val,label){document.getElementById('mainCategorySelectReset').value=val;document.getElementById('labelCatReset').textContent=label;document.getElementById('menuCatReset').classList.add('hidden');document.getElementById('arrowCatReset').style.transform='rotate(0deg)';document.getElementById('inputSearchReset').focus();}
@@ -207,11 +328,90 @@ function selectResetAutocomplete(nim){document.getElementById('autocompleteReset
 
 document.addEventListener('click',function(e){if(!e.target.closest('.custom-dropdown-container')&&!e.target.closest('#dropdownCatWrapperReset')){document.querySelectorAll('.custom-dropdown-menu').forEach(m=>m.classList.add('hidden'));document.querySelectorAll('.dropdown-arrow').forEach(a=>a.style.transform='rotate(0deg)');}const ab=document.getElementById('autocompleteReset');if(ab&&!e.target.closest('#inputSearchReset')&&!e.target.closest('#autocompleteReset'))ab.classList.add('hidden');});
 
-function confirmResetAll(nim,nama){_pendingNim=nim;_pendingKode='';document.getElementById('modalTitle').textContent='Reset Semua File TA';document.getElementById('modalBody').innerHTML='Semua file TA milik <strong>'+nama+'</strong> (NIM: '+nim+') akan dihapus. Mahasiswa harus upload ulang dari awal.';document.getElementById('confirmModal').classList.remove('hidden');}
-function confirmResetOne(nim,kode,nb){_pendingNim=nim;_pendingKode=kode;document.getElementById('modalTitle').textContent='Reset File: '+nb;document.getElementById('modalBody').innerHTML='File <strong>'+nb+'</strong> milik NIM <strong>'+nim+'</strong> akan dihapus. Mahasiswa bisa upload ulang file ini saja.';document.getElementById('confirmModal').classList.remove('hidden');}
-function closeModal(){document.getElementById('confirmModal').classList.add('hidden');_pendingNim='';_pendingKode='';}
+function toggleSelectAllReset(master) {
+    document.querySelectorAll('.reset-mhs-checkbox').forEach(cb => {
+        cb.checked = master.checked;
+    });
+    updateBatchResetUI();
+}
 
-document.getElementById('modalConfirmBtn').addEventListener('click',function(){if(!_pendingNim)return;const btn=this;btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split"></i> Memproses...';fetch(AJAX_RESET_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'nim='+encodeURIComponent(_pendingNim)+'&kode_berkas='+encodeURIComponent(_pendingKode)}).then(r=>r.json()).then(data=>{closeModal();if(data.success){window.location.href=BASE_RESET_URL+'?q='+encodeURIComponent(_pendingNim)+'&cat=nim&msg=success';}else{alert('Gagal: '+(data.message||'Terjadi kesalahan.'));}}).catch(()=>{closeModal();alert('Terjadi kesalahan jaringan.');}).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-arrow-counterclockwise"></i> Ya, Reset';});});
+function updateBatchResetUI() {
+    const checkedBoxes = document.querySelectorAll('.reset-mhs-checkbox:checked');
+    const bar = document.getElementById('batchResetBar');
+    const countText = document.getElementById('batchResetCountText');
+    const master = document.getElementById('selectAllReset');
+    const total = document.querySelectorAll('.reset-mhs-checkbox').length;
+
+    if (master && total > 0) {
+        master.checked = (checkedBoxes.length === total);
+    }
+
+    if (checkedBoxes.length > 0) {
+        if (bar) bar.classList.remove('hidden');
+        if (countText) countText.textContent = `${checkedBoxes.length} Mahasiswa Dipilih`;
+    } else {
+        if (bar) bar.classList.add('hidden');
+    }
+}
+
+function confirmBatchReset() {
+    const checkedBoxes = document.querySelectorAll('.reset-mhs-checkbox:checked');
+    if (checkedBoxes.length === 0) return;
+
+    const nims = [];
+    const names = [];
+    checkedBoxes.forEach(cb => {
+        nims.push(cb.value);
+        names.push(cb.getAttribute('data-name') + ` (${cb.value})`);
+    });
+
+    _pendingBatchNims = nims;
+    _pendingNim = '';
+    _pendingKode = '';
+
+    document.getElementById('modalTitle').textContent = `Reset File TA Batch (${nims.length} Mahasiswa)`;
+    document.getElementById('modalBody').innerHTML = `Semua file TA milik <strong>${nims.length} mahasiswa terpilih</strong> akan dihapus:<br><ul class="list-disc pl-5 mt-2.5 max-h-36 overflow-y-auto text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">${names.map(n=>`<li><strong>${n}</strong></li>`).join('')}</ul><br>Mahasiswa tersebut harus meng-upload ulang dari awal.`;
+    document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+function confirmResetAll(nim,nama){_pendingNim=nim;_pendingKode='';_pendingBatchNims=[];document.getElementById('modalTitle').textContent='Reset Semua File TA';document.getElementById('modalBody').innerHTML='Semua file TA milik <strong>'+nama+'</strong> (NIM: '+nim+') akan dihapus. Mahasiswa harus upload ulang dari awal.';document.getElementById('confirmModal').classList.remove('hidden');}
+function confirmResetOne(nim,kode,nb){_pendingNim=nim;_pendingKode=kode;_pendingBatchNims=[];document.getElementById('modalTitle').textContent='Reset File: '+nb;document.getElementById('modalBody').innerHTML='File <strong>'+nb+'</strong> milik NIM <strong>'+nim+'</strong> akan dihapus. Mahasiswa bisa upload ulang file ini saja.';document.getElementById('confirmModal').classList.remove('hidden');}
+function closeModal(){document.getElementById('confirmModal').classList.add('hidden');_pendingNim='';_pendingKode='';_pendingBatchNims=[];}
+
+document.getElementById('modalConfirmBtn').addEventListener('click',function(){
+    const btn=this;
+    btn.disabled=true;
+    btn.innerHTML='<i class="bi bi-hourglass-split"></i> Memproses...';
+
+    let bodyData = '';
+    if (_pendingBatchNims && _pendingBatchNims.length > 0) {
+        bodyData = _pendingBatchNims.map(n => 'nims[]=' + encodeURIComponent(n)).join('&');
+    } else if (_pendingNim) {
+        bodyData = 'nim=' + encodeURIComponent(_pendingNim) + '&kode_berkas=' + encodeURIComponent(_pendingKode);
+    } else {
+        closeModal();
+        return;
+    }
+
+    fetch(AJAX_RESET_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: bodyData
+    }).then(r=>r.json()).then(data=>{
+        closeModal();
+        if(data.success){
+            window.location.href=BASE_RESET_URL+'?msg=success';
+        }else{
+            alert('Gagal: '+(data.message||'Terjadi kesalahan.'));
+        }
+    }).catch(()=>{
+        closeModal();
+        alert('Terjadi kesalahan jaringan.');
+    }).finally(()=>{
+        btn.disabled=false;
+        btn.innerHTML='<i class="bi bi-arrow-counterclockwise"></i> Ya, Reset';
+    });
+});
 
 const up=new URLSearchParams(window.location.search);if(up.get('msg')==='success'){const b=document.createElement('div');b.className='fixed top-4 right-4 z-[999999] bg-green-500 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-bold flex items-center gap-2';b.innerHTML='<i class="bi bi-check-circle-fill"></i> File berhasil direset!';document.body.appendChild(b);setTimeout(()=>b.remove(),3500);}
 </script>

@@ -506,8 +506,21 @@
 
                                         <!-- Tahapan -->
                                         <td class="py-4 px-5 text-center">
-                                            <span class="inline-block px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                                <?= htmlspecialchars($r['tahapan_display'] ?? '-'); ?>
+                                            <?php
+                                            $td = $r['tahapan_display'] ?? 'Preview 1';
+                                            $td_stg = strtolower($td);
+                                            if (strpos($td_stg, 'preview 3') !== false || strpos($td_stg, 'preview3') !== false) {
+                                                $badge_tahap = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                                            } elseif (strpos($td_stg, 'preview 2') !== false || strpos($td_stg, 'preview2') !== false) {
+                                                $badge_tahap = 'bg-amber-50 text-amber-700 border-amber-200';
+                                            } elseif (strpos($td_stg, 'sidang') !== false) {
+                                                $badge_tahap = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                                            } else {
+                                                $badge_tahap = 'bg-orange-50 text-orange-700 border-orange-200';
+                                            }
+                                            ?>
+                                            <span class="inline-block px-2.5 py-1 rounded-xl text-[11px] font-bold border <?= $badge_tahap; ?>">
+                                                <?= htmlspecialchars($td); ?>
                                             </span>
                                         </td>
 
@@ -559,6 +572,19 @@
                         </div>
                     <?php else: ?>
                         <?php foreach ($list_peserta as $idx => $r): ?>
+                            <?php
+                            $td_m = $r['tahapan_display'] ?? 'Preview 1';
+                            $td_stg_m = strtolower($td_m);
+                            if (strpos($td_stg_m, 'preview 3') !== false || strpos($td_stg_m, 'preview3') !== false) {
+                                $badge_tahap_m = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                            } elseif (strpos($td_stg_m, 'preview 2') !== false || strpos($td_stg_m, 'preview2') !== false) {
+                                $badge_tahap_m = 'bg-amber-50 text-amber-700 border-amber-200';
+                            } elseif (strpos($td_stg_m, 'sidang') !== false) {
+                                $badge_tahap_m = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                            } else {
+                                $badge_tahap_m = 'bg-orange-50 text-orange-700 border-orange-200';
+                            }
+                            ?>
                             <div class="peserta-item peserta-card bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3 transition-all"
                                  data-nim="<?= strtolower($r['nim']); ?>"
                                  data-nama="<?= strtolower($r['nama_lengkap']); ?>"
@@ -575,8 +601,8 @@
                                             <?= htmlspecialchars($r['nim']); ?>
                                         </span>
                                     </div>
-                                    <span class="inline-block px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                        <?= htmlspecialchars($r['tahapan_display'] ?? '-'); ?>
+                                    <span class="inline-block px-2.5 py-0.5 rounded-lg text-[11px] font-bold border <?= $badge_tahap_m; ?>">
+                                        <?= htmlspecialchars($td_m); ?>
                                     </span>
                                 </div>
 
@@ -653,6 +679,7 @@
                                 <th class="py-3.5 px-5 text-center w-10">No</th>
                                 <th class="py-3.5 px-5">Mahasiswa</th>
                                 <th class="py-3.5 px-5">Prodi</th>
+                                <th class="py-3.5 px-5 text-center">Tahapan File</th>
                                 <th class="py-3.5 px-5 text-center">KSM</th>
                                 <th class="py-3.5 px-5 text-center">Transkrip</th>
                                 <th class="py-3.5 px-5 text-center">Surat Pernyataan</th>
@@ -664,7 +691,7 @@
                         <tbody class="divide-y divide-slate-100 text-sm" id="pesertaTableBody">
                             <?php if (empty($list_peserta)): ?>
                                 <tr id="emptyRow">
-                                    <td colspan="9" class="py-12 text-center text-slate-400">
+                                    <td colspan="10" class="py-12 text-center text-slate-400">
                                         <div class="w-16 h-16 rounded-3xl bg-orange-50 text-orange-400 flex items-center justify-center mx-auto mb-3 text-2xl">
                                             <i class="bi bi-folder-x"></i>
                                         </div>
@@ -700,6 +727,30 @@
                                         <td class="py-4 px-5">
                                             <span class="text-xs font-bold text-slate-800 block truncate max-w-[120px]">
                                                 <?= htmlspecialchars($r['prodi'] ?? 'DKV'); ?>
+                                            </span>
+                                        </td>
+
+                                        <!-- Tahapan File -->
+                                        <td class="py-4 px-5 text-center whitespace-nowrap">
+                                            <?php 
+                                            $stgFile = $r['current_stage'] ?? 'Mahasiswa';
+                                            $stgFileLower = strtolower($stgFile);
+                                            if ($stgFileLower === 'mahasiswa') {
+                                                $stgBadgeFile = 'bg-slate-100 text-slate-700 border-slate-200';
+                                            } elseif (strpos($stgFileLower, 'wali') !== false) {
+                                                $stgBadgeFile = 'bg-amber-100 text-amber-700 border-amber-200';
+                                            } elseif (strpos($stgFileLower, 'admin') !== false || strpos($stgFileLower, 'laa') !== false) {
+                                                $stgBadgeFile = 'bg-blue-100 text-blue-700 border-blue-200';
+                                            } elseif (strpos($stgFileLower, 'koordinator') !== false || strpos($stgFileLower, 'koor') !== false) {
+                                                $stgBadgeFile = 'bg-purple-100 text-purple-700 border-purple-200';
+                                            } elseif (strpos($stgFileLower, 'approved') !== false || strpos($stgFileLower, 'selesai') !== false) {
+                                                $stgBadgeFile = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                                            } else {
+                                                $stgBadgeFile = 'bg-slate-100 text-slate-700 border-slate-200';
+                                            }
+                                            ?>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap <?= $stgBadgeFile ?>">
+                                                <i class="bi bi-clock-history text-[9px]"></i> <?= htmlspecialchars($stgFile) ?>
                                             </span>
                                         </td>
 
@@ -759,7 +810,7 @@
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr id="noResultsDesktopPeserta" style="display: none;">
-                                    <td colspan="9" class="py-10 text-center text-slate-400">
+                                    <td colspan="10" class="py-10 text-center text-slate-400">
                                         <i class="bi bi-search text-2xl text-slate-300 block mb-2"></i>
                                         <p class="font-bold text-slate-600 text-xs">Tidak ada data berkas yang cocok dengan pencarian</p>
                                     </td>

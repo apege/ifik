@@ -189,6 +189,7 @@
         <!-- Main Card Container 3D -->
         <div class="card-3d-warm rounded-2xl mb-8 relative w-full max-w-full overflow-hidden">
             <form action="<?= site_url('mahasiswa/pendaftaran_ta'); ?>" method="POST" enctype="multipart/form-data" id="formPendaftaranTA">
+                <input type="hidden" name="is_submitted" id="inputIsSubmitted" value="0">
                 <fieldset class="<?= !empty($is_locked) ? 'opacity-70 select-none' : ''; ?>" <?= !empty($is_locked) ? 'disabled' : ''; ?>>
                 
                 <div class="p-4 sm:p-8 lg:p-10 w-full max-w-full overflow-hidden">
