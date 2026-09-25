@@ -47,6 +47,166 @@
         // Circular Progress Math (radius = 32, circumference = 2 * pi * 32 ≈ 201)
         $circumference = 201;
         $dashoffset = $circumference - ($circumference * $progress_pct / 100);
+
+        // ==========================================
+        // File Breakdown & Evaluation Calculation
+        // ==========================================
+        $active_syarat = !empty($syarat_berkas) ? $syarat_berkas : array(
+            array('kode_berkas' => 'ksm', 'nama_berkas' => 'Kartu Studi Mahasiswa (KSM)'),
+            array('kode_berkas' => 'transkrip', 'nama_berkas' => 'Transkrip Nilai Akademik'),
+            array('kode_berkas' => 'pernyataan', 'nama_berkas' => 'Surat Pernyataan Keaslian'),
+            array('kode_berkas' => 'bebas_lab', 'nama_berkas' => 'Surat Bebas Laboratorium')
+        );
+
+        $w_st  = $pendaftaran['status_approval_wali']  ?? 'Pending';
+        $a_st  = $pendaftaran['status_approval_admin'] ?? 'Pending';
+        $k_st  = $pendaftaran['status_approval_koor']  ?? 'Pending';
+        $kk_st = $pendaftaran['status_approval_kk']    ?? 'Pending';
+
+        $s_jud = $pendaftaran['status_judul'] ?? 'Pending';
+        $s_jen = $pendaftaran['status_jenis_ta'] ?? 'Pending';
+
+        $gen_notes = $pendaftaran['catatan_wali'] ?? '';
+        $files_list = [];
+
+        $bk_raw = $pendaftaran['berkas_kurang'] ?? '';
+        $bk_decoded = !empty($bk_raw) ? json_decode($bk_raw, true) : null;
+
+        foreach ($active_syarat as $sb) {
+            $k = $sb['kode_berkas'];
+            $title = $sb['nama_berkas'];
+
+            $st_dw  = $pendaftaran['status_file_' . $k] ?? null;
+            $st_laa = $student_berkas[$k]['status_verifikasi'] ?? ($pendaftaran['status_' . $k] ?? null);
+
+            $is_in_kurang = false;
+            if (!empty($bk_raw)) {
+                if (is_array($bk_decoded)) {
+                    if (in_array($k, $bk_decoded) || in_array($title, $bk_decoded)) {
+                        $is_in_kurang = true;
+                    } else {
+                        foreach ($bk_decoded as $item) {
+                            if (is_string($item) && (stripos($item, $k) !== false || stripos($item, $title) !== false)) {
+                                $is_in_kurang = true;
+                                break;
+                            }
+                        }
+                    }
+                } elseif (is_string($bk_raw)) {
+                    if (stripos($bk_raw, $k) !== false || stripos($bk_raw, $title) !== false) {
+                        $is_in_kurang = true;
+                    }
+                }
+            }
+
+            $file_rej_by = null;
+            if ($st_laa === 'Invalid' || $is_in_kurang) {
+                $status = 'Rejected';
+                $file_rej_by = 'admin';
+            } elseif ($st_dw === 'Rejected') {
+                $status = 'Rejected';
+                $file_rej_by = 'wali';
+            } elseif ($st_laa === 'Valid') {
+                $status = 'Approved';
+            } elseif ($st_dw === 'Approved') {
+                $status = 'Approved';
+            } else {
+                $status = 'Pending';
+            }
+
+            $filename = $student_berkas[$k]['file_name'] ?? ($pendaftaran['file_' . $k] ?? '');
+
+            $note = '';
+            if ($file_rej_by === 'admin') {
+                $note = $student_berkas[$k]['catatan'] ?? '';
+                if (empty($note) && !empty($pendaftaran['catatan_admin'])) {
+                    $note = $pendaftaran['catatan_admin'];
+                }
+            } elseif ($file_rej_by === 'wali') {
+                $note = $pendaftaran['catatan_file_' . $k] ?? '';
+                if (empty($note) && !empty($gen_notes)) {
+                    if (preg_match('/\[' . preg_quote($k, '/') . '[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
+                        $note = trim($m[1]);
+                    } elseif ($k === 'ksm' && preg_match('/\[KSM[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
+                        $note = trim($m[1]);
+                    } elseif ($k === 'transkrip' && preg_match('/\[TRANSKRIP[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
+                        $note = trim($m[1]);
+                    } elseif ($k === 'pernyataan' && preg_match('/\[PERNYATAAN[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
+                        $note = trim($m[1]);
+                    } elseif ($k === 'bebas_lab' && preg_match('/\[BEBAS_LAB[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
+                        $note = trim($m[1]);
+                    }
+                }
+            } else {
+                $note = $student_berkas[$k]['catatan'] ?? ($pendaftaran['catatan_file_' . $k] ?? '');
+            }
+
+            $files_list[] = [
+                'key'         => $k,
+                'field'       => 'file_' . $k,
+                'title'       => $title,
+                'filename'    => $filename,
+                'status'      => $status,
+                'rejected_by' => $file_rej_by,
+                'note'        => $note,
+                'url'         => !empty($filename) ? base_url('uploads/berkas_mahasiswa/' . $filename) : '',
+            ];
+        }
+
+        $file_rej_count = 0;
+        $file_app_count = 0;
+        $file_pen_count = 0;
+        $total_files_count = count($files_list);
+
+        foreach ($files_list as $f) {
+            if ($f['status'] === 'Approved') {
+                $file_app_count++;
+            } elseif ($f['status'] === 'Rejected') {
+                $file_rej_count++;
+            } else {
+                $file_pen_count++;
+            }
+        }
+
+        $app_items = ($s_jud === 'Approved' ? 1 : 0) + ($s_jen === 'Approved' ? 1 : 0) + $file_app_count;
+        $rej_items = ($s_jud === 'Rejected' ? 1 : 0) + ($s_jen === 'Rejected' ? 1 : 0) + $file_rej_count;
+        if ($kk_is_rej && $s_jud !== 'Rejected') {
+            $rej_items++;
+        }
+
+        if ($w_is_rej && $rej_items === 0) {
+            $s_jud = 'Rejected';
+            $rej_items++;
+        }
+
+        $total_eval_items = 2 + $total_files_count;
+        $pen_items = max(0, $total_eval_items - $app_items - $rej_items);
+
+        $active_reviewer_rej = null;
+        if ($w_is_rej || ($w_st !== 'Approved' && ($s_jud === 'Rejected' || $s_jen === 'Rejected' || $file_rej_count > 0))) {
+            $overall_badge_text = 'Perlu Revisi (Dosen Wali)';
+            $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
+            $overall_dot_cls    = 'bg-rose-500 animate-pulse';
+            $active_reviewer_rej = 'wali';
+        } elseif ($a_is_rej || ($a_st !== 'Approved' && $file_rej_count > 0 && $w_st === 'Approved')) {
+            $overall_badge_text = 'Perlu Revisi (Admin Layanan)';
+            $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
+            $overall_dot_cls    = 'bg-rose-500 animate-pulse';
+            $active_reviewer_rej = 'admin';
+        } elseif ($kk_is_rej) {
+            $overall_badge_text = 'Perlu Revisi (Ketua KK)';
+            $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
+            $overall_dot_cls    = 'bg-rose-500 animate-pulse';
+            $active_reviewer_rej = 'kk';
+        } elseif ($w_st === 'Approved' && $a_st === 'Approved' && $k_st === 'Approved' && $kk_st === 'Approved') {
+            $overall_badge_text = 'Disetujui';
+            $overall_badge_cls  = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            $overall_dot_cls    = 'bg-emerald-500';
+        } else {
+            $overall_badge_text = 'Pending';
+            $overall_badge_cls  = 'bg-amber-100 text-amber-800 border-amber-300';
+            $overall_dot_cls    = 'bg-amber-500 animate-pulse';
+        }
     ?>
 
     <!-- Auto Role-Aware Curved Animated Sidebar -->
@@ -149,7 +309,7 @@
                             </div>
                             <div>
                                 <span class="text-xs font-bold uppercase tracking-wider text-amber-200 block leading-none">NIM</span>
-                                <span class="text-sm font-extrabold text-white mt-0.5 block"><?= $mahasiswa['nim'] ?? '1301210001'; ?></span>
+                                <span class="text-sm font-extrabold text-white mt-0.5 block"><?= htmlspecialchars($mahasiswa['nim'] ?? ($this->session->userdata('nim') ?? '')); ?></span>
                             </div>
                         </div>
                         <div class="h-7 w-px bg-white/25 hidden sm:block"></div>
@@ -632,184 +792,15 @@
                                 </td>
                                 <td class="py-4 px-4 text-center whitespace-nowrap align-middle">
                                     <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200">
-                                        <?= htmlspecialchars($pendaftaran['jenis_ta'] ?? 'Pengkaryaan'); ?>
+                                        <?= htmlspecialchars(!empty(trim($pendaftaran['jenis_ta'] ?? '')) ? trim($pendaftaran['jenis_ta']) : 'TA Reguler'); ?>
                                     </span>
                                     <div class="text-xs text-slate-500 font-semibold mt-1">
-                                        <?= htmlspecialchars($pendaftaran['konsentrasi_dkv'] ?? 'Desain Grafis'); ?>
+                                        <?= htmlspecialchars(!empty(trim($pendaftaran['peminatan'] ?? '')) ? trim($pendaftaran['peminatan']) : (!empty(trim($pendaftaran['konsentrasi_dkv'] ?? '')) ? trim($pendaftaran['konsentrasi_dkv']) : 'Informatika')); ?>
                                     </div>
                                 </td>
                                 <td class="py-4 px-4 text-slate-800 font-bold text-xs whitespace-nowrap align-middle">
                                     <?= !empty($pendaftaran['created_at']) ? date('d F Y', strtotime($pendaftaran['created_at'])) : date('d F Y'); ?>
                                 </td>
-                                <?php
-                                    $active_syarat = !empty($syarat_berkas) ? $syarat_berkas : array(
-                                        array('kode_berkas' => 'ksm', 'nama_berkas' => 'Kartu Studi Mahasiswa (KSM)'),
-                                        array('kode_berkas' => 'transkrip', 'nama_berkas' => 'Transkrip Nilai Akademik'),
-                                        array('kode_berkas' => 'pernyataan', 'nama_berkas' => 'Surat Pernyataan Keaslian'),
-                                        array('kode_berkas' => 'bebas_lab', 'nama_berkas' => 'Surat Bebas Laboratorium')
-                                    );
-
-                                    $w_st  = $pendaftaran['status_approval_wali']  ?? 'Pending';
-                                    $a_st  = $pendaftaran['status_approval_admin'] ?? 'Pending';
-                                    $k_st  = $pendaftaran['status_approval_koor']  ?? 'Pending';
-                                    $kk_st = $pendaftaran['status_approval_kk']    ?? 'Pending';
-
-                                    $s_jud = $pendaftaran['status_judul'] ?? 'Pending';
-                                    $s_jen = $pendaftaran['status_jenis_ta'] ?? 'Pending';
-
-                                    $gen_notes = $pendaftaran['catatan_wali'] ?? '';
-                                    $files_list = [];
-
-                                    // Periksa berkas_kurang baik dalam format JSON array maupun string teks koma
-                                    $bk_raw = $pendaftaran['berkas_kurang'] ?? '';
-                                    $bk_decoded = !empty($bk_raw) ? json_decode($bk_raw, true) : null;
-
-                                    foreach ($active_syarat as $sb) {
-                                        $k = $sb['kode_berkas'];
-                                        $title = $sb['nama_berkas'];
-
-                                        // Status dari masing-masing reviewer
-                                        $st_dw  = $pendaftaran['status_file_' . $k] ?? null;
-                                        $st_laa = $student_berkas[$k]['status_verifikasi'] ?? ($pendaftaran['status_' . $k] ?? null);
-
-                                        // Cek apakah berkas termasuk yang ditandai kurang/invalid oleh Admin Layanan
-                                        $is_in_kurang = false;
-                                        if (!empty($bk_raw)) {
-                                            if (is_array($bk_decoded)) {
-                                                if (in_array($k, $bk_decoded) || in_array($title, $bk_decoded)) {
-                                                    $is_in_kurang = true;
-                                                } else {
-                                                    foreach ($bk_decoded as $item) {
-                                                        if (is_string($item) && (stripos($item, $k) !== false || stripos($item, $title) !== false)) {
-                                                            $is_in_kurang = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            } elseif (is_string($bk_raw)) {
-                                                if (stripos($bk_raw, $k) !== false || stripos($bk_raw, $title) !== false) {
-                                                    $is_in_kurang = true;
-                                                }
-                                            }
-                                        }
-
-                                        $file_rej_by = null;
-                                        if ($st_laa === 'Invalid' || $is_in_kurang) {
-                                            $status = 'Rejected';
-                                            $file_rej_by = 'admin';
-                                        } elseif ($st_dw === 'Rejected') {
-                                            $status = 'Rejected';
-                                            $file_rej_by = 'wali';
-                                        } elseif ($st_laa === 'Valid') {
-                                            $status = 'Approved';
-                                        } elseif ($st_dw === 'Approved') {
-                                            $status = 'Approved';
-                                        } else {
-                                            $status = 'Pending';
-                                        }
-
-                                        // Nama file
-                                        $filename = $student_berkas[$k]['file_name'] ?? ($pendaftaran['file_' . $k] ?? '');
-
-                                        // Catatan perbaikan spesifik berkas
-                                        $note = '';
-                                        if ($file_rej_by === 'admin') {
-                                            $note = $student_berkas[$k]['catatan'] ?? '';
-                                            if (empty($note) && !empty($pendaftaran['catatan_admin'])) {
-                                                $note = $pendaftaran['catatan_admin'];
-                                            }
-                                        } elseif ($file_rej_by === 'wali') {
-                                            $note = $pendaftaran['catatan_file_' . $k] ?? '';
-                                            if (empty($note) && !empty($gen_notes)) {
-                                                if (preg_match('/\[' . preg_quote($k, '/') . '[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
-                                                    $note = trim($m[1]);
-                                                } elseif ($k === 'ksm' && preg_match('/\[KSM[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
-                                                    $note = trim($m[1]);
-                                                } elseif ($k === 'transkrip' && preg_match('/\[TRANSKRIP[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
-                                                    $note = trim($m[1]);
-                                                } elseif ($k === 'pernyataan' && preg_match('/\[PERNYATAAN[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
-                                                    $note = trim($m[1]);
-                                                } elseif ($k === 'bebas_lab' && preg_match('/\[BEBAS_LAB[^\]]*\]\s*:\s*([^\n\r]+)/i', $gen_notes, $m)) {
-                                                    $note = trim($m[1]);
-                                                }
-                                            }
-                                        } else {
-                                            $note = $student_berkas[$k]['catatan'] ?? ($pendaftaran['catatan_file_' . $k] ?? '');
-                                        }
-
-                                        $files_list[] = [
-                                            'key'         => $k,
-                                            'field'       => 'file_' . $k,
-                                            'title'       => $title,
-                                            'filename'    => $filename,
-                                            'status'      => $status,
-                                            'rejected_by' => $file_rej_by,
-                                            'note'        => $note,
-                                            'url'         => !empty($filename) ? base_url('uploads/berkas_mahasiswa/' . $filename) : '',
-                                        ];
-                                    }
-
-                                    $w_is_rej  = ($w_st === 'Rejected');
-                                    $a_is_rej  = ($a_st === 'Rejected' || !empty($bk_raw));
-                                    $kk_is_rej = ($kk_st === 'Rejected');
-
-                                    // Hitung rincian khusus BERKAS (PDF) - Judul & Jenis TA terpisah
-                                    $file_rej_count = 0;
-                                    $file_app_count = 0;
-                                    $file_pen_count = 0;
-                                    $total_files_count = count($files_list);
-
-                                    foreach ($files_list as $f) {
-                                        if ($f['status'] === 'Approved') {
-                                            $file_app_count++;
-                                        } elseif ($f['status'] === 'Rejected') {
-                                            $file_rej_count++;
-                                        } else {
-                                            $file_pen_count++;
-                                        }
-                                    }
-
-                                    // Evaluasi item keseluruhan untuk modal & status
-                                    $app_items = ($s_jud === 'Approved' ? 1 : 0) + ($s_jen === 'Approved' ? 1 : 0) + $file_app_count;
-                                    $rej_items = ($s_jud === 'Rejected' ? 1 : 0) + ($s_jen === 'Rejected' ? 1 : 0) + $file_rej_count;
-                                    if ($kk_is_rej && $s_jud !== 'Rejected') {
-                                        $rej_items++;
-                                    }
-
-                                    if ($w_is_rej && $rej_items === 0) {
-                                        $s_jud = 'Rejected';
-                                        $rej_items++;
-                                    }
-
-                                    $total_eval_items = 2 + $total_files_count;
-                                    $pen_items = max(0, $total_eval_items - $app_items - $rej_items);
-
-                                    $active_reviewer_rej = null;
-                                    if ($w_is_rej || ($w_st !== 'Approved' && ($s_jud === 'Rejected' || $s_jen === 'Rejected' || $file_rej_count > 0))) {
-                                        $overall_badge_text = 'Perlu Revisi (Dosen Wali)';
-                                        $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
-                                        $overall_dot_cls    = 'bg-rose-500 animate-pulse';
-                                        $active_reviewer_rej = 'wali';
-                                    } elseif ($a_is_rej || ($a_st !== 'Approved' && $file_rej_count > 0 && $w_st === 'Approved')) {
-                                        $overall_badge_text = 'Perlu Revisi (Admin Layanan)';
-                                        $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
-                                        $overall_dot_cls    = 'bg-rose-500 animate-pulse';
-                                        $active_reviewer_rej = 'admin';
-                                    } elseif ($kk_is_rej) {
-                                        $overall_badge_text = 'Perlu Revisi (Ketua KK)';
-                                        $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
-                                        $overall_dot_cls    = 'bg-rose-500 animate-pulse';
-                                        $active_reviewer_rej = 'kk';
-                                    } elseif ($w_st === 'Approved' && $a_st === 'Approved' && $k_st === 'Approved' && $kk_st === 'Approved') {
-                                        $overall_badge_text = 'Disetujui';
-                                        $overall_badge_cls  = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                                        $overall_dot_cls    = 'bg-emerald-500';
-                                    } else {
-                                        $overall_badge_text = 'Pending';
-                                        $overall_badge_cls  = 'bg-amber-100 text-amber-800 border-amber-300';
-                                        $overall_dot_cls    = 'bg-amber-500 animate-pulse';
-                                    }
-                                ?>
                                 <!-- Kolom Status Keseluruhan -->
                                 <td class="py-4 px-4 text-center whitespace-nowrap align-middle">
                                     <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border <?= $overall_badge_cls; ?>">

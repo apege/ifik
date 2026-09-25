@@ -289,7 +289,7 @@
                             <?= htmlspecialchars($detail['nama_kk'] ?? $detail['kode_kk'] ?? 'Visual Communication & Multimedia'); ?>
                         </span>
                         <div class="mt-1.5 text-[11px] text-slate-500 font-medium">
-                            Skema TA: <span class="font-bold text-orange-600"><?= htmlspecialchars($detail['jenis_ta'] ?? 'Reguler'); ?></span>
+                            Skema TA: <span class="font-bold text-orange-600"><?= htmlspecialchars(!empty(trim($detail['jenis_ta'] ?? '')) ? trim($detail['jenis_ta']) : 'TA Reguler'); ?></span>
                         </div>
                     </div>
                     <div class="md:col-span-2 bg-white/90 p-3.5 rounded-xl border border-slate-200 shadow-2xs">

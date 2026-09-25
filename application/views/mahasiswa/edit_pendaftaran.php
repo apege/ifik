@@ -152,14 +152,21 @@
                 </p>
 
                 <?php 
-                    $current_jenis = $pendaftaran['jenis_ta'] ?? 'Pengkaryaan';
+                    $current_jenis = !empty(trim($pendaftaran['jenis_ta'] ?? '')) ? trim($pendaftaran['jenis_ta']) : 'TA Reguler';
                     $opsi_jenis = [
+                        'TA Reguler',
+                        'TA Jurnal',
+                        'TA HKI',
+                        'TA PROYEK',
                         'Pengkaryaan',
                         'Penulisan'
                     ];
+                    if (!empty($current_jenis) && !in_array($current_jenis, $opsi_jenis)) {
+                        $opsi_jenis[] = $current_jenis;
+                    }
                 ?>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                     <?php foreach($opsi_jenis as $idx => $opt): ?>
                         <?php $is_checked = ($current_jenis === $opt); ?>
                         <label class="jenis-radio-label relative p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3 <?= $is_checked ? 'border-orange-500 bg-orange-50/70 shadow-xs' : 'border-slate-200 bg-white hover:border-orange-300'; ?>">
