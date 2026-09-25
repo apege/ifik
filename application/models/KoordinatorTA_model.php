@@ -207,8 +207,20 @@ class KoordinatorTA_model extends CI_Model {
 
             $status_wali  = $fData['status_doswal'] ?? 'Pending';
             $status_admin = $fData['status_adminlaa'] ?? 'Pending';
-            $status_koor  = !empty($row['status_approval_koor']) ? $row['status_approval_koor'] : 'Pending';
-            $status_kk    = !empty($row['status_plotting']) ? $row['status_plotting'] : 'Pending';
+
+            // Dosen Pembimbing lengkap jika P1 dan P2 ada di thesis_lecturers
+            $has_pembimbing = (!empty($row['pembimbing_1']) && !empty($row['pembimbing_2']));
+
+            // Status koordinator dianggap Approved hanya jika Dosen Pembimbing sudah diplot DAN keterangan/status_file Approved
+            $raw_status_koor = !empty($row['status_approval_koor']) ? $row['status_approval_koor'] : 'Pending';
+            if ($raw_status_koor === 'Approved' && !$has_pembimbing) {
+                // Jika pembimbing belum diplot, status Koordinator TA masih Pending (Siap Diplot)
+                $status_koor = 'Pending';
+            } else {
+                $status_koor = $raw_status_koor;
+            }
+
+            $status_kk = !empty($row['status_plotting']) ? $row['status_plotting'] : 'Pending';
 
             // Alur Tahapan Resmi:
             // 1. Dosen Wali -> 2. Admin Layanan -> 3. Koordinator TA -> 4. Ketua KK -> 5. Selesai
@@ -217,7 +229,7 @@ class KoordinatorTA_model extends CI_Model {
                 $stage = 'Admin Layanan';
                 if (strcasecmp($status_admin, 'Approved') === 0) {
                     $stage = 'Koordinator TA';
-                    if (strcasecmp($status_koor, 'Approved') === 0) {
+                    if (strcasecmp($status_koor, 'Approved') === 0 && $has_pembimbing) {
                         $stage = 'Ketua KK';
                         if (strcasecmp($status_kk, 'Approved') === 0) {
                             $stage = 'Selesai';

@@ -2360,20 +2360,22 @@
 
             const isSelected = isEligibleForKoor && state.selectedStudents.has(mhs.nim);
 
+            const hasPembimbing = Boolean((mhs.nama_pembimbing_1 || mhs.pembimbing_1) && (mhs.nama_pembimbing_2 || mhs.pembimbing_2));
+
             // 1. Status Badge Koordinator (with whitespace-nowrap)
             let statusBadgeHtml = '';
             if (!isWaliApproved) {
                 statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-medium text-[10px] rounded-full border border-sky-200 bg-sky-50 text-sky-700 whitespace-nowrap"><i class="fa-solid fa-clock text-[9px]"></i> Antre Wali</span>`;
             } else if (!isAdminApproved) {
                 statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-medium text-[10px] rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 whitespace-nowrap"><i class="fa-solid fa-clock text-[9px]"></i> Antre Admin</span>`;
-            } else if (stKoor === 'Approved') {
-                statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 shadow-2xs whitespace-nowrap"><i class="fa-solid fa-circle-check text-[10px]"></i> Disetujui</span>`;
             } else if (stKoor === 'Rejected') {
                 statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-rose-300 bg-rose-50 text-rose-700 shadow-2xs whitespace-nowrap"><i class="fa-solid fa-circle-xmark text-[10px]"></i> Perlu Revisi</span>`;
-            } else if (isEligibleForKoor) {
+            } else if (!hasPembimbing) {
                 statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-orange-400 bg-orange-100 text-orange-950 shadow-xs whitespace-nowrap"><i class="fa-solid fa-bell text-[10px] text-orange-600"></i> Siap Diproses</span>`;
+            } else if (stKoor === 'Approved') {
+                statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 shadow-2xs whitespace-nowrap"><i class="fa-solid fa-circle-check text-[10px]"></i> Disetujui</span>`;
             } else {
-                statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-amber-300 bg-amber-50 text-amber-700 whitespace-nowrap">Pending</span>`;
+                statusBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-orange-400 bg-orange-100 text-orange-950 shadow-xs whitespace-nowrap"><i class="fa-solid fa-bell text-[10px] text-orange-600"></i> Siap Diproses</span>`;
             }
 
             // 2. Tahap Saat Ini Badge (with whitespace-nowrap)
@@ -2382,7 +2384,7 @@
                 stageBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-semibold text-[10px] rounded-full border border-sky-200 bg-sky-50 text-sky-700 whitespace-nowrap"><i class="fa-solid fa-user-tie text-[9px]"></i> Dosen Wali</span>`;
             } else if (stage === 'Admin Layanan' || (isWaliApproved && !isAdminApproved)) {
                 stageBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-semibold text-[10px] rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 whitespace-nowrap"><i class="fa-solid fa-file-signature text-[9px]"></i> Admin Layanan</span>`;
-            } else if (stage === 'Koordinator TA') {
+            } else if (!hasPembimbing || stage === 'Koordinator TA') {
                 stageBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-bold text-[10px] rounded-full border border-orange-300 bg-orange-50 text-orange-800 shadow-2xs whitespace-nowrap"><i class="fa-solid fa-graduation-cap text-[9px] text-orange-600"></i> Koordinator TA</span>`;
             } else if (stage === 'Ketua KK') {
                 stageBadgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 font-semibold text-[10px] rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 whitespace-nowrap"><i class="fa-solid fa-user-check text-[9px]"></i> Ketua KK</span>`;

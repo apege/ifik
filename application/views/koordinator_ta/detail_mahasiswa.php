@@ -73,13 +73,15 @@
             $stKoor  = $detail['status_approval_koor'] ?? 'Pending';
             $stKk    = $detail['status_approval_kk'] ?? 'Pending';
 
+            $hasPembimbing = (!empty($detail['pembimbing_1']) && !empty($detail['pembimbing_2']));
+
             // Hitung nomor tahap yang sedang aktif (1: Dosen Wali, 2: Admin Layanan, 3: Koordinator TA, 4: Ketua KK, 5: Selesai Approval)
             $activeStageNum = 1;
             if (strcasecmp($stWali, 'Approved') === 0) {
                 $activeStageNum = 2;
                 if (strcasecmp($stAdmin, 'Approved') === 0) {
                     $activeStageNum = 3;
-                    if (strcasecmp($stKoor, 'Approved') === 0) {
+                    if (strcasecmp($stKoor, 'Approved') === 0 && $hasPembimbing) {
                         $activeStageNum = 4;
                         if (strcasecmp($stKk, 'Approved') === 0) {
                             $activeStageNum = 5;
