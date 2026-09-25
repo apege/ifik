@@ -738,7 +738,7 @@
             .catch(err => console.error(err));
         }
 
-        function updateCardState(card) {
+        function updateCardState(card, skipAjax = false) {
             const key = card ? card.getAttribute('data-key') : '';
             const cbValid = card.querySelector('input[name="berkas_valid[]"]');
             const cbKurang = card.querySelector('input[name="berkas_kurang[]"]');
@@ -789,7 +789,7 @@
                 }
             }
 
-            if (key) {
+            if (key && !skipAjax) {
                 const noteVal = noteInput ? noteInput.value : '';
                 sendAjaxStatusUpdate(key, targetStatus, noteVal);
             }
@@ -960,13 +960,13 @@
             showToast('Semua status berkas & catatan berhasil di-reset!');
         }
 
-        function markAllValid() {
+        function markAllValid(skipAjax = true) {
             document.querySelectorAll('.doc-card').forEach(card => {
                 const cbValid = card.querySelector('input[name="berkas_valid[]"]');
                 const cbKurang = card.querySelector('input[name="berkas_kurang[]"]');
                 if (cbValid) cbValid.checked = true;
                 if (cbKurang) cbKurang.checked = false;
-                updateCardState(card);
+                updateCardState(card, skipAjax);
             });
             const total = document.querySelectorAll('.doc-card').length;
             showToast(`Semua ${total} berkas berhasil ditandai Setujui (ACC)!`);
@@ -1070,7 +1070,7 @@
             if (checkedValid < totalCards) {
                 const setAll = confirm('Informasi: Baru ' + checkedValid + ' dari ' + totalCards + ' berkas yang dicentang Valid/Setujui.\n\nApakah Anda ingin otomatis menandai SELURUH ' + totalCards + ' berkas sebagai SETUJUI dan meneruskan pengajuan ini ke Koordinator TA?');
                 if (setAll) {
-                    markAllValid();
+                    markAllValid(true);
                     return true;
                 }
                 return false;
