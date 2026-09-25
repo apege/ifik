@@ -15,7 +15,7 @@
 
     <!-- PHP Progress Calculation -->
     <?php
-        $has_ta = !empty($pendaftaran['judul_1']);
+        $has_ta = !empty($pendaftaran['judul_1']) || !empty($pendaftaran['jenis_ta']) || !empty($pendaftaran['is_submitted']) || !empty($pendaftaran['file_ksm']) || !empty($student_berkas);
 
         $w_status = $has_ta ? ($pendaftaran['status_approval_wali'] ?? 'Pending') : 'Belum Diajukan';
         $a_status = ($has_ta && $w_status === 'Approved') ? ($pendaftaran['status_approval_admin'] ?? 'Pending') : ($has_ta ? 'Pending' : 'Belum Diajukan');
