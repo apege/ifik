@@ -294,10 +294,6 @@ class AdminLayanan_model extends CI_Model {
     }
 
     public function update_verifikasi($nim, $status_input, $catatan = '', $extra_catatan = null, $berkas_valid = array(), $berkas_kurang = array()) {
-        if (!$this->db->table_exists('pendaftaran_ta')) {
-            return false;
-        }
-
         $active_syarat  = $this->get_active_syarat_berkas();
         $student_berkas = $this->get_student_berkas_map($nim);
 
@@ -320,20 +316,24 @@ class AdminLayanan_model extends CI_Model {
 
             $file_name = $student_berkas[$kode]['file_name'] ?? '';
             if (empty($file_name)) {
-                $p_row = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
-                $file_name = $p_row['file_' . $kode] ?? ('berkas_' . $kode . '_' . $nim . '.pdf');
+                if ($this->db->table_exists('pendaftaran_ta')) {
+                    $p_row = $this->db->get_where('pendaftaran_ta', ['nim' => $nim])->row_array();
+                    $file_name = $p_row['file_' . $kode] ?? ('berkas_' . $kode . '_' . $nim . '.pdf');
+                } else {
+                    $file_name = 'berkas_' . $kode . '_' . $nim . '.pdf';
+                }
             }
 
-            $this->save_student_berkas($nim, $kode, $file_name, $st);
+            $this->save_student_berkas($nim, $kode, $file_name, $st, $sb['nama_berkas'] ?? null, $catatan);
 
             // Update legacy column if exists
-            if (in_array($kode, array('ksm', 'transkrip', 'pernyataan', 'bebas_lab'))) {
+            if (in_array($kode, array('ksm', 'transkrip', 'pernyataan', 'bebas_lab')) && $this->db->table_exists('pendaftaran_ta')) {
                 $this->db->where('nim', $nim)->update('pendaftaran_ta', array('status_' . $kode => $st));
             }
 
             if ($st === 'Invalid') {
                 $has_invalid = true;
-                $invalid_items[] = $sb['nama_berkas'] . ' (Tidak Sesuai / Invalid)';
+                $invalid_items[] = ($sb['nama_berkas'] ?? $kode) . ' (Tidak Sesuai / Invalid)';
             } elseif ($st === 'Pending') {
                 $has_pending = true;
             }
@@ -353,36 +353,38 @@ class AdminLayanan_model extends CI_Model {
             $current_stage = 'Koordinator TA';
         }
 
-        $data = array(
-            'status_approval_admin' => $status_approval,
-            'catatan_admin'         => $catatan,
-            'berkas_kurang'         => $berkas_kurang_str,
-            'current_stage'         => $current_stage
-        );
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $data = array(
+                'status_approval_admin' => $status_approval,
+                'catatan_admin'         => $catatan,
+                'berkas_kurang'         => $berkas_kurang_str,
+                'current_stage'         => $current_stage
+            );
 
-        $this->db->where('nim', $nim);
-        return $this->db->update('pendaftaran_ta', $data);
+            $this->db->where('nim', $nim);
+            $this->db->update('pendaftaran_ta', $data);
+        }
+
+        return true;
     }
 
 
     public function reset_verifikasi_pending($nim) {
-        if (!$this->db->table_exists('pendaftaran_ta')) {
-            return false;
+        if ($this->db->table_exists('pendaftaran_ta')) {
+            $data = array(
+                'status_approval_admin' => 'Pending',
+                'catatan_admin'         => NULL,
+                'berkas_kurang'         => NULL,
+                'current_stage'         => 'Admin Layanan',
+                'status_ksm'            => 'Pending',
+                'status_transkrip'      => 'Pending',
+                'status_pernyataan'     => 'Pending',
+                'status_bebas_lab'      => 'Pending'
+            );
+
+            $this->db->where('nim', $nim);
+            $this->db->update('pendaftaran_ta', $data);
         }
-
-        $data = array(
-            'status_approval_admin' => 'Pending',
-            'catatan_admin'         => NULL,
-            'berkas_kurang'         => NULL,
-            'current_stage'         => 'Admin Layanan',
-            'status_ksm'            => 'Pending',
-            'status_transkrip'      => 'Pending',
-            'status_pernyataan'     => 'Pending',
-            'status_bebas_lab'      => 'Pending'
-        );
-
-        $this->db->where('nim', $nim);
-        $this->db->update('pendaftaran_ta', $data);
 
         $this->db->where('nim', $nim);
         return $this->db->update('pendaftaran_berkas', ['status_verifikasi' => 'Pending']);
