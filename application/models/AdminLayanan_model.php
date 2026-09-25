@@ -118,12 +118,29 @@ class AdminLayanan_model extends CI_Model {
         return $this->db->delete('syarat_berkas_ta');
     }
 
+    private function _parse_fp_admin_status($fp_row) {
+        if (empty($fp_row) || !is_array($fp_row)) return 'Pending';
+        if (!empty($fp_row['status_adminlaa']) && strcasecmp($fp_row['status_adminlaa'], 'Pending') !== 0) {
+            return $fp_row['status_adminlaa'];
+        }
+        if (!empty($fp_row['status_admin_laa']) && strcasecmp($fp_row['status_admin_laa'], 'Pending') !== 0) {
+            return $fp_row['status_admin_laa'];
+        }
+        if (!empty($fp_row['status_admin']) && strcasecmp($fp_row['status_admin'], 'Pending') !== 0) {
+            return $fp_row['status_admin'];
+        }
+        if (!empty($fp_row['status_laa']) && strcasecmp($fp_row['status_laa'], 'Pending') !== 0) {
+            return $fp_row['status_laa'];
+        }
+        return $fp_row['status_admin_laa'] ?? ($fp_row['status_adminlaa'] ?? ($fp_row['status_admin'] ?? ($fp_row['status_laa'] ?? 'Pending')));
+    }
+
     public function get_student_berkas_map($nim) {
         $map = array();
 
         // 1. Fetch from file_pendaftaran
         if ($this->db->table_exists('file_pendaftaran')) {
-            $target_ids = array_unique(['usr_mhs_' . $nim, 'mhs_' . $nim, $nim]);
+            $target_ids = array_unique(['usr_mhs_' . $nim, 'mhs_' . $nim, 'usr_' . $nim, $nim]);
             $fp_rows = $this->db->where_in('id_mhs', $target_ids)->get('file_pendaftaran')->result_array();
             if (!empty($fp_rows)) {
                 foreach ($fp_rows as $fp) {
@@ -142,7 +159,7 @@ class AdminLayanan_model extends CI_Model {
                     }
 
                     if ($kode) {
-                        $st = $fp['status_adminlaa'] ?? ($fp['status_admin'] ?? ($fp['status_laa'] ?? 'Pending'));
+                        $st = $this->_parse_fp_admin_status($fp);
                         $cleanSt = ($st === 'Approved' || $st === 'Valid') ? 'Valid' : (($st === 'Rejected' || $st === 'Invalid') ? 'Invalid' : 'Pending');
                         $map[$kode] = array(
                             'nim'               => $nim,
@@ -800,7 +817,7 @@ class AdminLayanan_model extends CI_Model {
                     }
                 }
                 
-                $st_adm = $fp['status_admin_laa'] ?? ($fp['status_admin'] ?? ($fp['status_laa'] ?? 'Pending'));
+                $st_adm = $this->_parse_fp_admin_status($fp);
                 $student_map[$nim]['status_admin'][] = $st_adm;
                 if (isset($fp['status_doswal'])) {
                     $student_map[$nim]['status_doswal'][] = $fp['status_doswal'];
@@ -907,12 +924,35 @@ class AdminLayanan_model extends CI_Model {
             $nama_depan = array_shift($parts) ?: 'Mahasiswa';
             $nama_belakang = implode(' ', $parts);
 
-            $admin_st_list = $info['status_admin'];
-            $st_admin = 'Pending';
-            if (in_array('Rejected', $admin_st_list) || in_array('Invalid', $admin_st_list)) {
+            $active_syarat = $this->get_active_syarat_berkas();
+            $required_kodes = !empty($active_syarat) ? array_column($active_syarat, 'kode_berkas') : array('ksm', 'transkrip', 'pernyataan', 'bebas_lab');
+            $total_required = count($required_kodes);
+
+            // Check pendaftaran_berkas table first
+            $p_berkas_map = $this->get_student_berkas_map($nim);
+            $pb_valid_count = 0;
+            $pb_invalid_count = 0;
+            foreach ($required_kodes as $rk) {
+                $st_v = $p_berkas_map[$rk]['status_verifikasi'] ?? 'Pending';
+                if ($st_v === 'Valid' || $st_v === 'Approved') {
+                    $pb_valid_count++;
+                } elseif ($st_v === 'Invalid' || $st_v === 'Rejected') {
+                    $pb_invalid_count++;
+                }
+            }
+
+            if ($pb_invalid_count > 0) {
                 $st_admin = 'Rejected';
-            } elseif (!empty($admin_st_list) && count(array_filter($admin_st_list, function($s) { return $s === 'Approved' || $s === 'Valid'; })) === count($admin_st_list)) {
+            } elseif ($pb_valid_count === $total_required && $total_required > 0) {
                 $st_admin = 'Approved';
+            } else {
+                $admin_st_list = $info['status_admin'];
+                $st_admin = 'Pending';
+                if (in_array('Rejected', $admin_st_list) || in_array('Invalid', $admin_st_list)) {
+                    $st_admin = 'Rejected';
+                } elseif (!empty($admin_st_list) && count(array_filter($admin_st_list, function($s) { return $s === 'Approved' || $s === 'Valid'; })) === count($admin_st_list)) {
+                    $st_admin = 'Approved';
+                }
             }
 
             $g_data = $info['guidance'] ?? array();
