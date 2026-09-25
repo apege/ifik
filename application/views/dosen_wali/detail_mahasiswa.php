@@ -213,8 +213,8 @@
                             <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
                                 <?= htmlspecialchars(($detail['nama_depan'] ?? 'Mahasiswa') . ' ' . ($detail['nama_belakang'] ?? '')); ?>
                             </h1>
-                            <button type="button" onclick="copyNIM('<?= $detail['nim']; ?>')" class="px-2.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-[11px] font-mono font-bold border border-slate-200 flex items-center gap-1.5 transition-colors" title="Klik untuk salin NIM">
-                                <span><?= htmlspecialchars($detail['nim']); ?></span>
+                            <button type="button" onclick="copyNIM('<?= $detail['nim'] ?? ($nim ?? ''); ?>')" class="px-2.5 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-[11px] font-mono font-bold border border-slate-200 flex items-center gap-1.5 transition-colors" title="Klik untuk salin NIM">
+                                <span><?= htmlspecialchars($detail['nim'] ?? ($nim ?? '')); ?></span>
                                 <i class="bi bi-clipboard text-slate-400 text-[10px]"></i>
                             </button>
                         </div>
@@ -371,7 +371,7 @@
         </div>
 
         <!-- Document Verification Form -->
-        <form method="POST" action="<?= site_url('dosen/wali/detail_mahasiswa/' . $detail['nim']); ?>" id="formVerifikasi">
+        <form method="POST" action="<?= site_url('dosen/wali/detail_mahasiswa/' . ($detail['nim'] ?? ($nim ?? ''))); ?>" id="formVerifikasi">
             <input type="hidden" name="status" id="formStatus" value="<?= $status_wali === 'Approved' ? 'Approved' : ($status_wali === 'Rejected' ? 'Rejected' : 'Pending'); ?>">
             <input type="hidden" name="status_judul_jenis" id="inputStatusJudulJenis" value="<?= $jj_status; ?>">
             <input type="hidden" name="catatan_judul_jenis" id="inputCatatanJudulJenis" value="<?= htmlspecialchars($jj_note); ?>">
@@ -418,7 +418,7 @@
                         $sb_idx = 1;
                         foreach ($active_sb as $sb) {
                             $k = $sb['kode_berkas'];
-                            $file_val = $student_berkas[$k]['file_name'] ?? ($detail['file_' . $k] ?? ($k . '_' . $detail['nim'] . '.pdf'));
+                            $file_val = $student_berkas[$k]['file_name'] ?? ($detail['file_' . $k] ?? ($k . '_' . ($detail['nim'] ?? ($nim ?? '')) . '.pdf'));
                             $st_val = $detail['status_file_' . $k] ?? 'Pending';
                             if ($st_val === 'Pending' && !empty($student_berkas[$k]['status_verifikasi'])) {
                                 $ver = $student_berkas[$k]['status_verifikasi'];
@@ -740,7 +740,7 @@
                             <?php 
                                 $mhs_full_name = trim(($detail['nama_depan'] ?? ($detail['nama'] ?? 'Mahasiswa')) . ' ' . ($detail['nama_belakang'] ?? ''));
                             ?>
-                            <span class="text-[11px] text-slate-400"><?= htmlspecialchars($mhs_full_name); ?> &bull; <span class="font-mono text-slate-300"><?= $detail['nim']; ?></span></span>
+                            <span class="text-[11px] text-slate-400"><?= htmlspecialchars($mhs_full_name); ?> &bull; <span class="font-mono text-slate-300"><?= htmlspecialchars($detail['nim'] ?? ($nim ?? '')); ?></span></span>
                         </div>
                     </div>
                     <button type="button" onclick="closeMultiDocModal()" class="md:hidden w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-lg flex items-center justify-center transition-colors cursor-pointer">&times;</button>
@@ -937,7 +937,7 @@
         window.reviewedDocs = <?= json_encode($reviewed_map ?? []); ?>;
         // Merge dari localStorage agar status 'Sudah Dilihat' langsung persisten seketika saat refresh
         try {
-            const storageKey = 'ifik_reviewed_' + '<?= $detail['nim']; ?>';
+            const storageKey = 'ifik_reviewed_' + '<?= $detail['nim'] ?? ($nim ?? ''); ?>';
             let stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
             for (let k in stored) {
                 if (stored[k]) {
@@ -1168,7 +1168,7 @@
 
             // Simpan ke localStorage agar seketika persisten saat refresh
             try {
-                const storageKey = 'ifik_reviewed_' + '<?= $detail['nim']; ?>';
+                const storageKey = 'ifik_reviewed_' + '<?= $detail['nim'] ?? ($nim ?? ''); ?>';
                 let stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
                 allKeys.forEach(k => stored[k] = true);
                 localStorage.setItem(storageKey, JSON.stringify(stored));
@@ -1177,7 +1177,7 @@
             // Kirim batch AJAX request ke server
             try {
                 const fd = new FormData();
-                fd.append('nim', '<?= $detail['nim']; ?>');
+                fd.append('nim', '<?= $detail['nim'] ?? ($nim ?? ''); ?>');
                 fd.append('file_type', allKeys.join(','));
                 fetch('<?= site_url("dosen/wali/log_review_ajax"); ?>', {
                     method: 'POST',
@@ -1549,7 +1549,7 @@
 
             // Simpan ke localStorage agar seketika persisten saat refresh
             try {
-                const storageKey = 'ifik_reviewed_' + '<?= $detail['nim']; ?>';
+                const storageKey = 'ifik_reviewed_' + '<?= $detail['nim'] ?? ($nim ?? ''); ?>';
                 let stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
                 stored[key] = true;
                 localStorage.setItem(storageKey, JSON.stringify(stored));
@@ -1558,7 +1558,7 @@
             // Send AJAX to server to log review timestamp
             try {
                 const fd = new FormData();
-                fd.append('nim', '<?= $detail['nim']; ?>');
+                fd.append('nim', '<?= $detail['nim'] ?? ($nim ?? ''); ?>');
                 fd.append('file_type', key);
                 fetch('<?= site_url("dosen/wali/log_review_ajax"); ?>', {
                     method: 'POST',
@@ -1824,7 +1824,7 @@
         function sendJudulJenisAjax(status, catatan) {
             try {
                 const fd = new FormData();
-                fd.append('nim', '<?= $detail['nim']; ?>');
+                fd.append('nim', '<?= $detail['nim'] ?? ($nim ?? ''); ?>');
                 fd.append('status', status);
                 fd.append('catatan', catatan);
                 fetch('<?= site_url("dosen/wali/update_judul_jenis_ajax"); ?>', {

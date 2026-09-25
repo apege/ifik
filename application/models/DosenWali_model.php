@@ -775,19 +775,34 @@ class DosenWali_model extends CI_Model {
                 ->row_array();
         }
 
-        $target_ids = array_unique(['usr_mhs_' . $nim, 'mhs_' . $nim, $nim]);
-        $files = $this->db->where_in('id_mhs', $target_ids)->get('file_pendaftaran')->result_array();
+        $mhs_tbl = $this->db->table_exists('mahasiswa') ? 'mahasiswa' : null;
+        $mhs_row = null;
+        if ($mhs_tbl) {
+            $mhs_row = $this->db->get_where('mahasiswa', ['nim' => $nim])->row_array();
+        }
+
+        $target_ids = array_values(array_unique(array_filter([$user_row['id'] ?? null, 'usr_mhs_' . $nim, 'mhs_' . $nim, $nim])));
+        $files = [];
+        if ($this->db->table_exists('file_pendaftaran')) {
+            $files = $this->db->where_in('id_mhs', $target_ids)->get('file_pendaftaran')->result_array();
+        }
 
         $guidance = null;
         if ($this->db->table_exists('guidance')) {
             $guidance = $this->db->where_in('id_mhs', $target_ids)->order_by('date', 'DESC')->get('guidance')->row_array();
+            if (!$guidance) {
+                $guidance = $this->db->get_where('guidance', ['id' => 'gdn_' . $nim])->row_array();
+            }
         }
 
-        if (empty($files) && empty($user_row) && empty($guidance)) return null;
-
-        $namaMhs = $user_row['name'] ?? ('Mahasiswa ' . $nim);
-        $emailMhs = $user_row['email'] ?? '';
-        $prodiMhs = $user_row['prodi'] ?? '';
+        $namaMhs = !empty($user_row['name'])
+            ? $user_row['name']
+            : (!empty($mhs_row['nama_depan'])
+                ? trim($mhs_row['nama_depan'] . ' ' . ($mhs_row['nama_belakang'] ?? ''))
+                : ('Mahasiswa ' . $nim));
+        $emailMhs = $user_row['email'] ?? ($mhs_row['email'] ?? '-');
+        $prodiMhs = $user_row['prodi'] ?? ($mhs_row['prodi'] ?? ($mhs_row['konsentrasi_dkv'] ?? 'Desain Komunikasi Visual'));
+        $noHpMhs  = $user_row['no_telp'] ?? ($user_row['no_hp'] ?? ($mhs_row['no_hp'] ?? '-'));
 
         $judul_1 = !empty($guidance['judul_1']) ? $guidance['judul_1'] : 'Usulan Judul Tugas Akhir';
         $judul_en = $guidance['judul_en'] ?? '';
@@ -887,7 +902,9 @@ class DosenWali_model extends CI_Model {
             'nama_depan'             => $namaMhs,
             'nama_belakang'          => '',
             'mhs_konsentrasi'        => $konsentrasi,
+            'prodi'                  => $prodiMhs,
             'email'                  => $emailMhs,
+            'no_hp'                  => $noHpMhs,
             'judul_1'                => $judul_1,
             'judul_en'               => $judul_en,
             'jenis_ta'               => $jenis_ta,

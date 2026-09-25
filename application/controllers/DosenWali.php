@@ -48,8 +48,47 @@ class DosenWali extends CI_Controller {
         $this->load->model('AdminLayanan_model');
 
         $data['title']          = 'Detail Mahasiswa & Approval Pendaftaran TA';
+        $data['nim']            = $nim;
         $data['dosen_info']     = $this->DosenWali_model->get_dosen_wali_info($nip_dosen);
         $data['detail']         = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
+        if (empty($data['detail'])) {
+            $data['detail'] = [
+                'id'                     => 'usr_mhs_' . $nim,
+                'nim'                    => $nim,
+                'nama_depan'             => 'Mahasiswa ' . $nim,
+                'nama_belakang'          => '',
+                'mhs_konsentrasi'        => 'Desain Komunikasi Visual',
+                'prodi'                  => 'Desain Komunikasi Visual',
+                'email'                  => '-',
+                'no_hp'                  => '-',
+                'judul_1'                => 'Usulan Judul Tugas Akhir',
+                'judul_en'               => '',
+                'jenis_ta'               => 'Pengkaryaan',
+                'status_judul'           => 'Pending',
+                'catatan_judul'          => '',
+                'status_approval_wali'   => 'Pending',
+                'status_approval_admin'  => 'Pending',
+                'status_approval_koor'   => 'Pending',
+                'status_approval_kk'     => 'Pending',
+                'current_stage'          => 'Dosen Wali',
+                'tgl_daftar'             => date('Y-m-d H:i:s'),
+                'created_at'             => date('Y-m-d H:i:s'),
+                'file_ksm'               => '',
+                'status_file_ksm'        => 'Pending',
+                'catatan_file_ksm'       => '',
+                'file_transkrip'         => '',
+                'status_file_transkrip'  => 'Pending',
+                'catatan_file_transkrip' => '',
+                'file_pernyataan'        => '',
+                'status_file_pernyataan' => 'Pending',
+                'catatan_file_pernyataan'=> '',
+                'file_bebas_lab'         => '',
+                'status_file_bebas_lab'  => 'Pending',
+                'catatan_file_bebas_lab' => '',
+                'berkas_map'             => [],
+                'total_berkas'           => 0
+            ];
+        }
         $data['syarat_berkas']  = $this->AdminLayanan_model->get_active_syarat_berkas();
         $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
 
