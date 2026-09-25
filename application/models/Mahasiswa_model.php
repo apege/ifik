@@ -181,6 +181,12 @@ class Mahasiswa_model extends CI_Model {
                 $existing_g = $this->db->get_where('guidance', ['id' => 'gdn_' . $nim])->row_array();
             }
 
+            // Pastikan kolom jenis_TA di tabel guidance berupa VARCHAR agar dapat menampung 'Pengkaryaan' & 'Penulisan' tanpa truncated oleh ENUM legacy
+            $prev_dbg = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            @$this->db->query("ALTER TABLE `guidance` MODIFY COLUMN `jenis_TA` VARCHAR(100) DEFAULT 'TA Reguler'");
+            $this->db->db_debug = $prev_dbg;
+
             $g_fields = $this->db->list_fields('guidance');
             $g_data   = [];
 
@@ -212,7 +218,7 @@ class Mahasiswa_model extends CI_Model {
             if (in_array('peminatan', $g_fields)) {
                 $g_data['peminatan'] = !empty(trim($data_ta['konsentrasi_dkv'] ?? ''))
                     ? trim($data_ta['konsentrasi_dkv'])
-                    : (!empty(trim($existing_g['peminatan'] ?? '')) ? trim($existing_g['peminatan']) : 'Desain Komunikasi Visual');
+                    : (!empty(trim($existing_g['peminatan'] ?? '')) ? trim($existing_g['peminatan']) : 'Informatika');
             }
             if (in_array('tahun', $g_fields)) $g_data['tahun'] = date('Y');
             $is_sub_flag = !empty($data_ta['is_submitted']);

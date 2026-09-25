@@ -222,38 +222,44 @@
                                     Jenis tugas akhir <span class="text-orange-500">*</span>
                                 </label>
 
+                                <?php
+                                    $current_jenis_val = !empty(trim($pendaftaran['jenis_ta'] ?? '')) ? trim($pendaftaran['jenis_ta']) : '';
+                                    $standard_jenis_opts = ['TA Reguler', 'TA Jurnal', 'TA HKI', 'TA PROYEK', 'Pengkaryaan', 'Penulisan'];
+                                    if (!empty($current_jenis_val) && !in_array($current_jenis_val, $standard_jenis_opts)) {
+                                        $standard_jenis_opts[] = $current_jenis_val;
+                                    }
+                                ?>
                                 <!-- Custom 3D Glass Dropdown for Jenis TA -->
                                 <div class="custom-dropdown relative w-full z-30" id="dropdownJenisTA">
-                                    <input type="hidden" name="jenis_ta" id="inputJenisTA" value="<?= htmlspecialchars($pendaftaran['jenis_ta'] ?? ''); ?>" required>
+                                    <input type="hidden" name="jenis_ta" id="inputJenisTA" value="<?= htmlspecialchars($current_jenis_val); ?>" required>
 
                                     <button type="button" class="dropdown-trigger w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/90 hover:border-orange-400 focus:ring-4 focus:ring-orange-500/10 outline-none text-slate-800 font-semibold text-xs flex items-center justify-between transition shadow-xs">
-                                        <span class="trigger-label <?= !empty($pendaftaran['jenis_ta']) ? 'text-slate-900 font-semibold' : 'text-slate-400 font-normal'; ?>">
-                                            <?= htmlspecialchars(!empty($pendaftaran['jenis_ta']) ? $pendaftaran['jenis_ta'] : '-- Pilih Jenis TA --'); ?>
+                                        <span class="trigger-label <?= !empty($current_jenis_val) ? 'text-slate-900 font-semibold' : 'text-slate-400 font-normal'; ?>">
+                                            <?= htmlspecialchars(!empty($current_jenis_val) ? $current_jenis_val : '-- Pilih Jenis TA --'); ?>
                                         </span>
                                         <i class="bi bi-chevron-down text-orange-500 font-bold text-xs transition-transform duration-200 chevron-icon"></i>
                                     </button>
 
-                                    <div class="dropdown-menu hidden absolute left-0 right-0 top-full mt-2 bg-white backdrop-blur-xl border border-orange-200/90 rounded-2xl p-2 shadow-2xl z-[100] space-y-1">
-                                        <div class="dropdown-option <?= (($pendaftaran['jenis_ta'] ?? '') === 'Pengkaryaan') ? 'bg-orange-100/80 text-orange-700 font-bold' : ''; ?> px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Pengkaryaan">
-                                            <span>Pengkaryaan</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm <?= (($pendaftaran['jenis_ta'] ?? '') === 'Pengkaryaan') ? '' : 'hidden'; ?> check-icon"></i>
-                                        </div>
-                                        <div class="dropdown-option <?= (($pendaftaran['jenis_ta'] ?? '') === 'Penulisan') ? 'bg-orange-100/80 text-orange-700 font-bold' : ''; ?> px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="Penulisan">
-                                            <span>Penulisan</span>
-                                            <i class="bi bi-check-lg text-orange-600 font-bold text-sm <?= (($pendaftaran['jenis_ta'] ?? '') === 'Penulisan') ? '' : 'hidden'; ?> check-icon"></i>
-                                        </div>
+                                    <div class="dropdown-menu hidden absolute left-0 right-0 top-full mt-2 bg-white backdrop-blur-xl border border-orange-200/90 rounded-2xl p-2 shadow-2xl z-[100] space-y-1 max-h-60 overflow-y-auto">
+                                        <?php foreach ($standard_jenis_opts as $s_opt): ?>
+                                            <?php $is_sel = ($current_jenis_val === $s_opt); ?>
+                                            <div class="dropdown-option <?= $is_sel ? 'bg-orange-100/80 text-orange-700 font-bold' : ''; ?> px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-orange-50 hover:text-orange-600 transition flex items-center justify-between cursor-pointer" data-value="<?= htmlspecialchars($s_opt); ?>">
+                                                <span><?= htmlspecialchars($s_opt); ?></span>
+                                                <i class="bi bi-check-lg text-orange-600 font-bold text-sm <?= $is_sel ? '' : 'hidden'; ?> check-icon"></i>
+                                            </div>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Preview Choice Badge Card -->
-                            <div class="<?= empty($pendaftaran['jenis_ta']) ? 'hidden' : ''; ?> p-4 rounded-xl bg-orange-100/60 border border-orange-200 flex items-center gap-3 transition-all duration-200" id="previewJenisTA">
+                            <div class="<?= empty($current_jenis_val) ? 'hidden' : ''; ?> p-4 rounded-xl bg-orange-100/60 border border-orange-200 flex items-center gap-3 transition-all duration-200" id="previewJenisTA">
                                 <div class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs font-bold shrink-0 box-3d">
                                     <i class="bi bi-check-lg"></i>
                                 </div>
                                 <div>
                                     <span class="text-[9px] font-bold uppercase tracking-wider text-orange-700 block">JENIS TUGAS AKHIR DIPILIH</span>
-                                    <span class="text-xs font-bold text-slate-900" id="previewTextJenisTA"><?= htmlspecialchars($pendaftaran['jenis_ta'] ?? ''); ?></span>
+                                    <span class="text-xs font-bold text-slate-900" id="previewTextJenisTA"><?= htmlspecialchars($current_jenis_val); ?></span>
                                 </div>
                             </div>
 

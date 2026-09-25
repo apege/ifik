@@ -163,7 +163,7 @@
 
                 <div class="p-4 rounded-xl bg-orange-50/50 border border-orange-200/80 space-y-1">
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor Induk Mahasiswa (NIM)</span>
-                    <p class="text-sm font-extrabold text-slate-900"><?= htmlspecialchars($mahasiswa['nim'] ?? '1301210001'); ?></p>
+                    <p class="text-sm font-extrabold text-slate-900"><?= htmlspecialchars($mahasiswa['nim'] ?? ($this->session->userdata('nim') ?? '')); ?></p>
                 </div>
 
                 <div class="p-4 rounded-xl bg-orange-50/50 border border-orange-200/80 space-y-1">
