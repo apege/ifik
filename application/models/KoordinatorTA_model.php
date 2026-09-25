@@ -44,55 +44,70 @@ class KoordinatorTA_model extends CI_Model {
         $files_map = array();
         if (empty($id_mhs_list)) return $files_map;
 
-        $this->db->select('id_mhs, nama, file, status_adminlaa, status_doswal, komentar');
+        $this->db->select('*');
         $this->db->from('file_pendaftaran');
         $this->db->where_in('id_mhs', $id_mhs_list);
         $query = $this->db->get();
 
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result_array() as $f) {
-                $mId = $f['id_mhs'];
-                $namaJenis = strtolower(trim($f['nama']));
-                if (!isset($files_map[$mId])) {
-                    $files_map[$mId] = array(
-                        'file_ksm'          => null,
-                        'status_ksm'        => 'Pending',
-                        'file_transkrip'    => null,
-                        'status_transkrip'  => 'Pending',
-                        'file_pernyataan'   => null,
-                        'status_pernyataan' => 'Pending',
-                        'file_bebas_lab'    => null,
-                        'status_bebas_lab'  => 'Pending',
-                        'status_doswal'     => 'Pending',
-                        'status_adminlaa'   => 'Pending',
-                        'catatan_wali'      => '',
-                        'catatan_admin'     => ''
-                    );
-                }
+                $rawId = $f['id_mhs'];
+                $cleanNim = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', $rawId);
+                $namaJenis = strtolower(trim($f['nama'] ?? ''));
 
-                if (strpos($namaJenis, 'ksm') !== false) {
-                    $files_map[$mId]['file_ksm'] = $f['file'];
-                    $files_map[$mId]['status_ksm'] = $f['status_doswal'] ?: 'Valid';
-                } elseif (strpos($namaJenis, 'transkrip') !== false) {
-                    $files_map[$mId]['file_transkrip'] = $f['file'];
-                    $files_map[$mId]['status_transkrip'] = $f['status_doswal'] ?: 'Valid';
-                } elseif (strpos($namaJenis, 'pernyataan') !== false) {
-                    $files_map[$mId]['file_pernyataan'] = $f['file'];
-                    $files_map[$mId]['status_pernyataan'] = $f['status_doswal'] ?: 'Valid';
-                } elseif (strpos($namaJenis, 'bebas') !== false || strpos($namaJenis, 'lab') !== false) {
-                    $files_map[$mId]['file_bebas_lab'] = $f['file'];
-                    $files_map[$mId]['status_bebas_lab'] = $f['status_doswal'] ?: 'Valid';
-                }
+                $st_doswal = $f['status_doswal'] ?? ($f['status_wali'] ?? 'Pending');
+                $st_admin  = $f['status_adminlaa'] ?? ($f['status_admin_laa'] ?? ($f['status_admin'] ?? ($f['status_laa'] ?? 'Pending')));
 
-                if (!empty($f['status_doswal'])) {
-                    $files_map[$mId]['status_doswal'] = $f['status_doswal'];
-                }
-                if (!empty($f['status_adminlaa'])) {
-                    $files_map[$mId]['status_adminlaa'] = $f['status_adminlaa'];
-                }
-                if (!empty($f['komentar'])) {
-                    $files_map[$mId]['catatan_wali'] = $f['komentar'];
-                    $files_map[$mId]['catatan_admin'] = $f['komentar'];
+                $keysToMap = array_unique(array_filter([$rawId, $cleanNim, 'usr_mhs_' . $cleanNim, 'mhs_' . $cleanNim]));
+
+                foreach ($keysToMap as $k) {
+                    if (!isset($files_map[$k])) {
+                        $files_map[$k] = array(
+                            'file_ksm'          => null,
+                            'status_ksm'        => 'Pending',
+                            'file_transkrip'    => null,
+                            'status_transkrip'  => 'Pending',
+                            'file_pernyataan'   => null,
+                            'status_pernyataan' => 'Pending',
+                            'file_bebas_lab'    => null,
+                            'status_bebas_lab'  => 'Pending',
+                            'status_doswal'     => 'Pending',
+                            'status_adminlaa'   => 'Pending',
+                            'catatan_wali'      => '',
+                            'catatan_admin'     => ''
+                        );
+                    }
+
+                    if (strpos($namaJenis, 'ksm') !== false) {
+                        $files_map[$k]['file_ksm'] = $f['file'];
+                        $files_map[$k]['status_ksm'] = $st_doswal ?: 'Valid';
+                    } elseif (strpos($namaJenis, 'transkrip') !== false) {
+                        $files_map[$k]['file_transkrip'] = $f['file'];
+                        $files_map[$k]['status_transkrip'] = $st_doswal ?: 'Valid';
+                    } elseif (strpos($namaJenis, 'pernyataan') !== false) {
+                        $files_map[$k]['file_pernyataan'] = $f['file'];
+                        $files_map[$k]['status_pernyataan'] = $st_doswal ?: 'Valid';
+                    } elseif (strpos($namaJenis, 'bebas') !== false || strpos($namaJenis, 'lab') !== false) {
+                        $files_map[$k]['file_bebas_lab'] = $f['file'];
+                        $files_map[$k]['status_bebas_lab'] = $st_doswal ?: 'Valid';
+                    }
+
+                    if (!empty($st_doswal) && $st_doswal !== 'Pending') {
+                        $files_map[$k]['status_doswal'] = $st_doswal;
+                    } elseif (empty($files_map[$k]['status_doswal']) || $files_map[$k]['status_doswal'] === 'Pending') {
+                        $files_map[$k]['status_doswal'] = $st_doswal;
+                    }
+
+                    if (!empty($st_admin) && $st_admin !== 'Pending') {
+                        $files_map[$k]['status_adminlaa'] = $st_admin;
+                    } elseif (empty($files_map[$k]['status_adminlaa']) || $files_map[$k]['status_adminlaa'] === 'Pending') {
+                        $files_map[$k]['status_adminlaa'] = $st_admin;
+                    }
+
+                    if (!empty($f['komentar'])) {
+                        $files_map[$k]['catatan_wali'] = $f['komentar'];
+                        $files_map[$k]['catatan_admin'] = $f['komentar'];
+                    }
                 }
             }
         }
@@ -160,18 +175,31 @@ class KoordinatorTA_model extends CI_Model {
         $rawList = $query->result_array();
         $id_mhs_list = array();
         foreach ($rawList as $row) {
-            if (!empty($row['user_id'])) $id_mhs_list[] = $row['user_id'];
-            if (!empty($row['nim'])) $id_mhs_list[] = $row['nim'];
-            if (!empty($row['id_mhs'])) $id_mhs_list[] = $row['id_mhs'];
+            if (!empty($row['user_id'])) {
+                $id_mhs_list[] = $row['user_id'];
+                $id_mhs_list[] = 'usr_' . $row['user_id'];
+            }
+            if (!empty($row['nim'])) {
+                $id_mhs_list[] = $row['nim'];
+                $id_mhs_list[] = 'usr_mhs_' . $row['nim'];
+                $id_mhs_list[] = 'mhs_' . $row['nim'];
+            }
+            if (!empty($row['id_mhs'])) {
+                $id_mhs_list[] = $row['id_mhs'];
+                $cNim = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', $row['id_mhs']);
+                $id_mhs_list[] = $cNim;
+                $id_mhs_list[] = 'usr_mhs_' . $cNim;
+                $id_mhs_list[] = 'mhs_' . $cNim;
+            }
         }
-        $id_mhs_list = array_unique($id_mhs_list);
+        $id_mhs_list = array_values(array_unique(array_filter($id_mhs_list)));
         $files_map = $this->_get_mhs_files($id_mhs_list);
 
         $result = array();
         foreach ($rawList as $row) {
             $uId = $row['user_id'] ?: $row['id_mhs'];
             $nim = $row['nim'] ?: $uId;
-            $fData = $files_map[$uId] ?? ($files_map[$nim] ?? ($files_map[$row['id_mhs']] ?? array()));
+            $fData = $files_map[$nim] ?? ($files_map['usr_mhs_' . $nim] ?? ($files_map['mhs_' . $nim] ?? ($files_map[$uId] ?? ($files_map[$row['id_mhs']] ?? array()))));
 
             $nameParts = explode(' ', trim($row['name'] ?? 'Mahasiswa'));
             $nama_depan = array_shift($nameParts);
@@ -308,8 +336,8 @@ class KoordinatorTA_model extends CI_Model {
             );
         }
 
-        $this->db->where('id_mhs', $userId);
-        $this->db->or_where('id_mhs', $mhs['nim']);
+        $target_ids = array_unique([$userId, $mhs['nim'], 'usr_mhs_' . $mhs['nim'], 'mhs_' . $mhs['nim']]);
+        $this->db->where_in('id_mhs', $target_ids);
         $guidance = $this->db->get('guidance')->row_array();
 
         $guidanceId = $guidance ? $guidance['id'] : ('gdn_' . ($mhs['nim'] ?: uniqid()));
