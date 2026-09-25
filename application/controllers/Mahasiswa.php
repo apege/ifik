@@ -23,7 +23,14 @@ class Mahasiswa extends CI_Controller {
     }
 
     private function _get_current_nim() {
-        return $this->session->userdata('nim') ?: ($this->session->userdata('nidn_nim') ?: '1301210001');
+        $nim = $this->session->userdata('nim') ?: ($this->session->userdata('nidn_nim') ?: ($this->session->userdata('username') ?: ''));
+        if (empty($nim) && $this->session->userdata('user_id') && $this->db->table_exists('user')) {
+            $u = $this->db->select('nim, nidn_nim, username')->get_where('user', ['id' => $this->session->userdata('user_id')])->row_array();
+            if ($u) {
+                $nim = !empty($u['nim']) ? $u['nim'] : (!empty($u['nidn_nim']) ? $u['nidn_nim'] : ($u['username'] ?? ''));
+            }
+        }
+        return $nim;
     }
 
     private function _do_upload($field_name, $config) {
@@ -1054,6 +1061,12 @@ class Mahasiswa extends CI_Controller {
             if (!$existing_g) {
                 $existing_g = $this->db->get_where('guidance', ['id' => 'gdn_' . $nim])->row_array();
             }
+
+            // Pastikan kolom jenis_TA di tabel guidance berupa VARCHAR agar dapat menampung 'Pengkaryaan' & 'Penulisan' tanpa truncated oleh ENUM legacy
+            $prev_dbg = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            @$this->db->query("ALTER TABLE `guidance` MODIFY COLUMN `jenis_TA` VARCHAR(100) DEFAULT 'TA Reguler'");
+            $this->db->db_debug = $prev_dbg;
 
             $g_fields = $this->db->list_fields('guidance');
             $g_data = array();

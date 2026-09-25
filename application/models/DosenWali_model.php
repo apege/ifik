@@ -22,7 +22,12 @@ class DosenWali_model extends CI_Model {
             if (in_array('komentar', $g_fields)) $g_up['komentar'] = $catatan_judul;
             if (in_array('date_edit', $g_fields)) $g_up['date_edit'] = date('Y-m-d H:i:s');
             if (!empty($g_up)) {
-                $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+                $this->db->group_start()
+                    ->where_in('id_mhs', $target_ids)
+                    ->or_where('id', 'gdn_' . $nim)
+                    ->or_like('id_mhs', $nim)
+                ->group_end()
+                ->update('guidance', $g_up);
             }
         }
         return true;
@@ -141,7 +146,12 @@ class DosenWali_model extends CI_Model {
             if (in_array('komentar', $g_fields)) $g_up['komentar'] = $catatan;
             if (in_array('date_edit', $g_fields)) $g_up['date_edit'] = date('Y-m-d H:i:s');
             if (!empty($g_up)) {
-                $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+                $this->db->group_start()
+                    ->where_in('id_mhs', $target_ids)
+                    ->or_where('id', 'gdn_' . $nim)
+                    ->or_like('id_mhs', $nim)
+                ->group_end()
+                ->update('guidance', $g_up);
             }
         }
 
@@ -180,7 +190,12 @@ class DosenWali_model extends CI_Model {
                 $g_up['komentar'] = $catatan;
             }
             if (!empty($g_up)) {
-                $this->db->where_in('id_mhs', $target_ids)->update('guidance', $g_up);
+                $this->db->group_start()
+                    ->where_in('id_mhs', $target_ids)
+                    ->or_where('id', 'gdn_' . $nim)
+                    ->or_like('id_mhs', $nim)
+                ->group_end()
+                ->update('guidance', $g_up);
             }
         }
 
@@ -535,16 +550,17 @@ class DosenWali_model extends CI_Model {
         // Ambil data guidance terbaru untuk student yang sudah mendaftar TA
         $guidance_map = [];
         if ($this->db->table_exists('guidance') && !empty($target_ids)) {
-            $distinct_ids = array_slice(array_unique($target_ids), 0, 25);
-            $g_rows = $this->db->select('id, id_mhs, judul_1, judul_en, peminatan, keterangan, date')
+            $distinct_ids = array_values(array_unique($target_ids));
+            $g_rows = $this->db->select('id, id_mhs, judul_1, judul_en, jenis_TA, peminatan, keterangan, komentar, date')
                 ->where_in('id_mhs', $distinct_ids)
-                ->limit(25)
+                ->or_where_in('id', array_map(function($id){ return 'gdn_' . preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', $id); }, $distinct_ids))
                 ->get('guidance')
                 ->result_array();
             if (!empty($g_rows)) {
                 foreach ($g_rows as $gr) {
                     $c_nim = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', $gr['id_mhs']);
                     $guidance_map[$gr['id_mhs']] = $gr;
+                    $guidance_map[$gr['id']] = $gr;
                     $guidance_map[$c_nim] = $gr;
                     $guidance_map['usr_mhs_' . $c_nim] = $gr;
                 }
@@ -554,12 +570,11 @@ class DosenWali_model extends CI_Model {
         // Ambil juga berkas dari pendaftaran_berkas
         $pb_map = [];
         if ($this->db->table_exists('pendaftaran_berkas') && !empty($target_ids)) {
-            $target_nims = array_slice(array_unique(array_map(function($id) {
+            $target_nims = array_values(array_unique(array_map(function($id) {
                 return preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', $id);
-            }, $target_ids)), 0, 15);
+            }, $target_ids)));
             $pb_rows = $this->db->select('id, nim, kode_berkas, file_name, status_verifikasi, catatan')
                 ->where_in('nim', $target_nims)
-                ->limit(40)
                 ->get('pendaftaran_berkas')
                 ->result_array();
             if (!empty($pb_rows)) {
@@ -570,15 +585,12 @@ class DosenWali_model extends CI_Model {
         }
 
         if (!empty($target_ids)) {
-            $distinct_fp_ids = array_slice(array_unique($target_ids), 0, 25);
+            $distinct_fp_ids = array_values(array_unique($target_ids));
             $this->db->where_in('id_mhs', $distinct_fp_ids);
-        } else {
-            $this->db->limit(30);
         }
 
         $files = $this->db->select('id, id_mhs, nama, file, status_doswal, komentar, date')
             ->order_by('id', 'DESC')
-            ->limit(40)
             ->get('file_pendaftaran')
             ->result_array();
         if (empty($files) && empty($guidance_map)) return array();
@@ -632,12 +644,13 @@ class DosenWali_model extends CI_Model {
             $emailMhs = $user_row['email'] ?? '';
             $prodiMhs = $user_row['prodi'] ?? '';
 
-            $g_row = $guidance_map[$nim] ?? ($guidance_map[$idMhs] ?? null);
-            $judul_1 = !empty($g_row['judul_1']) ? $g_row['judul_1'] : 'Usulan Judul Tugas Akhir';
+            $g_row = $guidance_map[$nim] ?? ($guidance_map[$idMhs] ?? ($guidance_map['gdn_' . $nim] ?? null));
+            $judul_1 = !empty($g_row['judul_1']) ? $g_row['judul_1'] : '-';
             $status_judul = !empty($g_row['keterangan']) ? $g_row['keterangan'] : 'Pending';
             if ($status_judul === 'Draft') continue; // Mahasiswa masih simpan draft, belum submit ("Kirim Pendaftaran")
             $catatan_judul = $g_row['komentar'] ?? '';
-            $konsentrasi = !empty($g_row['peminatan']) ? $g_row['peminatan'] : $prodiMhs;
+            $konsentrasi = !empty($g_row['peminatan']) ? $g_row['peminatan'] : (!empty($prodiMhs) ? $prodiMhs : 'Informatika');
+            $jenis_ta = !empty(trim($g_row['jenis_TA'] ?? '')) ? trim($g_row['jenis_TA']) : (!empty(trim($g_row['jenis_ta'] ?? '')) ? trim($g_row['jenis_ta']) : 'TA Reguler');
             $tgl_daftar = $g_row['date'] ?? ($info['date'] ?? date('Y-m-d H:i:s'));
 
             // Cek status persetujuan berkas oleh Dosen Wali
@@ -804,12 +817,12 @@ class DosenWali_model extends CI_Model {
         $prodiMhs = $user_row['prodi'] ?? ($mhs_row['prodi'] ?? ($mhs_row['konsentrasi_dkv'] ?? 'Desain Komunikasi Visual'));
         $noHpMhs  = $user_row['no_telp'] ?? ($user_row['no_hp'] ?? ($mhs_row['no_hp'] ?? '-'));
 
-        $judul_1 = !empty($guidance['judul_1']) ? $guidance['judul_1'] : 'Usulan Judul Tugas Akhir';
+        $judul_1 = !empty($guidance['judul_1']) ? $guidance['judul_1'] : '-';
         $judul_en = $guidance['judul_en'] ?? '';
-        $jenis_ta = !empty(trim($guidance['jenis_TA'] ?? '')) ? trim($guidance['jenis_TA']) : (!empty(trim($guidance['jenis_ta'] ?? '')) ? trim($guidance['jenis_ta']) : '');
+        $jenis_ta = !empty(trim($guidance['jenis_TA'] ?? '')) ? trim($guidance['jenis_TA']) : (!empty(trim($guidance['jenis_ta'] ?? '')) ? trim($guidance['jenis_ta']) : 'TA Reguler');
         $status_judul = !empty($guidance['keterangan']) ? $guidance['keterangan'] : 'Pending';
         $catatan_judul = $guidance['komentar'] ?? '';
-        $konsentrasi = !empty($guidance['peminatan']) ? $guidance['peminatan'] : $prodiMhs;
+        $konsentrasi = !empty($guidance['peminatan']) ? $guidance['peminatan'] : (!empty($prodiMhs) ? $prodiMhs : 'Informatika');
         $tgl_daftar = $guidance['date'] ?? date('Y-m-d H:i:s');
 
         $all_approved = true;
