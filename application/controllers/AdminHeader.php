@@ -24,39 +24,8 @@ class AdminHeader extends CI_Controller {
         $data['slides']   = $this->Header_model->get_slides();
         $data['kategori'] = $this->Booking_model->get_all_kategori();
         
-        // Fetch data ruangan dengan nama kategori
-        $this->db->select('ruangan.*, ruangan.ruangan AS nama_ruangan, ruangan.id AS kode_ruangan, kategori_ruangan.nama_kategori');
-        $this->db->from('ruangan');
-        $this->db->join('kategori_ruangan', 'kategori_ruangan.id = ruangan.id_kategori', 'left');
-        $this->db->order_by('ruangan.id', 'ASC');
-        $ruangan_list = $this->db->get()->result();
-
-        if (!empty($ruangan_list)) {
-            foreach ($ruangan_list as &$r) {
-                if (empty($r->nama_ruangan) && !empty($r->ruangan)) {
-                    $r->nama_ruangan = $r->ruangan;
-                }
-                if (empty($r->kode_ruangan) && !empty($r->id)) {
-                    $r->kode_ruangan = $r->id;
-                }
-                // Parse file foto & 3d model dari kolom images jika foto/model_3d kosong
-                if (!empty($r->images)) {
-                    if (strpos($r->images, '|') !== false) {
-                        list($f, $m) = explode('|', $r->images, 2);
-                        if (empty($r->foto)) $r->foto = $f;
-                        if (empty($r->model_3d)) $r->model_3d = $m;
-                    } else {
-                        $ext = strtolower(pathinfo($r->images, PATHINFO_EXTENSION));
-                        if (in_array($ext, ['glb', 'gltf', 'fbx', 'obj'])) {
-                            if (empty($r->model_3d)) $r->model_3d = $r->images;
-                        } else {
-                            if (empty($r->foto)) $r->foto = $r->images;
-                        }
-                    }
-                }
-            }
-        }
-        $data['ruangan'] = $ruangan_list;
+        // Fetch data ruangan dengan nama kategori (digrupkan per fasilitas)
+        $data['ruangan'] = $this->Booking_model->get_all_ruangan_grouped();
 
         $data['active_tab'] = $this->input->get('tab', true) === 'fasilitas' ? 'fasilitas' : 'header';
 

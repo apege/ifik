@@ -118,7 +118,7 @@
 
             $note = '';
             if ($file_rej_by === 'admin') {
-                $note = $student_berkas[$k]['catatan'] ?? '';
+                $note = $student_berkas[$k]['catatan'] ?? ($pendaftaran['catatan_admin_' . $k] ?? '');
                 if (empty($note) && !empty($pendaftaran['catatan_admin'])) {
                     $note = $pendaftaran['catatan_admin'];
                 }
@@ -138,7 +138,7 @@
                     }
                 }
             } else {
-                $note = $student_berkas[$k]['catatan'] ?? ($pendaftaran['catatan_file_' . $k] ?? '');
+                $note = $student_berkas[$k]['catatan'] ?? ($pendaftaran['catatan_admin_' . $k] ?? ($pendaftaran['catatan_file_' . $k] ?? ''));
             }
 
             $files_list[] = [
@@ -149,7 +149,7 @@
                 'status'      => $status,
                 'rejected_by' => $file_rej_by,
                 'note'        => $note,
-                'url'         => !empty($filename) ? base_url('uploads/berkas_mahasiswa/' . $filename) : '',
+                'url'         => !empty($filename) ? base_url('uploads/persyaratan_ta/' . $filename) : '',
             ];
         }
 
@@ -182,18 +182,25 @@
         $total_eval_items = 2 + $total_files_count;
         $pen_items = max(0, $total_eval_items - $app_items - $rej_items);
 
+        $has_any_file_rej_admin_flag = false;
+        $has_any_file_rej_wali_flag  = false;
+        foreach ($files_list as $fl) {
+            if ($fl['rejected_by'] === 'admin') $has_any_file_rej_admin_flag = true;
+            if ($fl['rejected_by'] === 'wali')  $has_any_file_rej_wali_flag  = true;
+        }
+
         $active_reviewer_rej = null;
-        if ($w_is_rej || ($w_st !== 'Approved' && ($s_jud === 'Rejected' || $s_jen === 'Rejected' || $file_rej_count > 0))) {
+        if ($w_is_rej || $s_jud === 'Rejected' || $s_jen === 'Rejected' || $has_any_file_rej_wali_flag) {
             $overall_badge_text = 'Perlu Revisi (Dosen Wali)';
             $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
             $overall_dot_cls    = 'bg-rose-500 animate-pulse';
             $active_reviewer_rej = 'wali';
-        } elseif ($a_is_rej || ($a_st !== 'Approved' && $file_rej_count > 0 && $w_st === 'Approved')) {
+        } elseif ($a_is_rej || $a_st === 'Rejected' || $has_any_file_rej_admin_flag) {
             $overall_badge_text = 'Perlu Revisi (Admin Layanan)';
             $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
             $overall_dot_cls    = 'bg-rose-500 animate-pulse';
             $active_reviewer_rej = 'admin';
-        } elseif ($kk_is_rej) {
+        } elseif ($kk_is_rej || $kk_st === 'Rejected') {
             $overall_badge_text = 'Perlu Revisi (Ketua KK)';
             $overall_badge_cls  = 'bg-rose-100 text-rose-800 border-rose-300';
             $overall_dot_cls    = 'bg-rose-500 animate-pulse';

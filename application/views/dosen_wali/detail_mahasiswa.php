@@ -177,7 +177,7 @@
         <?php
             $current_stage = $detail['current_stage'] ?? 'Dosen Wali';
             $status_wali = $detail['status_approval_wali'] ?? 'Pending';
-            $isLocked = in_array($current_stage, array('Koordinator TA', 'Ketua KK', 'Selesai Approval'));
+            $isLocked = ($status_wali === 'Approved' || in_array($current_stage, array('Admin Layanan', 'Koordinator TA', 'Ketua KK', 'Selesai Approval', 'Selesai')));
         ?>
 
         <?php if($isLocked): ?>
@@ -710,12 +710,14 @@
                     </button>
                 </div>
                 <div class="flex items-center gap-2.5">
+                    <?php if(!$isLocked): ?>
                     <button type="button" id="modalBtnKurang" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
                         <i class="bi bi-exclamation-circle"></i> Tandai Kurang / Revisi
                     </button>
                     <button type="button" id="modalBtnValid" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
                         <i class="bi bi-check2-circle"></i> Tandai Valid &amp; Lolos
                     </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

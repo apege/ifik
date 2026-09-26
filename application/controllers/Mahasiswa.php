@@ -309,18 +309,21 @@ class Mahasiswa extends CI_Controller {
                     // 2. Simpan ke file_pendaftaran jika ada
                     if ($this->db->table_exists('file_pendaftaran')) {
                         $target_ids = ['usr_mhs_' . $nim, 'mhs_' . $nim, $nim];
+                        $update_fp = [
+                            'file'            => 'uploads/persyaratan_ta/' . $new_file,
+                            'status_adminlaa' => 'Pending',
+                            'date_edit'       => date('Y-m-d H:i:s')
+                        ];
+                        if (($pendaftaran['status_approval_wali'] ?? '') !== 'Approved') {
+                            $update_fp['status_doswal'] = 'Pending';
+                            $update_fp['komentar']      = '';
+                        }
                         $this->db->group_start()
                             ->where_in('id_mhs', $target_ids)
                             ->or_like('id_mhs', $nim)
                             ->group_end()
                             ->like('nama', $k)
-                            ->update('file_pendaftaran', [
-                                'file'            => 'uploads/persyaratan_ta/' . $new_file,
-                                'status_doswal'   => 'Pending',
-                                'status_adminlaa' => 'Pending',
-                                'komentar'        => '',
-                                'date_edit'       => date('Y-m-d H:i:s')
-                            ]);
+                            ->update('file_pendaftaran', $update_fp);
                     }
 
                     // 3. Simpan ke pendaftaran_ta jika tabel dan kolomnya ada
@@ -331,18 +334,20 @@ class Mahasiswa extends CI_Controller {
                         $col_status  = 'status_file_' . $k;
                         $col_review  = 'review_file_' . $k;
                         $col_catatan = 'catatan_file_' . $k;
-                        if ($this->db->field_exists($col_status, 'pendaftaran_ta')) {
-                            $updated_data[$col_status] = 'Pending';
+                        if (($pendaftaran['status_approval_wali'] ?? '') !== 'Approved') {
+                            if ($this->db->field_exists($col_status, 'pendaftaran_ta')) {
+                                $updated_data[$col_status] = 'Pending';
+                            }
+                            if ($this->db->field_exists($col_review, 'pendaftaran_ta')) {
+                                $updated_data[$col_review] = 0;
+                            }
+                            if ($this->db->field_exists($col_catatan, 'pendaftaran_ta')) {
+                                $updated_data[$col_catatan] = '';
+                            }
                         }
                         $col_legacy_status = 'status_' . $k;
                         if ($this->db->field_exists($col_legacy_status, 'pendaftaran_ta')) {
                             $updated_data[$col_legacy_status] = 'Pending';
-                        }
-                        if ($this->db->field_exists($col_review, 'pendaftaran_ta')) {
-                            $updated_data[$col_review] = 0;
-                        }
-                        if ($this->db->field_exists($col_catatan, 'pendaftaran_ta')) {
-                            $updated_data[$col_catatan] = '';
                         }
                     }
                 }

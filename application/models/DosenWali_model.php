@@ -646,9 +646,12 @@ class DosenWali_model extends CI_Model {
 
             $g_row = $guidance_map[$nim] ?? ($guidance_map[$idMhs] ?? ($guidance_map['gdn_' . $nim] ?? null));
             $judul_1 = !empty($g_row['judul_1']) ? $g_row['judul_1'] : '-';
+            $judul_en = $g_row['judul_en'] ?? '';
             $status_judul = !empty($g_row['keterangan']) ? $g_row['keterangan'] : 'Pending';
             if ($status_judul === 'Draft') continue; // Mahasiswa masih simpan draft, belum submit ("Kirim Pendaftaran")
             $catatan_judul = $g_row['komentar'] ?? '';
+            $status_jenis_ta = $status_judul;
+            $catatan_jenis_ta = $catatan_judul;
             $konsentrasi = !empty($g_row['peminatan']) ? $g_row['peminatan'] : (!empty($prodiMhs) ? $prodiMhs : 'Informatika');
             $jenis_ta = !empty(trim($g_row['jenis_TA'] ?? '')) ? trim($g_row['jenis_TA']) : (!empty(trim($g_row['jenis_ta'] ?? '')) ? trim($g_row['jenis_ta']) : 'TA Reguler');
             $tgl_daftar = $g_row['date'] ?? ($info['date'] ?? date('Y-m-d H:i:s'));
@@ -742,8 +745,12 @@ class DosenWali_model extends CI_Model {
                 'mhs_konsentrasi'        => $konsentrasi,
                 'email'                  => $emailMhs,
                 'judul_1'                => $judul_1,
+                'judul_en'               => $judul_en,
+                'jenis_ta'               => $jenis_ta,
                 'status_judul'           => $status_judul,
                 'catatan_judul'          => $catatan_judul,
+                'status_jenis_ta'        => $status_jenis_ta,
+                'catatan_jenis_ta'       => $catatan_jenis_ta,
                 'status_approval_wali'   => $status_wali,
                 'status_approval_admin'  => $st_admin,
                 'status_approval_koor'   => $st_koor,
@@ -923,6 +930,8 @@ class DosenWali_model extends CI_Model {
             'jenis_ta'               => $jenis_ta,
             'status_judul'           => $status_judul,
             'catatan_judul'          => $catatan_judul,
+            'status_jenis_ta'        => $status_judul,
+            'catatan_jenis_ta'       => $catatan_judul,
             'status_approval_wali'   => $status_wali,
             'status_approval_admin'  => $st_admin,
             'status_approval_koor'   => $st_koor,
@@ -954,20 +963,36 @@ class DosenWali_model extends CI_Model {
         $ver = ($status === 'Approved') ? 'Approved' : (($status === 'Rejected') ? 'Rejected' : 'Pending');
 
         // Cari record yang cocok di file_pendaftaran
-        $this->db->group_start()
+        $check = $this->db->group_start()
             ->where('id_mhs', $nim)
             ->or_where('id_mhs', 'usr_mhs_' . $nim)
             ->or_where('id_mhs', 'mhs_' . $nim)
             ->or_like('id_mhs', $nim)
-            ->group_end();
-        $this->db->like('nama', $file_type);
+            ->group_end()
+            ->like('nama', $file_type)
+            ->get('file_pendaftaran')
+            ->row_array();
 
-        $update = $this->db->update('file_pendaftaran', [
-            'status_doswal' => $ver,
-            'komentar'      => $comment,
-            'date_edit'     => date('Y-m-d H:i:s'),
-            'view_doswal'   => 1
-        ]);
+        if ($check) {
+            $update = $this->db->where('id', $check['id'])
+                ->update('file_pendaftaran', [
+                    'status_doswal' => $ver,
+                    'komentar'      => $comment,
+                    'date_edit'     => date('Y-m-d H:i:s'),
+                    'view_doswal'   => 1
+                ]);
+        } else {
+            $update = $this->db->insert('file_pendaftaran', [
+                'id_mhs'        => 'usr_mhs_' . $nim,
+                'nama'          => 'file_' . $file_type,
+                'file'          => $file_type . '_' . $nim . '.pdf',
+                'status_doswal' => $ver,
+                'komentar'      => $comment,
+                'date'          => date('Y-m-d H:i:s'),
+                'date_edit'     => date('Y-m-d H:i:s'),
+                'view_doswal'   => 1
+            ]);
+        }
 
         return $update;
     }

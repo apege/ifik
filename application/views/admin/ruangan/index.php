@@ -1533,7 +1533,7 @@
         // Data seluruh ruangan yang sudah tersimpan untuk mendeteksi ketersediaan ruangan fisik
         const ALL_EXISTING_ROOMS = <?= json_encode(array_map(function($item) {
             return [
-                'id'           => (int)$item->id,
+                'id'           => (string)$item->id,
                 'nama_ruangan' => $item->nama_ruangan,
                 'kode_ruangan' => $item->kode_ruangan
             ];
@@ -1546,7 +1546,7 @@
         function getOccupiedRoomsMap(excludeId = null) {
             const map = {};
             (ALL_EXISTING_ROOMS || []).forEach(r => {
-                if (excludeId && parseInt(r.id) === parseInt(excludeId)) {
+                if (excludeId && String(r.id).trim().toUpperCase() === String(excludeId).trim().toUpperCase()) {
                     return; // Lewati ruangan/fasilitas yang sedang diedit
                 }
                 if (!r.kode_ruangan) return;

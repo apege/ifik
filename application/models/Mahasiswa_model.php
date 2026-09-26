@@ -406,6 +406,8 @@ class Mahasiswa_model extends CI_Model {
         $has_any_file_rej_wali = false;
         $has_any_file_rej_admin = false;
         $all_files_app_wali = true;
+        $all_files_app_admin = true;
+        $has_any_file_app_admin = false;
         $file_count = 0;
 
         $catatan_wali = !empty($pt_data['catatan_wali']) ? $pt_data['catatan_wali'] : ($guidance['komentar'] ?? '');
@@ -432,8 +434,10 @@ class Mahasiswa_model extends CI_Model {
             if (empty($st_dw)) {
                 if ($f_obj && !empty($f_obj['status_doswal'])) {
                     $st_dw = $f_obj['status_doswal'];
-                } elseif ($b_obj && !empty($b_obj['status_verifikasi'])) {
-                    $st_dw = ($b_obj['status_verifikasi'] === 'Valid') ? 'Approved' : (($b_obj['status_verifikasi'] === 'Invalid') ? 'Rejected' : 'Pending');
+                } elseif (!empty($guidance['keterangan']) && $guidance['keterangan'] === 'Approved') {
+                    $st_dw = 'Approved';
+                } elseif (!empty($guidance['keterangan']) && $guidance['keterangan'] === 'Rejected') {
+                    $st_dw = 'Rejected';
                 } else {
                     $st_dw = 'Pending';
                 }
@@ -452,8 +456,6 @@ class Mahasiswa_model extends CI_Model {
             if (empty($c_dw)) {
                 if ($f_obj && !empty($f_obj['komentar'])) {
                     $c_dw = $f_obj['komentar'];
-                } elseif ($b_obj && !empty($b_obj['catatan'])) {
-                    $c_dw = $b_obj['catatan'];
                 } else {
                     $c_dw = '';
                 }
@@ -463,8 +465,16 @@ class Mahasiswa_model extends CI_Model {
             // Status Admin LAA per berkas
             $st_laa = $b_obj['status_verifikasi'] ?? ($f_obj['status_adminlaa'] ?? 'Pending');
             $files_result['status_' . $k] = $st_laa;
-            if ($st_laa === 'Invalid' || $st_laa === 'Rejected') {
+            $files_result['catatan_admin_' . $k] = $b_obj['catatan'] ?? ($f_obj['catatan_adminlaa'] ?? '');
+            
+            $st_laa_clean = strtolower(trim((string)$st_laa));
+            if ($st_laa_clean === 'invalid' || strpos($st_laa_clean, 'revisi') !== false || strpos($st_laa_clean, 'tolak') !== false || strpos($st_laa_clean, 'rejected') !== false) {
                 $has_any_file_rej_admin = true;
+                $all_files_app_admin = false;
+            } elseif ($st_laa_clean === 'valid' || strpos($st_laa_clean, 'setuju') !== false || strpos($st_laa_clean, 'approved') !== false || $st_laa_clean === 'acc') {
+                $has_any_file_app_admin = true;
+            } else {
+                $all_files_app_admin = false;
             }
         }
 
@@ -485,13 +495,47 @@ class Mahasiswa_model extends CI_Model {
         if (!empty($pt_data['status_approval_admin'])) {
             $status_laa = $pt_data['status_approval_admin'];
         } else {
-            $status_laa = $has_any_file_rej_admin ? 'Rejected' : 'Pending';
+            if ($has_any_file_rej_admin) {
+                $status_laa = 'Rejected';
+            } elseif ($all_files_app_admin && $file_count > 0 && $has_any_file_app_admin) {
+                $status_laa = 'Approved';
+            } else {
+                $status_laa = 'Pending';
+            }
+        }
+
+        // Tentukan Overall Status Koordinator TA & Ketua KK
+        $status_koor = $pt_data['status_approval_koor'] ?? null;
+        $status_kk   = $pt_data['status_approval_kk'] ?? null;
+        if (empty($status_koor) || empty($status_kk)) {
+            $gid = $this->_get_guidance_id_by_nim($nim);
+            $tl = ($gid && $this->db->table_exists('thesis_lecturers')) 
+                ? $this->db->get_where('thesis_lecturers', ['id_guidance' => $gid])->row_array() 
+                : null;
+            if (empty($status_koor)) {
+                if ($tl && !empty($tl['dosen_pembimbing1']) && !empty($tl['dosen_pembimbing2'])) {
+                    $status_koor = 'Approved';
+                } else {
+                    $status_koor = 'Pending';
+                }
+            }
+            if (empty($status_kk)) {
+                if ($tl && !empty($tl['status'])) {
+                    $status_kk = $tl['status'];
+                } else {
+                    $status_kk = 'Pending';
+                }
+            }
         }
 
         $current_stage = $pt_data['current_stage'] ?? (
             ($status_doswal !== 'Approved') 
                 ? ($status_doswal === 'Rejected' ? 'Dosen Wali (Revisi)' : 'Dosen Wali') 
-                : (($status_laa !== 'Approved') ? 'Admin Layanan' : 'Koordinator TA')
+                : (($status_laa !== 'Approved') 
+                    ? ($status_laa === 'Rejected' ? 'Admin Layanan (Revisi)' : 'Admin Layanan') 
+                    : (($status_koor !== 'Approved') 
+                        ? 'Koordinator TA' 
+                        : (($status_kk !== 'Approved') ? 'Ketua KK' : 'Selesai')))
         );
 
         $res = array_merge(array(
@@ -509,8 +553,8 @@ class Mahasiswa_model extends CI_Model {
             'konsentrasi_dkv'       => $guidance['peminatan'] ?? ($pt_data['konsentrasi_dkv'] ?? 'Informatika'),
             'status_approval_wali'  => $status_doswal,
             'status_approval_admin' => $status_laa,
-            'status_approval_koor'  => $pt_data['status_approval_koor'] ?? 'Pending',
-            'status_approval_kk'    => $pt_data['status_approval_kk'] ?? 'Pending',
+            'status_approval_koor'  => $status_koor,
+            'status_approval_kk'    => $status_kk,
             'status_judul'          => $status_judul,
             'catatan_judul'         => $catatan_judul,
             'status_jenis_ta'       => $status_jenis_ta,

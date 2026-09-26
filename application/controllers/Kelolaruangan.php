@@ -61,7 +61,7 @@ class Kelolaruangan extends CI_Controller {
     {
         $data['title']    = 'Kelola Data Ruangan — Admin FIK';
         $data['kategori'] = $this->Booking_model->get_all_kategori();
-        $data['ruangan']  = $this->Booking_model->get_all_ruangan();
+        $data['ruangan']  = $this->Booking_model->get_all_ruangan_grouped();
 
         $this->load->view('admin/ruangan/index', $data);
     }
@@ -101,15 +101,22 @@ class Kelolaruangan extends CI_Controller {
      * 1 nomor ruangan fisik hanya boleh digunakan oleh 1 fasilitas.
      * 
      * @param array $rooms_to_check Daftar kode ruangan fisik (misal: ['LK 01', 'LK 02'])
-     * @param int|null $exclude_id ID fasilitas yang sedang diedit (diabaikan jika ada)
+     * @param int|string|null $exclude_id ID fasilitas yang sedang diedit (diabaikan jika ada)
+     * @param string|null $exclude_name Nama fasilitas yang sedang diedit
      * @return array|null Info konflik ['code' => ..., 'occupied_by' => ...] atau null jika aman
      */
-    private function _check_room_conflicts($rooms_to_check, $exclude_id = null)
+    private function _check_room_conflicts($rooms_to_check, $exclude_id = null, $exclude_name = null)
     {
         $existing = $this->Booking_model->get_all_ruangan();
-        if (!empty($exclude_id)) {
-            $existing = array_filter($existing, function($row) use ($exclude_id) {
-                return (string)$row->id !== (string)$exclude_id;
+        if (!empty($exclude_id) || !empty($exclude_name)) {
+            $existing = array_filter($existing, function($row) use ($exclude_id, $exclude_name) {
+                if (!empty($exclude_id) && ((string)$row->id === (string)$exclude_id || (string)($row->kode_ruangan ?? '') === (string)$exclude_id)) {
+                    return false;
+                }
+                if (!empty($exclude_name) && strcasecmp(trim((string)$row->nama_ruangan), trim((string)$exclude_name)) === 0) {
+                    return false;
+                }
+                return true;
             });
         }
 
@@ -123,9 +130,8 @@ class Kelolaruangan extends CI_Controller {
             if (empty($target_clean)) continue;
 
             foreach ($existing as $row) {
-                if (empty($row->kode_ruangan)) continue;
-                $row_rooms = array_filter(array_map('trim', explode(',', $row->kode_ruangan)));
-                foreach ($row_rooms as $r) {
+                $rowCodes = array_filter(array_map('trim', explode(',', (string)($row->kode_ruangan ?: $row->id))));
+                foreach ($rowCodes as $r) {
                     $r_clean = strtoupper(trim($r));
                     $r_canon = $canonicalize($r);
 
@@ -160,17 +166,19 @@ class Kelolaruangan extends CI_Controller {
         $spesifikasi_fasilitas = $this->input->post('spesifikasi_fasilitas', true);
         $tata_tertib     = $this->input->post('tata_tertib', true);
 
-        // Format ruangan fisik (bisa satu atau lebih, dipisah koma)
-        $rooms = array_filter(array_map('trim', explode(',', (string)$kode_ruangan)));
-        $clean_kode_ruangan = !empty($rooms) ? implode(', ', array_map('strtoupper', $rooms)) : strtoupper(trim((string)$kode_ruangan));
+        // Format ruangan fisik (bisa satu atau lebih kode dipisah koma)
+        $rooms = array_values(array_filter(array_map('trim', explode(',', (string)$kode_ruangan))));
+        if (empty($rooms) && !empty($kode_ruangan)) {
+            $rooms = [strtoupper(trim((string)$kode_ruangan))];
+        }
 
-        if (empty($nama_ruangan) || empty($clean_kode_ruangan) || empty($id_kategori)) {
+        if (empty($nama_ruangan) || empty($rooms) || empty($id_kategori)) {
             echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan/Lab, Ruangan Fisik (Nomor LK), dan Kategori!']);
             return;
         }
 
-        // Cek duplikasi ruangan fisik (1 ruangan fisik = 1 fasilitas)
-        $conflict = $this->_check_room_conflicts(!empty($rooms) ? $rooms : [$clean_kode_ruangan]);
+        // Cek duplikasi ruangan fisik (1 nomor ruangan fisik hanya untuk 1 baris/fasilitas)
+        $conflict = $this->_check_room_conflicts($rooms);
         if ($conflict) {
             echo json_encode([
                 'status'  => 'error',
@@ -184,23 +192,21 @@ class Kelolaruangan extends CI_Controller {
         $model_3d_path = $this->_upload_file('model_3d', 'uploads/ruangan/models/', 'glb|fbx|gltf|obj|bin');
 
         $fields = $this->db->list_fields('ruangan');
-        $data_ruangan = array();
-        if (in_array('id', $fields)) $data_ruangan['id'] = $clean_kode_ruangan;
-        if (in_array('ruangan', $fields)) $data_ruangan['ruangan'] = $nama_ruangan;
-        if (in_array('nama_ruangan', $fields)) $data_ruangan['nama_ruangan'] = $nama_ruangan;
-        if (in_array('kode_ruangan', $fields)) $data_ruangan['kode_ruangan'] = $clean_kode_ruangan;
-        if (in_array('id_kategori', $fields)) $data_ruangan['id_kategori'] = $id_kategori;
-        if (in_array('kapasitas', $fields)) $data_ruangan['kapasitas'] = $kapasitas ? $kapasitas : 30;
-        if (in_array('lokasi', $fields)) $data_ruangan['lokasi'] = $lokasi ? $lokasi : 'Gedung Sebatik (FIK)';
-        if (in_array('status', $fields)) $data_ruangan['status'] = $status ? $status : 'Tersedia';
-        if (in_array('akses', $fields)) $data_ruangan['akses'] = $status ? $status : 'Tersedia';
-        if (in_array('tagline', $fields)) $data_ruangan['tagline'] = $tagline;
-        if (in_array('jumlah_unit', $fields)) $data_ruangan['jumlah_unit'] = $jumlah_unit;
-        if (in_array('jam_operasional', $fields)) $data_ruangan['jam_operasional'] = $jam_operasional;
-        if (in_array('deskripsi', $fields)) $data_ruangan['deskripsi'] = $deskripsi;
-        if (in_array('spesifikasi_fasilitas', $fields)) $data_ruangan['spesifikasi_fasilitas'] = $spesifikasi_fasilitas;
-        if (in_array('tata_tertib', $fields)) $data_ruangan['tata_tertib'] = $tata_tertib;
-        if (in_array('date', $fields)) $data_ruangan['date'] = date('Y-m-d H:i:s');
+        $base_data = array();
+        if (in_array('ruangan', $fields)) $base_data['ruangan'] = $nama_ruangan;
+        if (in_array('nama_ruangan', $fields)) $base_data['nama_ruangan'] = $nama_ruangan;
+        if (in_array('id_kategori', $fields)) $base_data['id_kategori'] = $id_kategori;
+        if (in_array('kapasitas', $fields)) $base_data['kapasitas'] = $kapasitas ? $kapasitas : 30;
+        if (in_array('lokasi', $fields)) $base_data['lokasi'] = $lokasi ? $lokasi : 'Gedung Sebatik (FIK)';
+        if (in_array('status', $fields)) $base_data['status'] = $status ? $status : 'Tersedia';
+        if (in_array('akses', $fields)) $base_data['akses'] = $status ? $status : 'Tersedia';
+        if (in_array('tagline', $fields)) $base_data['tagline'] = $tagline;
+        if (in_array('jumlah_unit', $fields)) $base_data['jumlah_unit'] = $jumlah_unit;
+        if (in_array('jam_operasional', $fields)) $base_data['jam_operasional'] = $jam_operasional;
+        if (in_array('deskripsi', $fields)) $base_data['deskripsi'] = $deskripsi;
+        if (in_array('spesifikasi_fasilitas', $fields)) $base_data['spesifikasi_fasilitas'] = $spesifikasi_fasilitas;
+        if (in_array('tata_tertib', $fields)) $base_data['tata_tertib'] = $tata_tertib;
+        if (in_array('date', $fields)) $base_data['date'] = date('Y-m-d H:i:s');
 
         // Handle gambar/images (support kolom foto & model_3d atau kolom images kombinasi)
         if (in_array('images', $fields)) {
@@ -208,17 +214,32 @@ class Kelolaruangan extends CI_Controller {
             if ($foto_path && $model_3d_path) $combined = $foto_path . '|' . $model_3d_path;
             elseif ($foto_path) $combined = $foto_path;
             elseif ($model_3d_path) $combined = '|' . $model_3d_path;
-            if ($combined) $data_ruangan['images'] = $combined;
+            if ($combined) $base_data['images'] = $combined;
         } else {
-            if ($foto_path && in_array('foto', $fields)) $data_ruangan['foto'] = $foto_path;
-            if ($model_3d_path && in_array('model_3d', $fields)) $data_ruangan['model_3d'] = $model_3d_path;
+            if ($foto_path && in_array('foto', $fields)) $base_data['foto'] = $foto_path;
+            if ($model_3d_path && in_array('model_3d', $fields)) $base_data['model_3d'] = $model_3d_path;
         }
 
+        // Insert masing-masing kode ruangan fisik sebagai 1 baris tersendiri
+        $inserted = 0;
+        foreach ($rooms as $single_code) {
+            $clean_code = strtoupper(trim($single_code));
+            if (empty($clean_code)) continue;
 
-        $insert = $this->db->insert('ruangan', $data_ruangan);
+            $row_data = $base_data;
+            if (in_array('id', $fields)) $row_data['id'] = $clean_code;
+            if (in_array('kode_ruangan', $fields)) $row_data['kode_ruangan'] = $clean_code;
 
-        if ($insert) {
-            echo json_encode(['status' => 'success', 'message' => 'Ruangan baru & berkas berhasil ditambahkan!']);
+            if ($this->db->insert('ruangan', $row_data)) {
+                $inserted++;
+            }
+        }
+
+        if ($inserted > 0) {
+            $msg = ($inserted > 1) 
+                ? "{$inserted} ruangan fisik berhasil ditambahkan (1 baris per kode ruangan)!" 
+                : "Ruangan baru berhasil ditambahkan!";
+            echo json_encode(['status' => 'success', 'message' => $msg]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menambahkan ruangan baru.']);
         }
@@ -247,16 +268,22 @@ class Kelolaruangan extends CI_Controller {
         $tata_tertib     = $this->input->post('tata_tertib', true);
 
         // Format ruangan fisik (bisa satu atau lebih, dipisah koma)
-        $rooms = array_filter(array_map('trim', explode(',', (string)$kode_ruangan)));
-        $clean_kode_ruangan = !empty($rooms) ? implode(', ', array_map('strtoupper', $rooms)) : strtoupper(trim((string)$kode_ruangan));
+        $rooms = array_values(array_filter(array_map('trim', explode(',', (string)$kode_ruangan))));
+        if (empty($rooms) && !empty($kode_ruangan)) {
+            $rooms = [strtoupper(trim((string)$kode_ruangan))];
+        }
 
-        if (empty($nama_ruangan) || empty($clean_kode_ruangan) || empty($id_kategori)) {
+        if (empty($nama_ruangan) || empty($rooms) || empty($id_kategori)) {
             echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan/Lab, Ruangan Fisik (Nomor LK), dan Kategori!']);
             return;
         }
 
-        // Cek duplikasi ruangan fisik dengan mengecualikan ID yang sedang diedit
-        $conflict = $this->_check_room_conflicts(!empty($rooms) ? $rooms : [$clean_kode_ruangan], $id);
+        // Ambil data lama fasilitas yang sedang diedit
+        $old_room = $this->db->get_where('ruangan', ['id' => $id])->row();
+        $old_name = $old_room ? $old_room->ruangan : '';
+
+        // Cek duplikasi ruangan fisik dengan mengecualikan fasilitas yang sedang diedit
+        $conflict = $this->_check_room_conflicts($rooms, $id, $old_name);
         if ($conflict) {
             echo json_encode([
                 'status'  => 'error',
@@ -270,26 +297,24 @@ class Kelolaruangan extends CI_Controller {
         $model_3d_path = $this->_upload_file('model_3d', 'uploads/ruangan/models/', 'glb|fbx|gltf|obj|bin');
 
         $fields = $this->db->list_fields('ruangan');
-        $data_ruangan = array();
-        if (in_array('ruangan', $fields)) $data_ruangan['ruangan'] = $nama_ruangan;
-        if (in_array('nama_ruangan', $fields)) $data_ruangan['nama_ruangan'] = $nama_ruangan;
-        if (in_array('kode_ruangan', $fields)) $data_ruangan['kode_ruangan'] = $clean_kode_ruangan;
-        if (in_array('id_kategori', $fields)) $data_ruangan['id_kategori'] = $id_kategori;
-        if (in_array('kapasitas', $fields)) $data_ruangan['kapasitas'] = $kapasitas;
-        if (in_array('lokasi', $fields)) $data_ruangan['lokasi'] = $lokasi;
-        if (in_array('status', $fields)) $data_ruangan['status'] = $status;
-        if (in_array('akses', $fields)) $data_ruangan['akses'] = $status ? $status : 'Tersedia';
-        if (in_array('tagline', $fields)) $data_ruangan['tagline'] = $tagline;
-        if (in_array('jumlah_unit', $fields)) $data_ruangan['jumlah_unit'] = $jumlah_unit;
-        if (in_array('jam_operasional', $fields)) $data_ruangan['jam_operasional'] = $jam_operasional;
-        if (in_array('deskripsi', $fields)) $data_ruangan['deskripsi'] = $deskripsi;
-        if (in_array('spesifikasi_fasilitas', $fields)) $data_ruangan['spesifikasi_fasilitas'] = $spesifikasi_fasilitas;
-        if (in_array('tata_tertib', $fields)) $data_ruangan['tata_tertib'] = $tata_tertib;
+        $base_data = array();
+        if (in_array('ruangan', $fields)) $base_data['ruangan'] = $nama_ruangan;
+        if (in_array('nama_ruangan', $fields)) $base_data['nama_ruangan'] = $nama_ruangan;
+        if (in_array('id_kategori', $fields)) $base_data['id_kategori'] = $id_kategori;
+        if (in_array('kapasitas', $fields)) $base_data['kapasitas'] = $kapasitas ? $kapasitas : 30;
+        if (in_array('lokasi', $fields)) $base_data['lokasi'] = $lokasi ? $lokasi : 'Gedung Sebatik (FIK)';
+        if (in_array('status', $fields)) $base_data['status'] = $status ? $status : 'Tersedia';
+        if (in_array('akses', $fields)) $base_data['akses'] = $status ? $status : 'Tersedia';
+        if (in_array('tagline', $fields)) $base_data['tagline'] = $tagline;
+        if (in_array('jumlah_unit', $fields)) $base_data['jumlah_unit'] = $jumlah_unit;
+        if (in_array('jam_operasional', $fields)) $base_data['jam_operasional'] = $jam_operasional;
+        if (in_array('deskripsi', $fields)) $base_data['deskripsi'] = $deskripsi;
+        if (in_array('spesifikasi_fasilitas', $fields)) $base_data['spesifikasi_fasilitas'] = $spesifikasi_fasilitas;
+        if (in_array('tata_tertib', $fields)) $base_data['tata_tertib'] = $tata_tertib;
+        if (in_array('date', $fields)) $base_data['date'] = date('Y-m-d H:i:s');
 
-        // Handle gambar/images: support kolom foto & model_3d atau kolom images kombinasi
+        // Handle gambar/images
         if (in_array('images', $fields)) {
-            // Pertahankan foto/model lama jika tidak diupload ulang
-            $old_room = $this->db->get_where('ruangan', ['id' => $id])->row();
             $old_images = $old_room ? (string)$old_room->images : '';
             $old_foto = ''; $old_model = '';
             if (strpos($old_images, '|') !== false) {
@@ -305,18 +330,39 @@ class Kelolaruangan extends CI_Controller {
             if ($final_foto && $final_model) $combined = $final_foto . '|' . $final_model;
             elseif ($final_foto) $combined = $final_foto;
             elseif ($final_model) $combined = '|' . $final_model;
-            $data_ruangan['images'] = $combined;
+            if ($combined) $base_data['images'] = $combined;
         } else {
-            if ($foto_path && in_array('foto', $fields)) $data_ruangan['foto'] = $foto_path;
-            if ($model_3d_path && in_array('model_3d', $fields)) $data_ruangan['model_3d'] = $model_3d_path;
+            if ($foto_path && in_array('foto', $fields)) $base_data['foto'] = $foto_path;
+            elseif ($old_room && !empty($old_room->foto) && in_array('foto', $fields)) $base_data['foto'] = $old_room->foto;
+            
+            if ($model_3d_path && in_array('model_3d', $fields)) $base_data['model_3d'] = $model_3d_path;
+            elseif ($old_room && !empty($old_room->model_3d) && in_array('model_3d', $fields)) $base_data['model_3d'] = $old_room->model_3d;
         }
 
-
-
+        // Hapus baris lama fasilitas ini sebelum memasukkan baris baru per kode ruangan fisik
+        if (!empty($old_name)) {
+            $this->db->where('ruangan', $old_name);
+            $this->db->delete('ruangan');
+        }
         $this->db->where('id', $id);
-        $update = $this->db->update('ruangan', $data_ruangan);
+        $this->db->delete('ruangan');
 
-        if ($update) {
+        // Insert row baru per kode ruangan fisik
+        $inserted = 0;
+        foreach ($rooms as $single_code) {
+            $clean_code = strtoupper(trim($single_code));
+            if (empty($clean_code)) continue;
+
+            $row_data = $base_data;
+            if (in_array('id', $fields)) $row_data['id'] = $clean_code;
+            if (in_array('kode_ruangan', $fields)) $row_data['kode_ruangan'] = $clean_code;
+
+            if ($this->db->insert('ruangan', $row_data)) {
+                $inserted++;
+            }
+        }
+
+        if ($inserted > 0) {
             echo json_encode(['status' => 'success', 'message' => 'Data ruangan & berkas berhasil diperbarui!']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal memperbarui data ruangan.']);
@@ -332,8 +378,14 @@ class Kelolaruangan extends CI_Controller {
             $id = $this->input->post('id', true);
         }
 
-        $this->db->where('id', $id);
-        $delete = $this->db->delete('ruangan');
+        $room = $this->db->get_where('ruangan', ['id' => $id])->row();
+        if ($room && !empty($room->ruangan)) {
+            $this->db->where('ruangan', $room->ruangan);
+            $delete = $this->db->delete('ruangan');
+        } else {
+            $this->db->where('id', $id);
+            $delete = $this->db->delete('ruangan');
+        }
 
         if ($delete) {
             echo json_encode(['status' => 'success', 'message' => 'Ruangan berhasil dihapus!']);

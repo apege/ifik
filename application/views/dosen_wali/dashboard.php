@@ -708,7 +708,7 @@
                             </th>
                             <th class="py-3 px-3">MAHASISWA</th>
                             <th class="py-3 px-3">JUDUL RENCANA TA</th>
-                            <th class="py-3 px-3 text-center">STATUS <?= !empty($syarat_berkas) ? count($syarat_berkas) : 4; ?> BERKAS</th>
+                            <th class="py-3 px-3 text-center">STATUS BERKAS &amp; USULAN</th>
                             <th class="py-3 px-3 text-center">DOSEN WALI</th>
                             <th class="py-3 px-3 text-center">TAHAP SAAT INI</th>
                             <th class="py-3 px-3 text-center">AKSI</th>
@@ -730,14 +730,21 @@
                                      $trs_st = $mhs['status_file_transkrip'] ?? 'Pending';
                                      $prn_st = $mhs['status_file_pernyataan'] ?? 'Pending';
                                      $lab_st = $mhs['status_file_bebas_lab'] ?? 'Pending';
+                                     $isRowLocked = ($st === 'Approved' || in_array($rawStage, ['Admin Layanan', 'Koordinator TA', 'Ketua KK', 'Selesai Approval', 'Selesai']));
                                  ?>
                                 <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="<?= $st; ?>" data-status-label="<?= strtolower($stLabel); ?>" data-nim="<?= strtolower($mhs['nim']); ?>" data-nama="<?= strtolower($full_name); ?>" data-judul="<?= strtolower($mhs['judul_1'] ?? ''); ?>" data-stage="<?= strtolower($rawStage); ?>" data-stage-label="<?= strtolower($stageLabel); ?>">
                                     <!-- Checkbox Column -->
                                     <td class="py-3 px-2 text-center whitespace-nowrap">
-                                        <input type="checkbox" name="batch_select[]" value="<?= $mhs['nim']; ?>" 
-                                               data-name="<?= htmlspecialchars($full_name); ?>" 
-                                               onchange="updateBatchBarDW()"
-                                               class="student-cb w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer">
+                                        <?php if($isRowLocked): ?>
+                                            <span title="Pendaftaran sudah disetujui / terkunci" class="inline-flex items-center justify-center text-emerald-600">
+                                                <i class="bi bi-shield-check text-sm"></i>
+                                            </span>
+                                        <?php else: ?>
+                                            <input type="checkbox" name="batch_select[]" value="<?= $mhs['nim']; ?>" 
+                                                   data-name="<?= htmlspecialchars($full_name); ?>" 
+                                                   onchange="updateBatchBarDW()"
+                                                   class="student-cb w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer">
+                                        <?php endif; ?>
                                     </td>
                                     
                                     <!-- Mahasiswa Info -->
@@ -814,6 +821,34 @@
                                                     'class' => $btn_class
                                                 ];
                                             }
+
+                                            // Sertakan Status Usulan Judul & Skema TA
+                                            $jdl_st = $mhs['status_judul'] ?? 'Pending';
+                                            $jns_st = $mhs['status_jenis_ta'] ?? 'Pending';
+                                            if ($jdl_st === 'Rejected' || $jns_st === 'Rejected') {
+                                                $usulan_st = 'Rejected';
+                                            } elseif ($jdl_st === 'Approved' && $jns_st === 'Approved') {
+                                                $usulan_st = 'Approved';
+                                            } else {
+                                                $usulan_st = 'Pending';
+                                            }
+
+                                            if ($usulan_st === 'Approved') {
+                                                $v_cnt++;
+                                            } elseif ($usulan_st === 'Rejected') {
+                                                $i_cnt++;
+                                            } else {
+                                                $p_cnt++;
+                                            }
+
+                                            $btn_class_usulan = ($usulan_st === 'Approved') ? 'bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200' : (($usulan_st === 'Rejected') ? 'bg-rose-100/90 text-rose-700 hover:bg-rose-200' : 'bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60');
+
+                                            $item_pills[] = [
+                                                'code' => 'judul_jenis',
+                                                'name' => 'Usulan Judul & Skema TA',
+                                                'abbr' => 'JUDUL',
+                                                'class' => $btn_class_usulan
+                                            ];
                                         ?>
                                         <div class="flex flex-col items-center gap-1.5">
                                             <!-- Ringkasan Status Berkas (Valid, Direvisi, Menunggu) persis Admin LAA -->
@@ -1583,7 +1618,7 @@
                             { kode_berkas: 'bebas_lab', nama_berkas: 'Bebas Lab' }
                         ];
                         let vCnt = 0, iCnt = 0, pCnt = 0;
-                        const berkasPillsHtml = activeSyaratList.map((sb, bIdx) => {
+                        let berkasPillsHtml = activeSyaratList.map((sb, bIdx) => {
                             const k = sb.kode_berkas;
                             const bSt = mhs[`status_file_${k}`] || (mhs.berkas_map && mhs.berkas_map[k] ? (mhs.berkas_map[k].status_verifikasi === 'Valid' ? 'Approved' : (mhs.berkas_map[k].status_verifikasi === 'Invalid' ? 'Rejected' : 'Pending')) : 'Pending');
                             if (bSt === 'Approved') vCnt++;
@@ -1598,9 +1633,25 @@
                                 const w = (sb.nama_berkas || k).trim().split(/[\s_-]+/);
                                 abbr = (w[0] || 'DOC').substring(0, 4).toUpperCase();
                             }
-                            const dot = (bIdx < activeSyaratList.length - 1) ? '<span class="text-slate-300">·</span>' : '';
-                            return `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}', '${k}')" id="badge_doc_${mhs.nim}_${k}" title="Review ${sb.nama_berkas} - ${mhs.nama}" class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer ${bClass}">${abbr}</button>${dot}`;
+                            return `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}', '${k}')" id="badge_doc_${mhs.nim}_${k}" title="Review ${sb.nama_berkas} - ${mhs.nama}" class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer ${bClass}">${abbr}</button><span class="text-slate-300">·</span>`;
                         }).join('');
+
+                        // Tambahkan pill Usulan Judul & Skema TA
+                        const jdlSt = mhs.status_judul || 'Pending';
+                        const jnsSt = mhs.status_jenis_ta || 'Pending';
+                        let usulanSt = 'Pending';
+                        if (jdlSt === 'Rejected' || jnsSt === 'Rejected') {
+                            usulanSt = 'Rejected';
+                        } else if (jdlSt === 'Approved' && jnsSt === 'Approved') {
+                            usulanSt = 'Approved';
+                        }
+
+                        if (usulanSt === 'Approved') vCnt++;
+                        else if (usulanSt === 'Rejected') iCnt++;
+                        else pCnt++;
+
+                        const usulanClass = (usulanSt === 'Approved') ? 'bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200' : ((usulanSt === 'Rejected') ? 'bg-rose-100/90 text-rose-700 hover:bg-rose-200' : 'bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60');
+                        berkasPillsHtml += `<button type="button" onclick="openStudentBerkasPreview('${mhs.nim}', 'judul_jenis')" id="badge_doc_${mhs.nim}_judul_jenis" title="Review Usulan Judul & Skema TA - ${mhs.nama}" class="px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer ${usulanClass}">JUDUL</button>`;
 
                         let summaryBadgesHtml = '';
                         if (vCnt > 0) {
@@ -1617,11 +1668,15 @@
                         }
 
                         const prodiHtml = mhs.konsentrasi ? `<span>•</span><span class="text-orange-600 font-medium">${mhs.konsentrasi}</span>` : '';
+                        const isLockedRow = (st === 'Approved' || ['admin layanan', 'koordinator ta', 'ketua kk', 'selesai approval', 'selesai'].includes(rawStage.toLowerCase()));
+                        const cbHtml = isLockedRow 
+                            ? `<span title="Pendaftaran sudah disetujui / terkunci" class="inline-flex items-center justify-center text-emerald-600"><i class="bi bi-shield-check text-sm"></i></span>`
+                            : `<input type="checkbox" name="batch_select[]" value="${mhs.nim}" data-name="${mhs.nama}" ${isChecked} onchange="updateBatchBarDW()" class="student-cb w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer">`;
 
                         return `
                             <tr class="hover:bg-orange-50/50 transition-all duration-150 mhs-row" data-status="${st}" data-status-label="${stLabel.toLowerCase()}" data-nim="${(mhs.nim || '').toLowerCase()}" data-nama="${(mhs.nama || '').toLowerCase()}" data-judul="${(mhs.judul || '').toLowerCase()}" data-stage="${rawStage.toLowerCase()}" data-stage-label="${stageLabel.toLowerCase()}">
                                 <td class="py-3 px-2 text-center whitespace-nowrap">
-                                    <input type="checkbox" name="batch_select[]" value="${mhs.nim}" data-name="${mhs.nama}" ${isChecked} onchange="updateBatchBarDW()" class="student-cb w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 cursor-pointer">
+                                    ${cbHtml}
                                 </td>
                                 <td class="py-3 px-3 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
@@ -3231,7 +3286,7 @@
     }
 
     function getDocList() {
-        return (window.SYARAT_BERKAS && window.SYARAT_BERKAS.length > 0)
+        const baseList = (window.SYARAT_BERKAS && window.SYARAT_BERKAS.length > 0)
             ? window.SYARAT_BERKAS.map((sb, i) => {
                 const k = sb.kode_berkas;
                 const iconMap = {
@@ -3256,11 +3311,31 @@
                 { key: 'pernyataan', title: '3. Surat Pernyataan', shortTitle: 'Surat Pernyataan', fileField: 'file_pernyataan', statusField: 'status_file_pernyataan', noteField: 'catatan_file_pernyataan', icon: 'fa-solid fa-file-contract' },
                 { key: 'bebas_lab', title: '4. Bebas Lab & Perpus', shortTitle: 'Bebas Lab & Perpus', fileField: 'file_bebas_lab', statusField: 'status_file_bebas_lab', noteField: 'catatan_file_bebas_lab', icon: 'fa-solid fa-building-circle-check' }
             ];
+
+        // Khusus Dosen Wali: tambahkan Usulan Judul & Skema TA
+        baseList.push({
+            key: 'judul_jenis',
+            title: `${baseList.length + 1}. Usulan Judul & Skema TA`,
+            shortTitle: 'Usulan Judul & Skema TA',
+            isSpecialJudul: true,
+            statusField: 'status_judul',
+            noteField: 'catatan_judul',
+            icon: 'fa-solid fa-heading'
+        });
+
+        return baseList;
     }
 
     function getMhsDocStatus(nim, docKey) {
         const mhs = window.mhsDataMap ? window.mhsDataMap[nim] : null;
         if (!mhs) return 'Pending';
+        if (docKey === 'judul_jenis') {
+            const sj = mhs.status_judul || 'Pending';
+            const sk = mhs.status_jenis_ta || 'Pending';
+            if (sj === 'Rejected' || sk === 'Rejected') return 'Rejected';
+            if (sj === 'Approved' && sk === 'Approved') return 'Approved';
+            return 'Pending';
+        }
         const directStatus = mhs[`status_file_${docKey}`];
         if (directStatus === 'Approved' || directStatus === 'Rejected') return directStatus;
         if (mhs.berkas_map && mhs.berkas_map[docKey]) {
@@ -3278,9 +3353,9 @@
     function isMhsStageLocked(nim) {
         const mhs = window.mhsDataMap ? window.mhsDataMap[nim] : null;
         if (!mhs) return false;
-        const stage = mhs.current_stage || '';
-        // Hanya kunci jika berkas sudah diproses lebih lanjut oleh Koordinator TA ke atas
-        return ['Koordinator TA', 'Ketua KK', 'Selesai Approval'].includes(stage);
+        const stage = (mhs.current_stage || '').toLowerCase();
+        const st = mhs.status_approval_wali || '';
+        return st === 'Approved' || ['admin layanan', 'koordinator ta', 'ketua kk', 'selesai approval', 'selesai'].includes(stage);
     }
 
     function getMhsValidDocCount(nim, docList) {
@@ -3370,6 +3445,34 @@
                     ? 'bg-orange-600 text-white border-orange-600 shadow-xs ring-2 ring-orange-400' 
                     : 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200 shadow-2xs';
 
+                const isJudulDoc = (doc.key === 'judul_jenis');
+                const docSubtext = isJudulDoc
+                    ? `<span class="text-orange-600 font-bold"><i class="fa-solid fa-tag mr-1 text-[9px]"></i>${mhs.jenis_ta || 'Pengkaryaan / Reguler'}</span> &bull; <span class="text-slate-600 font-medium truncate inline-block max-w-[140px] align-bottom" title="${mhs.judul || ''}">${mhs.judul || 'Belum diisi'}</span>`
+                    : `<i class="fa-solid fa-file-pdf text-rose-500 mr-1 text-[9px]"></i>${rawFilename}`;
+
+                const downloadBtnHtml = isJudulDoc
+                    ? `<div class="flex flex-col items-center group/btn opacity-50 cursor-default" title="Usulan Judul & Skema (Teks)">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 text-xs font-bold flex items-center justify-center">
+                                <i class="fa-solid fa-heading text-xs"></i>
+                            </div>
+                            <span class="text-[9px] font-bold text-slate-400 mt-0.5 leading-tight select-none">Teks</span>
+                       </div>`
+                    : `<div class="flex flex-col items-center group/btn">
+                            <a href="${pdfUrl}" 
+                               download="${rawFilename}" 
+                               target="_blank" 
+                               class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs active:scale-95" 
+                               title="Unduh Berkas">
+                                <i class="fa-solid fa-download text-xs"></i>
+                            </a>
+                            <a href="${pdfUrl}" 
+                               download="${rawFilename}" 
+                               target="_blank" 
+                               class="text-[9px] font-bold text-slate-500 group-hover/btn:text-slate-800 mt-0.5 leading-tight select-none cursor-pointer transition-colors">
+                                Unduh
+                            </a>
+                       </div>`;
+
                 return `
                     <div class="p-2.5 px-3 rounded-xl border shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-2 ${activeCardBorder}">
                         <div class="min-w-0 flex-1">
@@ -3378,8 +3481,8 @@
                                 <span class="font-bold text-slate-800 text-[11px] truncate">${doc.title}</span>
                                 <span id="cardDocBadge_${nim}_${doc.key}">${statusBadge}</span>
                             </div>
-                            <p class="text-[10px] font-mono text-slate-400 truncate mt-0.5" title="${rawFilename}">
-                                <i class="fa-solid fa-file-pdf text-rose-500 mr-1 text-[9px]"></i>${rawFilename}
+                            <p class="text-[10px] font-mono text-slate-400 truncate mt-0.5" title="${isJudulDoc ? (mhs.judul || '') : rawFilename}">
+                                ${docSubtext}
                             </p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
@@ -3388,7 +3491,7 @@
                                 <button type="button" 
                                         onclick="previewBerkasItem('${nim}', '${doc.key}')" 
                                         class="w-7 h-7 rounded-lg border text-xs font-bold transition flex items-center justify-center cursor-pointer active:scale-95 ${previewBtnStyle}" 
-                                        title="${isCurrentlyPreviewed ? 'Tutup Pratinjau Ini' : 'Pratinjau Berkas'}">
+                                        title="${isCurrentlyPreviewed ? 'Tutup Pratinjau Ini' : (isJudulDoc ? 'Tinjau Usulan Judul & Skema' : 'Pratinjau Berkas')}">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                 </button>
                                 <span onclick="previewBerkasItem('${nim}', '${doc.key}')" class="text-[9px] font-bold ${isCurrentlyPreviewed ? 'text-orange-600' : 'text-slate-500 group-hover/btn:text-orange-600'} mt-0.5 leading-tight select-none cursor-pointer transition-colors">
@@ -3396,22 +3499,8 @@
                                 </span>
                             </div>
 
-                            <!-- Tombol Unduh -->
-                            <div class="flex flex-col items-center group/btn">
-                                <a href="${pdfUrl}" 
-                                   download="${rawFilename}" 
-                                   target="_blank" 
-                                   class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold transition flex items-center justify-center cursor-pointer shadow-2xs active:scale-95" 
-                                   title="Unduh Berkas">
-                                    <i class="fa-solid fa-download text-xs"></i>
-                                </a>
-                                <a href="${pdfUrl}" 
-                                   download="${rawFilename}" 
-                                   target="_blank" 
-                                   class="text-[9px] font-bold text-slate-500 group-hover/btn:text-slate-800 mt-0.5 leading-tight select-none cursor-pointer transition-colors">
-                                    Unduh
-                                </a>
-                            </div>
+                            <!-- Tombol Unduh / Teks -->
+                            ${downloadBtnHtml}
                         </div>
                     </div>
                 `;
@@ -3659,54 +3748,141 @@
                 const pdfUrl = resolveDocPdfUrl(rawFilename);
                 const fullName = (mhs.nama_depan ? (mhs.nama_depan + ' ' + (mhs.nama_belakang || '')) : (mhs.nama || 'Mahasiswa ' + p.nim)).trim();
 
+                const isJudulDoc = (p.docKey === 'judul_jenis');
                 const div = document.createElement('div');
                 div.id = cardId;
                 div.className = `preview-card-item pointer-events-auto bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col shrink-0 transition-all duration-300 ${panelWidthClass}`;
+                
+                const headerToolsHtml = isJudulDoc
+                    ? `
+                        <a href="${mhs.detail_url || '<?= site_url("dosen/wali/detail_mahasiswa/"); ?>' + p.nim}" target="_blank" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Buka Detail Mahasiswa Lengkap">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button type="button" onclick="closeSinglePreview(${index})" class="preview-close-btn w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-600/80 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer ml-0.5" title="Tutup Pratinjau Ini">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `
+                    : `
+                        <button type="button" onclick="togglePreviewIframeInteraction('${p.nim}', '${p.docKey}')" id="btnPreviewInteract_${p.nim}_${p.docKey}" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Kursor Terkunci (Normal). Klik jika ingin mengaktifkan scroll di dalam berkas">
+                            <i class="fa-solid fa-arrow-pointer text-[10px]" id="iconPreviewInteract_${p.nim}_${p.docKey}"></i>
+                        </button>
+                        <a href="${pdfUrl}" target="_blank" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Buka Layar Penuh di Tab Baru">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button type="button" onclick="closeSinglePreview(${index})" class="preview-close-btn w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-600/80 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer ml-0.5" title="Tutup Pratinjau Ini">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `;
+
+                const bodyContentHtml = isJudulDoc
+                    ? `
+                        <div class="${isMobile ? 'h-[310px] sm:h-[360px]' : 'h-[390px] sm:h-[430px] md:h-[450px]'} bg-slate-50 p-4 sm:p-5 overflow-y-auto space-y-3.5 border-b border-slate-200 select-text">
+                            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                                <div class="flex items-center gap-1.5 mb-1.5 text-xs font-bold text-orange-600">
+                                    <i class="fa-solid fa-lightbulb text-orange-500"></i>
+                                    <span>Usulan Judul (Bahasa Indonesia)</span>
+                                </div>
+                                <p class="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed">${mhs.judul || mhs.judul_1 || '<span class="italic text-slate-400 font-normal">Belum diisi oleh mahasiswa</span>'}</p>
+                            </div>
+                            ${mhs.judul_en ? `
+                            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+                                <div class="flex items-center gap-1.5 mb-1.5 text-xs font-bold text-blue-600">
+                                    <i class="fa-solid fa-globe text-blue-500"></i>
+                                    <span>Judul Usulan (Bahasa Inggris)</span>
+                                </div>
+                                <p class="text-xs sm:text-sm font-semibold italic text-slate-700 leading-relaxed">${mhs.judul_en}</p>
+                            </div>
+                            ` : ''}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold text-slate-400 block mb-1">Skema / Jenis TA:</span>
+                                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-lg text-xs font-bold inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-tag text-orange-500 text-[10px]"></i> ${mhs.jenis_ta || 'Pengkaryaan / Reguler'}
+                                    </span>
+                                </div>
+                                <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+                                    <span class="text-[10px] font-bold text-slate-400 block mb-1">Konsentrasi:</span>
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-graduation-cap text-slate-500 text-[10px]"></i> ${mhs.konsentrasi || mhs.mhs_konsentrasi || '-'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5 text-xs text-amber-900">
+                                <i class="fa-solid fa-circle-info text-amber-600 text-sm mt-0.5 shrink-0"></i>
+                                <div class="text-[11px] text-amber-800 leading-relaxed">
+                                    <strong class="font-bold">Verifikasi Dosen Wali:</strong>
+                                    Periksa kesesuaian topik usulan judul dan skema TA sebelum memberikan persetujuan.
+                                </div>
+                            </div>
+                        </div>
+                    `
+                    : `
+                        <div class="${isMobile ? 'h-[310px] sm:h-[360px]' : 'h-[390px] sm:h-[430px] md:h-[450px]'} bg-slate-200 relative border-b border-slate-200 overflow-hidden cursor-default select-none">
+                            <iframe id="iframePreviewBerkas_${p.nim}_${p.docKey}" src="${pdfUrl}#toolbar=0&navpanes=0" class="w-full h-full border-0 pointer-events-auto" title="Pratinjau Dokumen PDF"></iframe>
+                        </div>
+                    `;
+
+                const footerLeftHtml = isJudulDoc
+                    ? `
+                        <span id="previewStatusBadge_${p.nim}_${p.docKey}">
+                            ${getDocStatusBadgeHtml(currentStatus)}
+                        </span>
+                        <a href="${mhs.detail_url || '<?= site_url("dosen/wali/detail_mahasiswa/"); ?>' + p.nim}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs text-[11px]" title="Detail Mahasiswa">
+                            <i class="fa-solid fa-user text-[10px]"></i>
+                            <span>Detail</span>
+                        </a>
+                    `
+                    : `
+                        <span id="previewStatusBadge_${p.nim}_${p.docKey}">
+                            ${getDocStatusBadgeHtml(currentStatus)}
+                        </span>
+                        <a href="${pdfUrl}" download="${rawFilename}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs text-[11px]" title="Unduh Berkas Ini">
+                            <i class="fa-solid fa-download text-[10px]"></i>
+                            <span>Unduh</span>
+                        </a>
+                    `;
+
+                const presetsHtml = isJudulDoc
+                    ? `
+                        <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Usulan judul kurang sesuai dengan topik keilmuan')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Kurang Sesuai</button>
+                        <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Perbaiki tata bahasa / EYD pada judul TA')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ EYD / Bahasa</button>
+                        <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Skema TA perlu disesuaikan kembali')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Skema TA</button>
+                    `
+                    : `
+                        <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Dokumen buram / tidak terbaca')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Buram</button>
+                        <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Format / tipe berkas tidak sesuai')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Format Salah</button>
+                        <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Tanda tangan / cap belum lengkap')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Belum TTD</button>
+                    `;
+
                 div.innerHTML = `
                     <!-- Header Pratinjau Kompak dengan Label Sub-Pratinjau Jelas -->
                     <div class="p-2.5 px-3.5 bg-slate-900 text-white flex items-center justify-between gap-2.5 shrink-0 border-b border-slate-800">
                         <div class="flex items-center gap-2 min-w-0">
-                            <div class="preview-slot-badge w-7 h-7 rounded-lg bg-rose-600/30 border border-rose-500/50 text-rose-400 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                                ${totalPreviews > 1 ? slotNum : '<i class="fa-solid fa-file-pdf"></i>'}
+                            <div class="preview-slot-badge w-7 h-7 rounded-lg ${isJudulDoc ? 'bg-orange-600/30 border border-orange-500/50 text-orange-400' : 'bg-rose-600/30 border border-rose-500/50 text-rose-400'} flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                ${totalPreviews > 1 ? slotNum : (isJudulDoc ? '<i class="fa-solid fa-heading"></i>' : '<i class="fa-solid fa-file-pdf"></i>')}
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5">
                                     <span class="px-1.5 py-0.2 text-[8px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded uppercase tracking-wider">Sub-Pratinjau</span>
                                     <h4 class="text-xs font-bold text-white truncate max-w-[160px] sm:max-w-[210px]">${doc.title}</h4>
                                 </div>
-                                <p class="text-[10px] text-slate-300 font-medium truncate mt-0.5">${fullName} · <span class="font-mono text-slate-400">${rawFilename}</span></p>
+                                <p class="text-[10px] text-slate-300 font-medium truncate mt-0.5">${fullName} · ${isJudulDoc ? '<span class="text-orange-400 font-bold">Usulan Judul &amp; Skema</span>' : '<span class="font-mono text-slate-400">' + rawFilename + '</span>'}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            <button type="button" onclick="togglePreviewIframeInteraction('${p.nim}', '${p.docKey}')" id="btnPreviewInteract_${p.nim}_${p.docKey}" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Kursor Terkunci (Normal). Klik jika ingin mengaktifkan scroll di dalam berkas">
-                                <i class="fa-solid fa-arrow-pointer text-[10px]" id="iconPreviewInteract_${p.nim}_${p.docKey}"></i>
-                            </button>
-                            <a href="${pdfUrl}" target="_blank" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center text-xs transition cursor-pointer" title="Buka Layar Penuh di Tab Baru">
-                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                            </a>
-                            <button type="button" onclick="closeSinglePreview(${index})" class="preview-close-btn w-7 h-7 rounded-lg bg-white/10 hover:bg-rose-600/80 text-slate-300 hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer ml-0.5" title="Tutup Pratinjau Ini">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+                            ${headerToolsHtml}
                         </div>
                     </div>
 
-                    <!-- Body Frame Pratinjau PDF -->
-                    <div class="${isMobile ? 'h-[310px] sm:h-[360px]' : 'h-[390px] sm:h-[430px] md:h-[450px]'} bg-slate-200 relative border-b border-slate-200 overflow-hidden cursor-default select-none">
-                        <iframe id="iframePreviewBerkas_${p.nim}_${p.docKey}" src="${pdfUrl}#toolbar=0&navpanes=0" class="w-full h-full border-0 pointer-events-auto" title="Pratinjau Dokumen PDF"></iframe>
-                    </div>
+                    <!-- Body Frame Pratinjau -->
+                    ${bodyContentHtml}
 
                     <!-- Footer Pratinjau dengan Aksi Approve & Reject Berkas -->
                     <div class="p-2.5 px-3.5 bg-white flex flex-col gap-2 shrink-0 border-t border-slate-200/90">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <!-- Status Berkas & Unduh -->
+                            <!-- Status Berkas & Aksi Kiri -->
                             <div class="flex items-center gap-2">
-                                <span id="previewStatusBadge_${p.nim}_${p.docKey}">
-                                    ${getDocStatusBadgeHtml(currentStatus)}
-                                </span>
-                                <a href="${pdfUrl}" download="${rawFilename}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs text-[11px]" title="Unduh Berkas Ini">
-                                    <i class="fa-solid fa-download text-[10px]"></i>
-                                    <span>Unduh</span>
-                                </a>
+                                ${footerLeftHtml}
                             </div>
 
                             <!-- Tombol Aksi Verifikasi Berkas -->
@@ -3726,7 +3902,7 @@
                                             onclick="submitPreviewDocApproval('${p.nim}', '${p.docKey}', 'Approved')" 
                                             id="btnPreviewApprove_${p.nim}_${p.docKey}" 
                                             class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs shadow-emerald-600/20" 
-                                            title="Setujui dokumen ini sebagai Valid">
+                                            title="Setujui sebagai Valid">
                                         <i class="fa-solid fa-check text-[10px]"></i>
                                         <span>Setujui</span>
                                     </button>
@@ -3743,23 +3919,21 @@
                         <!-- Box Catatan Revisi Berkas (Expandable) -->
                         <div id="previewRejectBox_${p.nim}_${p.docKey}" class="hidden pt-2 border-t border-rose-100 flex flex-col gap-1.5 animate-fade-in">
                             <div class="flex items-center justify-between text-[10px] font-bold text-rose-700 flex-wrap gap-1">
-                                <span><i class="fa-solid fa-comment-dots mr-1"></i>Catatan Revisi Dokumen:</span>
+                                <span><i class="fa-solid fa-comment-dots mr-1"></i>Catatan Revisi:</span>
                                 <div class="flex items-center gap-1 flex-wrap">
-                                    <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Dokumen buram / tidak terbaca')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Buram</button>
-                                    <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Format / tipe berkas tidak sesuai')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Format Salah</button>
-                                    <button type="button" onclick="setPreviewPresetNote('${p.nim}', '${p.docKey}', 'Tanda tangan / cap belum lengkap')" class="px-1.5 py-0.5 rounded bg-rose-100/70 hover:bg-rose-200 text-rose-800 text-[9px] font-medium border border-rose-200 cursor-pointer">+ Belum TTD</button>
+                                    ${presetsHtml}
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5">
                                 <input type="text" 
                                        id="inputPreviewCatatan_${p.nim}_${p.docKey}" 
-                                       placeholder="Alasan penolakan / revisi dokumen..." 
+                                       placeholder="Alasan penolakan / revisi..." 
                                        oninput="clearPreviewDocNoteError('${p.nim}', '${p.docKey}')"
                                        class="flex-1 text-xs px-2.5 py-1.5 rounded-lg border border-rose-300 focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 focus:outline-none bg-rose-50/20 text-slate-800">
                                 <button type="button" 
-                                        onclick="submitPreviewDocApproval('${p.nim}', '${p.docKey}', 'Rejected')" 
-                                        id="btnSubmitPreviewReject_${p.nim}_${p.docKey}" 
-                                        class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs transition active:scale-95 cursor-pointer shrink-0 flex items-center gap-1">
+                                       onclick="submitPreviewDocApproval('${p.nim}', '${p.docKey}', 'Rejected')" 
+                                       id="btnSubmitPreviewReject_${p.nim}_${p.docKey}" 
+                                       class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs transition active:scale-95 cursor-pointer shrink-0 flex items-center gap-1">
                                     <i class="fa-solid fa-paper-plane text-[10px]"></i>
                                     <span>Kirim Revisi</span>
                                 </button>
@@ -3770,7 +3944,7 @@
                                 </button>
                             </div>
                             <p id="errPreviewCatatan_${p.nim}_${p.docKey}" class="text-[10px] font-bold text-rose-600 flex items-center gap-1 hidden">
-                                <i class="fa-solid fa-circle-exclamation"></i> <span>Alasan / catatan revisi dokumen wajib diisi!</span>
+                                <i class="fa-solid fa-circle-exclamation"></i> <span>Alasan / catatan revisi wajib diisi!</span>
                             </p>
                         </div>
                     </div>
@@ -3854,6 +4028,71 @@
         if (btnReject) btnReject.disabled = true;
         if (btnSubmitReject) btnSubmitReject.disabled = true;
 
+        if (docKey === 'judul_jenis') {
+            const formData = new FormData();
+            formData.append('nim', nim);
+            formData.append('status', status);
+            formData.append('catatan', comment);
+
+            fetch('<?= site_url("dosenwali/update_judul_jenis_ajax"); ?>', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (btnApprove) btnApprove.disabled = false;
+                if (btnReject) btnReject.disabled = false;
+                if (btnSubmitReject) btnSubmitReject.disabled = false;
+
+                if (res.success) {
+                    if (window.mhsDataMap && window.mhsDataMap[nim]) {
+                        window.mhsDataMap[nim].status_judul = status;
+                        window.mhsDataMap[nim].catatan_judul = comment;
+                        window.mhsDataMap[nim].status_jenis_ta = status;
+                        window.mhsDataMap[nim].catatan_jenis_ta = comment;
+                    }
+
+                    const pIdx = (window.activePreviews || []).findIndex(p => String(p.nim).trim() === String(nim).trim() && String(p.docKey).trim() === 'judul_jenis');
+                    if (pIdx > -1) {
+                        closeSinglePreview(pIdx);
+                    } else {
+                        window.activePreviews = (window.activePreviews || []).filter(p => !(String(p.nim).trim() === String(nim).trim() && String(p.docKey).trim() === 'judul_jenis'));
+                        refreshLihatBerkasView();
+                    }
+
+                    const tableBadge = document.getElementById(`badge_doc_${nim}_judul_jenis`);
+                    if (tableBadge) {
+                        if (status === 'Approved') {
+                            tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200';
+                        } else if (status === 'Rejected') {
+                            tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-rose-100/90 text-rose-700 hover:bg-rose-200';
+                        } else {
+                            tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60';
+                        }
+                    }
+                    updateTableBerkasSummaryBadges(nim);
+
+                    if (typeof pollRealtimeData === 'function') {
+                        lastDataHash = '';
+                        pollRealtimeData();
+                    }
+
+                    showDWToast(status === 'Approved' ? `Usulan Judul & Skema TA disetujui!` : `Catatan revisi Usulan Judul berhasil dikirim!`, true);
+                } else {
+                    showDWToast(res.message || 'Gagal memperbarui status Usulan Judul.', false);
+                }
+            })
+            .catch(err => {
+                if (btnApprove) btnApprove.disabled = false;
+                if (btnReject) btnReject.disabled = false;
+                if (btnSubmitReject) btnSubmitReject.disabled = false;
+                console.error(err);
+                showDWToast('Terjadi kesalahan jaringan.', false);
+            });
+            return;
+        }
+
         const formData = new FormData();
         formData.append('nim', nim);
         formData.append('file_type', docKey);
@@ -3906,13 +4145,10 @@
                 if (tableBadge) {
                     if (status === 'Approved') {
                         tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-emerald-100/90 text-emerald-700 hover:bg-emerald-200';
-                        tableBadge.innerText = 'Valid';
                     } else if (status === 'Rejected') {
                         tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-rose-100/90 text-rose-700 hover:bg-rose-200';
-                        tableBadge.innerText = 'Revisi';
                     } else {
                         tableBadge.className = 'px-1.5 py-0.5 rounded-md font-bold transition-all hover:scale-110 active:scale-95 cursor-pointer bg-white text-slate-500 hover:bg-orange-100 hover:text-orange-700 border border-slate-200/60';
-                        tableBadge.innerText = 'Pending';
                     }
                 }
                 updateTableBerkasSummaryBadges(nim);

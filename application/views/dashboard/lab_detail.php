@@ -38,10 +38,22 @@ $model_url = !empty($matched_room->model_3d)
     : '';
 
 $parsed_room_codes = [];
-if (!empty($matched_room->kode_ruangan)) {
-    $parsed_room_codes = array_filter(array_map('trim', explode(',', $matched_room->kode_ruangan)));
-} elseif (!empty($matched_room->id)) {
-    $parsed_room_codes = [$matched_room->id];
+if (!empty($all_ruangan) && !empty($matched_room)) {
+    foreach ($all_ruangan as $ar) {
+        if (strcasecmp(trim((string)$ar->nama_ruangan), trim((string)$matched_room->nama_ruangan)) === 0) {
+            $codeVal = !empty($ar->kode_ruangan) ? $ar->kode_ruangan : $ar->id;
+            if (!empty($codeVal) && !in_array($codeVal, $parsed_room_codes)) {
+                $parsed_room_codes[] = $codeVal;
+            }
+        }
+    }
+}
+if (empty($parsed_room_codes)) {
+    if (!empty($matched_room->kode_ruangan)) {
+        $parsed_room_codes = array_filter(array_map('trim', explode(',', $matched_room->kode_ruangan)));
+    } elseif (!empty($matched_room->id)) {
+        $parsed_room_codes = [$matched_room->id];
+    }
 }
 
 $specs = !empty($matched_room->spesifikasi_fasilitas)
