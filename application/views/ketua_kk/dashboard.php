@@ -209,7 +209,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-brand-600 transition-colors">Total Pengajuan KK</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $stats['total']; ?></h3>
+                            <h3 id="statTotalKK" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $stats['total']; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Seluruh Mahasiswa KK</p>
                         </div>
                         <div class="relative shrink-0">
@@ -234,7 +234,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-cyan-600 transition-colors">Siap Review KK</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $stats['ready']; ?></h3>
+                            <h3 id="statReadyKK" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $stats['ready']; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Prasyarat Koor Disetujui</p>
                         </div>
                         <div class="relative shrink-0">
@@ -258,7 +258,7 @@
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex-1">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-600 transition-colors">Bimbingan Terbuka</p>
-                            <h3 class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $stats['approved']; ?></h3>
+                            <h3 id="statApprovedKK" class="text-2xl font-black text-slate-900 mt-1 tracking-tight"><?= $stats['approved']; ?></h3>
                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-1">Resmi Unlocked</p>
                         </div>
                         <div class="relative shrink-0">
@@ -419,12 +419,12 @@
                             <?php else: ?>
                                 <?php foreach($list_mahasiswa as $row): ?>
                                     <?php
-                                        $is_wali_app  = ($row['status_approval_wali'] === 'Approved');
-                                        $is_admin_app = ($row['status_approval_admin'] === 'Approved');
-                                        $is_koor_app  = ($row['status_approval_koor'] === 'Approved');
-                                        $is_kk_app    = ($row['status_approval_kk'] === 'Approved');
-                                        $is_kk_rej    = ($row['status_approval_kk'] === 'Rejected');
-                                        $is_unlocked  = ($row['is_bimbingan_unlocked'] == 1);
+                                        $is_wali_app  = (($row['status_approval_wali'] ?? '') === 'Approved');
+                                        $is_admin_app = (($row['status_approval_admin'] ?? '') === 'Approved');
+                                        $is_koor_app  = (($row['status_approval_koor'] ?? '') === 'Approved');
+                                        $is_kk_app    = (($row['status_approval_kk'] ?? '') === 'Approved');
+                                        $is_kk_rej    = (($row['status_approval_kk'] ?? '') === 'Rejected');
+                                        $is_unlocked  = ($is_kk_app || (!empty($row['is_bimbingan_unlocked']) && $row['is_bimbingan_unlocked'] == 1));
                                         $is_prereq_ok = ($is_wali_app && $is_admin_app && $is_koor_app);
                                         $can_bulk_approve = ($is_prereq_ok && !$is_kk_app);
                                     ?>
@@ -440,13 +440,20 @@
 
                                         <!-- Mahasiswa -->
                                         <td class="py-4 px-5 whitespace-nowrap">
+                                            <?php
+                                                $display_name = trim(($row['nama_depan'] ?? '') . ' ' . ($row['nama_belakang'] ?? ''));
+                                                if (empty($display_name)) {
+                                                    $display_name = !empty($row['name']) ? $row['name'] : (!empty($row['full_name']) ? $row['full_name'] : 'Mahasiswa ' . ($row['nim'] ?? ''));
+                                                }
+                                                $initial_char = strtoupper(substr($display_name, 0, 1) ?: 'M');
+                                            ?>
                                             <div class="flex items-center gap-3">
                                                 <div class="w-9 h-9 rounded-xl bg-orange-100 border border-orange-200 text-brand-600 font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                                                    <?= strtoupper(substr($row['nama_depan'], 0, 1)); ?>
+                                                    <?= $initial_char; ?>
                                                 </div>
                                                 <div>
-                                                    <div class="font-bold text-slate-900 text-xs"><?= htmlspecialchars($row['nama_depan'] . ' ' . $row['nama_belakang']); ?></div>
-                                                    <div class="text-[11px] text-slate-400 font-mono"><?= htmlspecialchars($row['nim']); ?></div>
+                                                    <div class="font-bold text-slate-900 text-xs"><?= htmlspecialchars($display_name); ?></div>
+                                                    <div class="text-[11px] text-slate-400 font-mono"><?= htmlspecialchars($row['nim'] ?? ''); ?></div>
                                                 </div>
                                             </div>
                                         </td>
@@ -640,7 +647,7 @@
             search: '<?= addslashes($search ?? ''); ?>',
             cat: '<?= addslashes($cat ?? 'query'); ?>',
             page: 1,
-            per_page: <?= $per_page; ?>
+            perPage: <?= $per_page; ?>
         };
 
         function toggleKKCustomDropdown(id, e) {
@@ -696,6 +703,16 @@
                     tbody.style.opacity = '1';
 
                     if (!res.success) return;
+
+                    // Sync card stats if returned
+                    if (res.stats) {
+                        const elTotal = document.getElementById('statTotalKK');
+                        const elReady = document.getElementById('statReadyKK');
+                        const elApproved = document.getElementById('statApprovedKK');
+                        if (elTotal) elTotal.innerText = res.stats.total;
+                        if (elReady) elReady.innerText = res.stats.ready;
+                        if (elApproved) elApproved.innerText = res.stats.approved;
+                    }
 
                     // 1. Render Rows
                     if (!res.list || res.list.length === 0) {

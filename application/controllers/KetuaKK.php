@@ -80,7 +80,10 @@ class KetuaKK extends CI_Controller {
         $formatted_list = array();
         foreach ($list as $r) {
             $full_name = trim(($r['nama_depan'] ?? '') . ' ' . ($r['nama_belakang'] ?? ''));
-            if (empty($full_name)) $full_name = 'Mahasiswa ' . ($r['nim'] ?? '');
+            if (empty($full_name)) {
+                $full_name = !empty($r['name']) ? $r['name'] : (!empty($r['full_name']) ? $r['full_name'] : ('Mahasiswa ' . ($r['nim'] ?? '')));
+            }
+            $first_char = strtoupper(substr($full_name, 0, 1) ?: 'M');
 
             $is_ready_for_kk = (($r['status_approval_wali'] ?? '') === 'Approved') && 
                                (($r['status_approval_admin'] ?? '') === 'Approved') && 
@@ -89,7 +92,7 @@ class KetuaKK extends CI_Controller {
             $formatted_list[] = array(
                 'nim'                  => $r['nim'] ?? '',
                 'full_name'            => htmlspecialchars($full_name),
-                'first_char'           => strtoupper(substr($r['nama_depan'] ?? 'M', 0, 1)),
+                'first_char'           => $first_char,
                 'prodi'                => htmlspecialchars($r['prodi'] ?? 'DKV'),
                 'kode_kk'              => htmlspecialchars($r['kode_kk'] ?? 'KK-VCM'),
                 'nama_kk'              => htmlspecialchars($r['nama_kk'] ?? 'KK VCM'),
