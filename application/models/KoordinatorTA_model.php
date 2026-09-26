@@ -798,36 +798,60 @@ class KoordinatorTA_model extends CI_Model {
             return array();
         }
 
-        $guidanceIds = array_column($all, 'guidance_id');
-        $this->db->select('
-            id,
-            tanggal_sidang,
-            waktu_sidang,
-            ruang_sidang,
-            link_sidang,
-            nilaisidang_pembimbing1,
-            nilaisidang_pembimbing2,
-            nilaisidang_penguji1,
-            nilaisidang_penguji2,
-            penilaiansidang_pembimbing1,
-            penilaiansidang_pembimbing2,
-            penilaiansidang_penguji1,
-            penilaiansidang_penguji2,
-            evaluasi_pembimbing1,
-            evaluasi_pembimbing2,
-            evaluasi_penguji1,
-            evaluasi_penguji2,
-            bap,
-            status_bap
-        ');
-        $this->db->from('guidance');
-        $this->db->where_in('id', $guidanceIds);
-        $gQuery = $this->db->get();
-
+        $guidanceIds = array_filter(array_column($all, 'guidance_id'));
         $gMap = array();
-        if ($gQuery && $gQuery->num_rows() > 0) {
-            foreach ($gQuery->result_array() as $gr) {
-                $gMap[$gr['id']] = $gr;
+        if (!empty($guidanceIds)) {
+            $this->db->select('
+                id,
+                tanggal_sidang,
+                waktu_sidang,
+                ruang_sidang,
+                link_sidang,
+                status_preview,
+                nilaisidang_pembimbing1,
+                nilaisidang_pembimbing2,
+                nilaisidang_penguji1,
+                nilaisidang_penguji2,
+                penilaiansidang_pembimbing1,
+                penilaiansidang_pembimbing2,
+                penilaiansidang_penguji1,
+                penilaiansidang_penguji2,
+                evaluasi_pembimbing1,
+                evaluasi_pembimbing2,
+                evaluasi_penguji1,
+                evaluasi_penguji2,
+                bap,
+                status_bap
+            ');
+            $this->db->from('guidance');
+            $this->db->where_in('id', $guidanceIds);
+            $gQuery = $this->db->get();
+
+            if ($gQuery && $gQuery->num_rows() > 0) {
+                foreach ($gQuery->result_array() as $gr) {
+                    $gMap[$gr['id']] = $gr;
+                }
+            }
+        }
+
+        // Ambil riwayat aktivitas dari tabel thesis
+        $thesisMap = array();
+        if (!empty($guidanceIds) && $this->db->table_exists('thesis')) {
+            $this->db->select('id_guidance, tahapan_preview, status');
+            $this->db->where_in('id_guidance', $guidanceIds);
+            $tQuery = $this->db->get('thesis');
+            if ($tQuery && $tQuery->num_rows() > 0) {
+                foreach ($tQuery->result_array() as $tr) {
+                    $tGid = $tr['id_guidance'];
+                    $thp = strtolower(trim($tr['tahapan_preview'] ?? ''));
+                    $isApp = (strcasecmp($tr['status'] ?? '', 'Approved') === 0);
+                    if (!isset($thesisMap[$tGid])) {
+                        $thesisMap[$tGid] = array('has_p3' => false, 'p2_app' => false, 'has_sidang' => false, 'p3_app' => false);
+                    }
+                    if ($thp === 'preview2' && $isApp) $thesisMap[$tGid]['p2_app'] = true;
+                    if ($thp === 'preview3') { $thesisMap[$tGid]['has_p3'] = true; if ($isApp) $thesisMap[$tGid]['p3_app'] = true; }
+                    if ($thp === 'sidang')   { $thesisMap[$tGid]['has_sidang'] = true; if ($isApp) $thesisMap[$tGid]['p3_app'] = true; }
+                }
             }
         }
 
@@ -864,16 +888,22 @@ class KoordinatorTA_model extends CI_Model {
         foreach ($all as $item) {
             $gId = $item['guidance_id'];
             $gRow = $gMap[$gId] ?? array();
+            $tInfo = $thesisMap[$gId] ?? array();
 
             $statusPreview = strtolower(trim($gRow['status_preview'] ?? ($item['status_preview'] ?? '')));
             $hasPenguji = !empty($item['penguji_1']) && !empty($item['penguji_2']);
             $hasJadwalSidang = !empty($gRow['tanggal_sidang']);
 
             // Syarat masuk Tab 3 (Jadwal Sidang & Penilaian Sidang):
-            // Mahasiswa harus sudah memiliki Penguji dan sudah masuk ke tahap Preview 3 / Sidang / Terjadwal Sidang
-            $isInPreview3OrSidang = in_array($statusPreview, ['preview3', 'sidang', 'selesai']) || $hasJadwalSidang || !empty($gRow['nilaisidang_pembimbing1']);
+            // Mahasiswa sudah masuk ke tahap Preview 3 / Pra-Sidang / Sidang / Terjadwal Sidang
+            $isInPreview3OrSidang = in_array($statusPreview, ['preview3', 'sidang', 'selesai', 'lulus'])
+                || $hasJadwalSidang
+                || !empty($gRow['nilaisidang_pembimbing1'])
+                || !empty($tInfo['has_p3'])
+                || !empty($tInfo['p2_app'])
+                || !empty($tInfo['has_sidang']);
 
-            if (!$hasPenguji || !$isInPreview3OrSidang) {
+            if (!$isInPreview3OrSidang) {
                 continue;
             }
 
