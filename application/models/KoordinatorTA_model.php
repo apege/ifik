@@ -507,18 +507,27 @@ class KoordinatorTA_model extends CI_Model {
      * Ambil daftar ruangan yang tersedia dari tabel ruangan
      */
     public function get_available_ruangan() {
-        $this->db->select('id, ruangan as nama_ruangan, kapasitas, akses as status, spesifikasi_fasilitas as fasilitas, date as tanggal_dibuat');
+        $this->db->select('id, id as kode_ruangan, ruangan as nama_ruangan, kapasitas, akses as status, spesifikasi_fasilitas as fasilitas, date as tanggal_dibuat');
         $this->db->from('ruangan');
+        $this->db->order_by('id', 'ASC');
         $this->db->order_by('ruangan', 'ASC');
         $query = $this->db->get();
 
         if ($query && $query->num_rows() > 0) {
-            return $query->result_array();
+            $rows = $query->result_array();
+            foreach ($rows as &$r) {
+                if (empty($r['kode_ruangan'])) {
+                    $r['kode_ruangan'] = $r['id'];
+                }
+            }
+            return $rows;
         }
 
         return array(
-            array('id' => 'LK.01.01', 'nama_ruangan' => 'AULA Utama', 'kapasitas' => 94, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC, Sound System'),
-            array('id' => 'LK.01.02', 'nama_ruangan' => 'green screen', 'kapasitas' => 100, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC')
+            array('id' => 'LK.01.01', 'kode_ruangan' => 'LK.01.01', 'nama_ruangan' => 'Ruang Sidang Utama (LK.01.01)', 'kapasitas' => 94, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC, Sound System'),
+            array('id' => 'LK.01.02', 'kode_ruangan' => 'LK.01.02', 'nama_ruangan' => 'Studio Green Screen (LK.01.02)', 'kapasitas' => 100, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
+            array('id' => 'R.301',    'kode_ruangan' => 'R.301',    'nama_ruangan' => 'Ruang Sidang 1 (Lantai 3)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
+            array('id' => 'R.302',    'kode_ruangan' => 'R.302',    'nama_ruangan' => 'Ruang Sidang 2 (Lantai 3)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC')
         );
     }
 
