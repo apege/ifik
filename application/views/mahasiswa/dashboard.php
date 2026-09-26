@@ -47,24 +47,14 @@
         // Circular Progress Math (radius = 32, circumference = 2 * pi * 32 ≈ 201)
         $circumference = 201;
         $dashoffset = $circumference - ($circumference * $progress_pct / 100);
-
-        // Status Kelulusan & Nilai Sidang untuk Dashboard
-        $dash_pub = $pendaftaran['status_publish_sidang'] ?? 'Draft';
-        $dash_is_pub = in_array($dash_pub, ['Published', 'Republished']) && !empty($pendaftaran['nilai_akhir_sidang']);
-        $dash_kelulusan = $pendaftaran['status_kelulusan_sidang'] ?? 'Belum Dinilai';
-        $dash_grade = $pendaftaran['grade_sidang'] ?? '-';
-        $dash_nilai = !empty($pendaftaran['nilai_akhir_sidang']) ? number_format((float)$pendaftaran['nilai_akhir_sidang'], 2, '.', '') : '-';
     ?>
-
-    <!-- Auto Role-Aware Curved Animated Sidebar -->
-    <?php $this->load->view('components/curved_sidebar'); ?>
 
     <!-- Header Glass Navbar (Clean White Glass) -->
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-orange-100/80 shadow-xs">
         <div class="w-full px-4 sm:px-6 lg:px-10">
             <div class="flex items-center justify-between h-16 sm:h-18">
                 <!-- Brand -->
-                <div class="flex items-center gap-3 pl-11 sm:pl-12">
+                <div class="flex items-center gap-3">
                     <div class="w-9 h-9 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-xl font-bold text-lg flex items-center justify-center box-3d">
                         I
                     </div>
@@ -131,38 +121,7 @@
                 }
             }, 4000);
             </script>
-        <?php endif; ?>
-
-        <?php if($dash_is_pub): ?>
-            <!-- Defense Grade Published Announcement Banner -->
-            <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-800 text-white rounded-2xl p-6 shadow-xl border-2 border-emerald-300 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div class="flex items-center gap-4 relative z-10">
-                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center text-2xl font-bold box-3d border border-white/30 shrink-0">
-                        <i class="bi bi-trophy-fill text-amber-300"></i>
-                    </div>
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/20 text-[10px] font-black uppercase tracking-wider text-white border border-white/30 mb-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-300 animate-ping"></span>
-                            Pengumuman Kelulusan Sidang TA
-                        </div>
-                        <h3 class="text-base sm:text-lg font-black text-white leading-tight">
-                            Hasil Sidang Tugas Akhir Anda Telah Resmi Dipublikasikan!
-                        </h3>
-                        <p class="text-xs text-emerald-100 font-medium mt-0.5">
-                            Status: <strong class="text-white uppercase"><?= htmlspecialchars($dash_kelulusan); ?></strong> &bull; Nilai Akhir: <strong class="text-white"><?= $dash_nilai; ?></strong> &bull; Grade: <strong class="text-amber-200"><?= htmlspecialchars($dash_grade); ?></strong>
-                        </p>
-                    </div>
-                </div>
-                <div class="shrink-0 relative z-10 w-full md:w-auto">
-                    <a href="<?= site_url('mahasiswa/bimbingan?tab=sidang'); ?>" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-white text-emerald-800 font-extrabold text-xs shadow-md hover:bg-emerald-50 transition flex items-center justify-center gap-2 box-3d hover:scale-105 active:scale-95 cursor-pointer">
-                        <span>Lihat Berita Acara &amp; Rincian Nilai</span>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Hero Welcome & Progress Radial Card (3D Rich Orange Bento Layout) -->
+        <?php endif; ?>        <!-- Hero Welcome & Progress Radial Card (3D Rich Orange Bento Layout) -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <!-- Left Hero Panel (3 Cols) - Rich Orange 3D Card with Clear Campus Building Background -->
             <div class="lg:col-span-3 card-3d-orange rounded-2xl p-7 sm:p-8 relative overflow-hidden flex flex-col justify-between text-white">
