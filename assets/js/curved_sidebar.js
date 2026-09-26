@@ -333,28 +333,51 @@
 
         // Handle initial hash or hashchange for tabs/sections and update active state
         const updateSidebarActiveTab = (forcedHash) => {
-            const currentHash = (forcedHash !== undefined && forcedHash !== null) ? forcedHash : (window.location.hash || '');
             const panel = document.getElementById('curvedSidebarPanel');
             if (!panel) return;
             const navItems = panel.querySelectorAll('.curved-nav-item');
-            const isKoordinatorPage = window.location.pathname.includes('koordinatorta');
-            const targetHash = currentHash || (isKoordinatorPage ? '#pendaftaran' : '');
-
-            if (targetHash) {
-                const cleanTarget = targetHash.startsWith('#') ? targetHash : '#' + targetHash;
+            
+            // Check if current page is the Koordinator TA dashboard with client-side tabs
+            const hasDashboardTabs = !!(document.getElementById('tabBtnPendaftaran') || document.getElementById('tabContentPendaftaran'));
+            
+            if (!hasDashboardTabs) {
+                // On subpages (e.g. /koordinatorta/monitoring, /koordinatorta/help, /kalender),
+                // do not force client-side hash tabs. Match against full page URL.
+                const currentPath = window.location.pathname.replace(/\/index\.php\/?/i, '/').replace(/\/+$/, '');
                 navItems.forEach(item => {
                     const href = item.getAttribute('href') || '';
-                    if (href.includes('#')) {
-                        if (href.endsWith(cleanTarget) || href.includes(cleanTarget)) {
-                            item.classList.add('is-current');
-                        } else {
-                            item.classList.remove('is-current');
-                        }
-                    } else if (isKoordinatorPage && cleanTarget) {
-                        item.classList.remove('is-current');
+                    if (!href.startsWith('javascript:')) {
+                        try {
+                            const itemUrl = new URL(href, window.location.href);
+                            const itemPath = itemUrl.pathname.replace(/\/index\.php\/?/i, '/').replace(/\/+$/, '');
+                            if (itemPath === currentPath && !itemUrl.hash) {
+                                item.classList.add('is-current');
+                            } else {
+                                item.classList.remove('is-current');
+                            }
+                        } catch (e) {}
                     }
                 });
+                return;
             }
+
+            // On the Dashboard page with client-side tabs (#pendaftaran, #preview2, #sidang)
+            const currentHash = (forcedHash !== undefined && forcedHash !== null) ? forcedHash : (window.location.hash || '');
+            const targetHash = currentHash || '#pendaftaran';
+            const cleanTarget = targetHash.startsWith('#') ? targetHash : '#' + targetHash;
+
+            navItems.forEach(item => {
+                const href = item.getAttribute('href') || '';
+                if (href.includes('#')) {
+                    if (href.endsWith(cleanTarget) || href.includes(cleanTarget)) {
+                        item.classList.add('is-current');
+                    } else {
+                        item.classList.remove('is-current');
+                    }
+                } else {
+                    item.classList.remove('is-current');
+                }
+            });
         };
 
         window.updateSidebarActiveTab = updateSidebarActiveTab;
