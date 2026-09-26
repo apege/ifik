@@ -260,22 +260,23 @@ class Dashboard extends CI_Controller {
         $lokasi       = $this->input->post('lokasi', true);
         $status       = $this->input->post('status', true);
 
-        $rooms = array_filter(array_map('trim', explode(',', (string)$kode_ruangan)));
-        $clean_kode_ruangan = !empty($rooms) ? implode(', ', array_map('strtoupper', $rooms)) : strtoupper(trim((string)$kode_ruangan));
+        $rooms = array_values(array_filter(array_map('trim', explode(',', (string)$kode_ruangan))));
+        if (empty($rooms) && !empty($kode_ruangan)) {
+            $rooms = [strtoupper(trim((string)$kode_ruangan))];
+        }
 
-        if (empty($nama_ruangan) || empty($clean_kode_ruangan) || empty($id_kategori)) {
+        if (empty($nama_ruangan) || empty($rooms) || empty($id_kategori)) {
             echo json_encode(['status' => 'error', 'message' => 'Harap isi Nama Ruangan/Lab, Ruangan Fisik (Nomor LK), dan Kategori!']);
             return;
         }
 
-        // Cek duplikasi ruangan fisik (1 ruangan fisik = 1 fasilitas)
+        // Cek duplikasi ruangan fisik (1 ruangan fisik = 1 baris)
         $this->db->select('id, ruangan, ruangan AS nama_ruangan, id AS kode_ruangan');
         $existing_ruangan = $this->db->get('ruangan')->result();
         $canonicalize = function($str) {
             return strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', (string)$str));
         };
-        $check_rooms = !empty($rooms) ? $rooms : [$clean_kode_ruangan];
-        foreach ($check_rooms as $target) {
+        foreach ($rooms as $target) {
             $target_clean = strtoupper(trim($target));
             $target_canon = $canonicalize($target);
             if (empty($target_clean)) continue;
@@ -283,7 +284,7 @@ class Dashboard extends CI_Controller {
             foreach ($existing_ruangan as $row) {
                 $rowCode = $row->kode_ruangan ?: $row->id;
                 if (empty($rowCode)) continue;
-                $row_rooms = array_filter(array_map('trim', explode(',', $rowCode)));
+                $row_rooms = array_filter(array_map('trim', explode(',', (string)$rowCode)));
                 foreach ($row_rooms as $r) {
                     $r_clean = strtoupper(trim($r));
                     $r_canon = $canonicalize($r);
@@ -299,20 +300,33 @@ class Dashboard extends CI_Controller {
         }
 
         $fields = $this->db->list_fields('ruangan');
-        $data_ruangan = array();
-        if (in_array('id', $fields)) $data_ruangan['id'] = $clean_kode_ruangan;
-        if (in_array('ruangan', $fields)) $data_ruangan['ruangan'] = $nama_ruangan;
-        if (in_array('nama_ruangan', $fields)) $data_ruangan['nama_ruangan'] = $nama_ruangan;
-        if (in_array('kode_ruangan', $fields)) $data_ruangan['kode_ruangan'] = $clean_kode_ruangan;
-        if (in_array('id_kategori', $fields)) $data_ruangan['id_kategori'] = $id_kategori;
-        if (in_array('kapasitas', $fields)) $data_ruangan['kapasitas'] = $kapasitas ? $kapasitas : 30;
-        if (in_array('lokasi', $fields)) $data_ruangan['lokasi'] = $lokasi ? $lokasi : 'Gedung Sebatik (FIK)';
-        if (in_array('status', $fields)) $data_ruangan['status'] = $status ? $status : 'Tersedia';
+        $base_data = array();
+        if (in_array('ruangan', $fields)) $base_data['ruangan'] = $nama_ruangan;
+        if (in_array('nama_ruangan', $fields)) $base_data['nama_ruangan'] = $nama_ruangan;
+        if (in_array('id_kategori', $fields)) $base_data['id_kategori'] = $id_kategori;
+        if (in_array('kapasitas', $fields)) $base_data['kapasitas'] = $kapasitas ? $kapasitas : 30;
+        if (in_array('lokasi', $fields)) $base_data['lokasi'] = $lokasi ? $lokasi : 'Gedung Sebatik (FIK)';
+        if (in_array('status', $fields)) $base_data['status'] = $status ? $status : 'Tersedia';
 
-        $insert = $this->db->insert('ruangan', $data_ruangan);
+        $inserted = 0;
+        foreach ($rooms as $single_code) {
+            $clean_code = strtoupper(trim($single_code));
+            if (empty($clean_code)) continue;
 
-        if ($insert) {
-            echo json_encode(['status' => 'success', 'message' => 'Ruangan baru berhasil ditambahkan!']);
+            $row_data = $base_data;
+            if (in_array('id', $fields)) $row_data['id'] = $clean_code;
+            if (in_array('kode_ruangan', $fields)) $row_data['kode_ruangan'] = $clean_code;
+
+            if ($this->db->insert('ruangan', $row_data)) {
+                $inserted++;
+            }
+        }
+
+        if ($inserted > 0) {
+            $msg = ($inserted > 1) 
+                ? "{$inserted} ruangan fisik baru berhasil ditambahkan!" 
+                : "Ruangan baru berhasil ditambahkan!";
+            echo json_encode(['status' => 'success', 'message' => $msg]);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menambahkan ruangan baru.']);
         }

@@ -137,7 +137,8 @@
                                     'query'   => '🔍 Kata Kunci (Semua)',
                                     'nama'    => '🏷️ Nama Mahasiswa',
                                     'nim'     => '🆔 NIM Mahasiswa',
-                                    'ruangan' => '🏢 Ruangan / Waktu',
+                                    'ruangan' => '🏛️ Ruangan Sidang',
+                                    'waktu'   => '🕒 Waktu / Hari',
                                     'dosen'   => '👨‍🏫 Pembimbing / Penguji',
                                     'judul'   => '📖 Judul Tugas Akhir'
                                 ];
@@ -151,7 +152,8 @@
                                 <div onclick="selectJadwalMainCategory('query', '🔍 Kata Kunci (Semua)')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? 'query') === 'query' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>🔍 Kata Kunci (Semua)</span></div>
                                 <div onclick="selectJadwalMainCategory('nama', '🏷️ Nama Mahasiswa')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'nama' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>🏷️ Nama Mahasiswa</span></div>
                                 <div onclick="selectJadwalMainCategory('nim', '🆔 NIM Mahasiswa')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'nim' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>🆔 NIM Mahasiswa</span></div>
-                                <div onclick="selectJadwalMainCategory('ruangan', '🏢 Ruangan / Waktu')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'ruangan' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>🏢 Ruangan / Waktu</span></div>
+                                <div onclick="selectJadwalMainCategory('ruangan', '🏛️ Ruangan Sidang')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'ruangan' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>🏛️ Ruangan Sidang</span></div>
+                                <div onclick="selectJadwalMainCategory('waktu', '🕒 Waktu / Hari')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'waktu' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>🕒 Waktu / Hari</span></div>
                                 <div onclick="selectJadwalMainCategory('dosen', '👨‍🏫 Pembimbing / Penguji')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'dosen' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>👨‍🏫 Pembimbing / Penguji</span></div>
                                 <div onclick="selectJadwalMainCategory('judul', '📖 Judul Tugas Akhir')" class="dropdown-item px-3 py-2 rounded-xl cursor-pointer font-semibold <?= ($cat ?? '') === 'judul' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-700 hover:bg-slate-50'; ?>"><span>📖 Judul Tugas Akhir</span></div>
                             </div>
@@ -219,7 +221,8 @@
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/60 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
                             <th class="py-3.5 px-4 text-center w-12 whitespace-nowrap">No</th>
-                            <th class="py-3.5 px-4 whitespace-nowrap">Waktu & Ruangan</th>
+                            <th class="py-3.5 px-4 whitespace-nowrap">Waktu Sidang</th>
+                            <th class="py-3.5 px-4 whitespace-nowrap">Ruangan</th>
                             <th class="py-3.5 px-5 whitespace-nowrap">Mahasiswa & NIM</th>
                             <th class="py-3.5 px-5">Judul Tugas Akhir</th>
                             <th class="py-3.5 px-4 whitespace-nowrap">Tim Pembimbing</th>
@@ -230,7 +233,7 @@
                     <tbody class="divide-y divide-slate-100 font-medium">
                         <?php if (empty($list)): ?>
                             <tr>
-                                <td colspan="7" class="py-12 text-center text-slate-400">
+                                <td colspan="8" class="py-12 text-center text-slate-400">
                                     <p class="font-bold text-slate-700">Belum Ada Jadwal Sidang</p>
                                 </td>
                             </tr>
@@ -239,11 +242,17 @@
                                 <tr class="hover:bg-slate-50/80 transition-colors">
                                     <td class="py-4 px-4 text-center font-bold text-slate-400 whitespace-nowrap"><?= $r['no']; ?></td>
                                     
-                                    <!-- Waktu & Ruangan -->
+                                    <!-- Waktu Sidang -->
                                     <td class="py-4 px-4 whitespace-nowrap">
-                                        <div class="font-bold text-slate-800"><?= htmlspecialchars($r['hari_tanggal']); ?></div>
-                                        <div class="text-[11px] text-orange-600 font-mono font-bold"><?= htmlspecialchars($r['waktu']); ?></div>
-                                        <div class="text-[11px] text-slate-500 mt-0.5"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($r['ruangan']); ?></div>
+                                        <div class="font-bold text-slate-800 flex items-center gap-1.5"><i class="bi bi-calendar3 text-amber-500"></i> <?= htmlspecialchars($r['hari_tanggal']); ?></div>
+                                        <div class="text-[11px] text-orange-600 font-mono font-bold mt-0.5 flex items-center gap-1"><i class="bi bi-clock"></i> <?= htmlspecialchars($r['waktu']); ?></div>
+                                    </td>
+
+                                    <!-- Ruangan Sidang -->
+                                    <td class="py-4 px-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 shadow-2xs">
+                                            <i class="bi bi-geo-alt-fill text-cyan-600"></i> <?= htmlspecialchars($r['ruangan']); ?>
+                                        </span>
                                     </td>
 
                                     <!-- Mahasiswa & NIM -->
@@ -293,7 +302,8 @@
         const extraCategoriesJadwal = [
             { key: 'nama',    label: '🏷️ Nama Mahasiswa', placeholder: 'Ketik nama mahasiswa...' },
             { key: 'nim',     label: '🆔 NIM Mahasiswa',  placeholder: 'Ketik NIM mahasiswa...' },
-            { key: 'ruangan', label: '🏢 Ruangan / Waktu', placeholder: 'Ketik ruangan atau hari...' },
+            { key: 'ruangan', label: '🏛️ Ruangan Sidang', placeholder: 'Ketik nama/kode ruangan...' },
+            { key: 'waktu',   label: '🕒 Waktu / Hari',    placeholder: 'Ketik hari/tanggal...' },
             { key: 'dosen',   label: '👨‍🏫 Pembimbing / Penguji', placeholder: 'Ketik nama pembimbing / penguji...' },
             { key: 'judul',   label: '📖 Judul Tugas Akhir', placeholder: 'Ketik judul TA...' }
         ];
@@ -516,10 +526,11 @@
             const matches = window.jadwalData.filter(item => {
                 if (cat === 'nim')     return (item.nim || '').toLowerCase().includes(q);
                 if (cat === 'nama')    return (item.nama || '').toLowerCase().includes(q);
-                if (cat === 'ruangan') return (item.ruangan || '').toLowerCase().includes(q) || (item.hari_tanggal || '').toLowerCase().includes(q);
+                if (cat === 'ruangan') return (item.ruangan || '').toLowerCase().includes(q);
+                if (cat === 'waktu')   return (item.hari_tanggal || '').toLowerCase().includes(q) || (item.waktu || '').toLowerCase().includes(q);
                 if (cat === 'dosen')   return (item.pembimbing_1 || '').toLowerCase().includes(q) || (item.penguji_1 || '').toLowerCase().includes(q);
                 if (cat === 'judul')   return (item.judul || '').toLowerCase().includes(q);
-                return (item.nim || '').toLowerCase().includes(q) || (item.nama || '').toLowerCase().includes(q) || (item.ruangan || '').toLowerCase().includes(q);
+                return (item.nim || '').toLowerCase().includes(q) || (item.nama || '').toLowerCase().includes(q) || (item.ruangan || '').toLowerCase().includes(q) || (item.hari_tanggal || '').toLowerCase().includes(q);
             }).slice(0, 8);
 
             if (matches.length === 0) {

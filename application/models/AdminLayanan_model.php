@@ -1936,6 +1936,11 @@ class AdminLayanan_model extends CI_Model {
                     $this->db->or_like('g.id_mhs', $search);
                 } elseif ($cat === 'judul') {
                     $this->db->like('g.judul_1', $search);
+                } elseif ($cat === 'ruangan') {
+                    $this->db->like('g.ruang_sidang', $search);
+                } elseif ($cat === 'waktu') {
+                    $this->db->like('g.tanggal_sidang', $search);
+                    $this->db->or_like('g.waktu_sidang', $search);
                 } elseif ($cat === 'prodi') {
                     $this->db->like('m.prodi', $search);
                     $this->db->or_like('g.peminatan', $search);
@@ -1943,12 +1948,15 @@ class AdminLayanan_model extends CI_Model {
                 } elseif ($cat === 'dosen') {
                     $this->db->like('u_wali.name', $search);
                     $this->db->or_like('u_p1.name', $search);
+                    $this->db->or_like('u_pj1.name', $search);
+                    $this->db->or_like('u_pj2.name', $search);
                 } else {
                     $this->db->like('u.name', $search);
                     $this->db->or_like('u.nim', $search);
                     $this->db->or_like('g.id_mhs', $search);
                     $this->db->or_like('g.judul_1', $search);
                     $this->db->or_like('m.prodi', $search);
+                    $this->db->or_like('g.ruang_sidang', $search);
                 }
                 $this->db->group_end();
             }

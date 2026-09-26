@@ -38,8 +38,8 @@ class DosenWali extends CI_Controller {
         $detail = $this->DosenWali_model->get_detail_pendaftaran_mahasiswa($nim);
         if (!$detail) return false;
         $current_stage = $detail['current_stage'] ?? 'Dosen Wali';
-        // Hanya kunci jika berkas sudah diproses lebih lanjut oleh Koordinator TA ke atas
-        return in_array($current_stage, ['Koordinator TA', 'Ketua KK', 'Selesai Approval']);
+        $status_wali = $detail['status_approval_wali'] ?? 'Pending';
+        return ($status_wali === 'Approved' || in_array($current_stage, ['Admin Layanan', 'Koordinator TA', 'Ketua KK', 'Selesai Approval', 'Selesai']));
     }
 
     // Detail Mahasiswa Bimbingan & Approval
@@ -424,6 +424,13 @@ class DosenWali extends CI_Controller {
                 'nama'                   => $nama,
                 'konsentrasi'            => $m['mhs_konsentrasi'] ?? '',
                 'judul'                  => $m['judul_1'] ?? '',
+                'judul_1'                => $m['judul_1'] ?? '',
+                'judul_en'               => $m['judul_en'] ?? '',
+                'jenis_ta'               => $m['jenis_ta'] ?? '',
+                'status_judul'           => $m['status_judul'] ?? 'Pending',
+                'catatan_judul'          => $m['catatan_judul'] ?? '',
+                'status_jenis_ta'        => $m['status_jenis_ta'] ?? 'Pending',
+                'catatan_jenis_ta'       => $m['catatan_jenis_ta'] ?? '',
                 'status_approval_wali'   => $st,
                 'current_stage'          => $m['current_stage'] ?? 'Dosen Wali',
                 'detail_url'             => site_url('dosen/wali/detail_mahasiswa/' . $m['nim']),

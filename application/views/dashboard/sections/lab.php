@@ -604,8 +604,8 @@
 
                 if (empty($name)) continue;
 
-                $key = preg_replace('/[^a-z0-9]/', '', strtolower($code));
-                if (empty($key)) $key = 'room_' . $r->id;
+                $key = preg_replace('/[^a-z0-9]/', '', strtolower($name));
+                if (empty($key)) $key = 'room_' . preg_replace('/[^a-z0-9]/', '', strtolower($code));
 
                 if (!isset($dyn_lab_data[$key])) {
                     $default_img = base_url('assets/images/multimedia.jpg');

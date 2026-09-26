@@ -56,6 +56,45 @@ class Booking_model extends CI_Model {
         return $ruangan_list;
     }
 
+    /**
+     * Mengambil seluruh data ruangan yang digrupkan per fasilitas/nama ruangan
+     * untuk tampilan halaman web Admin & Landing Page (1 baris per fasilitas dengan daftar badge kode ruangan)
+     */
+    public function get_all_ruangan_grouped()
+    {
+        $raw_list = $this->get_all_ruangan();
+        if (empty($raw_list)) return [];
+
+        $grouped = [];
+        foreach ($raw_list as $r) {
+            $nameKey = strtolower(trim((string)$r->nama_ruangan));
+            if (!isset($grouped[$nameKey])) {
+                $clone = clone $r;
+                $clone->kode_ruangan_list = [$r->kode_ruangan ?: $r->id];
+                $clone->all_ids = [$r->id];
+                $grouped[$nameKey] = $clone;
+            } else {
+                $code = $r->kode_ruangan ?: $r->id;
+                if (!in_array($code, $grouped[$nameKey]->kode_ruangan_list)) {
+                    $grouped[$nameKey]->kode_ruangan_list[] = $code;
+                }
+                if (!in_array($r->id, $grouped[$nameKey]->all_ids)) {
+                    $grouped[$nameKey]->all_ids[] = $r->id;
+                }
+                if (empty($grouped[$nameKey]->foto) && !empty($r->foto)) $grouped[$nameKey]->foto = $r->foto;
+                if (empty($grouped[$nameKey]->model_3d) && !empty($r->model_3d)) $grouped[$nameKey]->model_3d = $r->model_3d;
+                if (empty($grouped[$nameKey]->tagline) && !empty($r->tagline)) $grouped[$nameKey]->tagline = $r->tagline;
+                if (empty($grouped[$nameKey]->deskripsi) && !empty($r->deskripsi)) $grouped[$nameKey]->deskripsi = $r->deskripsi;
+            }
+        }
+
+        foreach ($grouped as &$g) {
+            $g->kode_ruangan = implode(', ', $g->kode_ruangan_list);
+        }
+
+        return array_values($grouped);
+    }
+
     public function get_ruangan_by_kategori($id_kategori)
     {
         $this->db->select('ruangan.*, ruangan.ruangan AS nama_ruangan, ruangan.id AS kode_ruangan');
