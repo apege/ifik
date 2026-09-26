@@ -504,30 +504,60 @@ class KoordinatorTA_model extends CI_Model {
     }
 
     /**
-     * Ambil daftar ruangan yang tersedia dari tabel ruangan
+     * Ambil daftar ruangan yang tersedia dari tabel ruangan (di-split per sub-ruangan/kode ruangan jika ada koma)
      */
     public function get_available_ruangan() {
-        $this->db->select('id, id as kode_ruangan, ruangan as nama_ruangan, kapasitas, akses as status, spesifikasi_fasilitas as fasilitas, date as tanggal_dibuat');
+        $this->db->select('id, ruangan as nama_ruangan, kapasitas, akses as status, spesifikasi_fasilitas as fasilitas, date as tanggal_dibuat');
         $this->db->from('ruangan');
         $this->db->order_by('id', 'ASC');
         $this->db->order_by('ruangan', 'ASC');
         $query = $this->db->get();
 
+        $result = array();
         if ($query && $query->num_rows() > 0) {
             $rows = $query->result_array();
-            foreach ($rows as &$r) {
-                if (empty($r['kode_ruangan'])) {
-                    $r['kode_ruangan'] = $r['id'];
+            foreach ($rows as $r) {
+                $rawId = (string)($r['id'] ?? '');
+                $namaRuang = trim((string)($r['nama_ruangan'] ?? ''));
+
+                if (strpos($rawId, ',') !== false) {
+                    $codes = explode(',', $rawId);
+                    foreach ($codes as $c) {
+                        $codeTrim = trim($c);
+                        if (!empty($codeTrim)) {
+                            $result[] = array(
+                                'id'           => $codeTrim,
+                                'kode_ruangan' => $codeTrim,
+                                'nama_ruangan' => $namaRuang,
+                                'nama_lengkap' => $namaRuang . ' (Ruang: ' . $codeTrim . ')',
+                                'kapasitas'    => $r['kapasitas'] ?? 30,
+                                'status'       => $r['status'] ?? 'Tersedia',
+                                'fasilitas'    => $r['fasilitas'] ?? ''
+                            );
+                        }
+                    }
+                } else {
+                    $codeTrim = trim($rawId);
+                    $result[] = array(
+                        'id'           => !empty($codeTrim) ? $codeTrim : $namaRuang,
+                        'kode_ruangan' => $codeTrim,
+                        'nama_ruangan' => $namaRuang,
+                        'nama_lengkap' => !empty($codeTrim) ? ($namaRuang . ' (Ruang: ' . $codeTrim . ')') : $namaRuang,
+                        'kapasitas'    => $r['kapasitas'] ?? 30,
+                        'status'       => $r['status'] ?? 'Tersedia',
+                        'fasilitas'    => $r['fasilitas'] ?? ''
+                    );
                 }
             }
-            return $rows;
+            return $result;
         }
 
         return array(
-            array('id' => 'LK.01.01', 'kode_ruangan' => 'LK.01.01', 'nama_ruangan' => 'Ruang Sidang Utama (LK.01.01)', 'kapasitas' => 94, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC, Sound System'),
-            array('id' => 'LK.01.02', 'kode_ruangan' => 'LK.01.02', 'nama_ruangan' => 'Studio Green Screen (LK.01.02)', 'kapasitas' => 100, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
-            array('id' => 'R.301',    'kode_ruangan' => 'R.301',    'nama_ruangan' => 'Ruang Sidang 1 (Lantai 3)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
-            array('id' => 'R.302',    'kode_ruangan' => 'R.302',    'nama_ruangan' => 'Ruang Sidang 2 (Lantai 3)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC')
+            array('id' => 'LK.01.01', 'kode_ruangan' => 'LK.01.01', 'nama_ruangan' => 'AULA Utama', 'nama_lengkap' => 'AULA Utama (Ruang: LK.01.01)', 'kapasitas' => 94, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC, Sound System'),
+            array('id' => 'LK.01.02', 'kode_ruangan' => 'LK.01.02', 'nama_ruangan' => 'green screen', 'nama_lengkap' => 'green screen (Ruang: LK.01.02)', 'kapasitas' => 100, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
+            array('id' => 'LK.01.03', 'kode_ruangan' => 'LK.01.03', 'nama_ruangan' => 'Lab Incubator', 'nama_lengkap' => 'Lab Incubator (Ruang: LK.01.03)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
+            array('id' => 'LK.01.04', 'kode_ruangan' => 'LK.01.04', 'nama_ruangan' => 'Lab Incubator', 'nama_lengkap' => 'Lab Incubator (Ruang: LK.01.04)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC'),
+            array('id' => 'LK.01.05', 'kode_ruangan' => 'LK.01.05', 'nama_ruangan' => 'Lab Incubator', 'nama_lengkap' => 'Lab Incubator (Ruang: LK.01.05)', 'kapasitas' => 30, 'status' => 'Tersedia', 'fasilitas' => 'Proyektor, AC')
         );
     }
 
