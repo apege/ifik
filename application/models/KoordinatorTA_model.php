@@ -1581,6 +1581,24 @@ class KoordinatorTA_model extends CI_Model {
 
         $history = $this->get_history_penilaian_sidang($nim);
 
+        $extract_clean_note = function($raw) {
+            if (empty($raw)) return '';
+            if (is_array($raw)) {
+                return trim($raw['catatan'] ?? ($raw['komentar'] ?? ($raw['evaluasi'] ?? ($raw['feedback'] ?? ''))));
+            }
+            if (is_string($raw)) {
+                $trimmed = trim($raw);
+                if ((substr($trimmed, 0, 1) === '{' && substr($trimmed, -1) === '}') || (substr($trimmed, 0, 1) === '[' && substr($trimmed, -1) === ']')) {
+                    $decoded = json_decode($trimmed, true);
+                    if (is_array($decoded)) {
+                        return trim($decoded['catatan'] ?? ($decoded['komentar'] ?? ($decoded['evaluasi'] ?? ($decoded['feedback'] ?? ''))));
+                    }
+                }
+                return $trimmed;
+            }
+            return '';
+        };
+
         return array(
             'nim'                       => $student['nim'],
             'nama_mahasiswa'            => $student['nama'] ?? ($student['nama_lengkap'] ?? $student['nim']),
@@ -1615,10 +1633,10 @@ class KoordinatorTA_model extends CI_Model {
             'evaluasi_pembimbing2'      => $student['penilaiansidang_pembimbing2'] ?? ($student['evaluasi_pembimbing2'] ?? ''),
             'evaluasi_penguji1'         => $student['penilaiansidang_penguji1'] ?? ($student['evaluasi_penguji1'] ?? ''),
             'evaluasi_penguji2'         => $student['penilaiansidang_penguji2'] ?? ($student['evaluasi_penguji2'] ?? ''),
-            'catatan_pembimbing_1'      => $student['penilaiansidang_pembimbing1'] ?? ($student['evaluasi_pembimbing1'] ?? ''),
-            'catatan_pembimbing_2'      => $student['penilaiansidang_pembimbing2'] ?? ($student['evaluasi_pembimbing2'] ?? ''),
-            'catatan_penguji_1'         => $student['penilaiansidang_penguji1'] ?? ($student['evaluasi_penguji1'] ?? ''),
-            'catatan_penguji_2'         => $student['penilaiansidang_penguji2'] ?? ($student['evaluasi_penguji2'] ?? ''),
+            'catatan_pembimbing_1'      => $extract_clean_note($student['penilaiansidang_pembimbing1'] ?? ($student['evaluasi_pembimbing1'] ?? '')),
+            'catatan_pembimbing_2'      => $extract_clean_note($student['penilaiansidang_pembimbing2'] ?? ($student['evaluasi_pembimbing2'] ?? '')),
+            'catatan_penguji_1'         => $extract_clean_note($student['penilaiansidang_penguji1'] ?? ($student['evaluasi_penguji1'] ?? '')),
+            'catatan_penguji_2'         => $extract_clean_note($student['penilaiansidang_penguji2'] ?? ($student['evaluasi_penguji2'] ?? '')),
 
             // Rekap Nilai Akhir
             'is_nilai_lengkap'          => $student['is_nilai_lengkap'] ?? false,

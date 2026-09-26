@@ -9694,8 +9694,29 @@
             }
 
             if (wrapCatatan && textCatatan) {
-                if (catatanVal && String(catatanVal).trim() !== '') {
-                    textCatatan.textContent = `"${catatanVal}"`;
+                let actualNote = '';
+                if (catatanVal && typeof catatanVal === 'object') {
+                    actualNote = (catatanVal.catatan || catatanVal.komentar || catatanVal.evaluasi || catatanVal.feedback || '').trim();
+                } else if (catatanVal && typeof catatanVal === 'string') {
+                    const trimmed = catatanVal.trim();
+                    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                        try {
+                            const parsed = JSON.parse(trimmed);
+                            if (parsed && typeof parsed === 'object') {
+                                actualNote = (parsed.catatan || parsed.komentar || parsed.evaluasi || parsed.feedback || '').trim();
+                            } else {
+                                actualNote = trimmed;
+                            }
+                        } catch (e) {
+                            actualNote = trimmed;
+                        }
+                    } else {
+                        actualNote = trimmed;
+                    }
+                }
+
+                if (actualNote && actualNote !== '') {
+                    textCatatan.textContent = `"${actualNote}"`;
                     wrapCatatan.classList.remove('hidden');
                 } else {
                     wrapCatatan.classList.add('hidden');
