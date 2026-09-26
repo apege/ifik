@@ -698,7 +698,21 @@ class Mahasiswa_model extends CI_Model {
             'tahapan_preview'   => $tahap_enum,
         ];
 
-        return $this->db->insert('thesis', $insert);
+        $inserted = $this->db->insert('thesis', $insert);
+
+        // Sinkronisasi status_preview di tabel guidance agar konsisten di seluruh modul
+        if ($inserted && $this->db->table_exists('guidance') && $this->db->field_exists('status_preview', 'guidance')) {
+            $currG = $this->db->get_where('guidance', ['id' => $gid])->row_array();
+            $currPrev = strtolower(trim($currG['status_preview'] ?? ''));
+            $stageHierarchy = ['preview1' => 1, 'preview2' => 2, 'preview3' => 3, 'sidang' => 4, 'lulus' => 5, 'selesai' => 5];
+            $currRank = $stageHierarchy[$currPrev] ?? 0;
+            $newRank  = $stageHierarchy[$tahap_enum] ?? 0;
+            if ($newRank > $currRank) {
+                $this->db->where('id', $gid)->update('guidance', ['status_preview' => $tahap_enum]);
+            }
+        }
+
+        return $inserted;
     }
 
     public function count_upload_preview($nim, $tahap = 'Preview 1') {
@@ -724,7 +738,33 @@ class Mahasiswa_model extends CI_Model {
         if (empty($update)) return false;
 
         $this->db->where('id', $id);
-        return $this->db->update('thesis', $update);
+        $res = $this->db->update('thesis', $update);
+
+        // Jika review status disetujui (Approved), otomatis majukan status_preview di table guidance
+        if ($res && isset($data['status_pembimbing']) && $data['status_pembimbing'] === 'Approved') {
+            $th = $this->db->get_where('thesis', ['id' => $id])->row_array();
+            if ($th && !empty($th['id_guidance'])) {
+                $gId = $th['id_guidance'];
+                $thp = strtolower($th['tahapan_preview']);
+
+                $nextStage = null;
+                if ($thp === 'preview1') {
+                    $nextStage = 'preview2';
+                } elseif ($thp === 'preview2') {
+                    $nextStage = 'preview3';
+                } elseif ($thp === 'preview3') {
+                    $nextStage = 'sidang';
+                } elseif ($thp === 'sidang') {
+                    $nextStage = 'lulus';
+                }
+
+                if ($nextStage && $this->db->table_exists('guidance') && $this->db->field_exists('status_preview', 'guidance')) {
+                    $this->db->where('id', $gId)->update('guidance', ['status_preview' => $nextStage]);
+                }
+            }
+        }
+
+        return $res;
     }
 
     // =================================================================
