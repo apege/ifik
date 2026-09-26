@@ -209,6 +209,11 @@
                                 }
                                 if (history.pushState) {
                                     history.pushState(null, '', targetUrl.hash);
+                                } else {
+                                    window.location.hash = targetUrl.hash;
+                                }
+                                if (typeof window.updateSidebarActiveTab === 'function') {
+                                    window.updateSidebarActiveTab(targetUrl.hash);
                                 }
                             }
                         } catch (err) {
@@ -327,8 +332,8 @@
         }
 
         // Handle initial hash or hashchange for tabs/sections and update active state
-        const updateSidebarActiveTab = () => {
-            const currentHash = window.location.hash || '';
+        const updateSidebarActiveTab = (forcedHash) => {
+            const currentHash = (forcedHash !== undefined && forcedHash !== null) ? forcedHash : (window.location.hash || '');
             const panel = document.getElementById('curvedSidebarPanel');
             if (!panel) return;
             const navItems = panel.querySelectorAll('.curved-nav-item');
@@ -336,18 +341,24 @@
             const targetHash = currentHash || (isKoordinatorPage ? '#pendaftaran' : '');
 
             if (targetHash) {
+                const cleanTarget = targetHash.startsWith('#') ? targetHash : '#' + targetHash;
                 navItems.forEach(item => {
                     const href = item.getAttribute('href') || '';
                     if (href.includes('#')) {
-                        if (href.endsWith(targetHash)) {
+                        if (href.endsWith(cleanTarget) || href.includes(cleanTarget)) {
                             item.classList.add('is-current');
                         } else {
                             item.classList.remove('is-current');
                         }
+                    } else if (isKoordinatorPage && cleanTarget) {
+                        item.classList.remove('is-current');
                     }
                 });
             }
         };
+
+        window.updateSidebarActiveTab = updateSidebarActiveTab;
+        window.updateCurvedSidebarActive = updateSidebarActiveTab;
 
         const checkHash = () => {
             if (window.location.hash) {

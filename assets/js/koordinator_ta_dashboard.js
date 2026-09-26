@@ -52,6 +52,23 @@
 
     window.switchDashboardTab = function (tabName) {
         state.activeTab = tabName;
+        const targetHash = '#' + tabName;
+
+        // Sync URL hash seamlessly
+        if (window.location.hash !== targetHash) {
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', targetHash);
+            } else {
+                window.location.hash = targetHash;
+            }
+        }
+
+        // Sync active class in sidebar immediately
+        if (typeof window.updateSidebarActiveTab === 'function') {
+            window.updateSidebarActiveTab(targetHash);
+        } else if (typeof window.updateCurvedSidebarActive === 'function') {
+            window.updateCurvedSidebarActive(targetHash);
+        }
 
         const btnPendaftaran = document.getElementById('tabBtnPendaftaran');
         const btnPreview2 = document.getElementById('tabBtnPreview2');
@@ -10701,6 +10718,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+        const initialHash = window.location.hash ? window.location.hash.replace(/^#/, '') : '';
+        if (initialHash && ['pendaftaran', 'preview2', 'sidang'].includes(initialHash)) {
+            window.switchDashboardTab(initialHash);
+        }
         updateFilterBadge();
         updateP2FilterBadge();
         updateSidangFilterBadge();
