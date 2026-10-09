@@ -15,7 +15,7 @@ class PeminjamanBarang_model extends CI_Model {
     private $table_blokir = 'blokir_pengguna';
     private $table_settings = 'peminjaman_settings';
     private $last_expired_count = 0;
-    private $workflow_schema_version = 4;
+    private $workflow_schema_version = 5;
 
     public function __construct() {
         parent::__construct();
@@ -53,6 +53,11 @@ class PeminjamanBarang_model extends CI_Model {
             if (!$this->db->field_exists('prodi', $this->table_peminjaman)) {
                 $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `prodi` varchar(120) DEFAULT NULL AFTER `id_user`");
                 $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD INDEX `idx_peminjaman_prodi_status` (`prodi`, `status`)");
+            }
+
+            if (!$this->db->field_exists('jenis_peminjaman', $this->table_peminjaman)) {
+                $after = $this->db->field_exists('keperluan', $this->table_peminjaman) ? ' AFTER `keperluan`' : '';
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `jenis_peminjaman` varchar(50) NOT NULL DEFAULT 'dalam_kampus'{$after}");
             }
 
             if (!$this->db->field_exists('status_kaprodi', $this->table_peminjaman)) {
@@ -95,6 +100,19 @@ class PeminjamanBarang_model extends CI_Model {
             }
             if (!$this->db->field_exists('id_approver_kaur', $this->table_peminjaman)) {
                 $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `id_approver_kaur` int(11) DEFAULT NULL AFTER `tgl_approve_kaur`");
+            }
+
+            if (!$this->db->field_exists('status_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `status_wadek1` varchar(20) NOT NULL DEFAULT 'Pending' AFTER `id_approver_kaur`");
+            }
+            if (!$this->db->field_exists('catatan_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `catatan_wadek1` text DEFAULT NULL AFTER `status_wadek1`");
+            }
+            if (!$this->db->field_exists('tgl_approve_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `tgl_approve_wadek1` datetime DEFAULT NULL AFTER `catatan_wadek1`");
+            }
+            if (!$this->db->field_exists('id_approver_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `id_approver_wadek1` int(11) DEFAULT NULL AFTER `tgl_approve_wadek1`");
             }
 
             if (!$this->db->field_exists('foto_pengembalian', $this->table_peminjaman)) {
@@ -365,7 +383,9 @@ class PeminjamanBarang_model extends CI_Model {
         $data['stock_allocation_status'] = 'reserved';
         $data['stock_allocated_at'] = date('Y-m-d H:i:s');
         $data['stock_released_at'] = null;
-        if (!$this->db->insert($this->table_peminjaman, $data)) {
+        $table_fields = $this->db->list_fields($this->table_peminjaman);
+        $insert_data = !empty($table_fields) ? array_intersect_key($data, array_flip($table_fields)) : $data;
+        if (!$this->db->insert($this->table_peminjaman, $insert_data)) {
             $this->db->trans_rollback();
             return false;
         }
