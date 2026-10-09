@@ -52,38 +52,66 @@ class Peminjaman extends CI_Controller {
             $this->session->set_flashdata('error', $this->stock_shortage_message($stock_shortages));
             redirect('kaur/dashboard/peminjaman');
         }
-        $update = [
-            'status' => 'Disetujui (Menunggu Pengambilan)',
-            'status_kaur' => 'Disetujui',
-            'catatan_kaur' => $this->input->post('catatan_kaur', true),
-            'tgl_approve_kaur' => date('Y-m-d H:i:s'),
-            'id_approver_kaur' => $this->session->userdata('id_user'),
-            'qr_locked' => 1,
-            'qr_finalized_at' => date('Y-m-d H:i:s'),
-            'qr_finalized_by' => $this->session->userdata('id_user'),
-        ];
+        $is_external = (($peminjaman->jenis_peminjaman ?? '') === 'luar_kampus' || ($peminjaman->jenis_peminjaman ?? '') === 'external');
+        if ($is_external) {
+            $update = [
+                'status' => 'Menunggu ACC Wadek',
+                'status_kaur' => 'Disetujui',
+                'catatan_kaur' => $this->input->post('catatan_kaur', true),
+                'tgl_approve_kaur' => date('Y-m-d H:i:s'),
+                'id_approver_kaur' => $this->session->userdata('id_user'),
+                'status_wadek1' => 'Pending',
+            ];
+        } else {
+            $update = [
+                'status' => 'Disetujui (Menunggu Pengambilan)',
+                'status_kaur' => 'Disetujui',
+                'catatan_kaur' => $this->input->post('catatan_kaur', true),
+                'tgl_approve_kaur' => date('Y-m-d H:i:s'),
+                'id_approver_kaur' => $this->session->userdata('id_user'),
+                'qr_locked' => 1,
+                'qr_finalized_at' => date('Y-m-d H:i:s'),
+                'qr_finalized_by' => $this->session->userdata('id_user'),
+            ];
+        }
 
         $ok = $this->PeminjamanBarang_model->approve_group_with_reservation($group_id, ['Menunggu ACC Kaur'], $update);
         if ($ok && !empty($peminjaman->id_user)) {
+            $notif_pesan = $is_external
+                ? 'Peminjaman luar kampus Anda telah disetujui Kaur dan diteruskan untuk persetujuan Wakil Dekan (Wadek).'
+                : 'Peminjaman Anda telah disetujui resmi oleh Kaur. QR Code transaksi sudah aktif, silakan lakukan pengambilan barang di laboratorium.';
             $this->PeminjamanBarang_model->create_notifikasi(
                 null,
                 $peminjaman->id_user,
                 'Peminjaman disetujui Kaur',
-                'Peminjaman Anda telah disetujui resmi oleh Kaur. QR Code transaksi sudah aktif, silakan lakukan pengambilan barang di laboratorium.',
-                site_url('peminjaman/riwayat')
+                $notif_pesan,
+                site_url('peminjaman_barang/riwayat')
             );
         }
         if ($ok) {
-            $this->PeminjamanBarang_model->create_notifikasi(
-                'laboran',
-                null,
-                'Barang Siap Diserahterimakan',
-                ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah disetujui Kaur dan siap untuk serah terima fisik barang.',
-                site_url('admin/peminjaman')
-            );
+            if ($is_external) {
+                $this->PeminjamanBarang_model->create_notifikasi(
+                    'wadek',
+                    null,
+                    'Pengajuan Eksternal Menunggu ACC Wadek',
+                    'Pengajuan peminjaman barang luar kampus dari ' . ($peminjaman->nama_peminjam ?? 'Peminjam') . ' menunggu persetujuan Anda.',
+                    site_url('wadek/peminjaman')
+                );
+            } else {
+                $this->PeminjamanBarang_model->create_notifikasi(
+                    'laboran',
+                    null,
+                    'Barang Siap Diserahterimakan',
+                    ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah disetujui Kaur dan siap untuk serah terima fisik barang.',
+                    site_url('admin/peminjaman')
+                );
+            }
         }
 
-        $this->session->set_flashdata($ok ? 'success' : 'error', $ok ? 'Pengajuan berhasil disetujui. QR Code sudah aktif untuk pengambilan barang.' : 'Gagal menyetujui pengajuan.');
+        $flash_msg = $ok 
+            ? ($is_external ? 'Pengajuan berhasil disetujui Kaur dan diteruskan ke Wakil Dekan (Wadek).' : 'Pengajuan berhasil disetujui. QR Code sudah aktif untuk pengambilan barang.')
+            : 'Gagal menyetujui pengajuan.';
+        $this->session->set_flashdata($ok ? 'success' : 'error', $flash_msg);
         redirect('kaur/dashboard/peminjaman');
     }
 
@@ -209,25 +237,47 @@ class Peminjaman extends CI_Controller {
                     $stock_messages[] = $this->stock_shortage_message($stock_shortages);
                     continue;
                 }
-                $ok = $this->PeminjamanBarang_model->approve_group_with_reservation($group_id, ['Menunggu ACC Kaur'], [
-                    'status' => 'Disetujui (Menunggu Pengambilan)',
-                    'status_kaur' => 'Disetujui',
-                    'catatan_kaur' => '',
-                    'tgl_approve_kaur' => date('Y-m-d H:i:s'),
-                    'id_approver_kaur' => $this->session->userdata('id_user'),
-                    'qr_locked' => 1,
-                    'qr_finalized_at' => date('Y-m-d H:i:s'),
-                    'qr_finalized_by' => $this->session->userdata('id_user'),
-                ]);
-                if ($ok && !empty($peminjaman->id_user)) {
-                    $this->PeminjamanBarang_model->create_notifikasi(null, $peminjaman->id_user, 'Peminjaman disetujui Kaur',
-                        'Peminjaman Anda telah disetujui resmi oleh Kaur. QR Code transaksi sudah aktif, silakan lakukan pengambilan barang di laboratorium.',
-                        site_url('peminjaman/riwayat'));
-                }
-                if ($ok) {
-                    $this->PeminjamanBarang_model->create_notifikasi('laboran', null, 'Barang Siap Diserahterimakan',
-                        ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah disetujui Kaur dan siap untuk serah terima fisik barang.',
-                        site_url('admin/peminjaman'));
+                $is_external = (($peminjaman->jenis_peminjaman ?? '') === 'luar_kampus' || ($peminjaman->jenis_peminjaman ?? '') === 'external');
+                if ($is_external) {
+                    $ok = $this->PeminjamanBarang_model->approve_group_with_reservation($group_id, ['Menunggu ACC Kaur'], [
+                        'status' => 'Menunggu ACC Wadek',
+                        'status_kaur' => 'Disetujui',
+                        'catatan_kaur' => '',
+                        'tgl_approve_kaur' => date('Y-m-d H:i:s'),
+                        'id_approver_kaur' => $this->session->userdata('id_user'),
+                        'status_wadek1' => 'Pending',
+                    ]);
+                    if ($ok && !empty($peminjaman->id_user)) {
+                        $this->PeminjamanBarang_model->create_notifikasi(null, $peminjaman->id_user, 'Peminjaman disetujui Kaur',
+                            'Peminjaman luar kampus Anda telah disetujui Kaur dan diteruskan untuk persetujuan Wakil Dekan (Wadek).',
+                            site_url('peminjaman_barang/riwayat'));
+                    }
+                    if ($ok) {
+                        $this->PeminjamanBarang_model->create_notifikasi('wadek', null, 'Pengajuan Eksternal Menunggu ACC Wadek',
+                            'Pengajuan peminjaman barang luar kampus dari ' . ($peminjaman->nama_peminjam ?? 'Peminjam') . ' menunggu persetujuan Anda.',
+                            site_url('wadek/peminjaman'));
+                    }
+                } else {
+                    $ok = $this->PeminjamanBarang_model->approve_group_with_reservation($group_id, ['Menunggu ACC Kaur'], [
+                        'status' => 'Disetujui (Menunggu Pengambilan)',
+                        'status_kaur' => 'Disetujui',
+                        'catatan_kaur' => '',
+                        'tgl_approve_kaur' => date('Y-m-d H:i:s'),
+                        'id_approver_kaur' => $this->session->userdata('id_user'),
+                        'qr_locked' => 1,
+                        'qr_finalized_at' => date('Y-m-d H:i:s'),
+                        'qr_finalized_by' => $this->session->userdata('id_user'),
+                    ]);
+                    if ($ok && !empty($peminjaman->id_user)) {
+                        $this->PeminjamanBarang_model->create_notifikasi(null, $peminjaman->id_user, 'Peminjaman disetujui Kaur',
+                            'Peminjaman Anda telah disetujui resmi oleh Kaur. QR Code transaksi sudah aktif, silakan lakukan pengambilan barang di laboratorium.',
+                            site_url('peminjaman_barang/riwayat'));
+                    }
+                    if ($ok) {
+                        $this->PeminjamanBarang_model->create_notifikasi('laboran', null, 'Barang Siap Diserahterimakan',
+                            ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah disetujui Kaur dan siap untuk serah terima fisik barang.',
+                            site_url('admin/peminjaman'));
+                    }
                 }
             } else {
                 $ok = $this->PeminjamanBarang_model->reject_group_and_release($group_id, [

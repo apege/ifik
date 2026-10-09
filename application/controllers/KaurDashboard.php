@@ -563,14 +563,27 @@ class KaurDashboard extends CI_Controller {
         }
 
         $catatan = trim((string)$this->input->post('catatan_kaur', true));
-        $update = [
-            'status' => 'Disetujui (Menunggu Pengambilan)',
-            'status_kaur' => 'Disetujui',
-            'catatan_kaur' => $catatan,
-            'tgl_approve_kaur' => date('Y-m-d H:i:s'),
-            'id_approver_kaur' => $this->session->userdata('id_user') ?: $this->session->userdata('username'),
-            'qr_locked' => 1,
-        ];
+        $is_external = (($peminjaman->jenis_peminjaman ?? '') === 'luar_kampus' || ($peminjaman->jenis_peminjaman ?? '') === 'external');
+
+        if ($is_external) {
+            $update = [
+                'status' => 'Menunggu ACC Wadek',
+                'status_kaur' => 'Disetujui',
+                'catatan_kaur' => $catatan,
+                'tgl_approve_kaur' => date('Y-m-d H:i:s'),
+                'id_approver_kaur' => $this->session->userdata('id_user') ?: $this->session->userdata('username'),
+                'status_wadek1' => 'Pending',
+            ];
+        } else {
+            $update = [
+                'status' => 'Disetujui (Menunggu Pengambilan)',
+                'status_kaur' => 'Disetujui',
+                'catatan_kaur' => $catatan,
+                'tgl_approve_kaur' => date('Y-m-d H:i:s'),
+                'id_approver_kaur' => $this->session->userdata('id_user') ?: $this->session->userdata('username'),
+                'qr_locked' => 1,
+            ];
+        }
 
         $ok = $this->Peminjaman_model->approve_group_with_reservation(
             $group_id,
@@ -580,22 +593,36 @@ class KaurDashboard extends CI_Controller {
 
         if ($ok) {
             if (!empty($peminjaman->id_user)) {
+                $notif_pesan = $is_external
+                    ? 'Pengajuan peminjaman barang luar kampus Anda telah disetujui Kaur dan diteruskan untuk persetujuan Wakil Dekan (Wadek).'
+                    : 'Pengajuan peminjaman barang Anda telah disetujui resmi oleh Ka. Ur / Kepala Lab. Silakan ambil barang di Laboratorium.';
                 $this->Peminjaman_model->create_notifikasi(
                     null,
                     $peminjaman->id_user,
                     'Peminjaman Disetujui Kaur',
-                    'Pengajuan peminjaman barang Anda telah disetujui resmi oleh Ka. Ur / Kepala Lab. Silakan ambil barang di Laboratorium.',
+                    $notif_pesan,
                     site_url('peminjaman_barang/riwayat')
                 );
             }
-            $this->Peminjaman_model->create_notifikasi(
-                'laboran',
-                null,
-                'Barang Siap Diserahkan',
-                ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah di-ACC Kaur. Barang siap diserahterimakan.',
-                site_url('peminjamanbarang/scanner')
-            );
-            $this->session->set_flashdata('success', 'Pengajuan berhasil disetujui resmi oleh Ka. Ur! Status sekarang siap untuk serah terima fisik barang.');
+            if ($is_external) {
+                $this->Peminjaman_model->create_notifikasi(
+                    'wadek',
+                    null,
+                    'Pengajuan Eksternal Menunggu ACC Wadek',
+                    ($peminjaman->nama_peminjam ?? 'Peminjam') . ' mengajukan peminjaman luar kampus yang menunggu persetujuan Anda.',
+                    site_url('wadek/peminjaman')
+                );
+                $this->session->set_flashdata('success', 'Pengajuan berhasil disetujui Ka. Ur dan diteruskan ke Wakil Dekan (Wadek).');
+            } else {
+                $this->Peminjaman_model->create_notifikasi(
+                    'laboran',
+                    null,
+                    'Barang Siap Diserahkan',
+                    ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah di-ACC Kaur. Barang siap diserahterimakan.',
+                    site_url('peminjamanbarang/scanner')
+                );
+                $this->session->set_flashdata('success', 'Pengajuan berhasil disetujui resmi oleh Ka. Ur! Status sekarang siap untuk serah terima fisik barang.');
+            }
         } else {
             $this->session->set_flashdata('error', 'Gagal menyetujui pengajuan peminjaman barang.');
         }
