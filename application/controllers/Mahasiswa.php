@@ -133,8 +133,9 @@ class Mahasiswa extends CI_Controller {
             $this->form_validation->set_rules('konfirmasi_password', 'Konfirmasi Password', 'required|matches[password_baru]');
 
             if ($this->form_validation->run() === TRUE) {
-                $password_hashed = password_hash($this->input->post('password_baru'), PASSWORD_BCRYPT);
-                $this->Mahasiswa_model->update_password($nim, $password_hashed);
+                $salt = bin2hex(random_bytes(16));
+                $password_hashed = password_hash($this->input->post('password_baru') . $salt, PASSWORD_BCRYPT);
+                $this->Mahasiswa_model->update_password($nim, $password_hashed, $salt);
                 $this->session->set_flashdata('success', 'Password berhasil diubah!');
                 redirect('mahasiswa');
             }

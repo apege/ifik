@@ -13,6 +13,71 @@ class Onboarding extends CI_Controller {
     }
 
     /**
+     * Endpoint aktivasi dari tautan email
+     */
+    public function activate()
+    {
+        $email = strtolower(trim((string)$this->input->get('email', true)));
+        $token = trim((string)$this->input->get('token', true));
+
+        if (empty($email) || empty($token)) {
+            $this->session->set_flashdata('message', '<div class="alert alert-warning" role="alert" style="margin-top:24px;">Tautan aktivasi tidak valid atau parameter tidak lengkap.</div>');
+            redirect('auth');
+            return;
+        }
+
+        $user = $this->db->get_where('user', ['email' => $email])->row();
+        if (!$user) {
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert" style="margin-top:24px;">Akun dengan email tersebut tidak ditemukan.</div>');
+            redirect('auth');
+            return;
+        }
+
+        // Verifikasi token terhadap tabel user_token atau kolom user.token
+        $isValidToken = false;
+        if ($this->db->table_exists('user_token')) {
+            $tokenRow = $this->db->get_where('user_token', ['email' => $email])->row();
+            if ($tokenRow && !empty($tokenRow->token)) {
+                if (trim($token) === trim($tokenRow->token) || password_verify($token, $tokenRow->token)) {
+                    $isValidToken = true;
+                }
+            }
+        }
+
+        if (!$isValidToken && !empty($user->token)) {
+            if (trim($token) === trim($user->token) || password_verify($token, $user->token)) {
+                $isValidToken = true;
+            }
+        }
+
+        if (!$isValidToken) {
+            $this->session->set_flashdata('message', '<div class="alert alert-warning" role="alert" style="margin-top:24px;">Token aktivasi tidak cocok atau sudah tidak berlaku.</div>');
+            redirect('auth');
+            return;
+        }
+
+        // Buat sesi login sementara khusus untuk proses onboarding
+        $session_data = array(
+            'id'               => $user->id,
+            'user_id'          => $user->id,
+            'username'         => !empty($user->username) ? $user->username : (!empty($user->nim) ? $user->nim : $user->email),
+            'role_id'          => $user->role_id,
+            'name'             => $user->name,
+            'email'            => $user->email,
+            'nim'              => !empty($user->nim) ? $user->nim : (!empty($user->nip) ? $user->nip : ''),
+            'status'           => 'pending',
+            'koordinator'      => isset($user->koordinator) ? $user->koordinator : '',
+            'dosen_wali'       => isset($user->dosen_wali) ? $user->dosen_wali : '',
+            'password_changed' => 0,
+            'logged_in'        => TRUE
+        );
+        $this->session->set_userdata($session_data);
+
+        // Lempar langsung ke layar form onboarding
+        redirect('onboarding');
+    }
+
+    /**
      * Display the 2-step onboarding page (Change Password & Biodata)
      */
     public function index()
@@ -25,7 +90,7 @@ class Onboarding extends CI_Controller {
 
         // If user already changed password, no need to onboard again
         if ((int)$this->session->userdata('password_changed') === 1) {
-            redirect('dashboard');
+            redirect('');
             return;
         }
 
@@ -67,7 +132,17 @@ class Onboarding extends CI_Controller {
         $data['is_dosen'] = $isDosen;
         $data['is_mahasiswa'] = $isMahasiswa;
         $data['role_name'] = $roleName;
-        $data['nim'] = !empty($user->nidn_nim) ? $user->nidn_nim : (!empty($user->nim) ? $user->nim : (!empty($user->nip) ? $user->nip : (!empty($user->username) ? $user->username : '')));
+        if ($isDosen) {
+            // Dosen: prioritas kolom nip, fallback ke nim jika numerik (bukan username string)
+            $data['nim'] = !empty($user->nip)
+                ? $user->nip
+                : (!empty($user->nim) && is_numeric($user->nim) && $user->nim > 0 ? $user->nim : '');
+        } else {
+            // Mahasiswa: gunakan nim
+            $data['nim'] = !empty($user->nim) ? $user->nim : (!empty($user->nidn_nim) ? $user->nidn_nim : '');
+        }
+        $data['kode_dosen'] = !empty($user->kode_dosen) ? $user->kode_dosen : '';
+        $data['no_hp'] = !empty($user->no_hp) ? $user->no_hp : (!empty($user->no_telp) ? $user->no_telp : '');
 
         // Split existing name into nama_depan and nama_belakang if available
         $nameParts = explode(' ', trim($user->name), 2);
@@ -121,6 +196,14 @@ class Onboarding extends CI_Controller {
             'Desain Interior',
             'Kriya Tekstil & Fashion'
         );
+
+        // Fetch Kelompok Keahlian (KK) dynamically from MySQL database
+        $kkList = [];
+        if ($this->db->table_exists('kelompok_keahlian')) {
+            $this->db->order_by('id', 'ASC');
+            $kkList = $this->db->get('kelompok_keahlian')->result_array();
+        }
+        $data['kk_list'] = $kkList;
 
         $this->load->view('auth/onboarding', $data);
     }
@@ -177,11 +260,15 @@ class Onboarding extends CI_Controller {
         $nim                = trim($this->input->post('nim', true));
         $namaDepanRaw       = $this->input->post('nama_depan', true);
         $namaBelakangRaw    = $this->input->post('nama_belakang', true);
+        $kodeDosen          = strtoupper(trim($this->input->post('kode_dosen', true)));
+        $noHp               = trim($this->input->post('no_hp', true));
         $tempatLahir        = trim($this->input->post('tempat_lahir', true));
         $tanggalLahir       = trim($this->input->post('tanggal_lahir', true));
         $alamat             = trim($this->input->post('alamat', true));
         $konsentrasi        = trim($this->input->post('konsentrasi', true));
         $dosenWali          = trim($this->input->post('dosen_wali', true));
+        $kelompokKeahlian   = trim($this->input->post('kelompok_keahlian', true));
+        $idKk               = $this->input->post('id_kk', true);
 
         // 1. Validate Password
         if (empty($passwordBaru) || strlen($passwordBaru) < 6) {
@@ -221,19 +308,7 @@ class Onboarding extends CI_Controller {
             return;
         }
 
-        // 3. Strict Validation for Demographics & Birth Info
-        if (empty($tempatLahir) || empty($tanggalLahir) || empty($alamat)) {
-            $msg = 'Tempat lahir, tanggal lahir, dan alamat domisili lengkap wajib diisi!';
-            if ($isAjax) {
-                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
-                return;
-            }
-            $this->session->set_flashdata('error', $msg);
-            redirect('onboarding');
-            return;
-        }
-
-        // 4. Strict Validation for Academic Info
+        // Check Role
         $roleId = (int)$user->role_id;
         $roleName = 'mahasiswa';
         if ($this->db->table_exists('user_role')) {
@@ -251,6 +326,54 @@ class Onboarding extends CI_Controller {
         $isMahasiswa = (strpos($roleName, 'mahasiswa') !== false);
         $isDosen = !$isMahasiswa;
 
+        // Validate Kode Dosen (Strict for Lecturers)
+        if ($isDosen && empty($kodeDosen)) {
+            $msg = 'Kode dosen (inisial) wajib diisi untuk verifikasi identitas dosen!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+            redirect('onboarding');
+            return;
+        }
+
+        // Validate No Handphone (For all roles)
+        if (empty($noHp)) {
+            $msg = 'Nomor handphone / WhatsApp aktif wajib diisi!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+            redirect('onboarding');
+            return;
+        }
+
+        // 3. Strict Validation for Demographics & Birth Info
+        if (empty($tempatLahir) || empty($tanggalLahir) || empty($alamat)) {
+            $msg = 'Tempat lahir, tanggal lahir, dan alamat domisili lengkap wajib diisi!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+            redirect('onboarding');
+            return;
+        }
+
+        // 4. Strict Validation for Academic Info
+        if ($isDosen && empty($kelompokKeahlian)) {
+            $msg = 'Kelompok Keahlian (KK) wajib dipilih!';
+            if ($isAjax) {
+                $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+            redirect('onboarding');
+            return;
+        }
+
         if ($isMahasiswa && empty($dosenWali)) {
             $msg = 'Dosen wali akademik pembimbing wajib dipilih!';
             if ($isAjax) {
@@ -264,9 +387,9 @@ class Onboarding extends CI_Controller {
 
         $fullName = trim($cleanDepan . ' ' . $cleanBelakang);
 
-        // 3. Hash New Password with Bcrypt and Generate Salt
-        $salt = bin2hex(random_bytes(16));
-        $hashedPassword = password_hash($passwordBaru, PASSWORD_DEFAULT, ['cost' => 10]);
+        // 3. Hash New Password mengikuti format auth pembimbing: hash('sha256', $password . $salt)
+        $salt = password_hash("rasmuslerdorf", PASSWORD_DEFAULT);
+        $hashedPassword = hash('sha256', $passwordBaru . $salt);
 
         // 4. Update user / users Table with password, salt, and biodata
         $userUpdate = [
@@ -287,8 +410,32 @@ class Onboarding extends CI_Controller {
             $userUpdate['password_changed'] = 1;
         }
 
+        if ($this->db->field_exists('kode_dosen', 'user') && !empty($kodeDosen)) {
+            $userUpdate['kode_dosen'] = $kodeDosen;
+        }
+
+        if ($this->db->field_exists('no_telp', 'user') && !empty($noHp)) {
+            $userUpdate['no_telp'] = $noHp;
+        }
+
+        if ($this->db->field_exists('no_hp', 'user') && !empty($noHp)) {
+            $userUpdate['no_hp'] = $noHp;
+        }
+
         if ($isDosen) {
             $userUpdate['nip'] = $nim;
+            if (!empty($kelompokKeahlian)) {
+                // Kelompok keahlian dosen disimpan ke field 'koordinator', 'kelompok_keahlian', dan 'id_kk'
+                if ($this->db->field_exists('koordinator', 'user')) {
+                    $userUpdate['koordinator'] = $kelompokKeahlian;
+                }
+                if ($this->db->field_exists('kelompok_keahlian', 'user')) {
+                    $userUpdate['kelompok_keahlian'] = $kelompokKeahlian;
+                }
+                if ($this->db->field_exists('id_kk', 'user') && !empty($idKk)) {
+                    $userUpdate['id_kk'] = (int)$idKk;
+                }
+            }
         } else {
             $userUpdate['nim'] = $nim;
             if (!empty($dosenWali)) {
@@ -315,6 +462,7 @@ class Onboarding extends CI_Controller {
                 'nama_depan'      => $cleanDepan,
                 'nama_belakang'   => $cleanBelakang,
                 'email'           => !empty($user->email) ? $user->email : null,
+                'no_hp'           => !empty($noHp) ? $noHp : null,
                 'alamat'          => $alamat,
                 'kota'            => $tempatLahir,
                 'prodi'           => $konsentrasi,
@@ -339,21 +487,33 @@ class Onboarding extends CI_Controller {
         }
 
         // 6. Update Session Data
-        $this->session->set_userdata([
+        $sessionData = [
             'name'             => $fullName,
             'nidn_nim'         => $nim,
             'nim'              => $nim,
+            'kode_dosen'       => $kodeDosen,
+            'no_hp'            => $noHp,
+            'no_telp'          => $noHp,
             'password_changed' => 1
-        ]);
+        ];
+
+        if ($isDosen && !empty($kelompokKeahlian)) {
+            $sessionData['koordinator'] = $kelompokKeahlian;
+            $sessionData['kelompok_keahlian'] = $kelompokKeahlian;
+        }
+
+        $this->session->set_userdata($sessionData);
 
         $this->session->set_flashdata('success', 'Aktivasi akun berhasil! Password Anda telah diperbarui dan profil telah tersimpan.');
 
         // Determine target dashboard URL based on role
-        $targetRedirect = base_url('dashboard');
-        if ($roleId === 6 || strpos($roleName, 'koordinator') !== false) {
-            $targetRedirect = base_url('koordinatorta');
+        $targetRedirect = base_url();
+        if ($roleId === 4 || strpos($roleName, 'mahasiswa') !== false) {
+            $targetRedirect = base_url();
         } elseif ($roleId === 3 || strpos($roleName, 'dosen') !== false) {
-            $targetRedirect = base_url('dosen/wali');
+            $targetRedirect = base_url();
+        } elseif ($roleId === 6 || strpos($roleName, 'koordinator') !== false) {
+            $targetRedirect = base_url('koordinatorta');
         } elseif ($roleId === 2 || strpos($roleName, 'kaur') !== false) {
             $targetRedirect = base_url('kaur');
         } elseif ($roleId === 21 || strpos($roleName, 'laboran') !== false) {
@@ -363,7 +523,7 @@ class Onboarding extends CI_Controller {
         } elseif ($roleId === 9 || strpos($roleName, 'ketua kk') !== false) {
             $targetRedirect = base_url('ketuakk');
         } elseif ($roleId === 1 || strpos($roleName, 'admin') !== false) {
-            $targetRedirect = base_url('dashboard');
+            $targetRedirect = base_url();
         }
 
         if ($isAjax) {

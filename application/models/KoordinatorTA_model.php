@@ -12,7 +12,7 @@ class KoordinatorTA_model extends CI_Model {
      * Ambil list semua dosen dari tabel user (role_id = 2 / Kaur, 3 / Dosen, 6 / Koor, 7 / PIC, 9 / Ketua KK)
      */
     public function get_dosen_list() {
-        $this->db->select('id, name as nama_dosen, nip, email, kode_dosen, no_telp as no_hp');
+        $this->db->select('id, name as nama_dosen, nip, email, kode_dosen, no_telp as no_hp, koordinator, kelompok_keahlian, id_kk');
         $this->db->from('user');
         $this->db->where_in('role_id', array(2, 3, 6, 7, 9));
         $this->db->order_by('name', 'ASC');
@@ -22,14 +22,18 @@ class KoordinatorTA_model extends CI_Model {
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result_array() as $row) {
                 $nipKey = !empty($row['nip']) ? (string)$row['nip'] : (string)$row['id'];
+                $kkVal = !empty($row['koordinator']) ? $row['koordinator'] : ($row['kelompok_keahlian'] ?? '');
                 $result[$nipKey] = array(
-                    'id'         => $row['id'],
-                    'nip'        => $nipKey,
-                    'nama_dosen' => $row['nama_dosen'],
-                    'email'      => $row['email'] ?? '',
-                    'kode_dosen' => $row['kode_dosen'] ?? '',
-                    'no_hp'      => $row['no_hp'] ?? '',
-                    'prodi'      => 'Informatika'
+                    'id'                => $row['id'],
+                    'nip'               => $nipKey,
+                    'nama_dosen'        => $row['nama_dosen'],
+                    'email'             => $row['email'] ?? '',
+                    'kode_dosen'        => $row['kode_dosen'] ?? '',
+                    'no_hp'             => $row['no_hp'] ?? '',
+                    'koordinator'       => $kkVal,
+                    'kelompok_keahlian' => $kkVal,
+                    'id_kk'             => $row['id_kk'] ?? null,
+                    'prodi'             => 'Informatika'
                 );
             }
         }
@@ -436,6 +440,45 @@ class KoordinatorTA_model extends CI_Model {
         $p1_lama = '';
         $p2_lama = '';
         if (!empty($pembimbing_1) || !empty($pembimbing_2)) {
+            // 1. Resolve Pembimbing 1 ke User ID dan ambil Kelompok Keahlian miliknya
+            $p1_user_id = (string)$pembimbing_1;
+            $kk_p1 = 'VID'; // default
+            if (!empty($pembimbing_1)) {
+                $this->db->group_start();
+                $this->db->where('id', $pembimbing_1);
+                $this->db->or_where('nip', $pembimbing_1);
+                $this->db->or_where('nim', $pembimbing_1);
+                $this->db->group_end();
+                $uP1 = $this->db->get('user')->row_array();
+                if ($uP1) {
+                    $p1_user_id = !empty($uP1['id']) ? $uP1['id'] : $pembimbing_1;
+                    if (!empty($uP1['koordinator'])) {
+                        $kk_p1 = $uP1['koordinator'];
+                    } elseif (!empty($uP1['kelompok_keahlian'])) {
+                        $kk_p1 = $uP1['kelompok_keahlian'];
+                    } elseif (!empty($uP1['id_kk']) && $this->db->table_exists('kelompok_keahlian')) {
+                        $kkRow = $this->db->get_where('kelompok_keahlian', ['id' => $uP1['id_kk']])->row_array();
+                        if ($kkRow) {
+                            $kk_p1 = $kkRow['kode_kk'] ?: $kkRow['nama_kk'];
+                        }
+                    }
+                }
+            }
+
+            // 2. Resolve Pembimbing 2 ke User ID
+            $p2_user_id = (string)$pembimbing_2;
+            if (!empty($pembimbing_2)) {
+                $this->db->group_start();
+                $this->db->where('id', $pembimbing_2);
+                $this->db->or_where('nip', $pembimbing_2);
+                $this->db->or_where('nim', $pembimbing_2);
+                $this->db->group_end();
+                $uP2 = $this->db->get('user')->row_array();
+                if ($uP2) {
+                    $p2_user_id = !empty($uP2['id']) ? $uP2['id'] : $pembimbing_2;
+                }
+            }
+
             $this->db->where('id_guidance', $guidanceId);
             $tl = $this->db->get('thesis_lecturers')->row_array();
 
@@ -443,9 +486,9 @@ class KoordinatorTA_model extends CI_Model {
                 $tlData = array(
                     'id'                => 'tl_' . uniqid(),
                     'id_guidance'       => $guidanceId,
-                    'dosen_pembimbing1' => (string)$pembimbing_1,
-                    'kelompok_keahlian' => 'KK-SIDE',
-                    'dosen_pembimbing2' => (string)$pembimbing_2,
+                    'dosen_pembimbing1' => $p1_user_id,
+                    'kelompok_keahlian' => $kk_p1,
+                    'dosen_pembimbing2' => $p2_user_id,
                     'dosen_penguji1'    => '',
                     'dosen_penguji2'    => '',
                     'date'              => date('Y-m-d H:i:s'),
@@ -458,9 +501,9 @@ class KoordinatorTA_model extends CI_Model {
                 $p2_lama = $tl['dosen_pembimbing2'];
 
                 $tlData = array(
-                    'dosen_pembimbing1' => (string)$pembimbing_1,
-                    'dosen_pembimbing2' => (string)$pembimbing_2,
-                    'kelompok_keahlian' => 'KK-SIDE',
+                    'dosen_pembimbing1' => $p1_user_id,
+                    'dosen_pembimbing2' => $p2_user_id,
+                    'kelompok_keahlian' => $kk_p1,
                     'date_edit'         => date('Y-m-d H:i:s')
                 );
                 $this->db->where('id', $tl['id']);
@@ -789,15 +832,37 @@ class KoordinatorTA_model extends CI_Model {
         $pj1_lama = '';
         $pj2_lama = '';
 
+        // Resolve penguji to user ID
+        $pj1_id = (string)$penguji_1;
+        $pj2_id = (string)$penguji_2;
+        if (!empty($penguji_1)) {
+            $this->db->group_start();
+            $this->db->where('id', $penguji_1);
+            $this->db->or_where('nip', $penguji_1);
+            $this->db->or_where('nim', $penguji_1);
+            $this->db->group_end();
+            $uPj1 = $this->db->get('user')->row_array();
+            if ($uPj1) $pj1_id = !empty($uPj1['id']) ? $uPj1['id'] : $penguji_1;
+        }
+        if (!empty($penguji_2)) {
+            $this->db->group_start();
+            $this->db->where('id', $penguji_2);
+            $this->db->or_where('nip', $penguji_2);
+            $this->db->or_where('nim', $penguji_2);
+            $this->db->group_end();
+            $uPj2 = $this->db->get('user')->row_array();
+            if ($uPj2) $pj2_id = !empty($uPj2['id']) ? $uPj2['id'] : $penguji_2;
+        }
+
         if (!$tl) {
             $tlData = array(
                 'id'                => 'tl_' . uniqid(),
                 'id_guidance'       => $gId,
                 'dosen_pembimbing1' => '',
-                'kelompok_keahlian' => 'KK-SIDE',
+                'kelompok_keahlian' => 'VID',
                 'dosen_pembimbing2' => '',
-                'dosen_penguji1'    => (string)$penguji_1,
-                'dosen_penguji2'    => (string)$penguji_2,
+                'dosen_penguji1'    => $pj1_id,
+                'dosen_penguji2'    => $pj2_id,
                 'date'              => date('Y-m-d H:i:s'),
                 'date_edit'         => date('Y-m-d H:i:s'),
                 'status'            => 'Pending'
@@ -808,8 +873,8 @@ class KoordinatorTA_model extends CI_Model {
             $pj2_lama = $tl['dosen_penguji2'];
 
             $tlData = array(
-                'dosen_penguji1' => (string)$penguji_1,
-                'dosen_penguji2' => (string)$penguji_2,
+                'dosen_penguji1' => $pj1_id,
+                'dosen_penguji2' => $pj2_id,
                 'date_edit'      => date('Y-m-d H:i:s')
             );
             $this->db->where('id', $tl['id']);

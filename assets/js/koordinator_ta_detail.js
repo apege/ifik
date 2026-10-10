@@ -117,8 +117,11 @@
     // =========================================================
     // 2. DOSEN AUTOCOMPLETE COMBOBOX MODULE
     // =========================================================
-    function getDosenByNip(nip) {
-        return (config.dosenList || []).find(d => String(d.nip) === String(nip));
+    function getDosenByNip(idOrNip) {
+        if (!idOrNip) return null;
+        return (config.dosenList || []).find(d => 
+            String(d.id) === String(idOrNip) || String(d.nip) === String(idOrNip)
+        );
     }
 
     function renderDosenDropdown(slotNum, searchKeyword) {
@@ -132,12 +135,17 @@
         const currentNip = currentNipInput ? currentNipInput.value : '';
         const otherNip = otherNipInput ? otherNipInput.value : '';
 
+        const currentDosen = getDosenByNip(currentNip);
+        const otherDosen = getDosenByNip(otherNip);
+
         const kw = (searchKeyword || '').toLowerCase().trim();
         const filtered = (config.dosenList || []).filter(d => {
             const name = (d.nama_dosen || '').toLowerCase();
             const nip = String(d.nip || '');
+            const id = String(d.id || '').toLowerCase();
             const prodi = (d.prodi || '').toLowerCase();
-            return name.includes(kw) || nip.includes(kw) || prodi.includes(kw);
+            const kk = (d.kelompok_keahlian || '').toLowerCase();
+            return name.includes(kw) || nip.includes(kw) || id.includes(kw) || prodi.includes(kw) || kk.includes(kw);
         });
 
         if (filtered.length === 0) {
@@ -152,8 +160,10 @@
 
         let html = '';
         filtered.forEach(d => {
-            const isSelected = String(d.nip) === String(currentNip);
-            const isUsedByOther = String(d.nip) === String(otherNip);
+            const isSelected = (currentDosen && (String(d.id) === String(currentDosen.id) || String(d.nip) === String(currentDosen.nip))) ||
+                               (String(d.id) === String(currentNip) || String(d.nip) === String(currentNip));
+            const isUsedByOther = (otherDosen && (String(d.id) === String(otherDosen.id) || String(d.nip) === String(otherDosen.nip))) ||
+                                  (String(d.id) === String(otherNip) || String(d.nip) === String(otherNip));
 
             // Initials
             const parts = (d.nama_dosen || '').split(' ');
@@ -167,7 +177,8 @@
                 itemClass = 'p-3 flex items-center justify-between gap-3 opacity-40 cursor-not-allowed bg-slate-50';
             }
 
-            const clickHandler = isUsedByOther ? '' : `onclick="selectDosen(${slotNum}, '${d.nip}')"`;
+            const lecturerKey = d.id || d.nip;
+            const clickHandler = isUsedByOther ? '' : `onclick="selectDosen(${slotNum}, '${escapeHtml(lecturerKey)}')"` ;
 
             html += `
                 <div class="${itemClass}" ${clickHandler}>
@@ -177,7 +188,10 @@
                         </div>
                         <div class="min-w-0">
                             <p class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d.nama_dosen)}</p>
-                            <p class="text-[10px] text-slate-400 font-mono">NIP: ${d.nip}</p>
+                            <p class="text-[10px] text-slate-400 font-mono">
+                                NIP: ${d.nip}
+                                ${d.kelompok_keahlian ? ` • <span class="text-orange-600 font-semibold font-sans">KK: ${escapeHtml(d.kelompok_keahlian)}</span>` : ''}
+                            </p>
                         </div>
                     </div>
 
@@ -220,7 +234,7 @@
         renderDosenDropdown(slotNum, kw);
     };
 
-    window.selectDosen = function (slotNum, nip) {
+    window.selectDosen = function (slotNum, idOrNip) {
         const hiddenInput = document.getElementById(`inputPembimbing${slotNum}`);
         const searchContainer = document.getElementById(`searchContainer${slotNum}`);
         const chip = document.getElementById(`chipP${slotNum}`);
@@ -229,12 +243,19 @@
         const badge = document.getElementById(`badgeP${slotNum}`);
         const dropdown = document.getElementById(`dropdownList${slotNum}`);
 
-        const dosen = getDosenByNip(nip);
+        const dosen = getDosenByNip(idOrNip);
         if (!dosen) return;
 
-        if (hiddenInput) hiddenInput.value = nip;
+        // Prioritaskan User ID daripada NIP
+        if (hiddenInput) hiddenInput.value = dosen.id || dosen.nip;
         if (chipName) chipName.innerText = dosen.nama_dosen;
-        if (chipNip) chipNip.innerText = `NIP: ${dosen.nip}`;
+        if (chipNip) {
+            let label = `NIP: ${dosen.nip}`;
+            if (dosen.kelompok_keahlian) {
+                label += ` • KK: ${dosen.kelompok_keahlian}`;
+            }
+            chipNip.innerText = label;
+        }
 
         if (searchContainer) searchContainer.classList.add('hidden');
         if (chip) chip.classList.remove('hidden');
@@ -282,10 +303,18 @@
         const p2Input = document.getElementById('inputPembimbing2');
         const warning = document.getElementById('pembimbingConflictWarning');
 
-        const p1 = p1Input ? p1Input.value : '';
-        const p2 = p2Input ? p2Input.value : '';
+        const p1Val = p1Input ? p1Input.value : '';
+        const p2Val = p2Input ? p2Input.value : '';
 
-        if (p1 && p2 && String(p1) === String(p2)) {
+        const d1 = getDosenByNip(p1Val);
+        const d2 = getDosenByNip(p2Val);
+
+        const isConflict = (p1Val && p2Val) && (
+            String(p1Val) === String(p2Val) ||
+            (d1 && d2 && (String(d1.id) === String(d2.id) || String(d1.nip) === String(d2.nip)))
+        );
+
+        if (isConflict) {
             if (warning) warning.classList.remove('hidden');
             return false;
         } else {

@@ -608,13 +608,22 @@ class ImportEmail extends CI_Controller {
                 return;
             }
 
+            $username = explode('@', $email)[0];
             $updateData = [
                 'name' => $name,
                 'email' => $email,
                 'role_id' => $targetRoleId
             ];
+            if ($this->db->field_exists('username', $userTbl)) $updateData['username'] = $username;
             if ($this->db->field_exists('nidn_nim', $userTbl)) $updateData['nidn_nim'] = $nimNip;
-            if ($this->db->field_exists('nim', $userTbl)) $updateData['nim'] = $nimNip;
+            if ((int)$targetRoleId !== 4) {
+                // Non-Mahasiswa (Dosen, Laboran, Kaur, dll): simpan ke nip
+                if ($this->db->field_exists('nip', $userTbl)) $updateData['nip'] = $nimNip;
+                if ($this->db->field_exists('nim', $userTbl)) $updateData['nim'] = $currentUser->nim ?? '';
+            } else {
+                // Mahasiswa: simpan ke nim
+                if ($this->db->field_exists('nim', $userTbl)) $updateData['nim'] = $nimNip;
+            }
             if ($this->db->field_exists('updated_at', $userTbl)) $updateData['updated_at'] = date('Y-m-d H:i:s');
 
             $isUserProtected = (!empty($currentUser->password_changed) && (int)$currentUser->password_changed === 1) || (!empty($currentUser->is_active) && (int)$currentUser->is_active === 1);
@@ -623,11 +632,7 @@ class ImportEmail extends CI_Controller {
                 $salt = bin2hex(random_bytes(16));
                 if ($this->db->field_exists('salt', $userTbl)) $updateData['salt'] = $salt;
                 if ($this->db->table_exists('user_token')) {
-                    $this->db->replace('user_token', [
-                        'email' => $email,
-                        'token' => $rawToken,
-                        'date_created' => time()
-                    ]);
+                    $this->User_model->sync_user_token($email, $rawToken);
                 } elseif ($this->db->field_exists('token', $userTbl)) {
                     $updateData['token'] = $rawToken;
                     $updateData['password'] = password_hash($rawToken, PASSWORD_DEFAULT, ['cost' => 10]);

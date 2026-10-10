@@ -76,10 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     {
       id: 4,
-      title: isDosen ? "4. Program Studi" : "4. Akademik & Dosen",
+      title: isDosen ? "4. Program Studi & KK" : "4. Akademik & Dosen",
       date: "Langkah 4 dari 4",
       content: isDosen
-        ? "Langkah 4: Pilih Program Studi / Homebase pengajaran Anda."
+        ? "Langkah 4: Pilih Program Studi / Homebase dan Kelompok Keahlian (KK)."
         : "Langkah 4: Pilih konsentrasi peminatan dan dosen wali akademik pembimbing.",
       category: "Akademik",
       status: "pending",
@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const initialJurusan = (initData.konsentrasi_list && initData.konsentrasi_list[0]) || 'Desain Komunikasi Visual';
   const initialJurusanDosen = getDosenByJurusan(initialJurusan);
+  const initialKkList = Array.isArray(initData.kk_list) ? initData.kk_list : [];
+  const initialKkCode = (initialKkList[0] && (initialKkList[0].kode_kk || initialKkList[0].nama_kk)) || 'VID';
+  const initialIdKk = (initialKkList[0] && initialKkList[0].id) ? initialKkList[0].id : 1;
 
   // Global collected form state across nodes (Pre-filled from logged-in account)
   const formDataState = {
@@ -113,11 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
     nim: initData.nim || (isDosen ? '19850101' : '130210091'),
     nama_depan: initData.nama_depan || (isDosen ? 'Dr. Ahmad' : 'Indah'),
     nama_belakang: initData.nama_belakang || (isDosen ? 'Yani' : 'Permatasari'),
+    kode_dosen: initData.kode_dosen || '',
+    no_hp: initData.no_hp || '',
     tempat_lahir: '',
     tanggal_lahir: '',
     alamat: '',
     konsentrasi: initialJurusan,
-    dosen_wali: isDosen ? null : (initialJurusanDosen[0] ? initialJurusanDosen[0].nip : '1985010101')
+    dosen_wali: isDosen ? null : (initialJurusanDosen[0] ? initialJurusanDosen[0].nip : '1985010101'),
+    kelompok_keahlian: isDosen ? initialKkCode : null,
+    id_kk: isDosen ? initialIdKk : null
   };
 
   // State Persistence across Page Refresh
@@ -390,21 +397,50 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
 
-            <div class="orb-input-group">
-              <label class="orb-label">
-                <span>Nama Depan *</span>
-                <span class="orb-badge-warn" id="orbBadgeDepan">Tanpa Simbol</span>
-              </label>
-              <input type="text" id="orb_nama_depan" class="orb-input no-icon" placeholder="Nama depan" value="${formDataState.nama_depan}" required>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="orb-input-group">
+                <label class="orb-label">
+                  <span>Nama Depan *</span>
+                  <span class="orb-badge-warn" id="orbBadgeDepan">Tanpa Simbol</span>
+                </label>
+                <input type="text" id="orb_nama_depan" class="orb-input no-icon" placeholder="Nama depan" value="${formDataState.nama_depan}" required>
+              </div>
+
+              <div class="orb-input-group">
+                <label class="orb-label">
+                  <span>Nama Belakang *</span>
+                  <span class="orb-badge-warn" id="orbBadgeBelakang">Tanpa Simbol</span>
+                </label>
+                <input type="text" id="orb_nama_belakang" class="orb-input no-icon" placeholder="Nama belakang" value="${formDataState.nama_belakang}" required>
+              </div>
             </div>
 
-            <div class="orb-input-group">
-              <label class="orb-label">
-                <span>Nama Belakang *</span>
-                <span class="orb-badge-warn" id="orbBadgeBelakang">Tanpa Simbol</span>
-              </label>
-              <input type="text" id="orb_nama_belakang" class="orb-input no-icon" placeholder="Nama belakang" value="${formDataState.nama_belakang}" required>
-            </div>
+            ${isDosen ? `
+              <div class="grid grid-cols-2 gap-2">
+                <div class="orb-input-group">
+                  <label class="orb-label">
+                    <span>Kode Dosen *</span>
+                    <span class="text-[10px] text-orange-600 font-mono font-semibold" id="orbBadgeKodeDosen">Inisial Dosen</span>
+                  </label>
+                  <input type="text" id="orb_kode_dosen" class="orb-input no-icon uppercase font-mono font-bold tracking-wider" placeholder="Misal: ABC / DWL" maxlength="10" value="${formDataState.kode_dosen || ''}" required>
+                </div>
+                <div class="orb-input-group">
+                  <label class="orb-label">
+                    <span>No. Handphone / WA *</span>
+                    <span class="text-[10px] text-slate-500 font-mono">Aktif</span>
+                  </label>
+                  <input type="tel" id="orb_no_hp" class="orb-input no-icon font-mono" placeholder="08xxxxxxxxxx" value="${formDataState.no_hp || ''}" required>
+                </div>
+              </div>
+            ` : `
+              <div class="orb-input-group">
+                <label class="orb-label">
+                  <span>No. Handphone / WhatsApp *</span>
+                  <span class="text-[10px] text-slate-500 font-mono">Aktif</span>
+                </label>
+                <input type="tel" id="orb_no_hp" class="orb-input no-icon font-mono" placeholder="08xxxxxxxxxx" value="${formDataState.no_hp || ''}" required>
+              </div>
+            `}
 
             <p id="orbStep2Error" class="text-xs text-red-400 hidden"></p>
           </div>
@@ -542,8 +578,31 @@ document.addEventListener('DOMContentLoaded', () => {
       const initialDosenName = selectedDosen ? selectedDosen.nama : '';
       const konsentrasiLabel = isDosen ? 'Program Studi / Homebase *' : 'Konsentrasi / Program Studi *';
 
-      // Build Dosen Wali Autocomplete block ONLY for Mahasiswa / Info Box for Dosen
+      // Build Dosen Wali Autocomplete block ONLY for Mahasiswa / KK & Info Box for Dosen
       const roleSpecificBlock = isDosen ? `
+        <!-- Custom Select: Kelompok Keahlian (Dosen Only - Dynamically from Database) -->
+        <div class="orb-custom-select-wrapper mt-3">
+          <label class="orb-label">Kelompok Keahlian (KK) *</label>
+          <div class="orb-custom-select" id="select_kk">
+            <button type="button" class="orb-select-trigger">
+              <span class="orb-select-value">${formDataState.kelompok_keahlian || initialKkCode}</span>
+              <svg class="orb-select-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="orb-select-dropdown">
+              ${initialKkList.map(kk => {
+                const kkVal = kk.kode_kk || kk.nama_kk;
+                const isSel = (formDataState.kelompok_keahlian || initialKkCode) === kkVal;
+                return `
+                  <div class="orb-select-option ${isSel ? 'selected' : ''}" data-val="${kkVal}" data-id="${kk.id}">
+                    <span>${kkVal}</span>
+                    <svg class="orb-opt-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
         <!-- Info Callout Box: Hak Akses & Layanan Dosen -->
         <div class="p-3.5 bg-gradient-to-br from-orange-50/90 to-amber-50/60 border border-orange-200/90 rounded-xl space-y-2 text-xs text-slate-700 mt-2 shadow-2xs">
           <div class="flex items-center gap-2 font-bold text-orange-950">
@@ -828,6 +887,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const nextBtn = card.querySelector('#btnNextStep2');
       const errElem = card.querySelector('#orbStep2Error');
 
+      const kodeDosenInput = card.querySelector('#orb_kode_dosen');
+      const noHpInput = card.querySelector('#orb_no_hp');
+
       function setupStrictNameInput(input, badge) {
         if (!input) return;
         input.addEventListener('input', () => {
@@ -846,6 +908,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       setupStrictNameInput(namaDepanInput, badgeDepan);
       setupStrictNameInput(namaBelakangInput, badgeBelakang);
+
+      // Auto format Kode Dosen to uppercase alphanumeric
+      if (kodeDosenInput) {
+        kodeDosenInput.addEventListener('input', () => {
+          kodeDosenInput.value = kodeDosenInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        });
+      }
+
+      // Filter No HP to digits and plus symbol
+      if (noHpInput) {
+        noHpInput.addEventListener('input', () => {
+          noHpInput.value = noHpInput.value.replace(/[^0-9+]/g, '');
+        });
+      }
 
       // Back button to Step 1
       card.querySelector('#btnBackStep2')?.addEventListener('click', (e) => {
@@ -885,12 +961,26 @@ document.addEventListener('DOMContentLoaded', () => {
           markFieldInvalid(namaBelakangInput, 'Nama Belakang wajib diisi!');
           return;
         }
+        if (isDosen && kodeDosenInput && !kodeDosenInput.value.trim()) {
+          markFieldInvalid(kodeDosenInput, 'Kode Dosen inisial wajib diisi!');
+          return;
+        }
+        if (noHpInput && !noHpInput.value.trim()) {
+          markFieldInvalid(noHpInput, 'Nomor Handphone / WhatsApp wajib diisi!');
+          return;
+        }
+        if (noHpInput && noHpInput.value.trim().length < 8) {
+          markFieldInvalid(noHpInput, 'Nomor Handphone minimal 8 digit!');
+          return;
+        }
         card.querySelectorAll('.is-invalid').forEach(e => e.classList.remove('is-invalid'));
         errElem.classList.add('hidden');
 
         formDataState.nim = nimInput.value;
         formDataState.nama_depan = namaDepanInput.value;
         formDataState.nama_belakang = namaBelakangInput.value;
+        if (kodeDosenInput) formDataState.kode_dosen = kodeDosenInput.value.trim();
+        if (noHpInput) formDataState.no_hp = noHpInput.value.trim();
 
         // Mark node 2 completed, activate node 3
         node.status = 'completed';
@@ -1535,12 +1625,13 @@ document.addEventListener('DOMContentLoaded', () => {
             opt.classList.add('selected');
 
             selectContainer.classList.remove('is-open');
-            if (onSelectCallback) onSelectCallback(val, label);
+            if (onSelectCallback) onSelectCallback(val, label, opt);
           });
         });
       }
 
       setupCustomSelect(selectKonsentrasi, 'konsentrasi', (newJurusan) => {
+        saveDraftState();
         if (isDosen) return;
         const filteredDosen = getDosenByJurusan(newJurusan);
         const badge = card.querySelector('#dosenCountBadge');
@@ -1560,6 +1651,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-render autocomplete dropdown
         renderDosenAutocomplete('');
       });
+
+      // Bind Kelompok Keahlian select for Dosen
+      const selectKK = card.querySelector('#select_kk');
+      if (selectKK) {
+        setupCustomSelect(selectKK, 'kelompok_keahlian', (newKK, label, opt) => {
+          if (opt && opt.getAttribute('data-id')) {
+            formDataState.id_kk = opt.getAttribute('data-id');
+          }
+          saveDraftState();
+        });
+      }
 
       // ─── SEARCH AUTOCOMPLETE: DOSEN WALI (FILTERED BY JURUSAN) ───
       const searchInput = card.querySelector('#orb_dosen_search');
@@ -1711,9 +1813,14 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // 4. Check Step 4 (Akademik / Dosen Wali)
+        // 4. Check Step 4 (Akademik / Dosen Wali / KK)
         if (!formDataState.konsentrasi) {
           markFieldInvalid(selectKonsentrasi, 'Pilih Konsentrasi / Program Studi!');
+          return;
+        }
+
+        if (isDosen && !formDataState.kelompok_keahlian) {
+          markFieldInvalid(selectKK || card.querySelector('#select_kk'), 'Pilih Kelompok Keahlian (KK)!');
           return;
         }
 
@@ -1744,12 +1851,20 @@ document.addEventListener('DOMContentLoaded', () => {
         postData.append('nim', formDataState.nim || '');
         postData.append('nama_depan', formDataState.nama_depan);
         postData.append('nama_belakang', formDataState.nama_belakang || '');
+        postData.append('kode_dosen', formDataState.kode_dosen || '');
+        postData.append('no_hp', formDataState.no_hp || '');
         postData.append('tempat_lahir', formDataState.tempat_lahir);
         postData.append('tanggal_lahir', formDataState.tanggal_lahir);
         postData.append('alamat', formDataState.alamat);
         postData.append('konsentrasi', formDataState.konsentrasi || 'Informatika');
         if (!isDosen && formDataState.dosen_wali) {
           postData.append('dosen_wali', formDataState.dosen_wali);
+        }
+        if (isDosen && formDataState.kelompok_keahlian) {
+          postData.append('kelompok_keahlian', formDataState.kelompok_keahlian);
+          if (formDataState.id_kk) {
+            postData.append('id_kk', formDataState.id_kk);
+          }
         }
 
         try {
@@ -1778,14 +1893,19 @@ document.addEventListener('DOMContentLoaded', () => {
           updateBadge(node.id, 'COMPLETE', 'badge-complete');
 
           const roleTitle = initData.role_title || (isDosen ? 'Dosen' : 'Mahasiswa');
-          const targetUrl = result.redirect || initData.dashboard_url || `${window.location.origin}/dashboard`;
+          const targetUrl = result.redirect || initData.dashboard_url || initData.base_url || (window.location.origin + '/');
 
           const dosenObj = daftarDosen.find(d => d.nip === formDataState.dosen_wali);
           const summaryDetails = {
             'Akun': `${formDataState.nama_depan} ${formDataState.nama_belakang}`,
             [isDosen ? 'NIP / NIDN' : 'NIM']: formDataState.nim,
+            'No. Handphone': formDataState.no_hp || '-',
             'Program Studi': formDataState.konsentrasi
           };
+
+          if (isDosen && formDataState.kode_dosen) {
+            summaryDetails['Kode Dosen'] = formDataState.kode_dosen;
+          }
 
           if (!isDosen && dosenObj) {
             summaryDetails['Dosen Wali'] = dosenObj.nama;

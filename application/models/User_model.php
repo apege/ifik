@@ -21,16 +21,23 @@ class User_model extends CI_Model {
     private function _normalize_user($user)
     {
         if (!$user) return null;
-        if (!isset($user->nidn_nim)) {
-            $isStudent = (isset($user->role_id) && (int)$user->role_id === 4);
-            if ($isStudent) {
-                $user->nidn_nim = !empty($user->nim) ? $user->nim : (!empty($user->username) ? $user->username : '');
-            } else {
-                $user->nidn_nim = !empty($user->nip) ? $user->nip : (!empty($user->username) ? $user->username : (!empty($user->nim) ? $user->nim : ''));
+        $isStudent = (isset($user->role_id) && (int)$user->role_id === 4);
+
+        if ($isStudent) {
+            $user->nidn_nim = !empty($user->nim) ? $user->nim : (!empty($user->nip) ? $user->nip : (!empty($user->username) && is_numeric($user->username) ? $user->username : ''));
+        } else {
+            // Untuk Dosen & Staff: Prioritaskan NIP, lalu NIM (jika terimpor ke kolom nim), jangan pernah jadikan username string email sebagai NIP!
+            $user->nidn_nim = !empty($user->nip) ? $user->nip : (!empty($user->nim) ? $user->nim : (!empty($user->username) && is_numeric($user->username) ? $user->username : ''));
+            if (empty($user->nip) && !empty($user->nim)) {
+                $user->nip = $user->nim;
             }
         }
-        if (!isset($user->nim)) {
-            $user->nim = $user->nidn_nim;
+
+        if (!isset($user->nim) || empty($user->nim)) {
+            $user->nim = !empty($user->nidn_nim) ? $user->nidn_nim : (!empty($user->nip) ? $user->nip : '');
+        }
+        if (!isset($user->nip) || empty($user->nip)) {
+            $user->nip = !empty($user->nidn_nim) ? $user->nidn_nim : (!empty($user->nim) ? $user->nim : '');
         }
         if (!isset($user->status)) {
             $user->status = (!empty($user->is_active) && (int)$user->is_active === 1) ? 'active' : 'inactive';
@@ -39,12 +46,12 @@ class User_model extends CI_Model {
 
         // Master seed accounts are strictly identified by their designated IDs
         $masterIds = ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'mhs-1301210001', 'super-admin-01'];
-        if (in_array($user->id, $masterIds)) {
+        $isActive = (!empty($user->is_active) && (int)$user->is_active === 1);
+        $hasChanged = (isset($user->password_changed) && (int)$user->password_changed === 1);
+        if (in_array($user->id, $masterIds) || $isActive || $hasChanged) {
             $user->password_changed = 1;
-        } elseif (isset($user->password_changed)) {
-            $user->password_changed = (int)$user->password_changed;
         } else {
-            $user->password_changed = (!empty($user->is_active) && (int)$user->is_active === 1) ? 1 : 0;
+            $user->password_changed = 0;
         }
 
         if (empty($user->token) && !empty($user->email) && $this->db->table_exists('user_token') && !in_array($user->id, $masterIds)) {
@@ -195,11 +202,7 @@ class User_model extends CI_Model {
 
         // Catat token baru dengan timestamp date_created di user_token
         if ($this->db->table_exists('user_token')) {
-            $this->db->insert('user_token', [
-                'email'        => $email,
-                'token'        => $token,
-                'date_created' => time()
-            ]);
+            $this->sync_user_token($email, $token);
         }
         return true;
     }
@@ -260,7 +263,7 @@ class User_model extends CI_Model {
      * @param string $newHashedPassword
      * @return bool
      */
-    public function reset_password_by_token($email, $token, $newHashedPassword)
+    public function reset_password_by_token($email, $token, $newHashedPassword, $newSalt = null)
     {
         $user = $this->verify_reset_token($email, $token);
         if (!$user) return false;
@@ -269,6 +272,9 @@ class User_model extends CI_Model {
         $updatePayload = [
             'password' => $newHashedPassword
         ];
+        if ($newSalt !== null && $this->db->field_exists('salt', $this->tbl_user)) {
+            $updatePayload['salt'] = $newSalt;
+        }
         if ($this->db->field_exists('password_changed', $this->tbl_user)) {
             $updatePayload['password_changed'] = 1;
         }
@@ -354,13 +360,12 @@ class User_model extends CI_Model {
                 $row['token'] = $row['token_hash'];
             }
             $isMaster = in_array($row['id'], ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'super-admin-01', 'mhs-1301210001']);
-            $isActive = isset($row['is_active']) ? (int)$row['is_active'] : 0;
-            if ($isMaster) {
+            $isActive = (!empty($row['is_active']) && (int)$row['is_active'] === 1);
+            $hasChanged = (isset($row['password_changed']) && (int)$row['password_changed'] === 1);
+            if ($isMaster || $isActive || $hasChanged) {
                 $row['password_changed'] = 1;
-            } elseif (isset($row['password_changed'])) {
-                $row['password_changed'] = (int)$row['password_changed'];
             } else {
-                $row['password_changed'] = ($isActive === 1) ? 1 : 0;
+                $row['password_changed'] = 0;
             }
             if (empty($row['date_created']) && !empty($row['updated_at'])) {
                 $row['date_created'] = strtotime($row['updated_at']);
@@ -524,12 +529,19 @@ class User_model extends CI_Model {
             if (isset($existingMap[$email])) {
                 // Update existing user
                 $existing = $existingMap[$email];
+                $username = explode('@', $email)[0];
                 $updateData = [
                     'name' => $name,
                     'role_id' => $roleId
                 ];
+                if ($this->db->field_exists('username', $this->tbl_user)) $updateData['username'] = $username;
                 if ($this->db->field_exists('nidn_nim', $this->tbl_user)) $updateData['nidn_nim'] = $nimNip;
                 if ($this->db->field_exists('nim', $this->tbl_user)) $updateData['nim'] = $nimNip;
+                if ($this->db->field_exists('nip', $this->tbl_user)) {
+                    if ((int)$roleId !== 4 || empty($updateData['nim'])) {
+                        $updateData['nip'] = $nimNip;
+                    }
+                }
                 if ($this->db->field_exists('updated_at', $this->tbl_user)) $updateData['updated_at'] = $now;
 
                 $isUserProtected = (!empty($existing['password_changed']) && (int)$existing['password_changed'] === 1) || (!empty($existing['is_active']) && (int)$existing['is_active'] === 1);
@@ -546,18 +558,24 @@ class User_model extends CI_Model {
                 // Queue for bulk insert
                 $rawPwd = $token ? $token : 'Telkom#123';
                 $salt = bin2hex(random_bytes(16));
+                $username = explode('@', $email)[0];
                 $insertRow = [
-                    'id' => uniqid('usr_'),
-                    'username' => !empty($nimNip) ? $nimNip : explode('@', $email)[0],
+                    'id' => uniqid(),
+                    'username' => $username,
                     'role_id' => $roleId,
                     'name' => $name,
                     'email' => $email,
-                    'password' => password_hash($rawPwd, PASSWORD_DEFAULT, ['cost' => 10]),
+                    'password' => password_hash($rawPwd . $salt, PASSWORD_DEFAULT, ['cost' => 10]),
                     'status' => 'active'
                 ];
                 if ($this->db->field_exists('salt', $this->tbl_user)) $insertRow['salt'] = $salt;
                 if ($this->db->field_exists('nidn_nim', $this->tbl_user)) $insertRow['nidn_nim'] = $nimNip;
                 if ($this->db->field_exists('nim', $this->tbl_user)) $insertRow['nim'] = $nimNip;
+                if ($this->db->field_exists('nip', $this->tbl_user)) {
+                    if ((int)$roleId !== 4 || empty($insertRow['nim'])) {
+                        $insertRow['nip'] = $nimNip;
+                    }
+                }
                 if ($this->db->field_exists('token', $this->tbl_user)) $insertRow['token'] = $token;
                 if ($this->db->field_exists('password_changed', $this->tbl_user)) $insertRow['password_changed'] = 0;
                 if ($this->db->field_exists('email_status', $this->tbl_user)) $insertRow['email_status'] = $emailStatus;
@@ -580,11 +598,7 @@ class User_model extends CI_Model {
             $isProtectedForToken = isset($existingMap[$email]) && ((!empty($existingMap[$email]['password_changed']) && (int)$existingMap[$email]['password_changed'] === 1) || (!empty($existingMap[$email]['is_active']) && (int)$existingMap[$email]['is_active'] === 1));
 
             if ($token && !$isProtectedForToken && $this->db->table_exists('user_token')) {
-                $this->db->replace('user_token', [
-                    'email' => $email,
-                    'token' => $token,
-                    'date_created' => time()
-                ]);
+                $this->sync_user_token($email, $token);
             }
         }
 
@@ -609,6 +623,7 @@ class User_model extends CI_Model {
     public function upsert_user($data)
     {
         $email = strtolower(trim($data['email']));
+        $username = explode('@', $email)[0];
         $existing = $this->db->get_where($this->tbl_user, ['email' => $email])->row();
 
         if ($existing) {
@@ -616,8 +631,17 @@ class User_model extends CI_Model {
                 'name' => $data['name'],
                 'role_id' => isset($data['role_id']) ? $data['role_id'] : $existing->role_id
             ];
+            if ($this->db->field_exists('username', $this->tbl_user)) $updateData['username'] = $username;
             if ($this->db->field_exists('nidn_nim', $this->tbl_user)) $updateData['nidn_nim'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : ($existing->nidn_nim ?? '');
-            if ($this->db->field_exists('nim', $this->tbl_user)) $updateData['nim'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : ($existing->nim ?? '');
+            $resolvedRoleId = isset($data['role_id']) ? (int)$data['role_id'] : (int)($existing->role_id ?? 4);
+            if ($resolvedRoleId !== 4) {
+                // Non-Mahasiswa: simpan ke nip
+                if ($this->db->field_exists('nip', $this->tbl_user)) $updateData['nip'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : ($existing->nip ?? '');
+                if ($this->db->field_exists('nim', $this->tbl_user)) $updateData['nim'] = $existing->nim ?? '';
+            } else {
+                // Mahasiswa: simpan ke nim
+                if ($this->db->field_exists('nim', $this->tbl_user)) $updateData['nim'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : ($existing->nim ?? '');
+            }
             if ($this->db->field_exists('updated_at', $this->tbl_user)) $updateData['updated_at'] = date('Y-m-d H:i:s');
 
             $isUserProtected = (!empty($existing->password_changed) && (int)$existing->password_changed === 1) || (!empty($existing->is_active) && (int)$existing->is_active === 1);
@@ -626,11 +650,7 @@ class User_model extends CI_Model {
                 $salt = bin2hex(random_bytes(16));
                 if ($this->db->field_exists('salt', $this->tbl_user)) $updateData['salt'] = $salt;
                 if ($this->db->table_exists('user_token')) {
-                    $this->db->replace('user_token', [
-                        'email' => $email,
-                        'token' => $data['token'],
-                        'date_created' => time()
-                    ]);
+                    $this->sync_user_token($email, $data['token']);
                 } else if ($this->db->field_exists('token', $this->tbl_user)) {
                     $updateData['token'] = $data['token'];
                     $updateData['password'] = password_hash($data['token'], PASSWORD_DEFAULT, ['cost' => 10]);
@@ -643,18 +663,26 @@ class User_model extends CI_Model {
             $rawToken = !empty($data['token']) ? $data['token'] : null;
             $salt = bin2hex(random_bytes(16));
             $insertData = [
-                'id' => uniqid('usr_'),
-                'username' => !empty($data['nidn_nim']) ? $data['nidn_nim'] : explode('@', $email)[0],
+                'id' => uniqid(),
+                'username' => $username,
                 'role_id' => isset($data['role_id']) ? $data['role_id'] : (($this->tbl_role === 'user_role') ? 4 : 5),
                 'name' => $data['name'],
                 'email' => $email,
-                'password' => password_hash('Telkom#123', PASSWORD_DEFAULT, ['cost' => 10]),
+                'password' => password_hash('Telkom#123' . $salt, PASSWORD_DEFAULT, ['cost' => 10]),
                 'salt' => $salt,
                 'status' => 'active'
             ];
             if ($this->db->field_exists('salt', $this->tbl_user)) $insertData['salt'] = $salt;
             if ($this->db->field_exists('nidn_nim', $this->tbl_user)) $insertData['nidn_nim'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : '';
-            if ($this->db->field_exists('nim', $this->tbl_user)) $insertData['nim'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : '';
+            $roleCheck = isset($data['role_id']) ? (int)$data['role_id'] : 4;
+            if ($roleCheck !== 4) {
+                // Non-Mahasiswa: simpan ke nip, nim biarkan kosong
+                if ($this->db->field_exists('nip', $this->tbl_user)) $insertData['nip'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : '';
+                if ($this->db->field_exists('nim', $this->tbl_user)) $insertData['nim'] = '';
+            } else {
+                // Mahasiswa: simpan ke nim, nip biarkan kosong
+                if ($this->db->field_exists('nim', $this->tbl_user)) $insertData['nim'] = isset($data['nidn_nim']) ? $data['nidn_nim'] : '';
+            }
             if ($this->db->field_exists('password_changed', $this->tbl_user)) $insertData['password_changed'] = 0;
             if ($this->db->field_exists('email_status', $this->tbl_user)) $insertData['email_status'] = isset($data['email_status']) ? $data['email_status'] : 'belum';
             if ($this->db->field_exists('is_active', $this->tbl_user)) $insertData['is_active'] = 0;
@@ -665,7 +693,7 @@ class User_model extends CI_Model {
             if ($this->tbl_user === 'users' && $this->db->field_exists('token', 'users')) {
                 $insertData['token'] = $rawToken;
                 if ($rawToken) {
-                    $insertData['password'] = password_hash($rawToken, PASSWORD_DEFAULT, ['cost' => 10]);
+                    $insertData['password'] = password_hash($rawToken . $salt, PASSWORD_DEFAULT, ['cost' => 10]);
                 }
             }
 
@@ -673,11 +701,7 @@ class User_model extends CI_Model {
             $newId = $insertData['id'];
 
             if ($rawToken && $this->db->table_exists('user_token')) {
-                $this->db->replace('user_token', [
-                    'email' => $email,
-                    'token' => $rawToken,
-                    'date_created' => time()
-                ]);
+                $this->sync_user_token($email, $rawToken);
             }
 
             return $newId;
@@ -709,11 +733,7 @@ class User_model extends CI_Model {
 
                 // 1. Save strictly to user_token table
                 if ($this->db->table_exists('user_token')) {
-                    $this->db->replace('user_token', [
-                        'email' => $user->email,
-                        'token' => $token,
-                        'date_created' => $now
-                    ]);
+                    $this->sync_user_token($user->email, $token, $now);
                 }
 
                 // 2. Keep token column in sync if exists, but DO NOT touch user.password!
@@ -748,11 +768,7 @@ class User_model extends CI_Model {
         }
 
         if ($this->db->table_exists('user_token')) {
-            $this->db->replace('user_token', [
-                'email' => $user->email,
-                'token' => $token,
-                'date_created' => time()
-            ]);
+            $this->sync_user_token($user->email, $token);
         }
 
         if ($this->db->field_exists('token', $this->tbl_user)) {
@@ -760,6 +776,68 @@ class User_model extends CI_Model {
                 'token' => $token,
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Synchronize user_token with compatibility for both:
+     * - VPS database (sipintar_telu_jkt_ac_id): id is VARCHAR/CHAR, generates uniqid() (e.g. 5f5ed3b1a2594)
+     * - Local/dev database (db_ifik_baru): id is INT AUTO_INCREMENT
+     * @param string $email
+     * @param string $token
+     * @param int|null $dateCreated
+     * @return bool
+     */
+    public function sync_user_token($email, $token, $dateCreated = null)
+    {
+        if (!$this->db->table_exists('user_token')) {
+            return false;
+        }
+
+        $email = strtolower(trim($email));
+        $now = $dateCreated ?: time();
+
+        // Deteksi apakah kolom 'id' bertipe varchar/char/string (skema DB VPS pembimbing)
+        $isVarcharId = false;
+        if ($this->db->field_exists('id', 'user_token')) {
+            $fields = $this->db->field_data('user_token');
+            foreach ($fields as $f) {
+                if ($f->name === 'id') {
+                    $type = strtolower($f->type);
+                    if (strpos($type, 'varchar') !== false || strpos($type, 'char') !== false || strpos($type, 'text') !== false || strpos($type, 'string') !== false) {
+                        $isVarcharId = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        $existing = $this->db->get_where('user_token', ['email' => $email])->row();
+
+        if ($existing) {
+            $idToUse = $existing->id;
+            if (empty($idToUse)) {
+                $idToUse = substr(md5(uniqid(mt_rand(), true)), 0, 13);
+            }
+
+            $updateData = [
+                'token'        => $token,
+                'date_created' => $now,
+                'id'           => $idToUse
+            ];
+
+            $this->db->where('email', $email)->update('user_token', $updateData);
+        } else {
+            $insertData = [
+                'id'           => substr(md5(uniqid(mt_rand(), true)), 0, 13),
+                'email'        => $email,
+                'token'        => $token,
+                'date_created' => $now
+            ];
+
+            $this->db->replace('user_token', $insertData);
         }
 
         return true;

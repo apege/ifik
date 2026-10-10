@@ -2238,6 +2238,24 @@
         }
 
         function processUploadedFile(file) {
+            if (!file) return;
+
+            // Validasi batas maksimal ukuran file: 10MB (10 * 1024 * 1024 bytes)
+            const MAX_FILE_SIZE = 10 * 1024 * 1024;
+            if (file.size > MAX_FILE_SIZE) {
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran File Terlalu Besar',
+                    html: `Ukuran file <b>${fileSizeMB} MB</b> melebihi batas maksimal yang diizinkan (<b>10 MB</b>).<br><span class="text-xs text-slate-500 mt-2 block">Silakan kompres atau pecah data file Anda sebelum mengunggah.</span>`,
+                    confirmButtonColor: '#ea580c',
+                    confirmButtonText: 'Mengerti'
+                });
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) fileInput.value = '';
+                return;
+            }
+
             const ext = file.name.split('.').pop().toLowerCase();
 
             if (ext === 'csv') {
@@ -2251,6 +2269,8 @@
                     },
                     error: function(err) {
                         Swal.fire('Format Error', 'Gagal membaca CSV: ' + err.message, 'error');
+                        const fileInput = document.getElementById('file-input');
+                        if (fileInput) fileInput.value = '';
                     }
                 });
             } else if (ext === 'xlsx' || ext === 'xls') {
@@ -2267,11 +2287,15 @@
                         });
                     } catch(err) {
                         Swal.fire('File Error', 'Gagal mengekstrak Excel file: ' + err.message, 'error');
+                        const fileInput = document.getElementById('file-input');
+                        if (fileInput) fileInput.value = '';
                     }
                 };
                 reader.readAsArrayBuffer(file);
             } else {
                 Swal.fire('Format Tidak Didukung', 'Silakan pilih file berektensi .CSV atau .XLSX', 'warning');
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) fileInput.value = '';
             }
         }
 

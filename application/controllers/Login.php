@@ -48,12 +48,14 @@ class Login extends CI_Controller {
 				$isPasswordValid = true;
 			}
 
-			// 2. Standard Bcrypt Hash (Plain Bcrypt)
+			// 2. Fallback Standard Bcrypt Hash (Akun lama yang belum termigrasi ke salt)
+			// Jika cocok, tandai $shouldUpgradeHash agar saat login berhasil langsung diupgrade ke Double-Layer (Salt + Bcrypt)
 			if (!$isPasswordValid && password_verify($password, $user->password)) {
 				$isPasswordValid = true;
+				$shouldUpgradeHash = true;
 			}
 
-			// 2. Legacy SHA-256 with Salt (database import format: sha256(password + salt))
+			// 3. Legacy SHA-256 with Salt (database import format: sha256(password + salt))
 			if (!$isPasswordValid && !empty($user->salt)) {
 				if (hash('sha256', $password . $user->salt) === $user->password || hash('sha256', $user->salt . $password) === $user->password) {
 					$isPasswordValid = true;
@@ -61,13 +63,13 @@ class Login extends CI_Controller {
 				}
 			}
 
-			// 3. Legacy SHA-256 Unsalted
+			// 4. Legacy SHA-256 Unsalted
 			if (!$isPasswordValid && hash('sha256', $password) === $user->password) {
 				$isPasswordValid = true;
 				$shouldUpgradeHash = true;
 			}
 
-			// 4. Fallback if bcrypt hash was stored in salt column (swapped data)
+			// 5. Fallback if bcrypt hash was stored in salt column (swapped data)
 			if (!$isPasswordValid && !empty($user->salt) && (strpos($user->salt, '$2y$') === 0 || strpos($user->salt, '$2a$') === 0 || strpos($user->salt, '$2b$') === 0)) {
 				if (password_verify($password, $user->salt)) {
 					$isPasswordValid = true;
@@ -75,13 +77,13 @@ class Login extends CI_Controller {
 				}
 			}
 
-			// 5. Direct plaintext match for legacy/unhashed password
+			// 6. Direct plaintext match for legacy/unhashed password
 			if (!$isPasswordValid && $password === $user->password) {
 				$isPasswordValid = true;
 				$shouldUpgradeHash = true;
 			}
 
-			// 6. Check user_token / user_tokens table for activation token
+			// 7. Check user_token / user_tokens table for activation token
 			if (!$isPasswordValid) {
 				$tokenTables = ['user_token', 'user_tokens'];
 				foreach ($tokenTables as $tTbl) {
@@ -98,7 +100,7 @@ class Login extends CI_Controller {
 				}
 			}
 
-			// 7. Check user.token property / column
+			// 8. Check user.token property / column
 			if (!$isPasswordValid && !empty($user->token)) {
 				if (trim($password) === trim($user->token) || password_verify($password, $user->token)) {
 					$isPasswordValid = true;
@@ -107,15 +109,19 @@ class Login extends CI_Controller {
 			}
 
 			if ($isPasswordValid) {
-				// Auto-upgrade legacy hashes to modern secure bcrypt in database
+				// Auto-upgrade legacy / standard hashes to modern Double-Layer Bcrypt + Salt in database
 				if ($shouldUpgradeHash) {
 					$userTbl = $this->db->table_exists('user') ? 'user' : 'users';
-					$newHash = password_hash($password, PASSWORD_DEFAULT);
-					$newSalt = bin2hex(random_bytes(16));
+					$newSalt = (!empty($user->salt) && strlen($user->salt) >= 16 && strpos($user->salt, '$2y$') !== 0)
+						? $user->salt
+						: bin2hex(random_bytes(16));
+					$newHash = password_hash($password . $newSalt, PASSWORD_DEFAULT);
 					$this->db->where('id', $user->id)->update($userTbl, [
 						'password' => $newHash,
 						'salt'     => $newSalt
 					]);
+					$user->salt = $newSalt;
+					$user->password = $newHash;
 				}
 				// Master accounts are strictly identified by their designated seeder IDs
 				$masterIds = ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'mhs-1301210001', 'super-admin-01'];
@@ -133,8 +139,10 @@ class Login extends CI_Controller {
 					'email'            => $user->email,
 					'nidn_nim'         => $user->nidn_nim,
 					'nim'              => $user->nidn_nim,
+					'nip'              => !empty($user->nip) ? $user->nip : $user->nidn_nim,
 					'status'           => 'active',
 					'koordinator'      => isset($user->koordinator) ? $user->koordinator : '',
+					'kelompok_keahlian'=> !empty($user->kelompok_keahlian) ? $user->kelompok_keahlian : (isset($user->koordinator) ? $user->koordinator : ''),
 					'dosen_wali'       => isset($user->dosen_wali) ? $user->dosen_wali : '',
 					'prodi'            => isset($user->prodi) ? $user->prodi : '',
 					'password_changed' => $passwordChanged,
@@ -264,8 +272,10 @@ class Login extends CI_Controller {
 			'email'            => $user->email,
 			'nidn_nim'         => $user->nidn_nim,
 			'nim'              => $user->nidn_nim,
+			'nip'              => !empty($user->nip) ? $user->nip : $user->nidn_nim,
 			'status'           => 'active',
 			'koordinator'      => isset($user->koordinator) ? $user->koordinator : '',
+			'kelompok_keahlian'=> !empty($user->kelompok_keahlian) ? $user->kelompok_keahlian : (isset($user->koordinator) ? $user->koordinator : ''),
 			'dosen_wali'       => isset($user->dosen_wali) ? $user->dosen_wali : '',
 			'prodi'            => isset($user->prodi) ? $user->prodi : '',
 			'password_changed' => 0, // Directs to onboarding to setup password
@@ -422,9 +432,10 @@ class Login extends CI_Controller {
 			return;
 		}
 
-		// Hash new password and update
-		$hashedPassword = password_hash($passwordBaru, PASSWORD_DEFAULT);
-		$success = $this->User_model->reset_password_by_token($email, $token, $hashedPassword);
+		// Hash new password with Double-Layer (Salt + Bcrypt) and update
+		$salt = bin2hex(random_bytes(16));
+		$hashedPassword = password_hash($passwordBaru . $salt, PASSWORD_DEFAULT);
+		$success = $this->User_model->reset_password_by_token($email, $token, $hashedPassword, $salt);
 
 		if ($success) {
 			$this->session->set_flashdata('success', 'Password akun Anda berhasil diperbarui! Silakan masuk dengan password baru Anda.');

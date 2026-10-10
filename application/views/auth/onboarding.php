@@ -56,7 +56,7 @@
         <div class="step-nav-line"></div>
         <button type="button" class="step-nav-item" data-step="4">
           <span class="step-num">4</span>
-          <span class="step-text"><?= !empty($is_dosen) ? 'Program Studi' : 'Akademik & Dosen Wali'; ?></span>
+          <span class="step-text"><?= !empty($is_dosen) ? 'Program Studi & KK' : 'Akademik & Dosen Wali'; ?></span>
         </button>
       </nav>
     </header>
@@ -96,15 +96,18 @@
     window.ONBOARDING_INITIAL_DATA = {
       base_url: <?= json_encode(base_url()); ?>,
       save_url: <?= json_encode(base_url('onboarding/process_biodata')); ?>,
-      dashboard_url: <?= json_encode(base_url('dashboard')); ?>,
+      dashboard_url: <?= json_encode(base_url()); ?>,
       is_dosen: <?= json_encode(!empty($is_dosen)); ?>,
       role_title: <?= json_encode(!empty($role_title) ? $role_title : (!empty($is_dosen) ? 'Dosen' : 'Mahasiswa')); ?>,
       role_name: <?= json_encode(!empty($role_name) ? $role_name : 'mahasiswa'); ?>,
-      nim: <?= json_encode(!empty($nim) ? $nim : '130210091'); ?>,
-      nama_depan: <?= json_encode(!empty($nama_depan) ? $nama_depan : 'Indah'); ?>,
-      nama_belakang: <?= json_encode(!empty($nama_belakang) ? $nama_belakang : 'Permatasari'); ?>,
+      nim: <?= json_encode(!empty($nim) ? $nim : ''); ?>,
+      nama_depan: <?= json_encode(!empty($nama_depan) ? $nama_depan : ''); ?>,
+      nama_belakang: <?= json_encode(!empty($nama_belakang) ? $nama_belakang : ''); ?>,
+      kode_dosen: <?= json_encode(!empty($kode_dosen) ? $kode_dosen : ''); ?>,
+      no_hp: <?= json_encode(!empty($no_hp) ? $no_hp : ''); ?>,
       dosen_list: <?= json_encode(!empty($dosen_wali_list) ? $dosen_wali_list : []); ?>,
-      konsentrasi_list: <?= json_encode(!empty($konsentrasi_list) ? $konsentrasi_list : []); ?>
+      konsentrasi_list: <?= json_encode(!empty($konsentrasi_list) ? $konsentrasi_list : []); ?>,
+      kk_list: <?= json_encode(!empty($kk_list) ? $kk_list : []); ?>
     };
   </script>
 
