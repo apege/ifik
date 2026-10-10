@@ -15,7 +15,7 @@ class PeminjamanBarang_model extends CI_Model {
     private $table_blokir = 'blokir_pengguna';
     private $table_settings = 'peminjaman_settings';
     private $last_expired_count = 0;
-    private $workflow_schema_version = 4;
+    private $workflow_schema_version = 5;
 
     public function __construct() {
         parent::__construct();
@@ -53,6 +53,11 @@ class PeminjamanBarang_model extends CI_Model {
             if (!$this->db->field_exists('prodi', $this->table_peminjaman)) {
                 $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `prodi` varchar(120) DEFAULT NULL AFTER `id_user`");
                 $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD INDEX `idx_peminjaman_prodi_status` (`prodi`, `status`)");
+            }
+
+            if (!$this->db->field_exists('jenis_peminjaman', $this->table_peminjaman)) {
+                $after = $this->db->field_exists('keperluan', $this->table_peminjaman) ? ' AFTER `keperluan`' : '';
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `jenis_peminjaman` varchar(50) NOT NULL DEFAULT 'dalam_kampus'{$after}");
             }
 
             if (!$this->db->field_exists('status_kaprodi', $this->table_peminjaman)) {
@@ -95,6 +100,19 @@ class PeminjamanBarang_model extends CI_Model {
             }
             if (!$this->db->field_exists('id_approver_kaur', $this->table_peminjaman)) {
                 $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `id_approver_kaur` int(11) DEFAULT NULL AFTER `tgl_approve_kaur`");
+            }
+
+            if (!$this->db->field_exists('status_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `status_wadek1` varchar(20) NOT NULL DEFAULT 'Pending' AFTER `id_approver_kaur`");
+            }
+            if (!$this->db->field_exists('catatan_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `catatan_wadek1` text DEFAULT NULL AFTER `status_wadek1`");
+            }
+            if (!$this->db->field_exists('tgl_approve_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `tgl_approve_wadek1` datetime DEFAULT NULL AFTER `catatan_wadek1`");
+            }
+            if (!$this->db->field_exists('id_approver_wadek1', $this->table_peminjaman)) {
+                $this->db->query("ALTER TABLE `{$this->table_peminjaman}` ADD `id_approver_wadek1` int(11) DEFAULT NULL AFTER `tgl_approve_wadek1`");
             }
 
             if (!$this->db->field_exists('foto_pengembalian', $this->table_peminjaman)) {
@@ -365,7 +383,9 @@ class PeminjamanBarang_model extends CI_Model {
         $data['stock_allocation_status'] = 'reserved';
         $data['stock_allocated_at'] = date('Y-m-d H:i:s');
         $data['stock_released_at'] = null;
-        if (!$this->db->insert($this->table_peminjaman, $data)) {
+        $table_fields = $this->db->list_fields($this->table_peminjaman);
+        $insert_data = !empty($table_fields) ? array_intersect_key($data, array_flip($table_fields)) : $data;
+        if (!$this->db->insert($this->table_peminjaman, $insert_data)) {
             $this->db->trans_rollback();
             return false;
         }
@@ -819,6 +839,8 @@ class PeminjamanBarang_model extends CI_Model {
             $this->db->order_by("CASE WHEN MAX(p.status) IN ('Menunggu Verifikasi Laboran','Menunggu Pengecekan Laboran','Menunggu Persetujuan') AND MAX(p.status_kaprodi) = 'Disetujui' AND MAX(p.status_laboran) = 'Pending' THEN 0 ELSE 1 END", 'ASC', false);
         } elseif (!$has_explicit_sort && $action_role === 'kaur') {
             $this->db->order_by("CASE WHEN MAX(p.status) = 'Menunggu ACC Kaur' AND MAX(p.status_kaprodi) = 'Disetujui' AND MAX(p.status_kaur) = 'Pending' THEN 0 ELSE 1 END", 'ASC', false);
+        } elseif (!$has_explicit_sort && $action_role === 'wadek') {
+            $this->db->order_by("CASE WHEN MAX(p.status) IN ('Menunggu ACC Wadek','Menunggu Persetujuan Wadek') AND MAX(p.status_kaur) = 'Disetujui' AND MAX(p.status_wadek1) = 'Pending' THEN 0 ELSE 1 END", 'ASC', false);
         }
 
         if ($sort_key === 'barang') {
@@ -924,7 +946,11 @@ class PeminjamanBarang_model extends CI_Model {
         } elseif ($role === 'kaur') {
             $this->db->where('p.status', 'Menunggu ACC Kaur');
             $this->db->where('p.status_kaprodi', 'Disetujui')->where('p.status_kaur', 'Pending');
+        } elseif ($role === 'wadek') {
+            $this->db->where_in('p.status', ['Menunggu ACC Wadek', 'Menunggu Persetujuan Wadek']);
+            $this->db->where('p.status_kaur', 'Disetujui')->where('p.status_wadek1', 'Pending');
         } else {
+            $this->db->reset_query();
             return 0;
         }
         $row = $this->db->get()->row();
@@ -1368,6 +1394,62 @@ class PeminjamanBarang_model extends CI_Model {
     }
 
     /**
+     * Autocomplete search for Wadek approval list
+     */
+    public function autocomplete_wadek($term, $cat = 'all') {
+        if (empty($term)) return [];
+
+        $this->db->select('p.id_peminjaman, p.group_id, p.status, p.tanggal_pinjam, p.tanggal_kembali_rencana, p.nama_peminjam, p.nim_nip, a.nama_aset, a.kode_aset, COALESCE(r.ruangan, "Umum") AS nama_ruangan');
+        $this->db->from($this->table_peminjaman . ' as p');
+        $this->db->join('peminjam', 'peminjam.id_peminjam = p.id_peminjam', 'left');
+        $this->db->join('aset a', 'a.id_aset = p.id_aset', 'left');
+        $this->db->join('ruangan r', 'r.id = a.id_ruangan', 'left');
+
+        if ($cat === 'barang') {
+            $this->db->like('a.nama_aset', $term);
+        } elseif ($cat === 'peminjam') {
+            $this->db->group_start()->like('p.nama_peminjam', $term)->or_like('peminjam.nama_peminjam', $term)->or_like('p.nim_nip', $term)->group_end();
+        } elseif ($cat === 'kode' || $cat === 'number') {
+            $this->db->group_start()->like('a.kode_aset', $term)->or_like('p.group_id', $term)->or_where('p.id_peminjaman', (int)$term)->group_end();
+        } elseif ($cat === 'lab') {
+            $this->db->like('r.ruangan', $term);
+        } elseif ($cat === 'status') {
+            $this->db->like('p.status', $term);
+        } else {
+            $this->db->group_start()
+                     ->like('a.nama_aset', $term)
+                     ->or_like('a.kode_aset', $term)
+                     ->or_like('p.nama_peminjam', $term)
+                     ->or_like('p.nim_nip', $term)
+                     ->or_like('p.status', $term)
+                     ->or_like('p.group_id', $term)
+                     ->or_like('r.ruangan', $term)
+                     ->group_end();
+        }
+
+        $this->db->order_by('p.id_peminjaman', 'DESC');
+        $this->db->limit(8);
+        $query = $this->db->get()->result();
+
+        $out = [];
+        foreach ($query as $r) {
+            $out[] = [
+                'id_peminjaman'   => $r->id_peminjaman,
+                'group_id'        => $r->group_id,
+                'nama_peminjam'   => $r->nama_peminjam ?: 'Peminjam',
+                'nim_nip'         => $r->nim_nip ?: '-',
+                'nama_aset'       => $r->nama_aset ?: 'Barang',
+                'kode_aset'       => $r->kode_aset ?: '-',
+                'status'          => $r->status,
+                'ruangan'         => $r->nama_ruangan,
+                'tanggal_pinjam'  => $r->tanggal_pinjam,
+                'tanggal_kembali' => $r->tanggal_kembali_rencana,
+            ];
+        }
+        return $out;
+    }
+
+    /**
      * Autocomplete search for catalog items matching Admin LAA style
      */
     public function autocomplete_katalog($term, $cat = 'all') {
@@ -1668,22 +1750,24 @@ class PeminjamanBarang_model extends CI_Model {
             return [];
         }
 
-        $this->db->from($this->table_notifikasi);
+        $table = $this->table_notifikasi;
+        $this->db->select("{$table}.*");
+        $this->db->from($table);
         if (!empty($recipient_role) || !empty($recipient_user_id)) {
             $this->db->group_start();
             if (!empty($recipient_role)) {
-                $this->db->where('recipient_role', $recipient_role);
+                $this->db->where("{$table}.recipient_role", $recipient_role);
             }
             if (!empty($recipient_user_id)) {
                 if (!empty($recipient_role)) {
-                    $this->db->or_where('recipient_user_id', $recipient_user_id);
+                    $this->db->or_where("{$table}.recipient_user_id", $recipient_user_id);
                 } else {
-                    $this->db->where('recipient_user_id', $recipient_user_id);
+                    $this->db->where("{$table}.recipient_user_id", $recipient_user_id);
                 }
             }
             $this->db->group_end();
         }
-        $this->db->order_by('created_at', 'DESC');
+        $this->db->order_by("{$table}.created_at", 'DESC');
         if ($limit !== null && (int) $limit > 0) {
             $this->db->limit((int) $limit);
         }
@@ -1695,18 +1779,19 @@ class PeminjamanBarang_model extends CI_Model {
             return 0;
         }
 
-        $this->db->from($this->table_notifikasi);
-        $this->db->where('is_read', 0);
+        $table = $this->table_notifikasi;
+        $this->db->from($table);
+        $this->db->where("{$table}.is_read", 0);
         if (!empty($recipient_role) || !empty($recipient_user_id)) {
             $this->db->group_start();
             if (!empty($recipient_role)) {
-                $this->db->where('recipient_role', $recipient_role);
+                $this->db->where("{$table}.recipient_role", $recipient_role);
             }
             if (!empty($recipient_user_id)) {
                 if (!empty($recipient_role)) {
-                    $this->db->or_where('recipient_user_id', $recipient_user_id);
+                    $this->db->or_where("{$table}.recipient_user_id", $recipient_user_id);
                 } else {
-                    $this->db->where('recipient_user_id', $recipient_user_id);
+                    $this->db->where("{$table}.recipient_user_id", $recipient_user_id);
                 }
             }
             $this->db->group_end();
