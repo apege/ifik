@@ -518,6 +518,11 @@ $history_query['per_page'] = $history_per_page;
                             <td>
                                 <div class="fw-bold text-dark"><?= $r->nama_aset ?></div>
                                 <div class="text-muted small">Kode: <?= $r->kode_aset ?> &bull; Jml: <span class="text-fik-orange fw-bold"><?= $r->jumlah_pinjam ?></span></div>
+                                <?php if (($r->jenis_peminjaman ?? '') === 'luar_kampus'): ?>
+                                    <span class="badge rounded-pill bg-purple-subtle text-primary border border-primary-subtle mt-1" style="font-size: 10px;">🚀 Luar Kampus</span>
+                                <?php else: ?>
+                                    <span class="badge rounded-pill bg-warning-subtle text-fik-orange border border-warning-subtle mt-1" style="font-size: 10px;">🏛️ Internal</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <span class="history-date" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="Masa pinjam: <?= html_escape(masa_pinjam_indonesia($r->tanggal_pinjam, $r->tanggal_kembali_rencana)) ?>">

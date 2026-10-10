@@ -42,8 +42,14 @@ class Login extends CI_Controller {
 			$isTokenLogin = false;
 			$shouldUpgradeHash = false;
 
-			// 1. Modern Bcrypt Hash in password column
-			if (password_verify($password, $user->password)) {
+			// 1. Double-Layer Verification (Salt + Bcrypt Combined / Peppered Bcrypt)
+			// Sesuai standar keamanan: password diverifikasi bersama salt unik user: password_verify($password . $salt, $hash)
+			if (!empty($user->salt) && password_verify($password . $user->salt, $user->password)) {
+				$isPasswordValid = true;
+			}
+
+			// 2. Standard Bcrypt Hash (Plain Bcrypt)
+			if (!$isPasswordValid && password_verify($password, $user->password)) {
 				$isPasswordValid = true;
 			}
 

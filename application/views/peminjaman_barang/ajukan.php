@@ -75,9 +75,27 @@ $has_uploaded_visual = !empty($asset_media);
         .info-card { background: linear-gradient(135deg, #5d3315, #3a1e0a); color: white; border-radius: 15px; border: none; }
         
         .form-control, .form-select { border-radius: 8px; padding: 10px 15px; border: 1px solid #dee2e6; }
-        .form-control:focus, .form-select:focus { border-color: #ea5b1a; box-shadow: 0 0 0 0.25rem rgba(234, 91, 26, 0.25); }
         .btn-submit { background-color: #ea5b1a; color: white; font-weight: 600; padding: 12px; border-radius: 8px; border: none; transition: 0.3s; }
         .btn-submit:hover { background-color: #c24a13; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(234, 91, 26, 0.3); }
+        
+        .jenis-pinjam-card {
+            transition: all 0.22s ease-in-out;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .jenis-pinjam-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+        .jenis-pinjam-card.selected-internal {
+            background: #fff7ed !important;
+            border-color: #ea580c !important;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12), 0 6px 18px rgba(234, 88, 12, 0.08) !important;
+        }
+        .jenis-pinjam-card.selected-external {
+            background: #f5f3ff !important;
+            border-color: #7c3aed !important;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12), 0 6px 18px rgba(124, 58, 237, 0.08) !important;
+        }
         
         /* Galeri detail aset: foto utama lalu media tambahan 3D. */
         .asset-showcase {
@@ -509,6 +527,49 @@ $has_uploaded_visual = !empty($asset_media);
                             <?php endif; ?>
                         </div>
 
+                        <!-- Kategori / Jenis Peminjaman (Internal vs External) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark small d-flex align-items-center gap-1 mb-2">
+                                <i class="bi bi-diagram-3-fill text-fik-orange"></i> Kategori Peminjaman Barang <span class="text-danger">*</span>
+                            </label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="jenis-pinjam-card selected-internal d-block p-3 rounded-4 border position-relative" id="cardInternal" style="cursor: pointer;">
+                                        <div class="form-check m-0 d-flex align-items-start gap-2">
+                                            <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="jenis_peminjaman" id="jenisInternal" value="dalam_kampus" checked onchange="updateJenisPeminjamanUI()">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                                    <span class="fw-bold text-dark" style="font-size: 0.88rem;">Internal (Dalam Kampus)</span>
+                                                    <span class="badge rounded-pill bg-warning-subtle text-fik-orange border border-warning-subtle" style="font-size: 10px;">🏛️ Standar</span>
+                                                </div>
+                                                <p class="text-muted small mb-2" style="font-size: 0.76rem; line-height: 1.35;">Digunakan untuk kegiatan praktikum, riset, atau perkuliahan di lingkungan kampus FIK.</p>
+                                                <div class="d-flex align-items-center gap-1 text-muted" style="font-size: 10.5px;">
+                                                    <span class="fw-semibold text-secondary">Alur:</span> Kaprodi <i class="bi bi-arrow-right text-xs"></i> Laboran <i class="bi bi-arrow-right text-xs"></i> Kaur <i class="bi bi-arrow-right text-xs"></i> Lab
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="jenis-pinjam-card d-block p-3 rounded-4 border position-relative" id="cardExternal" style="cursor: pointer; background: #ffffff; border-color: #e2e8f0;">
+                                        <div class="form-check m-0 d-flex align-items-start gap-2">
+                                            <input class="form-check-input mt-1 flex-shrink-0" type="radio" name="jenis_peminjaman" id="jenisExternal" value="luar_kampus" onchange="updateJenisPeminjamanUI()">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                                    <span class="fw-bold text-dark" style="font-size: 0.88rem;">External (Luar Kampus)</span>
+                                                    <span class="badge rounded-pill bg-purple-subtle text-primary border border-primary-subtle" style="font-size: 10px;">🚀 Luar Kampus</span>
+                                                </div>
+                                                <p class="text-muted small mb-2" style="font-size: 0.76rem; line-height: 1.35;">Digunakan untuk kegiatan shooting, pameran, atau proyek di luar lingkungan kampus.</p>
+                                                <div class="d-flex align-items-center gap-1 text-muted" style="font-size: 10.5px;">
+                                                    <span class="fw-semibold text-primary">Alur:</span> Kaprodi <i class="bi bi-arrow-right text-xs"></i> Laboran <i class="bi bi-arrow-right text-xs"></i> Kaur <i class="bi bi-arrow-right text-xs"></i> <strong class="text-primary">Wadek</strong> <i class="bi bi-arrow-right text-xs"></i> Lab
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-4 borrowing-date-range" data-borrowing-date-range data-min-date="<?= date('Y-m-d') ?>">
                             <div class="borrowing-date-range__enhanced">
                                 <label class="form-label fw-semibold text-muted small mb-2"><i class="bi bi-calendar-range me-1"></i> Jadwal Peminjaman <span class="text-danger">*</span></label>
@@ -889,6 +950,29 @@ $has_uploaded_visual = !empty($asset_media);
                 });
                 window.addEventListener('pagehide', closeCamera);
             }
+
+            window.updateJenisPeminjamanUI = function() {
+                const isExternal = document.getElementById('jenisExternal')?.checked;
+                const cardInternal = document.getElementById('cardInternal');
+                const cardExternal = document.getElementById('cardExternal');
+
+                if (isExternal) {
+                    cardExternal?.classList.add('selected-external');
+                    cardInternal?.classList.remove('selected-internal');
+                    if (cardInternal) {
+                        cardInternal.style.background = '#ffffff';
+                        cardInternal.style.borderColor = '#e2e8f0';
+                    }
+                } else {
+                    cardInternal?.classList.add('selected-internal');
+                    cardExternal?.classList.remove('selected-external');
+                    if (cardExternal) {
+                        cardExternal.style.background = '#ffffff';
+                        cardExternal.style.borderColor = '#e2e8f0';
+                    }
+                }
+            };
+            updateJenisPeminjamanUI();
         });
     </script>
 </div><!-- /#laaMainContentWrapper -->

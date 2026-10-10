@@ -251,11 +251,28 @@ $peminjaman_list = $peminjaman_list ?? [];
                                             <span>Tolak</span>
                                         </button>
                                     <?php endif; ?>
-                                    <a href="<?= site_url('peminjamanbarang/serah_terima/' . rawurlencode($group_id)) ?>"
-                                       class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-colors">
+                                    <button type="button"
+                                            onclick='openDetailModal(<?= html_escape(json_encode([
+                                                'group_id' => $group_id,
+                                                'nama_peminjam' => $item->nama_peminjam ?? 'Mahasiswa',
+                                                'nim_nip' => $item->nim_nip ?? '-',
+                                                'prodi' => $item->prodi ?? '-',
+                                                'keperluan' => $item->keperluan ?? '-',
+                                                'tgl_pinjam' => date('d/m/Y', strtotime($item->tanggal_pinjam)),
+                                                'tgl_kembali' => date('d/m/Y', strtotime($item->tanggal_kembali_rencana)),
+                                                'status' => $progress['status_label'] ?? ($item->status ?? '-'),
+                                                'catatan_kaprodi' => $item->catatan_kaprodi ?? '',
+                                                'items' => array_map(function($b) {
+                                                    return [
+                                                        'nama' => $b->nama_aset ?? '-',
+                                                        'qty' => (int)($b->jumlah_pinjam ?? 1)
+                                                    ];
+                                                }, $item->detail_barang ?? [])
+                                            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)) ?>)'
+                                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-colors">
                                         <i class="bi bi-eye"></i>
-                                        <span>Rincian &amp; QR</span>
-                                    </a>
+                                        <span>Rincian</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -340,9 +357,70 @@ $peminjaman_list = $peminjaman_list ?? [];
         </div>
     </div>
 
+    <!-- Modal Detail Kaur -->
+    <div id="modalDetailKaur" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-base">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900">Rincian Pengajuan Barang</h3>
+                        <p class="text-xs text-slate-500 font-mono" id="detailGroupId">-</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="bi bi-x-lg text-lg"></i>
+                </button>
+            </div>
+            <div class="py-4 space-y-4">
+                <div class="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <div>
+                        <span class="text-slate-400 block font-semibold uppercase text-[10px]">Peminjam</span>
+                        <strong class="text-slate-800 text-sm" id="detailPeminjam">-</strong>
+                        <span class="text-slate-500 block mt-0.5" id="detailNim">-</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold uppercase text-[10px]">Program Studi</span>
+                        <strong class="text-slate-800" id="detailProdi">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold uppercase text-[10px]">Tanggal Pinjam</span>
+                        <strong class="text-slate-800" id="detailTglPinjam">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block font-semibold uppercase text-[10px]">Rencana Kembali</span>
+                        <strong class="text-slate-800" id="detailTglKembali">-</strong>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-slate-400 block font-semibold uppercase text-[10px]">Keperluan</span>
+                        <p class="text-slate-700 font-medium mt-0.5" id="detailKeperluan">-</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Daftar Barang yang Diajukan</h4>
+                    <div id="detailBarangList" class="space-y-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div id="detailCatatanKaprodiWrap" class="p-3 bg-blue-50/70 border border-blue-100 rounded-xl text-xs hidden">
+                    <span class="font-bold text-blue-900 block mb-0.5"><i class="bi bi-chat-left-text me-1"></i> Catatan Kaprodi:</span>
+                    <p class="text-blue-800" id="detailCatatanKaprodi">-</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeDetailModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const modalApprove = document.getElementById('modalApproveKaur');
         const modalReject = document.getElementById('modalRejectKaur');
+        const modalDetail = document.getElementById('modalDetailKaur');
         const formApprove = document.getElementById('formApproveKaur');
         const formReject = document.getElementById('formRejectKaur');
         const approveName = document.getElementById('approveModalName');
@@ -366,6 +444,45 @@ $peminjaman_list = $peminjaman_list ?? [];
 
         function closeRejectModal() {
             modalReject.classList.add('hidden');
+        }
+
+        function openDetailModal(data) {
+            if (!data) return;
+            document.getElementById('detailGroupId').textContent = data.group_id || '-';
+            document.getElementById('detailPeminjam').textContent = data.nama_peminjam || '-';
+            document.getElementById('detailNim').textContent = data.nim_nip || '-';
+            document.getElementById('detailProdi').textContent = data.prodi || '-';
+            document.getElementById('detailTglPinjam').textContent = data.tgl_pinjam || '-';
+            document.getElementById('detailTglKembali').textContent = data.tgl_kembali || '-';
+            document.getElementById('detailKeperluan').textContent = data.keperluan || '-';
+
+            const listEl = document.getElementById('detailBarangList');
+            listEl.innerHTML = '';
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(function(b) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs';
+                    row.innerHTML = '<span class="font-semibold text-slate-800 flex items-center gap-2"><i class="bi bi-box-seam text-slate-400"></i>' + (b.nama || '-') + '</span><span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">' + (b.qty || 1) + ' unit</span>';
+                    listEl.appendChild(row);
+                });
+            } else {
+                listEl.innerHTML = '<p class="text-xs text-slate-400 italic">Tidak ada rincian barang.</p>';
+            }
+
+            const cWrap = document.getElementById('detailCatatanKaprodiWrap');
+            const cText = document.getElementById('detailCatatanKaprodi');
+            if (data.catatan_kaprodi && data.catatan_kaprodi.trim() !== '') {
+                cText.textContent = data.catatan_kaprodi;
+                cWrap.classList.remove('hidden');
+            } else {
+                cWrap.classList.add('hidden');
+            }
+
+            modalDetail.classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            modalDetail.classList.add('hidden');
         }
     </script>
 </body>

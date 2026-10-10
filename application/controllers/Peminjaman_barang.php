@@ -234,6 +234,9 @@ class Peminjaman_barang extends CI_Controller {
 
             $group_id = uniqid('PJM_');
 
+            $raw_jenis_peminjaman = strtolower(trim((string)$this->input->post('jenis_peminjaman', true)));
+            $jenis_peminjaman = ($raw_jenis_peminjaman === 'luar_kampus' || $raw_jenis_peminjaman === 'external') ? 'luar_kampus' : 'dalam_kampus';
+
             $data_peminjaman = [
                 'group_id' => $group_id,
                 'id_aset' => $id_aset,
@@ -246,12 +249,14 @@ class Peminjaman_barang extends CI_Controller {
                 'tanggal_pinjam' => $tanggal_pinjam,
                 'tanggal_kembali_rencana' => $tanggal_kembali,
                 'keperluan' => $this->input->post('keperluan'),
+                'jenis_peminjaman' => $jenis_peminjaman,
                 'kondisi_saat_pinjam' => $this->input->post('kondisi_saat_pinjam') ?: 'Baik',
                 'foto_bukti' => $upload_data['file_name'],
                 'status' => 'Menunggu ACC Kaprodi',
                 'status_kaprodi' => 'Pending',
                 'status_laboran' => 'Pending',
                 'status_kaur' => 'Pending',
+                'status_wadek1' => 'Pending',
                 'created_at' => date('Y-m-d H:i:s')
             ];
 

@@ -118,18 +118,18 @@ class Peminjaman extends CI_Controller {
         }
 
         $ok = $this->PeminjamanBarang_model->approve_group_with_reservation($group_id, ['Menunggu ACC Kaprodi'], [
-            'status' => 'Menunggu Verifikasi Laboran',
+            'status' => 'Menunggu ACC Kaur',
             'status_kaprodi' => 'Disetujui',
             'catatan_kaprodi' => trim((string) $this->input->post('catatan_kaprodi', true)),
             'tgl_approve_kaprodi' => date('Y-m-d H:i:s'),
             'id_approver_kaprodi' => $this->session->userdata('id_user'),
         ]);
         if ($ok) {
-            $this->PeminjamanBarang_model->create_notifikasi('laboran', null, 'Peminjaman disetujui Kaprodi',
-                ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah di-ACC Kaprodi dan menunggu pengecekan Laboran.',
-                site_url('admin/peminjaman'));
+            $this->PeminjamanBarang_model->create_notifikasi('kaur', null, 'Peminjaman disetujui Kaprodi',
+                ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah di-ACC Kaprodi dan menunggu persetujuan Anda sebagai Kaur.',
+                site_url('kaur/barang'));
         }
-        $this->session->set_flashdata($ok ? 'success' : 'error', $ok ? 'Pengajuan diteruskan ke Laboran.' : 'Gagal memproses pengajuan atau reservasi stok tidak tersedia.');
+        $this->session->set_flashdata($ok ? 'success' : 'error', $ok ? 'Pengajuan disetujui dan diteruskan ke Kaur untuk persetujuan resmi.' : 'Gagal memproses pengajuan atau reservasi stok tidak tersedia.');
         redirect('kaprodi/peminjaman');
     }
 
@@ -215,16 +215,16 @@ class Peminjaman extends CI_Controller {
                     continue;
                 }
                 $ok = $this->PeminjamanBarang_model->approve_group_with_reservation($group_id, ['Menunggu ACC Kaprodi'], [
-                    'status' => 'Menunggu Verifikasi Laboran',
+                    'status' => 'Menunggu ACC Kaur',
                     'status_kaprodi' => 'Disetujui',
                     'catatan_kaprodi' => '',
                     'tgl_approve_kaprodi' => date('Y-m-d H:i:s'),
                     'id_approver_kaprodi' => $this->session->userdata('id_user'),
                 ]);
                 if ($ok) {
-                    $this->PeminjamanBarang_model->create_notifikasi('laboran', null, 'Peminjaman disetujui Kaprodi',
-                        ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah di-ACC Kaprodi dan menunggu pengecekan Laboran.',
-                        site_url('admin/peminjaman'));
+                    $this->PeminjamanBarang_model->create_notifikasi('kaur', null, 'Peminjaman disetujui Kaprodi',
+                        ($peminjaman->nama_peminjam ?? 'Peminjam') . ' sudah di-ACC Kaprodi dan menunggu persetujuan Anda sebagai Kaur.',
+                        site_url('kaur/barang'));
                 }
             } else {
                 $ok = $this->PeminjamanBarang_model->reject_group_and_release($group_id, [
