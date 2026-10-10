@@ -68,33 +68,46 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased pb-16">
 
-    <!-- Dedicated Admin LAA Sidebar Component -->
-    <?php $this->load->view('admin_layanan/sidebar'); ?>
+    <!-- Auto Role-Aware Sidebar Component -->
+    <?php 
+    $roleId = (int)$this->session->userdata('role_id');
+    if ($roleId === 5) {
+        $this->load->view('admin_layanan/sidebar');
+    } else {
+        $this->load->view('components/curved_sidebar');
+    }
 
-    <!-- Header Navbar Partial -->
-    <?php $this->load->view('partials/app_navbar', [
-        'user_role_label'   => 'Admin Layanan (LAA)',
-        'user_display_name' => 'Admin Layanan FIK',
-        'user_display_sub'  => 'Unit Akademik & Kelulusan'
-    ]); ?>
+    $roleLabel = ($roleId === 22) ? 'Super Admin' : (($roleId === 1) ? 'Panel Admin' : 'Admin Layanan (LAA)');
+    $roleSub   = ($roleId === 22 || $roleId === 1) ? 'Pusat Kontrol Super Admin' : 'Unit Akademik & Kelulusan';
+    $backUrl   = ($roleId === 22 || $roleId === 1) ? site_url('import-email') : site_url('adminlayanan');
+    $badgeText = ($roleId === 22) ? 'Super Admin' : (($roleId === 1) ? 'Admin Panel' : 'Admin Panel');
+    ?>
 
-    <!-- Sub Navigation Page Title Bar -->
-    <div class="glass-header px-4 sm:px-6 py-4 mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div class="flex items-start sm:items-center gap-3.5">
-                <a href="<?= site_url('adminlayanan'); ?>" class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-brand-600 flex items-center justify-center font-bold text-lg hover:bg-orange-100 transition shrink-0 mt-0.5 sm:mt-0">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
-                <div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Pengaturan Jalur Sidang &amp; Non-Sidang (Tab Dinamis)</h1>
-                        <span class="bg-orange-100 text-brand-700 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-200 uppercase tracking-wider">Admin Panel</span>
+    <div id="mainPageContent" class="page-wrapper-for-sidebar min-h-screen flex flex-col">
+        <!-- Header Navbar Partial -->
+        <?php $this->load->view('partials/app_navbar', [
+            'user_role_label'   => $roleLabel,
+            'user_display_name' => $this->session->userdata('nama') ?: ($this->session->userdata('name') ?: 'Administrator'),
+            'user_display_sub'  => $roleSub
+        ]); ?>
+
+        <!-- Sub Navigation Page Title Bar -->
+        <div class="glass-header px-4 sm:px-6 py-4 mb-8">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-3.5">
+                    <a href="<?= $backUrl; ?>" class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-brand-600 flex items-center justify-center font-bold text-lg hover:bg-orange-100 transition shrink-0 mt-0.5 sm:mt-0" title="Kembali">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Pengaturan Jalur Sidang &amp; Non-Sidang (Tab Dinamis)</h1>
+                            <span class="bg-orange-100 text-brand-700 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-200 uppercase tracking-wider"><?= $badgeText; ?></span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Tambah tab kategori utama baru, edit sub-jalur, dan atur form persyaratannya secara dinamis.</p>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Tambah tab kategori utama baru, edit sub-jalur, dan atur form persyaratannya secara dinamis.</p>
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
@@ -399,6 +412,7 @@
 
 
     </main>
+    </div>
 
     <!-- MODAL EDIT JALUR -->
     <div id="modalEditJalur" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">

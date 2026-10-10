@@ -82,24 +82,38 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-orange-50/20 to-slate-100 min-h-screen text-slate-800 antialiased">
 
-    <!-- Sidebar & Sticky Navbar -->
-    <?php $this->load->view('admin_layanan/sidebar'); ?>
-    <?php $this->load->view('partials/app_navbar', [
-        'user_role_id'      => $this->session->userdata('role_id') ?? 5,
-        'user_role_label'   => 'Admin Layanan (LAA)',
-        'user_display_name' => 'Unit Layanan FIK',
-        'user_display_sub'  => 'Pendaftaran Sidang Mahasiswa'
-    ]); ?>
+    <!-- Auto Role-Aware Sidebar Component -->
+    <?php 
+    $roleId = (int)$this->session->userdata('role_id');
+    if ($roleId === 5) {
+        $this->load->view('admin_layanan/sidebar');
+    } else {
+        $this->load->view('components/curved_sidebar');
+    }
 
-    <main class="min-h-screen p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto">
+    $roleLabel = ($roleId === 22) ? 'Super Admin' : (($roleId === 1) ? 'Panel Admin' : 'Admin Layanan (LAA)');
+    $roleSub   = ($roleId === 22 || $roleId === 1) ? 'Pusat Kontrol Super Admin' : 'Pendaftaran Sidang Mahasiswa';
+    $backUrl   = ($roleId === 22 || $roleId === 1) ? site_url('import-email') : site_url('adminlayanan');
+    $backLabel = ($roleId === 22) ? 'Super Admin' : (($roleId === 1) ? 'Panel Admin' : 'Portal LAA');
+    ?>
 
-        <!-- Header & Breadcrumb -->
-        <div class="mb-6 sm:mb-8">
-            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-slate-400 mb-2 pl-11 sm:pl-0 pt-0.5 sm:pt-0">
-                <a href="<?= site_url('adminlayanan') ?>" class="hover:text-orange-600 transition-colors">Portal LAA</a>
-                <i class="bi bi-chevron-right text-[10px]"></i>
-                <span class="text-orange-600 font-bold">Pendaftaran Sidang</span>
-            </div>
+    <div id="mainPageContent" class="page-wrapper-for-sidebar min-h-screen flex flex-col">
+        <?php $this->load->view('partials/app_navbar', [
+            'user_role_id'      => $roleId ?: 5,
+            'user_role_label'   => $roleLabel,
+            'user_display_name' => $this->session->userdata('nama') ?: ($this->session->userdata('name') ?: 'Administrator'),
+            'user_display_sub'  => $roleSub
+        ]); ?>
+
+        <main class="min-h-screen p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto flex-1 w-full">
+
+            <!-- Header & Breadcrumb -->
+            <div class="mb-6 sm:mb-8">
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-slate-400 mb-2 pl-11 sm:pl-0 pt-0.5 sm:pt-0">
+                    <a href="<?= $backUrl; ?>" class="hover:text-orange-600 transition-colors"><?= $backLabel; ?></a>
+                    <i class="bi bi-chevron-right text-[10px]"></i>
+                    <span class="text-orange-600 font-bold">Pendaftaran Sidang</span>
+                </div>
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                 <div>
@@ -413,6 +427,7 @@
         </div>
 
     </main>
+    </div>
 
     <!-- Raw Data for Autocomplete -->
     <script>

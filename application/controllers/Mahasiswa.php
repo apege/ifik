@@ -360,6 +360,8 @@ class Mahasiswa extends CI_Controller {
                         $update_fp = [
                             'file'            => 'uploads/persyaratan_ta/' . $new_file,
                             'status_adminlaa' => 'Pending',
+                            'view_adminlaa'   => 0,
+                            'view_doswal'     => 0,
                             'date_edit'       => date('Y-m-d H:i:s')
                         ];
                         if (($pendaftaran['status_approval_wali'] ?? '') !== 'Approved') {
@@ -953,6 +955,8 @@ class Mahasiswa extends CI_Controller {
                     if (in_array('file', $fp_fields)) $fp_payload['file'] = $rel_file_path;
                     if (in_array('status_doswal', $fp_fields)) $fp_payload['status_doswal'] = 'Pending';
                     if (in_array('status_adminlaa', $fp_fields)) $fp_payload['status_adminlaa'] = 'Pending';
+                    if (in_array('view_adminlaa', $fp_fields)) $fp_payload['view_adminlaa'] = 0;
+                    if (in_array('view_doswal', $fp_fields)) $fp_payload['view_doswal'] = 0;
                     if (in_array('date_edit', $fp_fields)) $fp_payload['date_edit'] = date('Y-m-d H:i:s');
 
                     if ($ex_fp) {

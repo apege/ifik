@@ -319,21 +319,21 @@
                                 $is_valid = ($b['status'] === 'Valid') && !$is_invalid;
                                 $card_border = $is_valid ? 'border-emerald-200 bg-emerald-50/20' : ($is_invalid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-white');
                             ?>
-                            <div id="doc_card_<?= $b['key']; ?>" class="clean-card doc-card rounded-2xl p-5 border <?= $card_border; ?> flex flex-col space-y-4 transition-all duration-300" data-key="<?= $b['key']; ?>">
-                                <div>
-                                    <div class="flex items-start justify-between gap-3 mb-2">
-                                        <div class="flex items-center gap-2.5">
-                                            <div class="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center text-sm font-bold shadow-2xs">
+                            <div id="doc_card_<?= $b['key']; ?>" class="clean-card doc-card rounded-2xl p-5 border <?= $card_border; ?> flex flex-col space-y-4 transition-all duration-300 min-w-0 overflow-hidden" data-key="<?= $b['key']; ?>">
+                                <div class="min-w-0">
+                                    <div class="flex items-start justify-between gap-3 mb-2 min-w-0">
+                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                            <div class="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center text-sm font-bold shadow-2xs shrink-0">
                                                 <i class="bi <?= $b['icon']; ?>"></i>
                                             </div>
-                                            <div>
-                                                <h3 class="font-black text-sm text-slate-900"><?= $b['label']; ?></h3>
-                                                <span class="text-[10px] text-slate-400 font-mono"><?= htmlspecialchars($b['file']); ?></span>
+                                            <div class="min-w-0 flex-1">
+                                                <h3 class="font-black text-sm text-slate-900 truncate" title="<?= htmlspecialchars($b['label']); ?>"><?= $b['label']; ?></h3>
+                                                <span class="text-[10px] text-slate-400 font-mono block truncate max-w-full" title="<?= htmlspecialchars($b['file']); ?>"><?= htmlspecialchars($b['file']); ?></span>
                                             </div>
                                         </div>
                                         
                                         <!-- Document Status Badge -->
-                                        <span class="doc-badge px-2.5 py-1 rounded-lg text-xs font-bold <?= $is_valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($is_invalid ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600 border border-slate-200'); ?>">
+                                        <span class="doc-badge shrink-0 whitespace-nowrap px-2.5 py-1 rounded-lg text-xs font-bold <?= $is_valid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($is_invalid ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600 border border-slate-200'); ?>">
                                             <?= $is_valid ? 'Setujui' : ($is_invalid ? 'Kurang/Revisi' : 'Belum Dicek'); ?>
                                         </span>
                                     </div>

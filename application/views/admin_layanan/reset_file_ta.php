@@ -129,7 +129,7 @@
             </div>
         </div>
         <button onclick="confirmResetAll('<?= htmlspecialchars($detail['nim']) ?>','<?= htmlspecialchars(($detail['nama_depan']??'').' '.($detail['nama_belakang']??'')) ?>')" class="shrink-0 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
-            <i class="bi bi-arrow-counterclockwise"></i> Reset Semua File
+            <i class="bi bi-arrow-counterclockwise"></i> Reset Pengajuan TA
         </button>
     </div>
 </div>
@@ -369,12 +369,12 @@ function confirmBatchReset() {
     _pendingNim = '';
     _pendingKode = '';
 
-    document.getElementById('modalTitle').textContent = `Reset File TA Batch (${nims.length} Mahasiswa)`;
-    document.getElementById('modalBody').innerHTML = `Semua file TA milik <strong>${nims.length} mahasiswa terpilih</strong> akan dihapus:<br><ul class="list-disc pl-5 mt-2.5 max-h-36 overflow-y-auto text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">${names.map(n=>`<li><strong>${n}</strong></li>`).join('')}</ul><br>Mahasiswa tersebut harus meng-upload ulang dari awal.`;
+    document.getElementById('modalTitle').textContent = `Reset Pengajuan TA Batch (${nims.length} Mahasiswa)`;
+    document.getElementById('modalBody').innerHTML = `Semua berkas file, judul usulan, dan jenis TA milik <strong>${nims.length} mahasiswa terpilih</strong> akan dihapus dan dikosongkan:<br><ul class="list-disc pl-5 mt-2.5 max-h-36 overflow-y-auto text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">${names.map(n=>`<li><strong>${n}</strong></li>`).join('')}</ul><br>Mahasiswa tersebut akan memulai kembali pengisian pendaftaran TA dari formulir kosong (Draft).`;
     document.getElementById('confirmModal').classList.remove('hidden');
 }
 
-function confirmResetAll(nim,nama){_pendingNim=nim;_pendingKode='';_pendingBatchNims=[];document.getElementById('modalTitle').textContent='Reset Semua File TA';document.getElementById('modalBody').innerHTML='Semua file TA milik <strong>'+nama+'</strong> (NIM: '+nim+') akan dihapus. Mahasiswa harus upload ulang dari awal.';document.getElementById('confirmModal').classList.remove('hidden');}
+function confirmResetAll(nim,nama){_pendingNim=nim;_pendingKode='';_pendingBatchNims=[];document.getElementById('modalTitle').textContent='Reset Pengajuan TA Mahasiswa';document.getElementById('modalBody').innerHTML='Semua berkas file upload, jenis tugas akhir, dan judul rencana TA milik <strong>'+nama+'</strong> (NIM: '+nim+') akan dihapus total. Status akan kembali ke Draft kosong sehingga mahasiswa harus mendaftar ulang dari awal.';document.getElementById('confirmModal').classList.remove('hidden');}
 function confirmResetOne(nim,kode,nb){_pendingNim=nim;_pendingKode=kode;_pendingBatchNims=[];document.getElementById('modalTitle').textContent='Reset File: '+nb;document.getElementById('modalBody').innerHTML='File <strong>'+nb+'</strong> milik NIM <strong>'+nim+'</strong> akan dihapus. Mahasiswa bisa upload ulang file ini saja.';document.getElementById('confirmModal').classList.remove('hidden');}
 function closeModal(){document.getElementById('confirmModal').classList.add('hidden');_pendingNim='';_pendingKode='';_pendingBatchNims=[];}
 

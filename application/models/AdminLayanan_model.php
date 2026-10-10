@@ -55,7 +55,7 @@ class AdminLayanan_model extends CI_Model {
         $prev_debug = $this->db->db_debug;
         $this->db->db_debug = FALSE;
         try {
-            $res = $this->db->select('id, kode_berkas, nama_berkas, deskripsi, is_required, is_active, urutan')
+            $res = $this->db->select('id, kode_berkas, nama_berkas, deskripsi, file_template, is_required, is_active, urutan')
                 ->order_by('urutan', 'ASC')
                 ->get('syarat_berkas_ta')
                 ->result_array();
@@ -69,16 +69,16 @@ class AdminLayanan_model extends CI_Model {
 
     public function get_active_syarat_berkas() {
         $fallback = [
-            ['id' => 1, 'kode_berkas' => 'ksm', 'nama_berkas' => 'KSM (Kartu Studi Mahasiswa)', 'deskripsi' => 'Bukti KRS semester aktif yang memuat mata kuliah Tugas Akhir.', 'is_required' => 1, 'is_active' => 1, 'urutan' => 1],
-            ['id' => 2, 'kode_berkas' => 'transkrip', 'nama_berkas' => 'Transkrip Nilai Akademik Terakhir', 'deskripsi' => 'Transkrip nilai resmi yang sudah divalidasi.', 'is_required' => 1, 'is_active' => 1, 'urutan' => 2],
-            ['id' => 3, 'kode_berkas' => 'pernyataan', 'nama_berkas' => 'Surat Pernyataan Mahasiswa', 'deskripsi' => 'Surat kesanggupan menyelesaikan TA bermaterai.', 'is_required' => 1, 'is_active' => 1, 'urutan' => 3],
-            ['id' => 4, 'kode_berkas' => 'bebas_lab', 'nama_berkas' => 'Surat Bebas Lab & Perpustakaan', 'deskripsi' => 'Surat keterangan bebas pinjaman alat lab FIK.', 'is_required' => 1, 'is_active' => 1, 'urutan' => 4],
+            ['id' => 1, 'kode_berkas' => 'ksm', 'nama_berkas' => 'KSM (Kartu Studi Mahasiswa)', 'deskripsi' => 'Bukti KRS semester aktif yang memuat mata kuliah Tugas Akhir.', 'file_template' => null, 'is_required' => 1, 'is_active' => 1, 'urutan' => 1],
+            ['id' => 2, 'kode_berkas' => 'transkrip', 'nama_berkas' => 'Transkrip Nilai Akademik Terakhir', 'deskripsi' => 'Transkrip nilai resmi yang sudah divalidasi.', 'file_template' => null, 'is_required' => 1, 'is_active' => 1, 'urutan' => 2],
+            ['id' => 3, 'kode_berkas' => 'pernyataan', 'nama_berkas' => 'Surat Pernyataan Mahasiswa', 'deskripsi' => 'Surat kesanggupan menyelesaikan TA bermaterai.', 'file_template' => null, 'is_required' => 1, 'is_active' => 1, 'urutan' => 3],
+            ['id' => 4, 'kode_berkas' => 'bebas_lab', 'nama_berkas' => 'Surat Bebas Lab & Perpustakaan', 'deskripsi' => 'Surat keterangan bebas pinjaman alat lab FIK.', 'file_template' => null, 'is_required' => 1, 'is_active' => 1, 'urutan' => 4],
         ];
         if (!$this->db->table_exists('syarat_berkas_ta')) return $fallback;
         $prev_debug = $this->db->db_debug;
         $this->db->db_debug = FALSE;
         try {
-            $res = $this->db->select('id, kode_berkas, nama_berkas, deskripsi, is_required, is_active, urutan')
+            $res = $this->db->select('id, kode_berkas, nama_berkas, deskripsi, file_template, is_required, is_active, urutan')
                 ->where('is_active', 1)
                 ->order_by('urutan', 'ASC')
                 ->get('syarat_berkas_ta')
@@ -390,6 +390,14 @@ class AdminLayanan_model extends CI_Model {
             if ($this->db->field_exists('date_edit', 'file_pendaftaran')) {
                 $fp_update['date_edit'] = date('Y-m-d H:i:s');
             }
+            if ($status === 'Pending') {
+                if ($this->db->field_exists('view_adminlaa', 'file_pendaftaran')) {
+                    $fp_update['view_adminlaa'] = 0;
+                }
+                if ($this->db->field_exists('view_doswal', 'file_pendaftaran')) {
+                    $fp_update['view_doswal'] = 0;
+                }
+            }
 
             if ($check) {
                 if (!empty($check['id'])) {
@@ -404,6 +412,7 @@ class AdminLayanan_model extends CI_Model {
                 }
             } else {
                 $u_id = !empty($target_ids) ? $target_ids[0] : ('usr_mhs_' . $clean_nim);
+                $view_val = ($status === 'Pending') ? 0 : 1;
                 $ins_fp = array(
                     'id'              => 'fp_' . $clean_nim . '_' . $kode_berkas . '_' . time(),
                     'id_mhs'          => $u_id,
@@ -413,8 +422,8 @@ class AdminLayanan_model extends CI_Model {
                     'komentar'        => $catatan ?: '',
                     'date'            => date('Y-m-d H:i:s'),
                     'date_edit'       => date('Y-m-d H:i:s'),
-                    'view_adminlaa'   => 1,
-                    'view_doswal'     => 1,
+                    'view_adminlaa'   => $view_val,
+                    'view_doswal'     => $view_val,
                     'status_doswal'   => ($status === 'Valid' || $status === 'Approved') ? 'Approved' : 'Pending'
                 );
                 $this->db->insert('file_pendaftaran', $ins_fp);

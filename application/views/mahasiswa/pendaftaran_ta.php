@@ -461,6 +461,61 @@
 
                             <!-- Collapsible Guide Content -->
                             <div id="guideBerkasTemplate" class="hidden mt-4 pt-4 border-t border-indigo-200 space-y-3.5">
+                                <?php 
+                                    $active_sb_templates = array();
+                                    $check_list_tmpl = !empty($syarat_berkas) ? $syarat_berkas : array();
+                                    foreach ($check_list_tmpl as $sbt) {
+                                        if (!empty($sbt['file_template'])) {
+                                            $active_sb_templates[] = $sbt;
+                                        }
+                                    }
+                                ?>
+                                <?php if (!empty($active_sb_templates)): ?>
+                                    <!-- Unduh File Template Resmi Dokumen (Dinamis Sesuai Syarat Berkas di Admin LAA) -->
+                                    <div class="p-4 rounded-xl bg-white border-2 border-indigo-300 shadow-xs space-y-3">
+                                        <div class="flex items-center justify-between gap-2 border-b border-indigo-100 pb-2.5">
+                                            <div class="flex items-center gap-2 text-indigo-950 font-black text-xs uppercase tracking-wider">
+                                                <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs shadow-2xs">
+                                                    <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                </span>
+                                                <span>Unduh File Template Resmi Dokumen</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full">
+                                                <?= count($active_sb_templates); ?> Template Tersedia
+                                            </span>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            <?php foreach ($active_sb_templates as $tmpl): ?>
+                                                <?php 
+                                                    $tmpl_ext = strtolower(pathinfo($tmpl['file_template'], PATHINFO_EXTENSION));
+                                                    $is_doc = in_array($tmpl_ext, array('doc', 'docx'));
+                                                    $is_pdf = ($tmpl_ext === 'pdf');
+                                                    $icon_class = $is_doc ? 'bi-file-earmark-word-fill text-blue-600' : ($is_pdf ? 'bi-file-earmark-pdf-fill text-rose-600' : 'bi-file-earmark-text-fill text-amber-600');
+                                                ?>
+                                                <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-indigo-300 hover:shadow-2xs transition group">
+                                                    <div class="flex items-center gap-2.5 min-w-0">
+                                                        <i class="bi <?= $icon_class; ?> text-xl shrink-0"></i>
+                                                        <div class="min-w-0">
+                                                            <span class="text-xs font-bold text-slate-800 block truncate group-hover:text-indigo-950" title="<?= htmlspecialchars($tmpl['nama_berkas']); ?>">
+                                                                <?= htmlspecialchars($tmpl['nama_berkas']); ?>
+                                                            </span>
+                                                            <span class="text-[10px] text-slate-400 font-mono block truncate">
+                                                                <?= htmlspecialchars($tmpl['file_template']); ?>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <a href="<?= base_url('uploads/templates/' . $tmpl['file_template']); ?>" download target="_blank"
+                                                       class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-[11px] flex items-center gap-1.5 shrink-0 shadow-2xs transition">
+                                                        <i class="bi bi-download text-[10px]"></i>
+                                                        <span>Unduh</span>
+                                                    </a>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
                                     <!-- CONTOH BENAR -->
                                     <div class="p-4 rounded-xl bg-white border-2 border-emerald-400 shadow-xs space-y-3">
@@ -565,6 +620,13 @@
                                                     <span class="text-[9px] font-extrabold text-rose-700 bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">Wajib</span>
                                                 <?php else: ?>
                                                     <span class="text-[9px] font-extrabold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">Opsional</span>
+                                                <?php endif; ?>
+                                                <?php if(!empty($sb['file_template'])): ?>
+                                                    <a href="<?= base_url('uploads/templates/' . $sb['file_template']); ?>" download target="_blank"
+                                                       class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-0.5 rounded-full transition shadow-2xs shrink-0" title="Unduh template resmi: <?= htmlspecialchars($sb['file_template']); ?>">
+                                                        <i class="bi bi-file-earmark-arrow-down"></i>
+                                                        <span>Unduh Template</span>
+                                                    </a>
                                                 <?php endif; ?>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1 font-medium leading-normal"><?= htmlspecialchars(($sb['deskripsi'] ?? '') ?: 'Unggah berkas ' . ($sb['nama_berkas'] ?? '')); ?></p>
