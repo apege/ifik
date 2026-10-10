@@ -260,6 +260,8 @@ class Mahasiswa_model extends CI_Model {
                 if (in_array('file',            $fp_fields)) $fpData['file']            = $relPath;
                 if (in_array('status_doswal',   $fp_fields)) $fpData['status_doswal']   = 'Pending';
                 if (in_array('status_adminlaa', $fp_fields)) $fpData['status_adminlaa'] = 'Pending';
+                if (in_array('view_adminlaa',   $fp_fields)) $fpData['view_adminlaa']   = 0;
+                if (in_array('view_doswal',     $fp_fields)) $fpData['view_doswal']     = 0;
                 if (in_array('date_edit',       $fp_fields)) $fpData['date_edit']       = date('Y-m-d H:i:s');
 
                 if ($exFp) {

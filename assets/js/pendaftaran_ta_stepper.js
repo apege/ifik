@@ -11,13 +11,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let currentStep = 1;
 
+    // Jika server mengindikasikan tidak ada draft tersimpan (atau baru saja di-reset oleh Admin LAA), bersihkan cache browser
+    if (window.SERVER_HAS_DRAFT === false) {
+        try {
+            localStorage.removeItem(STEP_KEY);
+            localStorage.removeItem(DRAFT_KEY);
+            localStorage.removeItem('ifik_ta_form_draft_' + userNim);
+            localStorage.removeItem('ifik_ta_active_step');
+            localStorage.removeItem('ifik_ta_draft');
+            localStorage.removeItem('ifik_ta_form_draft');
+        } catch (e) {}
+    }
+
     // Direct navigation support from URL, localStorage, or Database (Server Step)
     const urlParams = new URLSearchParams(window.location.search);
     const urlStep = parseInt(urlParams.get('step'));
     const savedStep = parseInt(localStorage.getItem(STEP_KEY));
     const serverStep = parseInt(window.SERVER_DRAFT_STEP);
 
-    if (urlStep && urlStep >= 1 && urlStep <= totalSteps) {
+    if (window.SERVER_HAS_DRAFT === false) {
+        currentStep = 1;
+    } else if (urlStep && urlStep >= 1 && urlStep <= totalSteps) {
         currentStep = urlStep;
     } else if (serverStep && serverStep >= 1 && serverStep <= totalSteps) {
         currentStep = serverStep;
@@ -974,6 +988,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // 2. Baca dari localStorage jika ada isian yang belum tersimpan di DB
+            if (window.SERVER_HAS_DRAFT === false) return;
             const draftStr = localStorage.getItem(DRAFT_KEY);
             if (!draftStr) return;
             const draft = JSON.parse(draftStr);

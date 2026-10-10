@@ -1071,7 +1071,8 @@ class DosenWali_model extends CI_Model {
             $bMap[$namaDoc] = [
                 'file_name'         => $fData['file'],
                 'status_verifikasi' => ($cleanSt === 'Approved') ? 'Valid' : (($cleanSt === 'Rejected') ? 'Invalid' : 'Pending'),
-                'catatan'           => $kom
+                'catatan'           => $kom,
+                'view_doswal'       => !empty($fData['view_doswal']) ? 1 : 0
             ];
         }
 
@@ -1165,6 +1166,7 @@ class DosenWali_model extends CI_Model {
             $res['file_' . $bk] = $bv['file_name'];
             $res['status_file_' . $bk] = ($bv['status_verifikasi'] === 'Valid') ? 'Approved' : (($bv['status_verifikasi'] === 'Invalid') ? 'Rejected' : 'Pending');
             $res['catatan_file_' . $bk] = $bv['catatan'] ?? '';
+            $res['review_file_' . $bk] = !empty($bv['view_doswal']) ? 1 : 0;
         }
 
         return $res;

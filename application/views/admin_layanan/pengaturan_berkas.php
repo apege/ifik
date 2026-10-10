@@ -62,31 +62,44 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased pb-16">
 
-    <!-- Dedicated Admin LAA Sidebar Component -->
-    <?php $this->load->view('admin_layanan/sidebar'); ?>
+    <!-- Auto Role-Aware Sidebar Component -->
+    <?php 
+    $roleId = (int)$this->session->userdata('role_id');
+    if ($roleId === 5) {
+        $this->load->view('admin_layanan/sidebar');
+    } else {
+        $this->load->view('components/curved_sidebar');
+    }
 
-    <!-- Header Navbar Partial -->
-    <?php $this->load->view('partials/app_navbar', [
-        'user_role_label'   => 'Admin Layanan (LAA)',
-        'user_display_name' => 'Admin Layanan FIK',
-        'user_display_sub'  => 'Unit Akademik & Kelulusan'
-    ]); ?>
+    $roleLabel = ($roleId === 22) ? 'Super Admin' : (($roleId === 1) ? 'Panel Admin' : 'Admin Layanan (LAA)');
+    $roleSub   = ($roleId === 22 || $roleId === 1) ? 'Pusat Kontrol Super Admin' : 'Unit Akademik & Kelulusan';
+    $backUrl   = ($roleId === 22 || $roleId === 1) ? site_url('import-email') : site_url('adminlayanan');
+    $badgeText = ($roleId === 22) ? 'Super Admin' : (($roleId === 1) ? 'Admin Panel' : 'LAA System');
+    ?>
 
-    <!-- Sub Navigation Page Title Bar -->
-    <div class="glass-header px-4 sm:px-6 py-4 mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div class="flex items-start sm:items-center gap-3.5">
-                <a href="<?= site_url('adminlayanan'); ?>" class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-brand-600 flex items-center justify-center font-bold text-lg hover:bg-orange-100 transition shrink-0 mt-0.5 sm:mt-0">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
-                <div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Pengaturan Persyaratan Berkas TA (Dinamis)</h1>
-                        <span class="bg-orange-100 text-brand-700 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-200 uppercase tracking-wider">LAA System</span>
+    <div id="mainPageContent" class="page-wrapper-for-sidebar min-h-screen flex flex-col">
+        <!-- Header Navbar Partial -->
+        <?php $this->load->view('partials/app_navbar', [
+            'user_role_label'   => $roleLabel,
+            'user_display_name' => $this->session->userdata('nama') ?: ($this->session->userdata('name') ?: 'Administrator'),
+            'user_display_sub'  => $roleSub
+        ]); ?>
+
+        <!-- Sub Navigation Page Title Bar -->
+        <div class="glass-header px-4 sm:px-6 py-4 mb-8">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-3.5">
+                    <a href="<?= $backUrl; ?>" class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-brand-600 flex items-center justify-center font-bold text-lg hover:bg-orange-100 transition shrink-0 mt-0.5 sm:mt-0" title="Kembali">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Pengaturan Persyaratan Berkas TA (Dinamis)</h1>
+                            <span class="bg-orange-100 text-brand-700 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-orange-200 uppercase tracking-wider"><?= $badgeText; ?></span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Kelola jenis, jumlah, status wajib, dan keaktifan berkas pendaftaran Tugas Akhir secara fleksibel tanpa hardcode.</p>
                     </div>
-                    <p class="text-xs text-slate-500 mt-0.5">Kelola jenis, jumlah, status wajib, dan keaktifan berkas pendaftaran Tugas Akhir secara fleksibel tanpa hardcode.</p>
                 </div>
-            </div>
 
             <!-- Header Action Button -->
             <button onclick="openModalAdd()" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-brand-600 hover:from-orange-600 hover:to-brand-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0">
@@ -144,6 +157,7 @@
                             <th class="py-3.5 px-4 text-center w-12">Urutan</th>
                             <th class="py-3.5 px-4">Nama & Kode Berkas</th>
                             <th class="py-3.5 px-4">Deskripsi / Petunjuk Mahasiswa</th>
+                            <th class="py-3.5 px-4 text-center">Template Dokumen</th>
                             <th class="py-3.5 px-4 text-center">Sifat Berkas</th>
                             <th class="py-3.5 px-4 text-center">Status Keaktifan</th>
                             <th class="py-3.5 px-4 text-right w-36">Aksi</th>
@@ -164,6 +178,18 @@
                                     </td>
                                     <td class="py-4 px-4 text-slate-600 max-w-xs">
                                         <?= htmlspecialchars($sb['deskripsi'] ?: '-'); ?>
+                                    </td>
+                                    <td class="py-4 px-4 text-center">
+                                        <?php if(!empty($sb['file_template'])): ?>
+                                            <a href="<?= base_url('uploads/templates/' . $sb['file_template']); ?>" target="_blank"
+                                               class="inline-flex items-center gap-1.5 bg-orange-50 hover:bg-orange-100 text-brand-700 border border-orange-200 px-2.5 py-1 rounded-lg text-[11px] font-bold shadow-2xs transition"
+                                               title="Unduh: <?= htmlspecialchars($sb['file_template']); ?>">
+                                                <i class="fa-solid fa-file-arrow-down text-orange-600"></i>
+                                                <span>Ada Template</span>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-slate-400 text-[11px] italic">Tidak ada</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="py-4 px-4 text-center">
                                         <?php if($sb['is_required'] == 1): ?>
@@ -190,8 +216,8 @@
                                     <td class="py-4 px-4 text-right space-x-1">
                                         <!-- Button Toggle -->
                                         <a href="<?= site_url('adminlayanan/toggle_syarat_berkas/' . $sb['id']); ?>" 
-                                           title="<?= $sb['is_active'] == 1 ? 'Non-aktifkan Berkas' : 'Aktifkan Berkas'; ?>"
-                                           class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition inline-block">
+                                            title="<?= $sb['is_active'] == 1 ? 'Non-aktifkan Berkas' : 'Aktifkan Berkas'; ?>"
+                                            class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition inline-block">
                                             <i class="fa-solid <?= $sb['is_active'] == 1 ? 'fa-toggle-on text-emerald-600' : 'fa-toggle-off text-slate-400'; ?> text-base"></i>
                                         </a>
 
@@ -204,9 +230,9 @@
 
                                         <!-- Button Delete -->
                                         <a href="<?= site_url('adminlayanan/hapus_syarat_berkas/' . $sb['id']); ?>" 
-                                           onclick="return confirm('Apakah Anda yakin ingin menghapus persyaratan berkas ini?');"
-                                           title="Hapus Syarat Berkas"
-                                           class="p-2 rounded-lg border border-slate-200 text-rose-500 hover:bg-rose-50 hover:border-rose-200 transition inline-block">
+                                            onclick="return confirm('Apakah Anda yakin ingin menghapus persyaratan berkas ini?');"
+                                            title="Hapus Syarat Berkas"
+                                            class="p-2 rounded-lg border border-slate-200 text-rose-500 hover:bg-rose-50 hover:border-rose-200 transition inline-block">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </a>
                                     </td>
@@ -214,7 +240,7 @@
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="py-8 text-center text-slate-400 font-medium">
+                                <td colspan="7" class="py-8 text-center text-slate-400 font-medium">
                                     Belum ada data persyaratan berkas. Klik tombol <strong>Tambah Syarat Berkas Baru</strong> di atas.
                                 </td>
                             </tr>
@@ -265,6 +291,17 @@
                                     <?= htmlspecialchars($sb['deskripsi']); ?>
                                 </div>
                             <?php endif; ?>
+                            <?php if (!empty($sb['file_template'])): ?>
+                                <div class="flex items-center justify-between bg-orange-50/70 p-2 rounded-xl border border-orange-200 text-[11px]">
+                                    <span class="text-slate-600 font-medium flex items-center gap-1.5">
+                                        <i class="fa-solid fa-file-arrow-down text-orange-600"></i>
+                                        <span>Template Dokumen</span>
+                                    </span>
+                                    <a href="<?= base_url('uploads/templates/' . $sb['file_template']); ?>" target="_blank" class="text-brand-600 font-bold hover:underline">
+                                        Unduh
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                             <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                                 <span class="text-slate-400 text-[10px]">Aksi Pengaturan:</span>
                                 <div class="flex items-center gap-1.5">
@@ -300,6 +337,7 @@
             </div>
         </div>
     </main>
+    </div>
 
     <!-- Modal Form Tambah / Edit Syarat Berkas -->
     <div id="modalForm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
@@ -319,7 +357,7 @@
                 </button>
             </div>
 
-            <form action="<?= site_url('adminlayanan/simpan_syarat_berkas'); ?>" method="POST" class="p-6 space-y-4">
+            <form action="<?= site_url('adminlayanan/simpan_syarat_berkas'); ?>" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
                 <input type="hidden" id="field_id" name="id" value="">
 
                 <div>
@@ -339,6 +377,33 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">Deskripsi / Petunjuk Pengunggahan</label>
                     <textarea id="field_deskripsi" name="deskripsi" rows="3" placeholder="Jelaskan spesifikasi file yang harus diunggah mahasiswa..."
                               class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"></textarea>
+                </div>
+
+                <!-- Input Upload File Template Resmi (Dinamis) -->
+                <div class="p-3.5 bg-orange-50/70 border border-orange-200 rounded-xl space-y-2">
+                    <label class="block text-xs font-bold text-slate-800 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-arrow-up text-brand-600"></i>
+                            <span>File Template / Contoh Dokumen Resmi</span>
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-normal">(.pdf, .docx, .doc, .xlsx, .zip)</span>
+                    </label>
+                    <input type="file" id="field_file_template" name="file_template" accept=".pdf,.doc,.docx,.xlsx,.xls,.zip"
+                           class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-600 file:text-white hover:file:bg-brand-700 cursor-pointer">
+                    
+                    <div id="boxExistingTemplate" class="hidden flex items-center justify-between pt-1 border-t border-orange-200/80 text-[11px]">
+                        <span class="text-slate-600 flex items-center gap-1 truncate max-w-xs font-mono">
+                            <i class="fa-solid fa-paperclip text-orange-600"></i>
+                            <span id="nameExistingTemplate"></span>
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <a href="#" id="linkDownloadTemplate" target="_blank" class="text-brand-600 font-bold hover:underline">Unduh</a>
+                            <label class="inline-flex items-center gap-1 text-rose-600 cursor-pointer font-bold">
+                                <input type="checkbox" id="checkHapusTemplate" name="hapus_template" value="1" class="rounded border-rose-300 text-rose-600 focus:ring-rose-500">
+                                <span>Hapus</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -376,6 +441,7 @@
 
     <script>
         const TOTAL_BERKAS_COUNT = <?= (int)$total_count; ?>;
+        const BASE_TEMPLATE_URL  = '<?= base_url("uploads/templates/"); ?>';
 
         function validateUrutanInput(input) {
             const maxVal = parseInt(input.getAttribute('max')) || 1;
@@ -395,6 +461,11 @@
             document.getElementById('field_nama_berkas').value = '';
             document.getElementById('field_kode_berkas').value = '';
             document.getElementById('field_deskripsi').value = '';
+            document.getElementById('field_file_template').value = '';
+            
+            const checkHapus = document.getElementById('checkHapusTemplate');
+            if (checkHapus) checkHapus.checked = false;
+            document.getElementById('boxExistingTemplate').classList.add('hidden');
             
             const maxAdd = TOTAL_BERKAS_COUNT + 1;
             const inputUrutan = document.getElementById('field_urutan');
@@ -414,6 +485,19 @@
             document.getElementById('field_nama_berkas').value = data.nama_berkas || '';
             document.getElementById('field_kode_berkas').value = data.kode_berkas || '';
             document.getElementById('field_deskripsi').value = data.deskripsi || '';
+            document.getElementById('field_file_template').value = '';
+            
+            const checkHapus = document.getElementById('checkHapusTemplate');
+            if (checkHapus) checkHapus.checked = false;
+
+            const boxExisting = document.getElementById('boxExistingTemplate');
+            if (data.file_template && data.file_template.trim() !== '') {
+                document.getElementById('nameExistingTemplate').innerText = data.file_template;
+                document.getElementById('linkDownloadTemplate').href = BASE_TEMPLATE_URL + encodeURIComponent(data.file_template);
+                boxExisting.classList.remove('hidden');
+            } else {
+                boxExisting.classList.add('hidden');
+            }
             
             const maxEdit = Math.max(1, TOTAL_BERKAS_COUNT);
             const inputUrutan = document.getElementById('field_urutan');
