@@ -44,17 +44,19 @@ uploads/ruangan/*
 uploads/signatures/*
 !uploads/signatures/index.html
 uploads/ticketing/*
-!uploads/ticketing/index.html
-uploads/krs/*
-!uploads/krs/index.html
+!uploads/ticketing/index.html
+uploads/krs/*
+!uploads/krs/index.html
 !uploads/krs/krs_1301210000_1792644484.png
 assets/uploads/bukti_peminjaman/*
 !assets/uploads/bukti_peminjaman/.gitkeep
+assets/uploads/barang/*
+!assets/uploads/barang/.gitkeep
+uploads/templates/*
+!uploads/templates/.gitkeep
 
 # Temp files
 cookie*.txt
-
-
 
 # React UI & Agents
 /components/
@@ -62,6 +64,3 @@ cookie*.txt
 /.agents/
 backend-pembimbing/
 scratch/
-
-
-

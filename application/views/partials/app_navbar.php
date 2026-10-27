@@ -11,12 +11,24 @@
         5  => 'Admin Layanan (LAA)',
         6  => 'Koordinator Tugas Akhir',
         7  => 'PIC Kelompok Keahlian',
-        9  => 'Ketua Kelompok Keahlian',
+        11 => 'Sekretariat',
+        15 => 'SDM dan Keuangan',
+        16 => 'Program Studi',
+        17 => 'Kemahasiswaan',
         21 => 'Laboran',
         22 => 'Super Administrator'
     ];
 
     $user_role_label = $role_names[$role_id] ?? ($current_uri === 'adminlayanan' ? 'Admin Layanan (LAA)' : ($current_uri === 'ketuakk' ? 'Ketua Kelompok Keahlian' : ($current_uri === 'koordinatorta' ? 'Koordinator Tugas Akhir' : ($current_uri === 'laboran' ? 'Laboran' : ($current_uri === 'kaur' ? 'Kepala Urusan (Ka Lab)' : ($role_id == 22 ? 'Panel Super Admin' : 'Pusat Kendali Admin'))))));
+    $user_jabatan = strtolower((string)($this->session->userdata('jabatan') ?? ''));
+    if ($role_id == 3) {
+        if ($user_jabatan === 'kaur') $user_role_label = 'Ka. Ur Laboratorium';
+        elseif ($user_jabatan === 'kaprodi') $user_role_label = 'Kaprodi';
+        elseif ($user_jabatan === 'wadek') $user_role_label = 'Wakil Dekan';
+    } elseif ($role_id == 16) {
+        $p = $this->session->userdata('prodi');
+        $user_role_label = !empty($p) ? 'Admin ' . $p : 'Admin Program Studi';
+    }
     $user_display_name = $this->session->userdata('name') ?: 'Unit Layanan FIK';
     $user_email = $this->session->userdata('email') ?: 'admin@telkomuniversity.ac.id';
 ?>

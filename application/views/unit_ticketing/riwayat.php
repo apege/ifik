@@ -136,27 +136,23 @@ $panelTitle      = $panelTitle      ?? 'Riwayat Tiket Saya';
             </div>
         <?php endif; ?>
 
-        <!-- Stats Overview Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-8">
+        <!-- Stats Overview Cards (3 Status Sesuai DB) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
             <a href="<?= site_url($baseRiwayatUrl . '?status=all'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'all' ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Diajukan</span>
                 <div class="text-2xl font-extrabold text-slate-900 mt-2 font-mono"><?= $stats['total'] ?? 0; ?></div>
             </a>
-            <a href="<?= site_url($baseRiwayatUrl . '?status=Menunggu'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Menunggu' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
-                <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Menunggu</span>
-                <div class="text-2xl font-extrabold text-amber-600 mt-2 font-mono"><?= $stats['menunggu'] ?? 0; ?></div>
+            <a href="<?= site_url($baseRiwayatUrl . '?status=Dikirim'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Dikirim', 'Menunggu']) ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+                <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Dikirim</span>
+                <div class="text-2xl font-extrabold text-amber-600 mt-2 font-mono"><?= $stats['dikirim'] ?? ($stats['menunggu'] ?? 0); ?></div>
             </a>
-            <a href="<?= site_url($baseRiwayatUrl . '?status=Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Diproses' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
-                <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Diproses</span>
-                <div class="text-2xl font-extrabold text-blue-600 mt-2 font-mono"><?= $stats['diproses'] ?? 0; ?></div>
+            <a href="<?= site_url($baseRiwayatUrl . '?status=Sedang Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Sedang Diproses', 'Diproses']) ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+                <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Sedang Diproses</span>
+                <div class="text-2xl font-extrabold text-blue-600 mt-2 font-mono"><?= $stats['sedang_diproses'] ?? ($stats['diproses'] ?? 0); ?></div>
             </a>
-            <a href="<?= site_url($baseRiwayatUrl . '?status=Selesai'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Selesai' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
-                <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Selesai</span>
-                <div class="text-2xl font-extrabold text-emerald-600 mt-2 font-mono"><?= $stats['selesai'] ?? 0; ?></div>
-            </a>
-            <a href="<?= site_url($baseRiwayatUrl . '?status=Ditutup'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Ditutup' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ditutup</span>
-                <div class="text-2xl font-extrabold text-slate-400 mt-2 font-mono"><?= $stats['ditutup'] ?? 0; ?></div>
+            <a href="<?= site_url($baseRiwayatUrl . '?status=Closed'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Closed', 'Selesai', 'Ditutup']) ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+                <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Closed</span>
+                <div class="text-2xl font-extrabold text-emerald-600 mt-2 font-mono"><?= $stats['closed'] ?? ($stats['selesai'] ?? 0); ?></div>
             </a>
         </div>
 
@@ -165,11 +161,10 @@ $panelTitle      = $panelTitle      ?? 'Riwayat Tiket Saya';
             <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" style="-webkit-overflow-scrolling: touch;">
                 <?php
                 $statusPills = [
-                    'all'      => 'Semua',
-                    'Menunggu' => 'Menunggu',
-                    'Diproses' => 'Diproses',
-                    'Selesai'  => 'Selesai',
-                    'Ditutup'  => 'Ditutup'
+                    'all'             => 'Semua',
+                    'Dikirim'         => 'Dikirim',
+                    'Sedang Diproses' => 'Sedang Diproses',
+                    'Closed'          => 'Closed'
                 ];
                 foreach ($statusPills as $stKey => $stLabel):
                     $isActive = ($filterStatus === $stKey);

@@ -341,7 +341,7 @@ class DosenTicketing extends CI_Controller {
             'deskripsi'          => $deskripsi,
             'custom_fields_data' => !empty($submittedCustomData) ? json_encode($submittedCustomData, JSON_UNESCAPED_UNICODE) : null,
             'lampiran'           => $lampiranFile,
-            'status'             => 'Menunggu'
+            'status'             => 'Dikirim'
         ];
 
         $insertId = $this->DosenTicketing_model->insert($ticketData);
@@ -598,16 +598,19 @@ class DosenTicketing extends CI_Controller {
             return;
         }
 
-        if (!in_array($status, ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'])) {
+        if (!in_array($status, ['Dikirim', 'Sedang Diproses', 'Closed', 'Menunggu', 'Diproses', 'Selesai', 'Ditutup'])) {
             $status = 'Diproses';
         }
 
         // Backend Guard: Status Stepper Satu Arah (Non-reversible)
         $statusWeight = [
-            'Menunggu' => 1,
-            'Diproses' => 2,
-            'Selesai'  => 3,
-            'Ditutup'  => 4
+            'Dikirim'        => 1,
+            'Menunggu'       => 1,
+            'Sedang Diproses'=> 2,
+            'Diproses'       => 2,
+            'Closed'         => 3,
+            'Selesai'        => 3,
+            'Ditutup'        => 3
         ];
 
         $currentTicket = $this->DosenTicketing_model->get_by_id($idTiket);

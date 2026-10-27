@@ -278,10 +278,13 @@ class LaboranTicketing extends CI_Controller {
 
             // Backend Guard: Status Stepper Satu Arah (Non-reversible)
             $statusWeight = [
-                'Menunggu' => 1,
-                'Diproses' => 2,
-                'Selesai'  => 3,
-                'Ditutup'  => 4
+                'Dikirim'        => 1,
+                'Menunggu'       => 1,
+                'Sedang Diproses'=> 2,
+                'Diproses'       => 2,
+                'Closed'         => 3,
+                'Selesai'        => 3,
+                'Ditutup'        => 3
             ];
             $currentStatus = $ticket->status ?? 'Menunggu';
             $curW = $statusWeight[$currentStatus] ?? 1;
@@ -316,17 +319,20 @@ class LaboranTicketing extends CI_Controller {
             return;
         }
 
-        $allowedStatus = ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'];
+        $allowedStatus = ['Dikirim', 'Sedang Diproses', 'Closed', 'Menunggu', 'Diproses', 'Selesai', 'Ditutup'];
         if (!in_array($status, $allowedStatus)) {
             $status = 'Diproses';
         }
 
         // Backend Guard: Status Stepper Satu Arah (Non-reversible)
         $statusWeight = [
-            'Menunggu' => 1,
-            'Diproses' => 2,
-            'Selesai'  => 3,
-            'Ditutup'  => 4
+            'Dikirim'        => 1,
+            'Menunggu'       => 1,
+            'Sedang Diproses'=> 2,
+            'Diproses'       => 2,
+            'Closed'         => 3,
+            'Selesai'        => 3,
+            'Ditutup'        => 3
         ];
         $currentStatus = $ticket->status ?? 'Menunggu';
         $curW = $statusWeight[$currentStatus] ?? 1;
@@ -565,7 +571,7 @@ class LaboranTicketing extends CI_Controller {
             'deskripsi'          => $deskripsi,
             'custom_fields_data' => !empty($submittedCustomData) ? json_encode($submittedCustomData, JSON_UNESCAPED_UNICODE) : null,
             'lampiran'           => $lampiran_name,
-            'status'             => 'Menunggu'
+            'status'             => 'Dikirim'
         ];
 
         $insertedId = $this->DosenTicketing_model->insert($ticketData);

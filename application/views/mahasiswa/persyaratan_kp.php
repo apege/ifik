@@ -189,7 +189,7 @@
                 </div>
 
                 <!-- CARD UPLOAD PERSYARATAN KP DINAMIS -->
-                <form action="<?= site_url('mahasiswa/persyaratan_kp'); ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form action="<?= site_url('mahasiswa/persyaratan_kp'); ?>" method="POST" enctype="multipart/form-data" id="formUploadPersyaratanKp" class="space-y-6">
                     <div class="card-3d-warm rounded-2xl overflow-hidden">
                         <div class="px-6 py-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div class="flex items-center gap-3">
@@ -314,9 +314,9 @@
                                             <i class="bi bi-arrow-right"></i>
                                         </a>
                                     <?php endif; ?>
-                                    <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
-                                        <i class="bi bi-cloud-arrow-up-fill"></i>
-                                        <span>Unggah Persyaratan KP</span>
+                                    <button type="submit" id="btnSubmitPersyaratanKp" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-700 hover:to-amber-600 text-white font-extrabold text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                                        <i class="bi bi-cloud-arrow-up-fill" id="iconSubmitPersyaratanKp"></i>
+                                        <span id="textSubmitPersyaratanKp">Unggah Persyaratan KP</span>
                                     </button>
                                 </div>
                             </div>
@@ -329,5 +329,28 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formUploadPersyaratanKp');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const btn = document.getElementById('btnSubmitPersyaratanKp');
+                    if (!btn) return;
+                    if (btn.disabled || btn.getAttribute('data-submitting') === 'true') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    btn.setAttribute('data-submitting', 'true');
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75', 'cursor-not-allowed');
+                    btn.classList.remove('cursor-pointer', 'hover:from-orange-700', 'hover:to-amber-600');
+                    const icon = document.getElementById('iconSubmitPersyaratanKp');
+                    const text = document.getElementById('textSubmitPersyaratanKp');
+                    if (icon) icon.className = 'bi bi-arrow-repeat animate-spin text-sm';
+                    if (text) text.textContent = 'Mengunggah Berkas...';
+                });
+            }
+        });
+    </script>
 </body>
 </html>

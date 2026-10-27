@@ -1970,7 +1970,7 @@ class Mahasiswa extends CI_Controller {
             'subjek'          => $subjek,
             'deskripsi'       => $deskripsi,
             'lampiran'        => $lampiran_name,
-            'status'          => 'Menunggu'
+            'status'          => 'Dikirim'
         ];
 
         $insertedId = $this->DosenTicketing_model->insert($ticketData);

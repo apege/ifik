@@ -454,6 +454,24 @@
             document.getElementById('modalFormSyarat').classList.remove('hidden');
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const formSyarat = document.getElementById('formSyarat');
+            if (formSyarat) {
+                formSyarat.addEventListener('submit', function(e) {
+                    const btn = formSyarat.querySelector('button[type="submit"]');
+                    if (!btn) return;
+                    if (btn.disabled || btn.getAttribute('data-submitting') === 'true') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    btn.setAttribute('data-submitting', 'true');
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75', 'cursor-not-allowed');
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+                });
+            }
+        });
+
         function closeModalForm() {
             document.getElementById('modalFormSyarat').classList.add('hidden');
         }
