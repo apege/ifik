@@ -154,8 +154,8 @@ $panelSubtitle  = $panelSubtitle  ?? 'Tinjau dan respon laporan kendala yang dit
             </div>
         <?php endif; ?>
 
-        <!-- Stats Overview Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-8">
+        <!-- Stats Overview Cards (3 Status Sesuai DB) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
             <!-- Total -->
             <a href="<?= site_url($baseResponUrl . '?status=all'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'all' ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
@@ -165,40 +165,31 @@ $panelSubtitle  = $panelSubtitle  ?? 'Tinjau dan respon laporan kendala yang dit
                 <div class="text-2xl font-extrabold text-slate-900 mt-2 font-mono"><?= $stats['total'] ?? 0; ?></div>
             </a>
 
-            <!-- Menunggu -->
-            <a href="<?= site_url($baseResponUrl . '?status=Menunggu'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Menunggu' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <!-- Dikirim -->
+            <a href="<?= site_url($baseResponUrl . '?status=Dikirim'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Dikirim', 'Menunggu']) ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Menunggu</span>
-                    <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="bi bi-hourglass-split"></i></span>
+                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Dikirim</span>
+                    <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="bi bi-send-check"></i></span>
                 </div>
-                <div class="text-2xl font-extrabold text-amber-600 mt-2 font-mono"><?= $stats['menunggu'] ?? 0; ?></div>
+                <div class="text-2xl font-extrabold text-amber-600 mt-2 font-mono"><?= $stats['dikirim'] ?? ($stats['menunggu'] ?? 0); ?></div>
             </a>
 
-            <!-- Diproses -->
-            <a href="<?= site_url($baseResponUrl . '?status=Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Diproses' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <!-- Sedang Diproses -->
+            <a href="<?= site_url($baseResponUrl . '?status=Sedang Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Sedang Diproses', 'Diproses']) ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Diproses</span>
+                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Sedang Diproses</span>
                     <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs"><i class="bi bi-gear-fill"></i></span>
                 </div>
-                <div class="text-2xl font-extrabold text-blue-600 mt-2 font-mono"><?= $stats['diproses'] ?? 0; ?></div>
+                <div class="text-2xl font-extrabold text-blue-600 mt-2 font-mono"><?= $stats['sedang_diproses'] ?? ($stats['diproses'] ?? 0); ?></div>
             </a>
 
-            <!-- Selesai -->
-            <a href="<?= site_url($baseResponUrl . '?status=Selesai'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Selesai' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <!-- Closed -->
+            <a href="<?= site_url($baseResponUrl . '?status=Closed'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Closed', 'Selesai', 'Ditutup']) ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Selesai</span>
+                    <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Closed</span>
                     <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="bi bi-check2-circle"></i></span>
                 </div>
-                <div class="text-2xl font-extrabold text-emerald-600 mt-2 font-mono"><?= $stats['selesai'] ?? 0; ?></div>
-            </a>
-
-            <!-- Ditutup -->
-            <a href="<?= site_url($baseResponUrl . '?status=Ditutup'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Ditutup' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ditutup</span>
-                    <span class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center text-xs"><i class="bi bi-archive-fill"></i></span>
-                </div>
-                <div class="text-2xl font-extrabold text-slate-400 mt-2 font-mono"><?= $stats['ditutup'] ?? 0; ?></div>
+                <div class="text-2xl font-extrabold text-emerald-600 mt-2 font-mono"><?= $stats['closed'] ?? ($stats['selesai'] ?? 0); ?></div>
             </a>
         </div>
 
@@ -207,11 +198,10 @@ $panelSubtitle  = $panelSubtitle  ?? 'Tinjau dan respon laporan kendala yang dit
             <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" style="-webkit-overflow-scrolling: touch;">
                 <?php
                 $statusPills = [
-                    'all'      => 'Semua Tiket',
-                    'Menunggu' => 'Menunggu',
-                    'Diproses' => 'Sedang Diproses',
-                    'Selesai'  => 'Selesai',
-                    'Ditutup'  => 'Ditutup'
+                    'all'             => 'Semua Tiket',
+                    'Dikirim'         => 'Dikirim',
+                    'Sedang Diproses' => 'Sedang Diproses',
+                    'Closed'          => 'Closed'
                 ];
                 foreach ($statusPills as $stKey => $stLabel):
                     $isActive = ($filterStatus === $stKey);
@@ -418,10 +408,9 @@ $panelSubtitle  = $panelSubtitle  ?? 'Tinjau dan respon laporan kendala yang dit
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Perbarui Status Tiket <span class="text-rose-500">*</span></label>
                     <select name="status" id="modalStatusSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 bg-white">
-                        <option value="Menunggu">Menunggu (Belum diproses)</option>
-                        <option value="Diproses">Diproses (Sedang ditangani)</option>
-                        <option value="Selesai">Selesai (Solusi telah diberikan)</option>
-                        <option value="Ditutup">Ditutup (Tiket ditutup)</option>
+                        <option value="Dikirim">1. Dikirim (Antrean Masuk)</option>
+                        <option value="Sedang Diproses">2. Sedang Diproses (Sedang Ditangani)</option>
+                        <option value="Closed">3. Closed (Selesai / Ditutup)</option>
                     </select>
                 </div>
 

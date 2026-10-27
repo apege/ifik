@@ -63,6 +63,13 @@ class KelompokKeahlian extends CI_Controller {
     /**
      * Halaman Utama Kelola Dinamis Kelompok Keahlian (KK)
      */
+    /**
+     * [MODUL DINAMIS KK] Menampilkan daftar seluruh Kelompok Keahlian (KK) / Laboratorium Riset fakultas.
+     * Mengambil statistik jumlah dosen anggota dan status keaktifan KK.
+     * 
+     * @return void Me-render view admin/kelompok_keahlian
+     * @affected_table kelompok_keahlian, user
+     */
     public function index() {
         $search = trim($this->input->get('q', true) ?? '');
         $status = trim($this->input->get('status', true) ?? 'all');
@@ -79,6 +86,13 @@ class KelompokKeahlian extends CI_Controller {
 
     /**
      * Simpan / Tambah / Update Kelompok Keahlian
+     */
+    /**
+     * [MODUL DINAMIS KK] Menambah atau memperbarui master data Kelompok Keahlian (KK).
+     * Memvalidasi keunikan kode KK dan menugaskan Ketua KK.
+     * 
+     * @return void Redirect ke kelompokkeahlian
+     * @affected_table kelompok_keahlian
      */
     public function simpan() {
         $id          = $this->input->post('id', true);
@@ -131,6 +145,13 @@ class KelompokKeahlian extends CI_Controller {
     /**
      * Toggle status aktif / non-aktif KK
      */
+    /**
+     * [MODUL DINAMIS KK] Mengubah status keaktifan (aktif/nonaktif) KK secara cepat.
+     * 
+     * @param  int $id ID Kelompok Keahlian
+     * @return void Redirect dengan flashdata success
+     * @affected_table kelompok_keahlian
+     */
     public function toggle_status($id = null) {
         if (empty($id)) {
             $id = $this->input->post('id', true);
@@ -155,6 +176,13 @@ class KelompokKeahlian extends CI_Controller {
 
     /**
      * Hapus Kelompok Keahlian
+     */
+    /**
+     * [MODUL DINAMIS KK] Menghapus data Kelompok Keahlian jika belum memiliki riwayat dosen/mahasiswa terkait.
+     * 
+     * @param  int $id ID Kelompok Keahlian
+     * @return void
+     * @affected_table kelompok_keahlian
      */
     public function hapus($id = null) {
         if (empty($id)) {

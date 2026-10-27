@@ -142,8 +142,8 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
             </div>
         <?php endif; ?>
 
-        <!-- Stats Overview Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-8">
+        <!-- Stats Overview Cards (3 Status Sesuai DB) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
             <!-- Total -->
             <a href="<?= site_url($baseResponUrl . '?status=all'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'all' ? 'border-orange-500 ring-2 ring-orange-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
@@ -153,40 +153,31 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                 <div class="text-2xl font-extrabold text-slate-900 mt-2 font-mono"><?= $stats['total'] ?? 0; ?></div>
             </a>
 
-            <!-- Menunggu -->
-            <a href="<?= site_url($baseResponUrl . '?status=Menunggu'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Menunggu' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <!-- Dikirim -->
+            <a href="<?= site_url($baseResponUrl . '?status=Dikirim'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Dikirim', 'Menunggu']) ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Menunggu</span>
+                    <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Dikirim</span>
                     <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="bi bi-hourglass-split"></i></span>
                 </div>
-                <div class="text-2xl font-extrabold text-amber-600 mt-2 font-mono"><?= $stats['menunggu'] ?? 0; ?></div>
+                <div class="text-2xl font-extrabold text-amber-600 mt-2 font-mono"><?= $stats['dikirim'] ?? $stats['menunggu'] ?? 0; ?></div>
             </a>
 
-            <!-- Diproses -->
-            <a href="<?= site_url($baseResponUrl . '?status=Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Diproses' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <!-- Sedang Diproses -->
+            <a href="<?= site_url($baseResponUrl . '?status=Sedang%20Diproses'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Sedang Diproses', 'Diproses']) ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Diproses</span>
-                    <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs"><i class="bi bi-gear-fill"></i></span>
+                    <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Sedang Diproses</span>
+                    <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs"><i class="bi bi-gear-wide-connected"></i></span>
                 </div>
-                <div class="text-2xl font-extrabold text-blue-600 mt-2 font-mono"><?= $stats['diproses'] ?? 0; ?></div>
+                <div class="text-2xl font-extrabold text-blue-600 mt-2 font-mono"><?= $stats['sedang_diproses'] ?? $stats['diproses'] ?? 0; ?></div>
             </a>
 
-            <!-- Selesai -->
-            <a href="<?= site_url($baseResponUrl . '?status=Selesai'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Selesai' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
+            <!-- Closed -->
+            <a href="<?= site_url($baseResponUrl . '?status=Closed'); ?>" class="bg-white p-4 rounded-2xl border <?= in_array($filterStatus, ['Closed', 'Selesai', 'Ditutup']) ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Selesai</span>
+                    <span class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Closed</span>
                     <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="bi bi-check2-circle"></i></span>
                 </div>
-                <div class="text-2xl font-extrabold text-emerald-600 mt-2 font-mono"><?= $stats['selesai'] ?? 0; ?></div>
-            </a>
-
-            <!-- Ditutup -->
-            <a href="<?= site_url($baseResponUrl . '?status=Ditutup'); ?>" class="bg-white p-4 rounded-2xl border <?= $filterStatus === 'Ditutup' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200/80 hover:border-slate-300' ?> shadow-xs transition-all flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ditutup</span>
-                    <span class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 flex items-center justify-center text-xs"><i class="bi bi-archive-fill"></i></span>
-                </div>
-                <div class="text-2xl font-extrabold text-slate-400 mt-2 font-mono"><?= $stats['ditutup'] ?? 0; ?></div>
+                <div class="text-2xl font-extrabold text-emerald-600 mt-2 font-mono"><?= $stats['closed'] ?? $stats['selesai'] ?? 0; ?></div>
             </a>
         </div>
 
@@ -195,14 +186,13 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
             <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none" style="-webkit-overflow-scrolling: touch;">
                 <?php
                 $statusPills = [
-                    'all'      => 'Semua Tiket',
-                    'Menunggu' => 'Menunggu',
-                    'Diproses' => 'Sedang Diproses',
-                    'Selesai'  => 'Selesai',
-                    'Ditutup'  => 'Ditutup'
+                    'all'             => 'Semua Tiket',
+                    'Dikirim'         => 'Dikirim',
+                    'Sedang Diproses' => 'Sedang Diproses',
+                    'Closed'          => 'Closed'
                 ];
                 foreach ($statusPills as $stKey => $stLabel):
-                    $isActive = ($filterStatus === $stKey);
+                    $isActive = ($filterStatus === $stKey || ($stKey === "Dikirim" && $filterStatus === "Menunggu") || ($stKey === "Sedang Diproses" && $filterStatus === "Diproses") || ($stKey === "Closed" && in_array($filterStatus, ["Selesai", "Ditutup"])));
                 ?>
                     <a href="<?= site_url($baseResponUrl . '?status=' . $stKey . ($search ? '&q=' . urlencode($search) : '')); ?>" 
                        class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all <?= $isActive ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-600' ?>">
@@ -520,7 +510,7 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                     <!-- Dynamic Icon -->
                 </span>
                 <div class="flex items-center justify-between gap-2">
-                    <span id="step2Title" class="font-bold text-[11px]">2. Diproses</span>
+                    <span id="step2Title" class="font-bold text-[11px]">2. Sedang Diproses</span>
                     <span id="step2Time" class="text-[10px] font-mono font-bold whitespace-nowrap">-</span>
                 </div>
                 <p id="step2Desc" class="text-[10px] text-slate-400 leading-snug mt-0.5">
@@ -543,7 +533,7 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                     <!-- Dynamic Icon -->
                 </span>
                 <div class="flex items-center justify-between gap-2">
-                    <span id="step3Title" class="font-bold text-[11px]">3. Selesai</span>
+                    <span id="step3Title" class="font-bold text-[11px]">3. Closed</span>
                     <span id="step3Time" class="text-[10px] font-mono font-bold whitespace-nowrap">-</span>
                 </div>
                 <p id="step3Desc" class="text-[10px] text-slate-400 leading-snug mt-0.5">
@@ -560,8 +550,8 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                 </div>
             </div>
 
-            <!-- Step 4: Ditutup -->
-            <div class="relative">
+            <!-- Step 4: Ditutup (Hidden) -->
+            <div class="relative hidden" id="step4Container">
                 <span id="step4Icon" class="absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border">
                     <!-- Dynamic Icon -->
                 </span>
@@ -714,18 +704,18 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                                 <label class="block text-xs font-extrabold text-slate-700">Tahap Penanganan Tiket <span class="text-rose-500">*</span></label>
                                 <span class="text-[10px] font-bold text-slate-400"><i class="bi bi-shield-check text-emerald-500"></i> Alur Maju Terkunci (Satu Arah)</span>
                             </div>
-                            <input type="hidden" name="status" id="formStatusInput" value="Menunggu">
+                            <input type="hidden" name="status" id="formStatusInput" value="Dikirim">
                             
-                            <!-- Card Selector Stepper (One-Way) -->
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="statusCardContainer">
-                                <!-- Card Menunggu -->
-                                <div id="cardStatus_Menunggu" onclick="selectStatusCard('Menunggu')" 
+                            <!-- Card Selector Stepper (One-Way 3 Status) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="statusCardContainer">
+                                <!-- Card Dikirim -->
+                                <div id="cardStatus_Dikirim" onclick="selectStatusCard('Dikirim')" 
                                      class="status-choice-card cursor-pointer p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-1.5 select-none relative bg-slate-50 border-slate-200">
                                     <div class="w-7 h-7 rounded-xl flex items-center justify-center text-sm font-bold icon-box bg-amber-100 text-amber-600">
                                         <i class="bi bi-hourglass-split"></i>
                                     </div>
                                     <div>
-                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">1. Menunggu</span>
+                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">1. Dikirim</span>
                                         <span class="text-[9px] text-slate-400 block mt-0.5 card-subtext">Antrean Masuk</span>
                                     </div>
                                     <span class="status-badge-indicator absolute -top-1.5 -right-1.5 hidden w-5 h-5 rounded-full bg-orange-600 text-white text-[10px] flex items-center justify-center shadow-xs">
@@ -733,14 +723,14 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                                     </span>
                                 </div>
 
-                                <!-- Card Diproses -->
-                                <div id="cardStatus_Diproses" onclick="selectStatusCard('Diproses')" 
+                                <!-- Card Sedang Diproses -->
+                                <div id="cardStatus_Sedang_Diproses" onclick="selectStatusCard('Sedang Diproses')" 
                                      class="status-choice-card cursor-pointer p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-1.5 select-none relative bg-slate-50 border-slate-200">
                                     <div class="w-7 h-7 rounded-xl flex items-center justify-center text-sm font-bold icon-box bg-blue-100 text-blue-600">
                                         <i class="bi bi-gear-wide-connected"></i>
                                     </div>
                                     <div>
-                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">2. Diproses</span>
+                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">2. Sedang Diproses</span>
                                         <span class="text-[9px] text-slate-400 block mt-0.5 card-subtext">Sedang Ditangani</span>
                                     </div>
                                     <span class="status-badge-indicator absolute -top-1.5 -right-1.5 hidden w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center shadow-xs">
@@ -748,36 +738,22 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                                     </span>
                                 </div>
 
-                                <!-- Card Selesai -->
-                                <div id="cardStatus_Selesai" onclick="selectStatusCard('Selesai')" 
+                                <!-- Card Closed -->
+                                <div id="cardStatus_Closed" onclick="selectStatusCard('Closed')" 
                                      class="status-choice-card cursor-pointer p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-1.5 select-none relative bg-slate-50 border-slate-200">
                                     <div class="w-7 h-7 rounded-xl flex items-center justify-center text-sm font-bold icon-box bg-emerald-100 text-emerald-600">
                                         <i class="bi bi-check2-circle"></i>
                                     </div>
                                     <div>
-                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">3. Selesai</span>
-                                        <span class="text-[9px] text-slate-400 block mt-0.5 card-subtext">Kendala Teratasi</span>
+                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">3. Closed</span>
+                                        <span class="text-[9px] text-slate-400 block mt-0.5 card-subtext">Selesai & Ditutup</span>
                                     </div>
                                     <span class="status-badge-indicator absolute -top-1.5 -right-1.5 hidden w-5 h-5 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center shadow-xs">
                                         <i class="bi bi-check-lg"></i>
                                     </span>
                                 </div>
-
-                                <!-- Card Ditutup -->
-                                <div id="cardStatus_Ditutup" onclick="selectStatusCard('Ditutup')" 
-                                     class="status-choice-card cursor-pointer p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-1.5 select-none relative bg-slate-50 border-slate-200">
-                                    <div class="w-7 h-7 rounded-xl flex items-center justify-center text-sm font-bold icon-box bg-purple-100 text-purple-600">
-                                        <i class="bi bi-archive-fill"></i>
-                                    </div>
-                                    <div>
-                                        <span class="text-[11px] font-extrabold block text-slate-800 leading-tight">4. Ditutup</span>
-                                        <span class="text-[9px] text-slate-400 block mt-0.5 card-subtext">Arsip Final</span>
-                                    </div>
-                                    <span class="status-badge-indicator absolute -top-1.5 -right-1.5 hidden w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] flex items-center justify-center shadow-xs">
-                                        <i class="bi bi-check-lg"></i>
-                                    </span>
-                                </div>
                             </div>
+                        </div>
                         </div>
 
                         <!-- Catatan Referensi Diproses Sebelumnya (Tampil saat memilih Selesai) -->
@@ -886,39 +862,52 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
     <script>
         // Urutan tahapan status (Nilai lebih besar = tahap lebih maju)
         const STATUS_WEIGHT = {
-            'Menunggu': 1,
-            'Diproses': 2,
-            'Selesai':  3,
-            'Ditutup':  4
+            'Dikirim':         1,
+            'Menunggu':        1,
+            'Sedang Diproses': 2,
+            'Diproses':        2,
+            'Closed':          3,
+            'Selesai':         3,
+            'Ditutup':         3
         };
 
-        let currentTicketInitialStatus = 'Menunggu';
+        const AVAILABLE_STATUSES = ['Dikirim', 'Sedang Diproses', 'Closed'];
+
+        let currentTicketInitialStatus = 'Dikirim';
+
+        function getNormalizedStatus(st) {
+            if (!st) return 'Dikirim';
+            if (st === 'Menunggu') return 'Dikirim';
+            if (st === 'Diproses') return 'Sedang Diproses';
+            if (st === 'Selesai' || st === 'Ditutup') return 'Closed';
+            return st;
+        }
+
+        function getStatusCardEl(st) {
+            const key = st.replace(/\s+/g, '_');
+            return document.getElementById('cardStatus_' + key) || document.getElementById('cardStatus_' + st);
+        }
 
         function setupStatusCards(currentStatus) {
-            currentTicketInitialStatus = currentStatus || 'Menunggu';
+            currentTicketInitialStatus = getNormalizedStatus(currentStatus || 'Dikirim');
             const initialWeight = STATUS_WEIGHT[currentTicketInitialStatus] || 1;
             const inputHidden = document.getElementById('formStatusInput');
             const noticeLocked = document.getElementById('statusLockedNotice');
 
-            // Default seleksi ke status sekarang
             inputHidden.value = currentTicketInitialStatus;
-
             let hasLockedBefore = false;
 
-            // Iterasi 4 card status
-            ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'].forEach(st => {
-                const card = document.getElementById('cardStatus_' + st);
+            AVAILABLE_STATUSES.forEach(st => {
+                const card = getStatusCardEl(st);
                 if (!card) return;
 
                 const cardWeight = STATUS_WEIGHT[st];
                 const badge = card.querySelector('.status-badge-indicator');
                 const subtext = card.querySelector('.card-subtext');
 
-                // Reset kelas dasar
                 card.className = 'status-choice-card p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center gap-1.5 select-none relative';
 
                 if (cardWeight < initialWeight) {
-                    // Tahap sebelumnya: TERKUNCI & TIDAK BISA MUNDUR
                     hasLockedBefore = true;
                     card.classList.add('bg-slate-100', 'border-slate-200', 'opacity-50', 'cursor-not-allowed');
                     card.setAttribute('title', 'Tahap ini sudah dilewati dan tidak dapat dimundurkan kembali.');
@@ -934,12 +923,10 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                     if (subtext) subtext.innerHTML = '<span class="text-slate-400 font-bold">Dilewati</span>';
                     if (badge) badge.classList.add('hidden');
                 } else {
-                    // Tahap saat ini atau tahap maju: BISA DIPILIH
                     card.classList.add('cursor-pointer');
                     card.onclick = function() { selectStatusCard(st); };
 
                     if (st === currentTicketInitialStatus) {
-                        // Card Aktif terpilih
                         card.classList.add('border-orange-500', 'bg-orange-50/60', 'ring-2', 'ring-orange-500/20', 'shadow-sm');
                         if (badge) badge.classList.remove('hidden');
                     } else {
@@ -956,22 +943,22 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
         }
 
         function selectStatusCard(selectedStatus) {
+            selectedStatus = getNormalizedStatus(selectedStatus);
             const initialWeight = STATUS_WEIGHT[currentTicketInitialStatus] || 1;
             const targetWeight  = STATUS_WEIGHT[selectedStatus] || 1;
 
-            // Larang mundur secara tegas
             if (targetWeight < initialWeight) {
                 return;
             }
 
             document.getElementById('formStatusInput').value = selectedStatus;
 
-            ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'].forEach(st => {
-                const card = document.getElementById('cardStatus_' + st);
+            AVAILABLE_STATUSES.forEach(st => {
+                const card = getStatusCardEl(st);
                 if (!card) return;
 
                 const cardWeight = STATUS_WEIGHT[st];
-                if (cardWeight < initialWeight) return; // Lewati yang sudah terkunci
+                if (cardWeight < initialWeight) return;
 
                 const badge = card.querySelector('.status-badge-indicator');
 
@@ -984,7 +971,6 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                 }
             });
 
-            // Sesuaikan label, placeholder, dan value textarea berdasarkan tahap yang dipilih
             const prevBox = document.getElementById('modalPrevProsesNoteBox');
             const prevText = document.getElementById('modalPrevProsesNoteText');
             const lbl = document.getElementById('formTanggapanLabel');
@@ -992,17 +978,17 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
             const txt = document.getElementById('formTanggapanText');
             const curr = window.currentTicketData || {};
 
-            if (selectedStatus === 'Diproses') {
+            if (selectedStatus === 'Sedang Diproses' || selectedStatus === 'Diproses') {
                 if (prevBox) prevBox.classList.add('hidden');
-                if (lbl) lbl.textContent = 'Catatan Progres Pengerjaan (Diproses)';
-                if (hint) hint.textContent = 'Catatan investigasi atau penanganan saat ini';
+                if (lbl) lbl.textContent = 'Catatan Progres Pengerjaan (Sedang Diproses)';
+                if (hint) hint.textContent = 'Catatan investigasi atau pengerjaan teknis saat ini';
                 if (txt) {
-                    txt.placeholder = 'Tuliskan catatan progres atau investigasi awal penanganan tiket...';
+                    txt.placeholder = 'Tuliskan catatan progres atau investigasi pengerjaan kendala...';
                     txt.value = curr.catatan_proses || '';
                 }
-            } else if (selectedStatus === 'Selesai') {
-                if (lbl) lbl.textContent = 'Solusi & Catatan Penyelesaian (Selesai)';
-                if (hint) hint.textContent = 'Wajib/Disarankan mengisi solusi hasil perbaikan';
+            } else if (selectedStatus === 'Closed' || selectedStatus === 'Selesai' || selectedStatus === 'Ditutup') {
+                if (lbl) lbl.textContent = 'Solusi & Catatan Penutupan Tiket (Closed)';
+                if (hint) hint.textContent = 'Solusi hasil penanganan atau catatan penutupan tiket';
                 if (curr.catatan_proses && curr.catatan_proses.trim()) {
                     if (prevBox) prevBox.classList.remove('hidden');
                     if (prevText) prevText.textContent = curr.catatan_proses.trim();
@@ -1010,20 +996,12 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                     if (prevBox) prevBox.classList.add('hidden');
                 }
                 if (txt) {
-                    txt.placeholder = 'Tuliskan solusi akhir, hasil penanganan kendala, atau instruksi untuk pelapor...';
-                    txt.value = curr.catatan_selesai || '';
-                }
-            } else if (selectedStatus === 'Ditutup') {
-                if (prevBox) prevBox.classList.add('hidden');
-                if (lbl) lbl.textContent = 'Catatan Penutupan Tiket (Ditutup)';
-                if (hint) hint.textContent = 'Catatan arsip final';
-                if (txt) {
-                    txt.placeholder = 'Tuliskan catatan penutupan tiket jika diperlukan...';
-                    txt.value = curr.catatan_tutup || '';
+                    txt.placeholder = 'Tuliskan solusi akhir, hasil penanganan kendala, dan konfirmasi penutupan tiket...';
+                    txt.value = curr.catatan_selesai || curr.catatan_tutup || (!curr.catatan_proses ? curr.tanggapan : '') || '';
                 }
             } else {
                 if (prevBox) prevBox.classList.add('hidden');
-                if (lbl) lbl.textContent = 'Catatan Tiket (Menunggu)';
+                if (lbl) lbl.textContent = 'Catatan Tiket (Dikirim)';
                 if (hint) hint.textContent = '(Opsional)';
                 if (txt) {
                     txt.placeholder = 'Tuliskan catatan tiket jika ada...';
@@ -1321,9 +1299,14 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
             step3Title.textContent = '3. Selesai';
             step4Title.textContent = '4. Ditutup';
 
-            if (status === 'Menunggu') {
+            const normStatus = getNormalizedStatus(status);
+
+            if (normStatus === 'Dikirim') {
                 popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200';
-                popWaBadge.innerHTML = '<i class="bi bi-check text-slate-400 font-black text-sm"></i> Menunggu';
+                popWaBadge.innerHTML = '<i class="bi bi-hourglass-split text-amber-600 font-black text-xs"></i> Dikirim';
+
+                step2Title.textContent = '2. Sedang Diproses';
+                step3Title.textContent = '3. Closed';
 
                 // Step 2: Waiting
                 step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-amber-100 text-amber-600 border border-amber-300';
@@ -1331,7 +1314,7 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                 step2Title.className = 'font-bold text-[11px] text-amber-800';
                 step2Time.className = 'text-[10px] font-semibold text-amber-600 flex items-center whitespace-nowrap';
                 step2Time.innerHTML = '<i class="bi bi-hourglass-split mr-1 text-[9px]"></i> Menunggu Antrean';
-                step2Desc.textContent = 'Menunggu giliran peninjauan oleh Dosen / unit ' + (unit || 'terkait') + '.';
+                step2Desc.textContent = 'Menunggu giliran peninjauan oleh unit ' + (unit || 'terkait') + '.';
 
                 // Step 3: Pending
                 step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
@@ -1339,102 +1322,49 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                 step3Title.className = 'font-bold text-[11px] text-slate-400';
                 step3Time.className = 'text-[10px] font-normal text-slate-400 flex items-center whitespace-nowrap';
                 step3Time.innerHTML = '<i class="bi bi-dash mr-1 text-[10px]"></i> Belum Selesai';
-                step3Desc.textContent = 'Solusi dan jawaban akan disampaikan setelah kendala selesai ditangani.';
-
-                // Step 4: Pending
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
-                step4Icon.innerHTML = '<i class="bi bi-lock text-[10px]"></i>';
-                step4Title.className = 'font-bold text-[11px] text-slate-400';
-                step4Time.className = 'text-[10px] font-normal text-slate-400 flex items-center whitespace-nowrap';
-                step4Time.innerHTML = '<i class="bi bi-dash mr-1 text-[10px]"></i> Belum Ditutup';
-                step4Desc.textContent = 'Tiket masih berstatus aktif dalam antrean.';
+                step3Desc.textContent = 'Solusi resmi akan diberikan setelah kendala selesai ditangani.';
 
                 stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-slate-200';
 
-            } else if (status === 'Diproses') {
+            } else if (normStatus === 'Sedang Diproses') {
                 popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200';
-                popWaBadge.innerHTML = '<i class="bi bi-check-all text-slate-500 font-black text-base"></i> Diproses';
+                popWaBadge.innerHTML = '<i class="bi bi-gear-wide-connected text-blue-600 font-black text-xs"></i> Sedang Diproses';
+
+                step2Title.textContent = '2. Sedang Diproses';
+                step3Title.textContent = '3. Closed';
 
                 // Step 2: Processing (Active)
                 step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-blue-600 text-white shadow-xs';
-                step2Icon.innerHTML = '<i class="bi bi-check-all text-sm font-bold"></i>';
+                step2Icon.innerHTML = '<i class="bi bi-gear-wide-connected text-xs animate-spin"></i>';
                 step2Title.className = 'font-bold text-[11px] text-blue-800';
                 step2Time.className = 'text-[10px] font-mono font-bold text-blue-600 flex items-center whitespace-nowrap';
                 step2Time.innerHTML = '<i class="bi bi-clock-history mr-1 text-[9px]"></i>' + (tglDiproses || updated || created);
-                step2Desc.textContent = 'Dosen sedang aktif meninjau dan menangani kendala ini.';
+                step2Desc.textContent = 'Unit terkait sedang aktif menangani kendala.';
 
-                // Tampilkan catatan investigasi/pengerjaan di Step 2 jika ada
                 const noteDiproses = catatanProses || tanggapan;
                 if (noteDiproses && step2Box && step2Text) {
                     step2Box.classList.remove('hidden');
                     step2Text.textContent = '"' + noteDiproses + '"';
                 }
 
-                // Step 3: Pending (BELUM SELESAI & TIDAK DITAMPILKAN TANGGAPAN DI SINI)
+                // Step 3: Pending
                 step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
                 step3Icon.innerHTML = '<i class="bi bi-circle text-[8px]"></i>';
                 step3Title.className = 'font-bold text-[11px] text-slate-400';
                 step3Time.className = 'text-[10px] font-normal text-slate-400 flex items-center whitespace-nowrap';
                 step3Time.innerHTML = '<i class="bi bi-dash mr-1 text-[10px]"></i> Belum Selesai';
-                step3Desc.textContent = 'Solusi dan hasil penanganan akan dicatat setelah penanganan selesai.';
+                step3Desc.textContent = 'Solusi dan hasil penyelesaian akan dicatat setelah penanganan selesai.';
                 if (step3Box) step3Box.classList.add('hidden');
-
-                // Step 4: Pending
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
-                step4Icon.innerHTML = '<i class="bi bi-lock text-[10px]"></i>';
-                step4Title.className = 'font-bold text-[11px] text-slate-400';
-                step4Time.className = 'text-[10px] font-normal text-slate-400 flex items-center whitespace-nowrap';
-                step4Time.innerHTML = '<i class="bi bi-dash mr-1 text-[10px]"></i> Belum Ditutup';
-                step4Desc.textContent = 'Tiket masih dalam proses penanganan.';
 
                 stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-blue-300';
 
-            } else if (status === 'Selesai') {
-                popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200';
-                popWaBadge.innerHTML = '<i class="bi bi-check-all text-sky-500 font-black text-base"></i> Selesai';
-
-                // Step 2: Complete
-                step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-blue-500 text-white shadow-xs';
-                step2Icon.innerHTML = '<i class="bi bi-check-lg"></i>';
-                step2Title.className = 'font-bold text-[11px] text-slate-700';
-                step2Time.className = 'text-[10px] font-mono font-bold text-slate-500 flex items-center whitespace-nowrap';
-                step2Time.innerHTML = '<i class="bi bi-clock-history mr-1 text-[9px]"></i>' + (tglDiproses || created);
-                step2Desc.textContent = 'Kendala telah ditelaah dan diproses oleh Dosen.';
-
-                // Tampilkan catatan pengerjaan tahap Diproses jika ada
-                if (catatanProses && step2Box && step2Text) {
-                    step2Box.classList.remove('hidden');
-                    step2Text.textContent = '"' + catatanProses + '"';
-                }
-
-                // Step 3: Complete with Solusi
-                step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black bg-sky-500 text-white shadow-xs ring-2 ring-sky-200';
-                step3Icon.innerHTML = '<i class="bi bi-check-all"></i>';
-                step3Title.className = 'font-bold text-[11px] text-sky-900';
-                step3Time.className = 'text-[10px] font-mono font-bold text-sky-700 flex items-center whitespace-nowrap';
-                step3Time.innerHTML = '<i class="bi bi-clock-fill mr-1 text-[9px]"></i>' + (tglSelesai || tglTanggapan || updated);
-                step3Desc.textContent = 'Solusi resmi telah selesai diberikan oleh Dosen.';
-
-                const noteSelesai = catatanSelesai || (!catatanProses ? tanggapan : '');
-                if (noteSelesai && step3Box && step3Text) {
-                    step3Box.classList.remove('hidden');
-                    step3Text.textContent = '"' + noteSelesai + '"';
-                }
-
-                // Step 4: Ready to close
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-300';
-                step4Icon.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-                step4Title.className = 'font-bold text-[11px] text-amber-800';
-                step4Time.className = 'text-[10px] font-semibold text-amber-600 flex items-center whitespace-nowrap';
-                step4Time.innerHTML = '<i class="bi bi-check-circle mr-1 text-[9px]"></i> Siap Ditutup';
-                step4Desc.textContent = 'Solusi telah terkirim, menunggu konfirmasi penutupan.';
-
-                stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-sky-400';
-
             } else {
-                // Status Ditutup
-                popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-300';
-                popWaBadge.innerHTML = '<i class="bi bi-patch-check-fill text-purple-600 text-xs"></i> Ditutup';
+                // Closed
+                popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200';
+                popWaBadge.innerHTML = '<i class="bi bi-check2-circle text-emerald-600 font-black text-xs"></i> Closed';
+
+                step2Title.textContent = '2. Sedang Diproses';
+                step3Title.textContent = '3. Closed';
 
                 // Step 2: Complete
                 step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-blue-500 text-white shadow-xs';
@@ -1443,38 +1373,27 @@ $baseResponUrl = $baseResponUrl ?? 'kaur/respon-ticketing';
                 step2Time.className = 'text-[10px] font-mono font-bold text-slate-500 flex items-center whitespace-nowrap';
                 step2Time.innerHTML = '<i class="bi bi-clock-history mr-1 text-[9px]"></i>' + (tglDiproses || created);
                 step2Desc.textContent = 'Kendala telah selesai diproses.';
+
                 if (catatanProses && step2Box && step2Text) {
                     step2Box.classList.remove('hidden');
                     step2Text.textContent = '"' + catatanProses + '"';
                 }
 
                 // Step 3: Complete with Solusi
-                step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black bg-sky-500 text-white shadow-xs';
-                step3Icon.innerHTML = '<i class="bi bi-check-all"></i>';
-                step3Title.className = 'font-bold text-[11px] text-sky-900';
-                step3Time.className = 'text-[10px] font-mono font-bold text-sky-700 flex items-center whitespace-nowrap';
-                step3Time.innerHTML = '<i class="bi bi-clock-fill mr-1 text-[9px]"></i>' + (tglSelesai || tglTanggapan || updated);
-                step3Desc.textContent = 'Solusi resmi telah diterima pelapor.';
-                const noteSelesai = catatanSelesai || (!catatanProses ? tanggapan : '');
-                if (noteSelesai && step3Box && step3Text) {
+                step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-200';
+                step3Icon.innerHTML = '<i class="bi bi-check2-all"></i>';
+                step3Title.className = 'font-bold text-[11px] text-emerald-900';
+                step3Time.className = 'text-[10px] font-mono font-bold text-emerald-700 flex items-center whitespace-nowrap';
+                step3Time.innerHTML = '<i class="bi bi-check-circle-fill mr-1 text-[9px]"></i>' + (tglSelesai || tglTanggapan || updated);
+                step3Desc.textContent = 'Kendala tuntas ditangani dan tiket telah ditutup resmi.';
+
+                const noteClosed = catatanSelesai || catatanTutup || (!catatanProses ? tanggapan : '');
+                if (noteClosed && step3Box && step3Text) {
                     step3Box.classList.remove('hidden');
-                    step3Text.textContent = '"' + noteSelesai + '"';
+                    step3Text.textContent = '"' + noteClosed + '"';
                 }
 
-                // Step 4: Closed
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-purple-600 text-white shadow-sm ring-2 ring-purple-200';
-                step4Icon.innerHTML = '<i class="bi bi-check-lg font-black"></i>';
-                step4Title.className = 'font-bold text-[11px] text-purple-900';
-                step4Time.className = 'text-[10px] font-mono font-bold text-purple-700 flex items-center whitespace-nowrap';
-                step4Time.innerHTML = '<i class="bi bi-patch-check-fill mr-1 text-[10px]"></i>' + (updated || tglTanggapan || created);
-                step4Desc.textContent = 'Kendala telah tuntas diselesaikan dan tiket resmi ditutup.';
-
-                if (catatanTutup && step4Box && step4Text) {
-                    step4Box.classList.remove('hidden');
-                    step4Text.textContent = '"' + catatanTutup + '"';
-                }
-
-                stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-purple-500';
+                stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-emerald-500';
             }
 
             // Show & Positioning

@@ -493,7 +493,11 @@ class ImportEmail extends CI_Controller {
     }
 
     /**
-     * AJAX: Save single user (Create / Edit)
+     * [MODUL JABATAN DOSEN] AJAX: Menyimpan atau memperbarui data akun pengguna tunggal (Create / Edit).
+     * Menerapkan aturan proteksi ketat: atribut 'jabatan' hanya dapat diisi jika role pengguna adalah Dosen (role_id 3).
+     *
+     * @return json Response status berhasil/gagal dan data akun terformat
+     * @affected_table user
      */
     public function save_user() {
         $rawInput = file_get_contents('php://input');

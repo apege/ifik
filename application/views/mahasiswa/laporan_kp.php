@@ -144,7 +144,7 @@
                                         File Laporan KP (Termasuk Form Penilaian KP) <span class="text-rose-500">*</span>
                                     </label>
 
-                                    <div class="relative border-2 border-dashed border-orange-300 hover:border-orange-500 bg-orange-50/40 hover:bg-orange-50/70 rounded-3xl p-8 text-center transition-all cursor-pointer group"
+                                    <div id="laporanDropZone" class="relative border-2 border-dashed border-orange-300 hover:border-orange-500 bg-orange-50/40 hover:bg-orange-50/70 rounded-3xl p-8 text-center transition-all cursor-pointer group"
                                          onclick="document.getElementById('fileLaporanKpInput').click()">
                                         <input type="file" name="file_laporan_kp" id="fileLaporanKpInput" accept=".pdf,application/pdf" required
                                                class="hidden" onchange="onSelectLaporanFile(this)">
@@ -252,6 +252,71 @@
     </div>
 
     <script>
+                function initLaporanDropZone() {
+            const zone = document.getElementById('laporanDropZone');
+            const input = document.getElementById('fileLaporanKpInput');
+            if (!zone || !input) return;
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+                window.addEventListener(eventName, function(e) {
+                    if (eventName === 'dragover' || eventName === 'drop') {
+                        e.preventDefault();
+                    }
+                }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach((eventName) => {
+                zone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.add('border-orange-500', 'bg-orange-100/90', 'ring-4', 'ring-orange-200');
+                    zone.classList.remove('border-orange-300', 'bg-orange-50/40');
+                }, false);
+            });
+
+            ['dragleave', 'dragend'].forEach((eventName) => {
+                zone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.relatedTarget && zone.contains(e.relatedTarget)) return;
+                    zone.classList.remove('border-orange-500', 'bg-orange-100/90', 'ring-4', 'ring-orange-200');
+                    zone.classList.add('border-orange-300', 'bg-orange-50/40');
+                }, false);
+            });
+
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                zone.classList.remove('border-orange-500', 'bg-orange-100/90', 'ring-4', 'ring-orange-200');
+                zone.classList.add('border-orange-300', 'bg-orange-50/40');
+
+                const dt = e.dataTransfer;
+                if (!dt || !dt.files || dt.files.length === 0) return;
+
+                const file = dt.files[0];
+                const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                if (!isPdf) {
+                    alert('Hanya berkas berformat PDF yang diperbolehkan.');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Ukuran file maksimal adalah 10 MB.');
+                    return;
+                }
+
+                try {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                } catch (err) {
+                    input.files = dt.files;
+                }
+
+                onSelectLaporanFile(input);
+            }, false);
+        }
+
         function onSelectLaporanFile(input) {
             const badge = document.getElementById('laporanSelectedBadge');
             const nameEl = document.getElementById('laporanSelectedName');
@@ -263,6 +328,27 @@
                 if (sizeEl) sizeEl.textContent = (f.size / 1024 / 1024).toFixed(2) + ' MB';
             }
         }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initLaporanDropZone();
+            const form = document.querySelector('form[action*="laporan_kp"]');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const btn = form.querySelector('button[type="submit"]');
+                    if (!btn) return;
+                    if (btn.disabled || btn.getAttribute('data-submitting') === 'true') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    btn.setAttribute('data-submitting', 'true');
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75', 'cursor-not-allowed');
+                    btn.classList.remove('cursor-pointer', 'hover:from-orange-700', 'hover:to-amber-600');
+                    btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin text-sm"></i> <span>Mengunggah Laporan...</span>';
+                });
+            }
+        });
     </script>
 </body>
 </html>

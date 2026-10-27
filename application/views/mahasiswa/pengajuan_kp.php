@@ -768,11 +768,13 @@
                 if (targetStep === 3 && !validateStep2()) {
                     currentKpStep = 2;
                     updateStepperUI();
+            initKpDropZones();
                     return;
                 }
             }
             currentKpStep = targetStep;
             updateStepperUI();
+            initKpDropZones();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -787,6 +789,7 @@
                 currentKpStep = 3;
             }
             updateStepperUI();
+            initKpDropZones();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -794,6 +797,7 @@
             if (currentKpStep > 1) {
                 currentKpStep--;
                 updateStepperUI();
+            initKpDropZones();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 window.location.href = "<?= site_url('mahasiswa'); ?>";
@@ -969,8 +973,108 @@
             });
         }
 
+        function initKpDropZones() {
+            // Cegah browser membuka file secara default saat drop di luar dropzone
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+                window.addEventListener(eventName, function(e) {
+                    if (eventName === 'dragover' || eventName === 'drop') {
+                        e.preventDefault();
+                    }
+                }, false);
+            });
+
+            document.querySelectorAll('.kp-drop-zone').forEach((zone) => {
+                ['dragenter', 'dragover'].forEach((eventName) => {
+                    zone.addEventListener(eventName, function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        zone.classList.add('border-orange-500', 'bg-orange-100/90', 'ring-4', 'ring-orange-200');
+                        zone.classList.remove('border-orange-300', 'bg-orange-50/40');
+                    }, false);
+                });
+
+                ['dragleave', 'dragend'].forEach((eventName) => {
+                    zone.addEventListener(eventName, function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (e.relatedTarget && zone.contains(e.relatedTarget)) return;
+                        zone.classList.remove('border-orange-500', 'bg-orange-100/90', 'ring-4', 'ring-orange-200');
+                        zone.classList.add('border-orange-300', 'bg-orange-50/40');
+                    }, false);
+                });
+
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.remove('border-orange-500', 'bg-orange-100/90', 'ring-4', 'ring-orange-200');
+                    zone.classList.add('border-orange-300', 'bg-orange-50/40');
+
+                    const dt = e.dataTransfer;
+                    if (!dt || !dt.files || dt.files.length === 0) return;
+
+                    const file = dt.files[0];
+                    const input = zone.querySelector('input.kp-file-input');
+                    if (!input || input.disabled) return;
+
+                    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                    if (!isPdf) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Format Berkas Tidak Sesuai',
+                                text: 'Hanya berkas berformat PDF yang diperbolehkan.'
+                            });
+                        } else {
+                            alert('Hanya berkas berformat PDF yang diperbolehkan.');
+                        }
+                        return;
+                    }
+
+                    if (file.size > 5 * 1024 * 1024) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Ukuran Terlalu Besar',
+                                text: 'Ukuran file maksimal adalah 5 MB.'
+                            });
+                        } else {
+                            alert('Ukuran file maksimal adalah 5 MB.');
+                        }
+                        return;
+                    }
+
+                    try {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        input.files = dataTransfer.files;
+                    } catch (err) {
+                        input.files = dt.files;
+                    }
+
+                    handleKpFileSelect(input);
+                }, false);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             restoreLocalDraft();
+
+            const formKp = document.getElementById('formPengajuanKP');
+            if (formKp) {
+                formKp.addEventListener('submit', function(e) {
+                    const btn = document.getElementById('btnSubmitKp');
+                    if (!btn) return;
+                    if (btn.disabled || btn.getAttribute('data-submitting') === 'true') {
+                        e.preventDefault();
+                        return false;
+                    }
+                    btn.setAttribute('data-submitting', 'true');
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75', 'cursor-not-allowed');
+                    btn.classList.remove('cursor-pointer', 'hover:from-emerald-700', 'hover:to-teal-700');
+                    btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin text-sm"></i> <span>Mengirim Pengajuan...</span>';
+                });
+            }
             KP_FIELD_IDS.forEach((id) => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -982,6 +1086,7 @@
                 currentKpStep = 1;
             }
             updateStepperUI();
+            initKpDropZones();
         });
     </script>
 </body>

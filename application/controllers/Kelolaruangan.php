@@ -59,6 +59,13 @@ class Kelolaruangan extends CI_Controller {
         }
     }
 
+    /**
+     * [MODUL FASILITAS RUANGAN] Menampilkan katalog master ruangan laboratorium dan kelas fakultas.
+     * Menyajikan status kondisi (Tersedia / Maintenance), daya tampung kapasitas, dan foto ruangan.
+     * 
+     * @return void Me-render view kelolaruangan/index
+     * @affected_table ruangan
+     */
     public function index()
     {
         redirect('adminheader?tab=fasilitas');
@@ -202,6 +209,12 @@ class Kelolaruangan extends CI_Controller {
         return null;
     }
 
+    /**
+     * [MODUL FASILITAS RUANGAN] Menambahkan master data ruangan baru beserta upload foto fasilitas.
+     * 
+     * @return void Redirect ke kelolaruangan
+     * @affected_table ruangan
+     */
     public function tambah()
     {
         if (ob_get_length()) ob_clean();
@@ -300,6 +313,13 @@ class Kelolaruangan extends CI_Controller {
         }
     }
 
+    /**
+     * [MODUL FASILITAS RUANGAN] Memperbarui profil ruangan, kapasitas daya tampung, dan fasilitas alat di dalamnya.
+     * 
+     * @param  int|null $id ID Ruangan
+     * @return void
+     * @affected_table ruangan
+     */
     public function update($id = null)
     {
         if (ob_get_length()) ob_clean();

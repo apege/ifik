@@ -205,7 +205,7 @@ class AdminLayananTicketing extends CI_Controller {
             return;
         }
 
-        if (!in_array($status, ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'])) {
+        if (!in_array($status, ['Dikirim', 'Sedang Diproses', 'Closed', 'Menunggu', 'Diproses', 'Selesai', 'Ditutup'])) {
             $status = 'Diproses';
         }
 

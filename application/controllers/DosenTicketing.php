@@ -27,6 +27,13 @@ class DosenTicketing extends CI_Controller {
     /**
      * Halaman Input Tiket Baru
      */
+    /**
+     * [MODUL TICKETING] Formulir penerbitan tiket baru permohonan layanan akademik/fasilitas.
+     * Memuat 6 unit layanan fakultas dan kategori dinamis terkait.
+     * 
+     * @return void Me-render view ticketing/input
+     * @affected_table ticketing_kategori
+     */
     public function input() {
         $userId = $this->session->userdata('user_id');
         $nidn = $this->session->userdata('nidn_nim') ?: $this->session->userdata('nim');
@@ -179,6 +186,13 @@ class DosenTicketing extends CI_Controller {
 
     /**
      * Proses Simpan Tiket Baru
+     */
+    /**
+     * [MODUL TICKETING] Memproses penyimpanan tiket baru dengan penomoran otomatis TIK-YYYYMMDD-XXXX.
+     * Menangani upload lampiran bukti pendukung dan penentuan tingkat prioritas layanan.
+     * 
+     * @return void Redirect ke riwayat tiket dengan notifikasi nomor tiket
+     * @affected_table ticketing
      */
     public function simpan() {
         $userId      = $this->session->userdata('user_id');
@@ -341,7 +355,7 @@ class DosenTicketing extends CI_Controller {
             'deskripsi'          => $deskripsi,
             'custom_fields_data' => !empty($submittedCustomData) ? json_encode($submittedCustomData, JSON_UNESCAPED_UNICODE) : null,
             'lampiran'           => $lampiranFile,
-            'status'             => 'Menunggu'
+            'status'             => 'Dikirim'
         ];
 
         $insertId = $this->DosenTicketing_model->insert($ticketData);
@@ -372,6 +386,12 @@ class DosenTicketing extends CI_Controller {
 
     /**
      * Halaman Riwayat Tiket
+     */
+    /**
+     * [MODUL TICKETING] Menampilkan daftar riwayat tiket pengguna dengan filter status dan unit layanan.
+     * 
+     * @return void Me-render view ticketing/riwayat
+     * @affected_table ticketing
      */
     public function riwayat() {
         $userId = $this->session->userdata('user_id');
@@ -576,6 +596,12 @@ class DosenTicketing extends CI_Controller {
     /**
      * Simpan Tanggapan & Perubahan Status oleh Kaur
      */
+    /**
+     * [MODUL TICKETING] Menyimpan balasan percakapan / tanggapan petugas unit terhadap tiket yang sedang diproses.
+     * 
+     * @return void Redirect ke respon_detail tiket
+     * @affected_table ticketing_replies, ticketing
+     */
     public function respon_simpan_tanggapan() {
         $roleId = (int)$this->session->userdata('role_id');
         $jabatan = strtolower((string)($this->session->userdata('jabatan') ?? ''));
@@ -598,16 +624,19 @@ class DosenTicketing extends CI_Controller {
             return;
         }
 
-        if (!in_array($status, ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'])) {
+        if (!in_array($status, ['Dikirim', 'Sedang Diproses', 'Closed', 'Menunggu', 'Diproses', 'Selesai', 'Ditutup'])) {
             $status = 'Diproses';
         }
 
         // Backend Guard: Status Stepper Satu Arah (Non-reversible)
         $statusWeight = [
-            'Menunggu' => 1,
-            'Diproses' => 2,
-            'Selesai'  => 3,
-            'Ditutup'  => 4
+            'Dikirim'        => 1,
+            'Menunggu'       => 1,
+            'Sedang Diproses'=> 2,
+            'Diproses'       => 2,
+            'Closed'         => 3,
+            'Selesai'        => 3,
+            'Ditutup'        => 3
         ];
 
         $currentTicket = $this->DosenTicketing_model->get_by_id($idTiket);

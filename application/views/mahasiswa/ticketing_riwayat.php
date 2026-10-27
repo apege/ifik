@@ -100,7 +100,7 @@
             </div>
         <?php endif; ?>
 
-        <!-- Stats Overview Cards -->
+        <!-- Stats Overview Cards (3 Status Sesuai DB) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             
             <!-- Total -->
@@ -115,36 +115,36 @@
                 </div>
             </div>
 
-            <!-- Menunggu -->
+            <!-- Dikirim -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Menunggu</span>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1 block"><?= (int)($stats['menunggu'] ?? 0); ?></span>
-                    <span class="text-[11px] text-amber-500/80 font-medium">Belum diproses</span>
+                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Dikirim</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1 block"><?= (int)($stats['dikirim'] ?? $stats['menunggu'] ?? 0); ?></span>
+                    <span class="text-[11px] text-amber-500/80 font-medium">Antrean masuk</span>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
                     <i class="bi bi-hourglass-split"></i>
                 </div>
             </div>
 
-            <!-- Diproses -->
+            <!-- Sedang Diproses -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-blue-500 uppercase tracking-wider block">Diproses</span>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1 block"><?= (int)($stats['diproses'] ?? 0); ?></span>
-                    <span class="text-[11px] text-blue-500/80 font-medium">Sedang ditindak</span>
+                    <span class="text-xs font-bold text-blue-500 uppercase tracking-wider block">Sedang Diproses</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1 block"><?= (int)($stats['sedang_diproses'] ?? $stats['diproses'] ?? 0); ?></span>
+                    <span class="text-[11px] text-blue-500/80 font-medium">Sedang ditangani</span>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
-                    <i class="bi bi-arrow-repeat"></i>
+                    <i class="bi bi-gear-wide-connected"></i>
                 </div>
             </div>
 
-            <!-- Selesai -->
+            <!-- Closed -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider block">Selesai</span>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1 block"><?= (int)($stats['selesai'] ?? 0); ?></span>
-                    <span class="text-[11px] text-emerald-500/80 font-medium">Telah terselesaikan</span>
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider block">Closed</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1 block"><?= (int)($stats['closed'] ?? $stats['selesai'] ?? 0); ?></span>
+                    <span class="text-[11px] text-emerald-500/80 font-medium">Selesai & ditutup</span>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
                     <i class="bi bi-check2-all"></i>
@@ -159,22 +159,19 @@
             <!-- Table Header Filter Bar -->
             <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 
-                <!-- Status Filter Pills -->
+                <!-- Status Filter Pills (3 Status Sesuai DB) -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none" id="filter-pills" style="-webkit-overflow-scrolling: touch;">
                     <button type="button" onclick="filterByStatus('all', this)" class="status-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-orange-600 text-white shadow-xs shrink-0 cursor-pointer">
                         Semua (<?= (int)($stats['total'] ?? 0); ?>)
                     </button>
-                    <button type="button" onclick="filterByStatus('Menunggu', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Menunggu (<?= (int)($stats['menunggu'] ?? 0); ?>)
+                    <button type="button" onclick="filterByStatus('Dikirim', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
+                        Dikirim (<?= (int)($stats['dikirim'] ?? $stats['menunggu'] ?? 0); ?>)
                     </button>
-                    <button type="button" onclick="filterByStatus('Diproses', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Diproses (<?= (int)($stats['diproses'] ?? 0); ?>)
+                    <button type="button" onclick="filterByStatus('Sedang Diproses', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
+                        Sedang Diproses (<?= (int)($stats['sedang_diproses'] ?? $stats['diproses'] ?? 0); ?>)
                     </button>
-                    <button type="button" onclick="filterByStatus('Selesai', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Selesai (<?= (int)($stats['selesai'] ?? 0); ?>)
-                    </button>
-                    <button type="button" onclick="filterByStatus('Ditutup', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Ditutup (<?= (int)($stats['ditutup'] ?? 0); ?>)
+                    <button type="button" onclick="filterByStatus('Closed', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
+                        Closed (<?= (int)($stats['closed'] ?? $stats['selesai'] ?? 0); ?>)
                     </button>
                 </div>
 
@@ -486,7 +483,7 @@
                 <div id="step1Icon" class="absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-500 text-white shadow-xs">
                     <i class="bi bi-check"></i>
                 </div>
-                <div id="step1Title" class="font-bold text-[11px] text-slate-800">1. Menunggu</div>
+                <div id="step1Title" class="font-bold text-[11px] text-slate-800">1. Dikirim</div>
                 <div class="text-[10px] font-mono text-slate-500" id="step1Time">-</div>
                 <div id="step1Desc" class="text-[11px] text-slate-500 mt-0.5">Laporan masuk ke antrean unit <span id="step1Unit" class="font-semibold text-slate-700"></span>.</div>
             </div>
@@ -496,7 +493,7 @@
                 <div id="step2Icon" class="absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-200 text-slate-500">
                     <i class="bi bi-arrow-repeat"></i>
                 </div>
-                <div id="step2Title" class="font-bold text-[11px] text-slate-600">2. Diproses</div>
+                <div id="step2Title" class="font-bold text-[11px] text-slate-600">2. Sedang Diproses</div>
                 <div id="step2Time" class="text-[10px] font-mono text-slate-400">-</div>
                 <div id="step2Desc" class="text-[11px] text-slate-500 mt-0.5">Kendala sedang diinvestigasi & dikerjakan.</div>
                 <div id="step2TanggapanBox" class="hidden mt-2 p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-[11px] text-blue-900 leading-snug">
@@ -510,7 +507,7 @@
                 <div id="step3Icon" class="absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-200 text-slate-500">
                     <i class="bi bi-check-all"></i>
                 </div>
-                <div id="step3Title" class="font-bold text-[11px] text-slate-600">3. Selesai</div>
+                <div id="step3Title" class="font-bold text-[11px] text-slate-600">3. Closed</div>
                 <div id="step3Time" class="text-[10px] font-mono text-slate-400">-</div>
                 <div id="step3Desc" class="text-[11px] text-slate-500 mt-0.5">Solusi telah diberikan, kendala selesai ditangani.</div>
                 <div id="step3TanggapanBox" class="hidden mt-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-900 leading-snug">
@@ -519,8 +516,8 @@
                 </div>
             </div>
 
-            <!-- Step 4: Ditutup -->
-            <div class="relative">
+            <!-- Step 4: Ditutup (Hidden) -->
+            <div class="relative hidden" id="popStep4Container">
                 <div id="step4Icon" class="absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-200 text-slate-500">
                     <i class="bi bi-patch-check-fill"></i>
                 </div>
@@ -586,49 +583,41 @@
                     </div>
                 </div>
 
-                <!-- Card Stepper Progress Tracking (4 Tahap) -->
+                <!-- Card Stepper Progress Tracking (3 Status) -->
                 <div>
                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                         <span>Alur Progres Penanganan</span>
                         <span class="text-[10px] text-emerald-600 font-bold"><i class="bi bi-shield-check"></i> Terverifikasi Sistem</span>
                     </h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="mhsStepperContainer">
-                        <!-- Step 1: Menunggu -->
-                        <div id="mhsStep_Menunggu" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="mhsStepperContainer">
+                        <!-- Step 1: Dikirim -->
+                        <div id="mhsStep_Dikirim" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
                             <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
                                 <i class="bi bi-hourglass-split"></i>
                             </div>
-                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">1. Menunggu</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">1. Dikirim</span>
                             <span class="text-[8px] text-slate-400 step-desc">Antrean Masuk</span>
                         </div>
 
-                        <!-- Step 2: Diproses -->
-                        <div id="mhsStep_Diproses" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                        <!-- Step 2: Sedang Diproses -->
+                        <div id="mhsStep_Sedang_Diproses" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
                             <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
                                 <i class="bi bi-gear-wide-connected"></i>
                             </div>
-                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">2. Diproses</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">2. Sedang Diproses</span>
                             <span class="text-[8px] text-slate-400 step-desc">Sedang Ditangani</span>
                         </div>
 
-                        <!-- Step 3: Selesai -->
-                        <div id="mhsStep_Selesai" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
+                        <!-- Step 3: Closed -->
+                        <div id="mhsStep_Closed" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
                             <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
                                 <i class="bi bi-check2-circle"></i>
                             </div>
-                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">3. Selesai</span>
-                            <span class="text-[8px] text-slate-400 step-desc">Telah Diatasi</span>
-                        </div>
-
-                        <!-- Step 4: Ditutup -->
-                        <div id="mhsStep_Ditutup" class="p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1 bg-slate-50 border-slate-200">
-                            <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-500">
-                                <i class="bi bi-archive-fill"></i>
-                            </div>
-                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">4. Ditutup</span>
-                            <span class="text-[8px] text-slate-400 step-desc">Arsip Final</span>
+                            <span class="text-[10px] font-extrabold text-slate-700 leading-tight">3. Closed</span>
+                            <span class="text-[8px] text-slate-400 step-desc">Selesai & Ditutup</span>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <!-- Deskripsi Lengkap -->
@@ -780,55 +769,77 @@
     <!-- Client-side Scripts for Filtering & Modal -->
     <script>
         const MHS_STATUS_WEIGHT = {
-            'Menunggu': 1,
-            'Diproses': 2,
-            'Selesai':  3,
-            'Ditutup':  4
+            'Dikirim':         1,
+            'Menunggu':        1,
+            'Sedang Diproses': 2,
+            'Diproses':        2,
+            'Closed':          3,
+            'Selesai':         3,
+            'Ditutup':         3
         };
 
-        function updateMhsStepperProgress(status) {
-            const currentWeight = MHS_STATUS_WEIGHT[status] || 1;
+        function getNormalizedMhsStatus(st) {
+            if (!st) return 'Dikirim';
+            if (st === 'Menunggu') return 'Dikirim';
+            if (st === 'Diproses') return 'Sedang Diproses';
+            if (st === 'Selesai' || st === 'Ditutup') return 'Closed';
+            return st;
+        }
 
-            ['Menunggu', 'Diproses', 'Selesai', 'Ditutup'].forEach(st => {
-                const card = document.getElementById('mhsStep_' + st);
+        function updateMhsStepperProgress(status) {
+            const normStatus = getNormalizedMhsStatus(status);
+            const currentWeight = MHS_STATUS_WEIGHT[normStatus] || 1;
+
+            ['Dikirim', 'Sedang Diproses', 'Closed'].forEach(st => {
+                const key = st.replace(/\s+/g, '_');
+                const card = document.getElementById('mhsStep_' + key) || document.getElementById('mhsStep_' + st);
                 if (!card) return;
 
                 const stepWeight = MHS_STATUS_WEIGHT[st];
                 const iconBox = card.querySelector('.step-icon');
                 const desc = card.querySelector('.step-desc');
 
-                // Reset kelas dasar
                 card.className = 'p-2.5 rounded-2xl border-2 transition-all flex flex-col items-center text-center gap-1';
 
                 if (stepWeight < currentWeight) {
-                    // Sudah terlewati (Tahap Selesai)
-                    card.classList.add('bg-emerald-50/70', 'border-emerald-200');
-                    if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-emerald-500 text-white';
-                    if (desc) desc.innerHTML = '<span class="text-emerald-700 font-bold"><i class="bi bi-check2"></i> Terlewati</span>';
-                } else if (stepWeight === currentWeight) {
-                    // Sedang aktif saat ini
-                    if (st === 'Menunggu') {
-                        card.classList.add('bg-amber-50', 'border-amber-400', 'ring-2', 'ring-amber-400/20');
-                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-amber-500 text-white animate-pulse';
-                        if (desc) desc.innerHTML = '<span class="text-amber-700 font-extrabold">Antrean Aktif</span>';
-                    } else if (st === 'Diproses') {
-                        card.classList.add('bg-blue-50', 'border-blue-500', 'ring-2', 'ring-blue-500/20');
-                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-blue-600 text-white animate-pulse';
-                        if (desc) desc.innerHTML = '<span class="text-blue-700 font-extrabold">Sedang Ditangani</span>';
-                    } else if (st === 'Selesai') {
-                        card.classList.add('bg-emerald-50', 'border-emerald-500', 'ring-2', 'ring-emerald-500/20');
-                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-emerald-600 text-white';
-                        if (desc) desc.innerHTML = '<span class="text-emerald-700 font-extrabold">Selesai Ditindak</span>';
-                    } else {
-                        card.classList.add('bg-purple-50', 'border-purple-500', 'ring-2', 'ring-purple-500/20');
-                        if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-purple-600 text-white';
-                        if (desc) desc.innerHTML = '<span class="text-purple-700 font-extrabold">Ditutup Resmi</span>';
+                    card.classList.add('border-emerald-200', 'bg-emerald-50/50');
+                    if (iconBox) {
+                        iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-emerald-500 text-white shadow-2xs';
+                        iconBox.innerHTML = '<i class="bi bi-check-lg"></i>';
                     }
+                    if (desc) desc.innerHTML = '<span class="text-emerald-600 font-bold">Selesai</span>';
+
+                } else if (stepWeight === currentWeight) {
+                    if (st === 'Closed') {
+                        card.classList.add('border-emerald-500', 'bg-emerald-50', 'ring-2', 'ring-emerald-500/20');
+                        if (iconBox) {
+                            iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-emerald-600 text-white shadow-2xs';
+                            iconBox.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                        }
+                        if (desc) desc.innerHTML = '<span class="text-emerald-700 font-extrabold">Ditutup</span>';
+                    } else if (st === 'Sedang Diproses') {
+                        card.classList.add('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-500/20');
+                        if (iconBox) {
+                            iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-blue-600 text-white shadow-2xs';
+                            iconBox.innerHTML = '<i class="bi bi-gear-wide-connected animate-spin"></i>';
+                        }
+                        if (desc) desc.innerHTML = '<span class="text-blue-700 font-extrabold">Aktif Ditangani</span>';
+                    } else {
+                        card.classList.add('border-amber-500', 'bg-amber-50', 'ring-2', 'ring-amber-500/20');
+                        if (iconBox) {
+                            iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-amber-500 text-white shadow-2xs';
+                            iconBox.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+                        }
+                        if (desc) desc.innerHTML = '<span class="text-amber-700 font-extrabold">Dalam Antrean</span>';
+                    }
+
                 } else {
-                    // Belum tercapai (Masa Datang)
-                    card.classList.add('bg-slate-50', 'border-slate-200', 'opacity-60');
-                    if (iconBox) iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-400';
-                    if (desc) desc.innerHTML = '<span class="text-slate-400">Tahap Berikutnya</span>';
+                    card.classList.add('border-slate-200', 'bg-slate-50', 'opacity-50');
+                    if (iconBox) {
+                        iconBox.className = 'w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold step-icon bg-slate-200 text-slate-400';
+                        iconBox.innerHTML = '<i class="bi bi-clock"></i>';
+                    }
+                    if (desc) desc.innerHTML = '<span class="text-slate-400">Menunggu</span>';
                 }
             });
         }
@@ -1156,11 +1167,16 @@
             if (step3Box) { step3Box.classList.add('hidden'); step3Text.textContent = ''; }
             if (step4Box) { step4Box.classList.add('hidden'); step4Text.textContent = ''; }
 
-            if (status === 'Menunggu') {
-                popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200';
-                popWaBadge.innerHTML = '<i class="bi bi-hourglass-split text-amber-600 font-black text-xs"></i> 1. Menunggu';
+            const normStatus = getNormalizedMhsStatus(status);
 
-                // Step 1: Active
+            if (normStatus === 'Dikirim') {
+                popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200';
+                popWaBadge.innerHTML = '<i class="bi bi-hourglass-split text-amber-600 font-black text-xs"></i> 1. Dikirim';
+
+                if (step1Title) step1Title.textContent = '1. Dikirim';
+                if (step2Title) step2Title.textContent = '2. Sedang Diproses';
+                if (step3Title) step3Title.textContent = '3. Closed';
+
                 if (step1Icon) {
                     step1Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-amber-500 text-white shadow-xs animate-pulse';
                     step1Icon.innerHTML = '<i class="bi bi-hourglass-split"></i>';
@@ -1168,34 +1184,28 @@
                 if (step1Title) step1Title.className = 'font-bold text-[11px] text-amber-800';
                 if (step1Desc) step1Desc.innerHTML = 'Laporan masuk antrean unit <span class="font-semibold text-slate-700">' + (unit || 'terkait') + '</span>.';
 
-                // Step 2: Waiting
                 step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
                 step2Icon.innerHTML = '<i class="bi bi-hourglass text-[9px]"></i>';
                 step2Title.className = 'font-bold text-[11px] text-slate-400';
                 step2Time.textContent = 'Menunggu Antrean';
                 step2Desc.textContent = 'Menunggu staf ' + (unit || 'unit') + ' membuka dan menangani kendala.';
 
-                // Step 3: Pending
                 step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
                 step3Icon.innerHTML = '<i class="bi bi-dash"></i>';
                 step3Title.className = 'font-bold text-[11px] text-slate-400';
                 step3Time.textContent = '-';
                 step3Desc.textContent = 'Solusi belum tersedia.';
 
-                // Step 4: Pending
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
-                step4Icon.innerHTML = '<i class="bi bi-lock text-[10px]"></i>';
-                step4Title.className = 'font-bold text-[11px] text-slate-400';
-                step4Time.textContent = '-';
-                step4Desc.textContent = 'Tiket masih aktif dalam antrean.';
-
                 stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-slate-200';
 
-            } else if (status === 'Diproses') {
+            } else if (normStatus === 'Sedang Diproses') {
                 popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-blue-50 text-blue-700 border-blue-200';
-                popWaBadge.innerHTML = '<i class="bi bi-gear-wide-connected text-blue-600 font-black text-xs"></i> 2. Diproses';
+                popWaBadge.innerHTML = '<i class="bi bi-gear-wide-connected text-blue-600 font-black text-xs"></i> 2. Sedang Diproses';
 
-                // Step 1: Completed
+                if (step1Title) step1Title.textContent = '1. Dikirim';
+                if (step2Title) step2Title.textContent = '2. Sedang Diproses';
+                if (step3Title) step3Title.textContent = '3. Closed';
+
                 if (step1Icon) {
                     step1Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shadow-xs';
                     step1Icon.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -1203,21 +1213,18 @@
                 if (step1Title) step1Title.className = 'font-bold text-[11px] text-slate-700';
                 if (step1Desc) step1Desc.innerHTML = 'Laporan telah diterima unit <span class="font-semibold text-slate-700">' + (unit || 'terkait') + '</span>.';
 
-                // Step 2: Active
                 step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-blue-600 text-white shadow-xs';
                 step2Icon.innerHTML = '<i class="bi bi-gear-wide-connected text-xs animate-spin"></i>';
                 step2Title.className = 'font-bold text-[11px] text-blue-800';
                 step2Time.textContent = tglDiproses || updated || created;
                 step2Desc.textContent = 'Kendala sedang diinvestigasi & dikerjakan staf ' + (unit || 'unit') + '.';
 
-                // Catatan pengerjaan tahap Diproses
                 const noteDiproses = catatanProses || tanggapan;
                 if (noteDiproses && step2Box && step2Text) {
                     step2Box.classList.remove('hidden');
                     step2Text.textContent = '"' + noteDiproses + '"';
                 }
 
-                // Step 3: Strictly Pending (TIDAK DITAMPILKAN TANGGAPAN DI SINI)
                 step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
                 step3Icon.innerHTML = '<i class="bi bi-dash"></i>';
                 step3Title.className = 'font-bold text-[11px] text-slate-400';
@@ -1225,20 +1232,17 @@
                 step3Desc.textContent = 'Solusi dan jawaban sedang dirumuskan oleh staf.';
                 if (step3Box) step3Box.classList.add('hidden');
 
-                // Step 4: Pending
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
-                step4Icon.innerHTML = '<i class="bi bi-lock text-[10px]"></i>';
-                step4Title.className = 'font-bold text-[11px] text-slate-400';
-                step4Time.textContent = '-';
-                step4Desc.textContent = 'Tiket masih dalam penanganan.';
-
                 stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-blue-300';
 
-            } else if (status === 'Selesai') {
+            } else {
+                // Closed
                 popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200';
-                popWaBadge.innerHTML = '<i class="bi bi-check2-circle text-emerald-600 font-black text-xs"></i> 3. Selesai';
+                popWaBadge.innerHTML = '<i class="bi bi-check-circle-fill text-emerald-600 font-black text-xs"></i> 3. Closed';
 
-                // Step 1: Completed
+                if (step1Title) step1Title.textContent = '1. Dikirim';
+                if (step2Title) step2Title.textContent = '2. Sedang Diproses';
+                if (step3Title) step3Title.textContent = '3. Closed';
+
                 if (step1Icon) {
                     step1Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shadow-xs';
                     step1Icon.innerHTML = '<i class="bi bi-check-lg"></i>';
@@ -1246,51 +1250,6 @@
                 if (step1Title) step1Title.className = 'font-bold text-[11px] text-slate-700';
                 if (step1Desc) step1Desc.innerHTML = 'Laporan diterima sistem.';
 
-                // Step 2: Completed
-                step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shadow-xs';
-                step2Icon.innerHTML = '<i class="bi bi-check-lg"></i>';
-                step2Title.className = 'font-bold text-[11px] text-slate-700';
-                step2Time.textContent = tglDiproses || updated;
-                step2Desc.textContent = 'Kendala telah selesai ditindaklanjuti staf.';
-                if (catatanProses && step2Box && step2Text) {
-                    step2Box.classList.remove('hidden');
-                    step2Text.textContent = '"' + catatanProses + '"';
-                }
-
-                // Step 3: Active
-                step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-600 text-white shadow-xs';
-                step3Icon.innerHTML = '<i class="bi bi-check2-all text-xs"></i>';
-                step3Title.className = 'font-bold text-[11px] text-emerald-800';
-                step3Time.textContent = tglSelesai || tglTanggapan || updated;
-                step3Desc.textContent = 'Solusi telah diberikan, kendala selesai ditangani.';
-                const noteSelesai = catatanSelesai || (!catatanProses ? tanggapan : '');
-                if (noteSelesai && step3Box && step3Text) {
-                    step3Box.classList.remove('hidden');
-                    step3Text.textContent = '"' + noteSelesai + '"';
-                }
-
-                // Step 4: Pending
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-slate-100 text-slate-400 border border-slate-200';
-                step4Icon.innerHTML = '<i class="bi bi-clock text-[10px]"></i>';
-                step4Title.className = 'font-bold text-[11px] text-slate-400';
-                step4Time.textContent = 'Menunggu Konfirmasi';
-                step4Desc.textContent = 'Menunggu konfirmasi penutupan tiket / arsip final.';
-
-                stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-emerald-400';
-
-            } else if (status === 'Ditutup') {
-                popWaBadge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border bg-purple-50 text-purple-800 border-purple-200';
-                popWaBadge.innerHTML = '<i class="bi bi-archive-fill text-purple-600 text-xs"></i> 4. Ditutup';
-
-                // Step 1: Completed
-                if (step1Icon) {
-                    step1Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shadow-xs';
-                    step1Icon.innerHTML = '<i class="bi bi-check-lg"></i>';
-                }
-                if (step1Title) step1Title.className = 'font-bold text-[11px] text-slate-700';
-                if (step1Desc) step1Desc.innerHTML = 'Laporan diterima sistem.';
-
-                // Step 2: Completed
                 step2Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-500 text-white shadow-xs';
                 step2Icon.innerHTML = '<i class="bi bi-check-lg"></i>';
                 step2Title.className = 'font-bold text-[11px] text-slate-700';
@@ -1301,30 +1260,18 @@
                     step2Text.textContent = '"' + catatanProses + '"';
                 }
 
-                // Step 3: Completed
-                step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-emerald-600 text-white shadow-xs';
+                step3Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-black bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-200';
                 step3Icon.innerHTML = '<i class="bi bi-check2-all text-xs"></i>';
                 step3Title.className = 'font-bold text-[11px] text-emerald-800';
                 step3Time.textContent = tglSelesai || tglTanggapan || updated;
                 step3Desc.textContent = 'Solusi telah diterima & kendala teratasi.';
-                const noteSelesai = catatanSelesai || (!catatanProses ? tanggapan : '');
+                const noteSelesai = catatanSelesai || catatanTutup || (!catatanProses ? tanggapan : '');
                 if (noteSelesai && step3Box && step3Text) {
                     step3Box.classList.remove('hidden');
                     step3Text.textContent = '"' + noteSelesai + '"';
                 }
 
-                // Step 4: Active
-                step4Icon.className = 'absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-purple-600 text-white shadow-xs';
-                step4Icon.innerHTML = '<i class="bi bi-check-lg text-xs"></i>';
-                step4Title.className = 'font-bold text-[11px] text-purple-800';
-                step4Time.textContent = updated;
-                step4Desc.textContent = 'Tiket telah ditutup secara permanen & diarsipkan.';
-                if (catatanTutup && step4Box && step4Text) {
-                    step4Box.classList.remove('hidden');
-                    step4Text.textContent = '"' + catatanTutup + '"';
-                }
-
-                stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-purple-400';
+                stepperLine.className = 'absolute left-3 top-2.5 bottom-2.5 w-0.5 bg-emerald-500';
             }
 
             // Position Popover

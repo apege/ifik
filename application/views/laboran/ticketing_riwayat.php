@@ -131,7 +131,7 @@
             </div>
         <?php endif; ?>
 
-        <!-- Stats Overview Cards -->
+        <!-- Stats Overview Cards (3 Status Sesuai DB) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             
             <!-- Total -->
@@ -146,36 +146,36 @@
                 </div>
             </div>
 
-            <!-- Menunggu -->
+            <!-- Dikirim -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Menunggu</span>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1 block"><?= (int)($stats['menunggu'] ?? 0); ?></span>
-                    <span class="text-[11px] text-amber-500/80 font-medium">Belum diproses</span>
+                    <span class="text-xs font-bold text-amber-500 uppercase tracking-wider block">Dikirim</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1 block"><?= (int)($stats['dikirim'] ?? $stats['menunggu'] ?? 0); ?></span>
+                    <span class="text-[11px] text-amber-500/80 font-medium">Antrean masuk</span>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
                     <i class="bi bi-hourglass-split"></i>
                 </div>
             </div>
 
-            <!-- Diproses -->
+            <!-- Sedang Diproses -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-blue-500 uppercase tracking-wider block">Diproses</span>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1 block"><?= (int)($stats['diproses'] ?? 0); ?></span>
-                    <span class="text-[11px] text-blue-500/80 font-medium">Sedang ditindak</span>
+                    <span class="text-xs font-bold text-blue-500 uppercase tracking-wider block">Sedang Diproses</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1 block"><?= (int)($stats['sedang_diproses'] ?? $stats['diproses'] ?? 0); ?></span>
+                    <span class="text-[11px] text-blue-500/80 font-medium">Sedang ditangani</span>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
-                    <i class="bi bi-arrow-repeat"></i>
+                    <i class="bi bi-gear-wide-connected"></i>
                 </div>
             </div>
 
-            <!-- Selesai -->
+            <!-- Closed -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider block">Selesai</span>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1 block"><?= (int)($stats['selesai'] ?? 0); ?></span>
-                    <span class="text-[11px] text-emerald-500/80 font-medium">Telah terselesaikan</span>
+                    <span class="text-xs font-bold text-emerald-500 uppercase tracking-wider block">Closed</span>
+                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1 block"><?= (int)($stats['closed'] ?? $stats['selesai'] ?? 0); ?></span>
+                    <span class="text-[11px] text-emerald-500/80 font-medium">Selesai & ditutup</span>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
                     <i class="bi bi-check2-all"></i>
@@ -190,22 +190,19 @@
             <!-- Table Header Filter Bar -->
             <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 
-                <!-- Status Filter Pills -->
+                <!-- Status Filter Pills (3 Status Sesuai DB) -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-none" id="filter-pills" style="-webkit-overflow-scrolling: touch;">
                     <button type="button" onclick="filterByStatus('all', this)" class="status-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-orange-600 text-white shadow-xs shrink-0 cursor-pointer">
                         Semua (<?= (int)($stats['total'] ?? 0); ?>)
                     </button>
-                    <button type="button" onclick="filterByStatus('Menunggu', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Menunggu (<?= (int)($stats['menunggu'] ?? 0); ?>)
+                    <button type="button" onclick="filterByStatus('Dikirim', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
+                        Dikirim (<?= (int)($stats['dikirim'] ?? $stats['menunggu'] ?? 0); ?>)
                     </button>
-                    <button type="button" onclick="filterByStatus('Diproses', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Diproses (<?= (int)($stats['diproses'] ?? 0); ?>)
+                    <button type="button" onclick="filterByStatus('Sedang Diproses', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
+                        Sedang Diproses (<?= (int)($stats['sedang_diproses'] ?? $stats['diproses'] ?? 0); ?>)
                     </button>
-                    <button type="button" onclick="filterByStatus('Selesai', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Selesai (<?= (int)($stats['selesai'] ?? 0); ?>)
-                    </button>
-                    <button type="button" onclick="filterByStatus('Ditutup', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
-                        Ditutup (<?= (int)($stats['ditutup'] ?? 0); ?>)
+                    <button type="button" onclick="filterByStatus('Closed', this)" class="status-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all shrink-0 cursor-pointer">
+                        Closed (<?= (int)($stats['closed'] ?? $stats['selesai'] ?? 0); ?>)
                     </button>
                 </div>
 
@@ -533,7 +530,7 @@
                     <i class="bi bi-check-lg"></i>
                 </span>
                 <div class="flex items-center justify-between gap-2">
-                    <span class="font-bold text-slate-800 text-[11px]">1. Menunggu</span>
+                    <span class="font-bold text-slate-800 text-[11px]">1. Dikirim</span>
                     <span id="step1Time" class="text-[10px] font-mono text-emerald-600 font-bold whitespace-nowrap">-</span>
                 </div>
                 <p class="text-[10px] text-slate-400 leading-snug mt-0.5">
@@ -547,7 +544,7 @@
                     <!-- Dynamic Icon -->
                 </span>
                 <div class="flex items-center justify-between gap-2">
-                    <span id="step2Title" class="font-bold text-[11px]">2. Diproses</span>
+                    <span id="step2Title" class="font-bold text-[11px]">2. Sedang Diproses</span>
                     <span id="step2Time" class="text-[10px] font-mono font-bold whitespace-nowrap">-</span>
                 </div>
                 <p id="step2Desc" class="text-[10px] text-slate-400 leading-snug mt-0.5">
@@ -570,7 +567,7 @@
                     <!-- Dynamic Icon -->
                 </span>
                 <div class="flex items-center justify-between gap-2">
-                    <span id="step3Title" class="font-bold text-[11px]">3. Selesai</span>
+                    <span id="step3Title" class="font-bold text-[11px]">3. Closed</span>
                     <span id="step3Time" class="text-[10px] font-mono font-bold whitespace-nowrap">-</span>
                 </div>
                 <p id="step3Desc" class="text-[10px] text-slate-400 leading-snug mt-0.5">
@@ -587,8 +584,8 @@
                 </div>
             </div>
 
-            <!-- Step 4: Ditutup -->
-            <div class="relative">
+            <!-- Step 4: Ditutup (Hidden) -->
+            <div class="relative hidden" id="popStep4Container">
                 <span id="step4Icon" class="absolute -left-7 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border">
                     <!-- Dynamic Icon -->
                 </span>
@@ -827,6 +824,14 @@
         }
 
         // Search in Table & Mobile Cards
+        function getNormalizedStatus(st) {
+            if (!st) return 'Dikirim';
+            if (st === 'Menunggu') return 'Dikirim';
+            if (st === 'Diproses') return 'Sedang Diproses';
+            if (st === 'Selesai' || st === 'Ditutup') return 'Closed';
+            return st;
+        }
+
         function searchTable() {
             applyFilters();
         }
@@ -839,7 +844,7 @@
             let visibleRows = 0;
             rows.forEach(row => {
                 const rowStatus = row.getAttribute('data-status');
-                const matchesStatus = (currentFilterStatus === 'all' || rowStatus === currentFilterStatus);
+                const matchesStatus = (currentFilterStatus === 'all' || getNormalizedStatus(rowStatus) === getNormalizedStatus(currentFilterStatus));
                 const text = row.textContent.toLowerCase();
                 const matchesQuery = !query || text.includes(query);
                 if (matchesStatus && matchesQuery) {
@@ -853,7 +858,7 @@
             let visibleCards = 0;
             cards.forEach(card => {
                 const cardStatus = card.getAttribute('data-status');
-                const matchesStatus = (currentFilterStatus === 'all' || cardStatus === currentFilterStatus);
+                const matchesStatus = (currentFilterStatus === 'all' || getNormalizedStatus(cardStatus) === getNormalizedStatus(currentFilterStatus));
                 const text = card.textContent.toLowerCase();
                 const matchesQuery = !query || text.includes(query);
                 if (matchesStatus && matchesQuery) {
