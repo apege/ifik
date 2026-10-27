@@ -235,7 +235,12 @@ class DosenWali extends CI_Controller {
         ));
     }
 
-    // AJAX Endpoint: Update status per-file (Approved / Rejected)
+    /**
+     * [MODUL APPROVAL TA] AJAX Endpoint: Update status verifikasi per-berkas (Valid / Invalid / Pending).
+     * 
+     * @return json Response status berhasil/gagal dan feedback pesan
+     * @affected_table file_pendaftaran_ta
+     */
     public function update_file_approval_ajax() {
         $nim = $this->input->post('nim');
         $file_type = $this->input->post('file_type');
@@ -268,7 +273,12 @@ class DosenWali extends CI_Controller {
             )));
     }
 
-    // AJAX Endpoint: Approve Semua / Tolak Semua Berkas
+    /**
+     * [MODUL APPROVAL TA] AJAX Endpoint: Menyetujui (Approve) seluruh berkas persyaratan TA mahasiswa sekaligus.
+     * 
+     * @return json Response status massal
+     * @affected_table file_pendaftaran_ta
+     */
     public function approve_all_files_ajax() {
         $nim = $this->input->post('nim');
         $status = $this->input->post('status');
@@ -291,7 +301,12 @@ class DosenWali extends CI_Controller {
         ));
     }
 
-    // AJAX Endpoint: Update keseluruhan Approval Dosen Wali
+    /**
+     * [MODUL APPROVAL TA] AJAX Endpoint: Keputusan final persetujuan pendaftaran TA oleh Dosen Wali (Disetujui / Revisi / Ditolak).
+     * 
+     * @return json Response status dan pesan notifikasi
+     * @affected_table pendaftaran_ta
+     */
     public function ajax_approval() {
         $nim = $this->input->post('nim');
         $status = $this->input->post('status');

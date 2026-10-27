@@ -63,6 +63,12 @@ class ProgramStudi extends CI_Controller {
     /**
      * Halaman Utama Pengaturan Dinamis Program Studi
      */
+    /**
+     * [MODUL DINAMIS PRODI] Menampilkan master data Program Studi di Fakultas Industri Kreatif.
+     * 
+     * @return void Me-render view admin/program_studi
+     * @affected_table program_studi, user
+     */
     public function index() {
         $search = trim($this->input->get('q', true) ?? '');
         $status = trim($this->input->get('status', true) ?? 'all');
@@ -78,6 +84,12 @@ class ProgramStudi extends CI_Controller {
 
     /**
      * Simpan / Tambah / Update Program Studi
+     */
+    /**
+     * [MODUL DINAMIS PRODI] Menyimpan entri baru atau update Program Studi beserta jenjang (S1/D3/S2) dan Kaprodi.
+     * 
+     * @return void
+     * @affected_table program_studi
      */
     public function simpan() {
         $id          = $this->input->post('id', true);
@@ -126,6 +138,13 @@ class ProgramStudi extends CI_Controller {
     /**
      * Toggle status aktif / non-aktif
      */
+    /**
+     * [MODUL DINAMIS PRODI] Mengaktifkan atau menonaktifkan visibilitas Program Studi pada sistem.
+     * 
+     * @param  int $id ID Program Studi
+     * @return void
+     * @affected_table program_studi
+     */
     public function toggle_status($id) {
         $id = (int)$id;
         $new_status = $this->ProgramStudi_model->toggle_status($id);
@@ -145,6 +164,13 @@ class ProgramStudi extends CI_Controller {
 
     /**
      * Hapus Program Studi
+     */
+    /**
+     * [MODUL DINAMIS PRODI] Menghapus master data program studi dari database.
+     * 
+     * @param  int $id ID Program Studi
+     * @return void
+     * @affected_table program_studi
      */
     public function hapus($id) {
         $id = (int)$id;

@@ -577,6 +577,13 @@ class Mahasiswa extends CI_Controller {
         redirect('mahasiswa');
     }
 
+    /**
+     * [MODUL TA] Halaman utama pendaftaran Tugas Akhir (TA) mahasiswa (Multi-Step Form Stepper).
+     * Menangani Step 1 (Input Proposal), Step 2 (Upload Berkas Dinamis), Step 3 (Review & Final Submit).
+     *
+     * @return void
+     * @affected_table pendaftaran_ta, file_pendaftaran_ta, syarat_berkas_ta
+     */
     public function pendaftaran_ta() {
         $nim = $this->_get_current_nim();
 
@@ -864,6 +871,12 @@ class Mahasiswa extends CI_Controller {
             ]));
     }
 
+    /**
+     * [MODUL TA] AJAX Upload berkas persyaratan TA dengan penamaan file berbasis User ID dan validasi PDF 5MB.
+     *
+     * @return json Response success true/false, filename, dan link pratinjau berkas
+     * @affected_table file_pendaftaran_ta
+     */
     public function ajax_upload_file_ta() {
         $nim = $this->input->post('nim') ?: $this->_get_current_nim();
         $field_name = $this->input->post('field_name');
@@ -1194,6 +1207,13 @@ class Mahasiswa extends CI_Controller {
             ]));
     }
 
+    /**
+     * [MODUL TA] AJAX Auto-Save Draft formulir pendaftaran TA (Multi-Step Form: Step 1, 2, atau 3).
+     * Menyimpan progres judul, bahasa inggris, jenis TA, dan nomor tahapan draft ke tabel pendaftaran_ta.
+     *
+     * @return json Response status success beserta draft_step tersimpan
+     * @affected_table pendaftaran_ta
+     */
     public function ajax_save_draft_ta() {
         $prev_debug = $this->db->db_debug;
         $this->db->db_debug = FALSE;
@@ -2419,7 +2439,16 @@ public function upload_berkas_sidang_ajax() {
     // =========================================================
     // KERJA PRAKTIK (KP) - PENGAJUAN, PERSYARATAN DINAMIS & LAPORAN
     // =========================================================
+    // MODUL PENGAJUAN & LAPORAN KERJA PRAKTIK (KP)
+    // =========================================================
 
+    /**
+     * [MODUL KP] Halaman formulir pengajuan KP mahasiswa dan pemrosesan submit pendaftaran instansi.
+     * Mengambil profil mahasiswa, konfigurasi persyaratan dinamis, serta kalkulasi tahapan workflow KP.
+     *
+     * @return void Me-render view mahasiswa/pengajuan_kp
+     * @affected_table tb_kp, file_pendaftaran_kp, syarat_berkas_kp
+     */
     public function pengajuan_kp() {
         $nim = $this->_get_current_nim();
         $user_id = $this->_get_current_user_id();
@@ -2541,6 +2570,13 @@ public function upload_berkas_sidang_ajax() {
         $this->load->view('mahasiswa/pengajuan_kp', $data);
     }
 
+    /**
+     * [MODUL KP] AJAX Auto-Save Draft formulir pengajuan instansi KP mahasiswa.
+     * Menyimpan data isian sementara ke tabel tb_kp tanpa memicu validasi upload berkas wajib.
+     *
+     * @return json Response status 'ok', id_kp, status_file, dan waktu tersimpan
+     * @affected_table tb_kp
+     */
     public function ajax_save_draft_kp() {
         header('Content-Type: application/json');
         $nim = $this->_get_current_nim();
@@ -2603,6 +2639,13 @@ public function upload_berkas_sidang_ajax() {
         ]);
     }
 
+    /**
+     * [MODUL KP] AJAX Upload berkas persyaratan KP dinamis per kode_berkas.
+     * Memvalidasi file PDF maks 5MB, menyimpan fisik file ke uploads/persyaratan_kp/, dan mencatat ke file_pendaftaran_kp.
+     *
+     * @return json Response status berhasil/gagal beserta filename dan info berkas
+     * @affected_table file_pendaftaran_kp
+     */
     public function ajax_upload_file_kp() {
         header('Content-Type: application/json');
         $nim = $this->_get_current_nim();
@@ -2687,6 +2730,13 @@ public function upload_berkas_sidang_ajax() {
         ]);
     }
 
+    /**
+     * [MODUL KP] AJAX Hapus berkas persyaratan KP yang telah diunggah.
+     * Berkas yang sudah disetujui LAA dilindungi dan tidak dapat dihapus.
+     *
+     * @return json Response success true/false
+     * @affected_table file_pendaftaran_kp
+     */
     public function ajax_delete_file_kp() {
         header('Content-Type: application/json');
         $nim = $this->_get_current_nim();
@@ -2828,6 +2878,13 @@ public function upload_berkas_sidang_ajax() {
         redirect('mahasiswa/pengajuan_kp?step=2');
     }
 
+    /**
+     * [MODUL KP] Pengunggahan Laporan Akhir KP dan Lembar Penilaian Pembimbing Lapangan.
+     * Mengubah status_file di tb_kp menjadi 'Sudah Upload Laporan' dan menyimpan dokumen ke file_laporan_kp.
+     *
+     * @return void
+     * @affected_table tb_kp, file_laporan_kp
+     */
     public function laporan_kp() {
         $nim = $this->_get_current_nim();
         $user_id = $this->_get_current_user_id();

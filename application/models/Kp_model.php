@@ -261,6 +261,12 @@ class Kp_model extends CI_Model {
     // MASTER PERSYARATAN KP DINAMIS (syarat_berkas_kp) - KHUSUS SUPER ADMIN
     // =========================================================================
 
+    /**
+     * [SUPER ADMIN DINAMIS] Mengambil semua master berkas persyaratan KP untuk panel admin.
+     *
+     * @return array Daftar seluruh dokumen persyaratan terurut berdasarkan kolom urutan
+     * @affected_table syarat_berkas_kp
+     */
     public function get_all_syarat_kp() {
         if (!$this->db->table_exists('syarat_berkas_kp')) return [];
         $prev_debug = $this->db->db_debug;
@@ -275,6 +281,13 @@ class Kp_model extends CI_Model {
         }
     }
 
+    /**
+     * [MAHASISWA FORM DINAMIS] Mengambil daftar berkas persyaratan KP yang berstatus aktif (is_active = 1).
+     * Digunakan untuk me-render input file dinamis pada formulir pendaftaran mahasiswa.
+     *
+     * @return array Daftar persyaratan aktif
+     * @affected_table syarat_berkas_kp
+     */
     public function get_active_syarat_kp() {
         if (!$this->db->table_exists('syarat_berkas_kp')) return [];
         $prev_debug = $this->db->db_debug;
@@ -289,6 +302,14 @@ class Kp_model extends CI_Model {
         }
     }
 
+    /**
+     * [SUPER ADMIN] Menambah atau memperbarui master berkas persyaratan KP.
+     *
+     * @param  int|null $id   ID persyaratan (null jika tambah baru)
+     * @param  array    $data Payload (kode_berkas, nama_berkas, is_required, is_active, urutan)
+     * @return int|false      ID baris tersimpan
+     * @affected_table syarat_berkas_kp
+     */
     public function save_syarat_kp($id, $data) {
         if (!$this->db->table_exists('syarat_berkas_kp')) return false;
         if (!empty($id)) {
@@ -306,6 +327,13 @@ class Kp_model extends CI_Model {
         }
     }
 
+    /**
+     * [SUPER ADMIN] Mengubah status keaktifan (aktif/nonaktif) persyaratan berkas KP secara instan.
+     *
+     * @param  int $id ID berkas persyaratan
+     * @return bool    True jika status berhasil di-toggle
+     * @affected_table syarat_berkas_kp
+     */
     public function toggle_syarat_kp($id) {
         if (!$this->db->table_exists('syarat_berkas_kp')) return false;
         $row = $this->db->get_where('syarat_berkas_kp', ['id' => (int)$id])->row_array();
@@ -314,6 +342,13 @@ class Kp_model extends CI_Model {
         return $this->db->where('id', (int)$id)->update('syarat_berkas_kp', ['is_active' => $new_status]);
     }
 
+    /**
+     * [SUPER ADMIN] Menghapus master persyaratan berkas KP dari database.
+     *
+     * @param  int $id ID berkas persyaratan
+     * @return bool
+     * @affected_table syarat_berkas_kp
+     */
     public function delete_syarat_kp($id) {
         if (!$this->db->table_exists('syarat_berkas_kp')) return false;
         return $this->db->where('id', (int)$id)->delete('syarat_berkas_kp');
@@ -323,6 +358,14 @@ class Kp_model extends CI_Model {
     // DATA UTAMA PENGAJUAN KP (tb_kp)
     // =========================================================================
 
+    /**
+     * [READ] Mengambil record pendaftaran KP milik mahasiswa berdasarkan NIM atau user_id.
+     *
+     * @param  string      $nim     Nomor Induk Mahasiswa
+     * @param  string|null $user_id ID Akun User (opsional)
+     * @return array|null           Data baris pengajuan KP lengkap beserta nama dosen pembimbing
+     * @affected_table tb_kp
+     */
     public function get_kp_by_mhs($nim, $user_id = null) {
         if (!$this->db->table_exists('tb_kp')) return null;
         $target_ids = $this->get_target_mhs_ids($nim, $user_id);
@@ -353,6 +396,16 @@ class Kp_model extends CI_Model {
         return $row;
     }
 
+    /**
+     * [CREATE / UPDATE] Menyimpan data formulir instansi KP mahasiswa (Auto-Save Draft & Submit).
+     * Menerapkan mekanisme upsert: update jika sudah ada pengajuan, insert jika baru pertama kali.
+     *
+     * @param  string      $nim     NIM mahasiswa
+     * @param  string|null $user_id ID akun pengguna
+     * @param  array       $payload Data instansi, alamat, kota, dan status pengajuan
+     * @return string|false         ID KP (id_kp) yang disimpan
+     * @affected_table tb_kp
+     */
     public function save_kp($nim, $user_id, $payload) {
         if (!$this->db->table_exists('tb_kp')) return false;
         $existing = $this->get_kp_by_mhs($nim, $user_id);
@@ -394,6 +447,15 @@ class Kp_model extends CI_Model {
     // FILE PERSYARATAN KP (file_pendaftaran_kp)
     // =========================================================================
 
+    /**
+     * [READ] Mengambil seluruh berkas persyaratan dokumen pendaftaran KP yang sudah diunggah mahasiswa.
+     *
+     * @param  string      $nim     NIM mahasiswa
+     * @param  string|null $id_kp   ID pengajuan KP (opsional)
+     * @param  string|null $user_id ID akun mahasiswa
+     * @return array                Array map berkas dengan indeks kode_berkas
+     * @affected_table file_pendaftaran_kp
+     */
     public function get_files_pendaftaran_kp($nim, $id_kp = null, $user_id = null) {
         if (!$this->db->table_exists('file_pendaftaran_kp')) return [];
         $target_ids = $this->get_target_mhs_ids($nim, $user_id);
@@ -427,6 +489,18 @@ class Kp_model extends CI_Model {
         return $map;
     }
 
+    /**
+     * [CREATE / UPDATE] Menyimpan data berkas pendaftaran KP mahasiswa ke tabel file_pendaftaran_kp.
+     *
+     * @param  string      $nim         NIM mahasiswa
+     * @param  string|null $user_id     ID user
+     * @param  string      $id_kp       ID pengajuan KP
+     * @param  string      $kode_berkas Kode dokumen persyaratan dinamis
+     * @param  string      $filename    Nama file PDF yang tersimpan di disk
+     * @param  string      $status_laa  Status awal verifikasi ('Draft' atau 'Pending')
+     * @return bool                     True jika operasi insert/update berhasil
+     * @affected_table file_pendaftaran_kp
+     */
     public function save_file_pendaftaran_kp($nim, $user_id, $id_kp, $kode_berkas, $filename, $status_laa = 'Draft') {
         if (!$this->db->table_exists('file_pendaftaran_kp')) return false;
         $fields = $this->db->list_fields('file_pendaftaran_kp');
@@ -467,6 +541,15 @@ class Kp_model extends CI_Model {
         }
     }
 
+    /**
+     * [UPDATE] Mengubah status semua berkas persyaratan KP mahasiswa dari 'Draft' menjadi 'Pending' untuk verifikasi LAA.
+     *
+     * @param  string      $nim     NIM mahasiswa
+     * @param  string|null $user_id ID user
+     * @param  string|null $id_kp   ID pengajuan KP
+     * @return bool
+     * @affected_table file_pendaftaran_kp
+     */
     public function submit_files_pendaftaran_kp($nim, $user_id, $id_kp = null) {
         if (!$this->db->table_exists('file_pendaftaran_kp')) return false;
         $target_ids = $this->get_target_mhs_ids($nim, $user_id);
@@ -491,6 +574,15 @@ class Kp_model extends CI_Model {
         ]);
     }
 
+    /**
+     * [DELETE] Menghapus dokumen persyaratan KP tertentu baik file fisik di disk maupun baris database.
+     *
+     * @param  string      $nim         NIM mahasiswa
+     * @param  string|null $user_id     ID user
+     * @param  string      $kode_berkas Kode berkas persyaratan
+     * @return bool
+     * @affected_table file_pendaftaran_kp
+     */
     public function delete_file_pendaftaran_kp($nim, $user_id, $kode_berkas) {
         if (!$this->db->table_exists('file_pendaftaran_kp')) return false;
         $target_ids = $this->get_target_mhs_ids($nim, $user_id);
@@ -521,6 +613,15 @@ class Kp_model extends CI_Model {
     // FILE LAPORAN & PENILAIAN KP (file_laporan_kp)
     // =========================================================================
 
+    /**
+     * [READ] Mengambil berkas laporan akhir KP dan bukti penilaian lapangan yang diunggah mahasiswa.
+     *
+     * @param  string      $nim     NIM mahasiswa
+     * @param  string|null $id_kp   ID pengajuan KP
+     * @param  string|null $user_id ID user
+     * @return array
+     * @affected_table file_laporan_kp
+     */
     public function get_files_laporan_kp($nim, $id_kp = null, $user_id = null) {
         if (!$this->db->table_exists('file_laporan_kp')) return [];
         $target_ids = $this->get_target_mhs_ids($nim, $user_id);
@@ -554,6 +655,18 @@ class Kp_model extends CI_Model {
         return $map;
     }
 
+    /**
+     * [CREATE / UPDATE] Menyimpan berkas laporan akhir KP dan nilai pembimbing lapangan ke tabel file_laporan_kp.
+     *
+     * @param  string      $nim       NIM mahasiswa
+     * @param  string|null $user_id   ID user
+     * @param  string      $id_kp     ID pengajuan KP
+     * @param  string      $nama_item 'laporan_kp' atau 'nilai_lapangan'
+     * @param  string      $filename  Nama file tersimpan
+     * @param  int         $poin      Poin nilai jika ada
+     * @return bool
+     * @affected_table file_laporan_kp
+     */
     public function save_file_laporan_kp($nim, $user_id, $id_kp, $nama_item, $filename, $poin = 0) {
         if (!$this->db->table_exists('file_laporan_kp')) return false;
         $fields = $this->db->list_fields('file_laporan_kp');

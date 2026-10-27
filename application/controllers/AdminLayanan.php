@@ -1965,6 +1965,12 @@ class AdminLayanan extends CI_Controller {
         }
     }
 
+    /**
+     * [MODUL DINAMIS KP] Halaman panel Super Admin untuk mengelola persyaratan dokumen KP dinamis.
+     *
+     * @return void Me-render view admin_layanan/pengaturan_berkas_kp
+     * @affected_table syarat_berkas_kp
+     */
     public function pengaturan_berkas_kp() {
         $this->_require_super_admin_kp();
         $this->load->model('Kp_model');
@@ -1973,6 +1979,12 @@ class AdminLayanan extends CI_Controller {
         $this->load->view('admin_layanan/pengaturan_berkas_kp', $data);
     }
 
+    /**
+     * [MODUL DINAMIS KP] Menyimpan penambahan atau pembaruan berkas persyaratan KP beserta upload template dokumen.
+     *
+     * @return void Redirect ke superadmin/pengaturan_berkas_kp
+     * @affected_table syarat_berkas_kp
+     */
     public function simpan_syarat_kp() {
         $this->_require_super_admin_kp();
         $this->load->model('Kp_model');
