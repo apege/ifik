@@ -1,8 +1,36 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Controller KoordinatorTA
+ * 
+ * Modul Pengelolaan Tugas Akhir Fakultas Industri Kreatif (IFIK) - Telkom University
+ * Menangani seluruh alur kerja koordinasi tugas akhir tingkat fakultas:
+ * 1. Tab 1: Pendaftaran & Approval Pengajuan Tugas Akhir (Single & Batch)
+ * 2. Tab 2: Plotting & Penugasan Dosen Penguji Evaluasi Preview 2 (Conflict of Interest Protection)
+ * 3. Tab 3: Penjadwalan Sidang Komprehensif, Alokasi Ruangan Bebas Bentrok, & Penilaian Yudisium
+ * 4. Monitoring Pipeline 9-Tahapan Tugas Akhir Mahasiswa (Dosen Wali s/d Lulus)
+ * 5. Pengelolaan Status & Downgrade / Reset Tahapan Bimbingan (Role Protected & Audit Trail)
+ * 6. Master Rubrik Penilaian Dinamis Multi-Versi berbasis Program Studi & Konsentrasi Peminatan
+ * 7. Integrasi Helpdesk Live Chat Dukungan Mahasiswa
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Controllers
+ * @category   Koordinator_TA
+ * @author     Muhammad Alif Muzakky
+ * @link       https://ifik.telkomuniversity.ac.id
+ */
 class KoordinatorTA extends CI_Controller {
 
+        /**
+     * Konstruktor KoordinatorTA
+     * 
+     * Menginisialisasi model KoordinatorTA_model, helper formulir, URL, dan teks.
+     * Menerapkan pengamanan ganda:
+     * - Autentikasi sesi login aktif
+     * - Otorisasi Role-Based Access Control (RBAC): Hanya Role 6 (Koordinator TA), Role 1 (Admin), dan Role 22 (Super Admin)
+     * - Penanganan respon otomatis: HTTP 401/403 format JSON jika request berasal dari AJAX, atau redirect ke halaman login
+     */
     public function __construct() {
         parent::__construct();
         $this->load->model('KoordinatorTA_model');
@@ -45,6 +73,17 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // Dashboard Koordinator TA: Daftar Mahasiswa Mendaftar Tugas Akhir, Plotting Preview 2, & Penjadwalan Sidang
+        /**
+     * Dashboard Utama Koordinator TA
+     * 
+     * Menyajikan antarmuka SPA terpadu 3 Tab Kerja:
+     * - Tab 1: Antrean Pendaftaran TA baru & approval proposal pembimbing
+     * - Tab 2: Antrean Mahasiswa siap plotting dosen penguji tahap Preview 2
+     * - Tab 3: Antrean Penjadwalan sidang, pemilihan master ruangan, dan input nilai
+     * Menginjeksikan data master prodi dan master peminatan dinamis untuk form rubrik.
+     * 
+     * @return void Render view koordinator_ta/dashboard
+     */
     public function index() {
         $nip_koor = $this->session->userdata('nip') ?: ($this->session->userdata('username') ?: '1987010102');
         $data['title'] = 'Dashboard Koordinator TA';
@@ -61,6 +100,16 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // Halaman Monitoring Status Peserta Tugas Akhir (Semua Tahapan: Dosen Wali -> Lulus)
+        /**
+     * Halaman Monitoring Status Peserta Tugas Akhir
+     * 
+     * Melacak dan memetakan progres seluruh peserta tugas akhir ke dalam 9 tahapan pipeline:
+     * (1. Dosen Wali -> 2. Admin LAA -> 3. Koordinator TA -> 4. Ketua KK -> 5. Preview 1 ->
+     *  6. Preview 2 -> 7. Preview 3 -> 8. Sidang TA -> 9. Lulus Sidang)
+     * Dilengkapi fitur slide-over drawer untuk inspeksi draf naskah, laporan Turnitin, dan berkas syarat LAA.
+     * 
+     * @return void Render view koordinator_ta/monitoring
+     */
     public function monitoring() {
         $nip_koor = $this->session->userdata('nip') ?: ($this->session->userdata('username') ?: '1987010102');
         $data['title'] = 'Monitoring Status Peserta Tugas Akhir';
@@ -72,11 +121,28 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // Alias route status_peserta_ta
+        /**
+     * Route Alias untuk Monitoring Peserta Tugas Akhir
+     * 
+     * Memelihara kompatibilitas rute lama (/koordinatorta/status_peserta_ta) agar mengarah
+     * ke method monitoring() tanpa memutus tautan yang telah tersebar.
+     * 
+     * @return void
+     */
     public function status_peserta_ta() {
         $this->monitoring();
     }
 
     // Halaman Khusus Koordinator TA: Kelola Status & Downgrade / Reset Tahapan Tugas Akhir
+        /**
+     * Halaman Kelola Status & Downgrade / Reset Tahapan Tugas Akhir
+     * 
+     * Menyediakan fasilitas administratif khusus untuk menurunkan status tahapan bimbingan
+     * mahasiswa (misal: karena cuti akademik, pergantian judul total, atau tidak aktif bimbingan).
+     * Mengambil daftar kandidat yang valid dan 50 catatan log audit riwayat penurunan terbaru.
+     * 
+     * @return void Render view koordinator_ta/kelola_tahap
+     */
     public function kelola_tahap() {
         $nip_koor = $this->session->userdata('nip') ?: ($this->session->userdata('username') ?: '1987010102');
         $data['title'] = 'Kelola Status & Downgrade Tahapan TA — IK Labs Portal';
@@ -88,6 +154,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Filter & Search Candidates for Downgrade
+        /**
+     * AJAX Endpoint: Pengambilan Data Kandidat Mahasiswa untuk Downgrade
+     * 
+     * Memfilter kandidat berdasarkan tahapan aktif (stage) dan kueri pencarian teks (search).
+     * Mengembalikan data mahasiswa lengkap dengan judul, pembimbing, dan status berkas.
+     * 
+     * @return void Output JSON format: {status: bool, total: int, data: array}
+     */
     public function ajax_get_downgrade_candidates() {
         header('Content-Type: application/json');
 
@@ -103,6 +177,15 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Eksekusi Downgrade / Reset Tahapan Mahasiswa
+        /**
+     * AJAX Endpoint: Eksekusi Transaksional Penurunan / Reset Tahapan Mahasiswa
+     * 
+     * Memverifikasi otorisasi Role ID (hanya Koordinator TA / Super Admin), memvalidasi
+     * parameter NIM, target tahap, alasan justifikasi (min 5 karakter), dan checklist persetujuan risiko.
+     * Mendelegasikan eksekusi pembersihan naskah, unlink file fisik, dan pembaruan database ke model.
+     * 
+     * @return void Output JSON hasil eksekusi dan pembaruan koleksi kandidat & audit log
+     */
     public function ajax_execute_downgrade() {
         header('Content-Type: application/json');
 
@@ -153,6 +236,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Realtime Monitoring Sync (Background Polling for Monitoring Peserta TA)
+        /**
+     * AJAX Endpoint: Sinkronisasi Data Monitoring Real-Time & Rekapitulasi KPI
+     * 
+     * Dipanggil secara periodik (background polling interval 30 detik) atau tombol sync manual
+     * untuk menghitung agregasi statistik peserta per tahapan pipeline dan status kelengkapan berkas LAA.
+     * 
+     * @return void Output JSON format: {status: bool, data: array, stats: array}
+     */
     public function ajax_realtime_monitoring() {
         header('Content-Type: application/json');
 
@@ -263,6 +354,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Approval Koordinator TA dengan Validasi LAA & Pembimbing 1 & 2
+        /**
+     * AJAX Endpoint: Persetujuan / Penolakan Tunggal Pendaftaran Tugas Akhir (Tab 1)
+     * 
+     * Memproses keputusan persetujuan proposal mahasiswa secara satuan, menetapkan Dosen Pembimbing 1
+     * dan Pembimbing 2, mencatat catatan revisi, dan memperbarui status bimbingan pada tabel guidance.
+     * 
+     * @return void Output JSON status pembaruan
+     */
     public function ajax_approval() {
         header('Content-Type: application/json');
 
@@ -356,6 +455,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Batch Approval Koordinator TA (Multi-Select & Per-Mahasiswa Plotting)
+        /**
+     * AJAX Endpoint: Persetujuan Massal Pendaftaran Tugas Akhir (Batch Action Tab 1)
+     * 
+     * Menerima array NIM mahasiswa terpilih, memvalidasi kuota dan pemetaan pembimbing,
+     * lalu mengeksekusi batch approval dalam satu database transaction terproteksi.
+     * 
+     * @return void Output JSON status eksekusi massal
+     */
     public function ajax_batch_approval() {
         header('Content-Type: application/json');
 
@@ -496,6 +603,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Update Dosen Penguji & Jadwal Sidang Preview 2 (Single Mahasiswa)
+        /**
+     * AJAX Endpoint: Penugasan Dosen Penguji Evaluasi Preview 2 (Tab 2)
+     * 
+     * Memvalidasi aturan bebas benturan kepentingan (Conflict of Interest Protection) agar Dosen Pembimbing
+     * mahasiswa tidak ditugaskan sebagai penguji, lalu menyimpan penguji 1 dan 2 ke tabel guidance.
+     * 
+     * @return void Output JSON status plotting penguji
+     */
     public function ajax_update_preview2_penguji() {
         header('Content-Type: application/json');
 
@@ -614,6 +729,14 @@ class KoordinatorTA extends CI_Controller {
     // =========================================================
 
     // AJAX Endpoint: Update Jadwal Sidang TA Single Mahasiswa
+        /**
+     * AJAX Endpoint: Penetapan Jadwal, Waktu, dan Ruangan Sidang Komprehensif (Tab 3)
+     * 
+     * Memeriksa deteksi bentrok ruangan (Room Conflict Detection) pada master_ruangan di slot waktu
+     * yang sama sebelum mengunci jadwal sidang mahasiswa di tabel guidance.
+     * 
+     * @return void Output JSON status penjadwalan sidang
+     */
     public function ajax_update_jadwal_sidang() {
         header('Content-Type: application/json');
 
@@ -762,6 +885,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Simpan Penilaian Akhir Sidang TA
+        /**
+     * AJAX Endpoint: Penyimpanan Nilai Rubrik Sidang Komprehensif (Tab 3)
+     * 
+     * Menerima input skor per butir kriteria rubrik dari Dewan Penguji 1, Penguji 2, dan Pembimbing,
+     * mengkalkulasi rata-rata tertimbang (35% P1 + 35% P2 + 30% Pb), serta menentukan indeks mutu nilai (A s/d E).
+     * 
+     * @return void Output JSON hasil kalkulasi nilai dan status kelulusan
+     */
     public function ajax_simpan_penilaian_sidang() {
         header('Content-Type: application/json');
 
@@ -807,6 +938,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Publish / Republish / Set Jadwal Publikasi Nilai Sidang
+        /**
+     * AJAX Endpoint: Publikasi Nilai Sidang / Rilis Yudisium Resmi (Tab 3)
+     * 
+     * Mengubah status publikasi nilai menjadi 'Published', mengesahkan status kelulusan akhir mahasiswa
+     * untuk membuka transkrip sidang di portal mahasiswa, dan mencatat log audit ke log_approval_history.
+     * 
+     * @return void Output JSON status publikasi nilai
+     */
     public function ajax_publish_penilaian_sidang() {
         header('Content-Type: application/json');
 
@@ -886,6 +1025,14 @@ class KoordinatorTA extends CI_Controller {
     /**
      * Halaman Dedicated Form Master Rubrik Penilaian Sidang TA (Dinamis Nilai)
      */
+        /**
+     * Halaman Dedicated Pengelolaan Master Rubrik Penilaian Sidang
+     * 
+     * Mengelola matriks indikator penilaian per program studi (DKV, DI, DP, KTF, SR, FA, MD, IF)
+     * dan peminatan konsentrasi keilmuan secara dinamis dari tabel master_prodi dan master_peminatan.
+     * 
+     * @return void Render view koordinator_ta/master_rubrik
+     */
     public function master_rubrik() {
         $data['title'] = 'Kelola Master Rubrik Penilaian Sidang TA';
         $data['rubriks'] = $this->KoordinatorTA_model->get_all_master_rubrik();
@@ -905,6 +1052,13 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Ambil Master Peminatan (Bisa filter kode_prodi)
+        /**
+     * AJAX Endpoint: Pemuatan Data Peminatan Dinamis Berdasarkan Kode Prodi
+     * 
+     * Menghubungkan dropdown program studi dengan konsentrasi peminatan aktif secara cascading via AJAX.
+     * 
+     * @return void Output JSON format: {status: bool, data: array}
+     */
     public function ajax_get_master_peminatan() {
         header('Content-Type: application/json');
         $kode_prodi = $this->input->get('kode_prodi') ?: $this->input->post('kode_prodi');
@@ -916,6 +1070,14 @@ class KoordinatorTA extends CI_Controller {
     }
 
     // AJAX Endpoint: Simpan / Update Master Rubrik Dinamis
+        /**
+     * AJAX Endpoint: Penyimpanan & Multi-Version Archiving Master Rubrik Penilaian
+     * 
+     * Memvalidasi persentase total bobot kriteria wajib bernilai 100.0%. Jika as_new_version = true,
+     * mengarsipkan versi rubrik kurikulum lama (status = 'archived') dan menerbitkan versi baru (versi + 1).
+     * 
+     * @return void Output JSON status penyimpanan instrumen rubrik
+     */
     public function ajax_simpan_master_rubrik() {
         header('Content-Type: application/json');
 

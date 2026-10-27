@@ -1,8 +1,31 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Controller DosenWali
+ * 
+ * Modul Pembinaan Akademik Dosen Wali & Approval Dua Tahap (KRS & KHS).
+ * Mengelola seluruh interaksi bimbingan akademik antara dosen wali dan mahasiswa binaan:
+ * 1. Tahap 1: Verifikasi & Persetujuan Kontrak KRS (Pemeriksaan berkas PDF KRS & beban SKS)
+ * 2. Tahap 2: Evaluasi & Penilaian Hasil Belajar KHS (Input nilai angka/huruf, autosave inline, import Excel SheetJS)
+ * 3. Persetujuan Nilai Per Mata Kuliah & Approval Massal (Multiple MK Approval)
+ * 4. Sinkronisasi otomatis kelulusan dan pemutakhiran status kelayakan maju sidang/tugas akhir
+ * 5. Manajemen tanda tangan digital dosen wali untuk pengesahan dokumen resmi
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Controllers
+ * @category   Dosen_Wali
+ * @author     Muhammad Alif Muzakky
+ */
 class DosenWali extends CI_Controller {
 
+        /**
+     * Konstruktor DosenWali
+     * 
+     * Memuat model DosenWali_model dan helper form/url.
+     * Menerapkan normalisasi URL (redirect 301 dari /dosenwali ke /dosen/wali)
+     * dan verifikasi keamanan sesi login serta otorisasi peran dosen (Role ID 1, 3, 6, 7, 9).
+     */
     public function __construct() {
         parent::__construct();
         $this->load->model('DosenWali_model');
@@ -908,6 +931,15 @@ class DosenWali extends CI_Controller {
      * MENU 1: Perwalian Tahap 1 (Kontrak KRS Awal Semester)
      * Dosen Wali memverifikasi berkas KRS, cek kuota SKS (max 24), dan menyetujui / meminta revisi.
      */
+        /**
+     * Halaman Perwalian Tahap 1: Verifikasi Kontrak KRS Mahasiswa Binaan
+     * 
+     * Menyajikan daftar seluruh mahasiswa bimbingan dosen wali yang sedang menempuh
+     * masa perwalian Tahap 1, kartu ringkasan metrik status (Total, Menunggu Review, Disetujui, Perlu Revisi),
+     * modal split-view dokumen PDF KRS, dan form penetapan keputusan.
+     * 
+     * @return void Render view dosen_wali/perwalian_tahap1
+     */
     public function perwalian_tahap1() {
         $this->load->model('Perwalian_model');
 
@@ -947,6 +979,15 @@ class DosenWali extends CI_Controller {
     /**
      * MENU 2: Perwalian Tahap 2 (Input & Evaluasi Nilai Akhir Semester)
      * Dosen Wali meng-generate MK, import Excel nilai, checklist lulus/tidak lulus, dan kunci perwalian.
+     */
+        /**
+     * Halaman Perwalian Tahap 2: Evaluasi Nilai KHS & Hasil Belajar
+     * 
+     * Menyajikan daftar mahasiswa binaan yang telah lulus/disetujui KRS Tahap 1-nya.
+     * Menyediakan fasilitas input nilai interaktif per mata kuliah, inline autosave,
+     * filter status kelulusan (Lulus, Belum Lulus, Menunggu Review), serta fitur multiple approval nilai per MK.
+     * 
+     * @return void Render view dosen_wali/perwalian_tahap2
      */
     public function perwalian_tahap2() {
         $this->load->model('Perwalian_model');
@@ -1010,6 +1051,14 @@ class DosenWali extends CI_Controller {
     /**
      * AJAX: Approval / Revisi KRS Tahap 1 oleh Dosen Wali
      */
+        /**
+     * AJAX Endpoint: Eksekusi Keputusan Persetujuan / Permintaan Revisi KRS Tahap 1
+     * 
+     * Memperbarui status kontrak KRS mahasiswa (status_tahap1 = 'Disetujui' / 'Revisi'),
+     * mencatat catatan bimbingan dosen wali, dan membuka akses mahasiswa melangkah ke Tahap 2.
+     * 
+     * @return void Output JSON format: {status: bool, message: string}
+     */
     public function perwalian_approve_tahap1() {
         $this->output->set_content_type('application/json');
         $this->load->model('Perwalian_model');
@@ -1063,6 +1112,14 @@ class DosenWali extends CI_Controller {
 
     /**
      * AJAX: Update Nilai Per Mata Kuliah (A, AB, B, BC, C, D, E) atau Switch Lulus/Tidak Lulus
+     */
+        /**
+     * AJAX Endpoint: Pembaruan Nilai Hasil Belajar Mata Kuliah Secara Inline
+     * 
+     * Menerima input skor angka atau huruf mutu dari dosen wali, mengkalkulasi bobot indeks prestasi,
+     * menentukan status kelulusan mata kuliah (Lulus jika nilai >= C/50), dan menyimpannya secara otomatis (inline autosave).
+     * 
+     * @return void Output JSON status pembaruan nilai
      */
     public function perwalian_update_nilai() {
         $this->output->set_content_type('application/json');
@@ -1120,6 +1177,14 @@ class DosenWali extends CI_Controller {
     /**
      * AJAX: Approve / Unapprove Mata Kuliah pada Tahap 2 (Satu-satu per MK atau Multiple Sekaligus)
      */
+        /**
+     * AJAX Endpoint: Persetujuan Kelulusan Nilai Per Mata Kuliah (Multiple Approval)
+     * 
+     * Mengunci nilai mata kuliah yang telah diisi dosen, mengubah statusnya menjadi Disetujui,
+     * dan menyinkronkan status kemajuan perwalian Tahap 2 mahasiswa secara otomatis.
+     * 
+     * @return void Output JSON status pengesahan nilai MK
+     */
     public function perwalian_approve_mk_tahap2() {
         $this->output->set_content_type('application/json');
         $this->load->model('Perwalian_model');
@@ -1162,6 +1227,14 @@ class DosenWali extends CI_Controller {
 
     /**
      * AJAX: Selesaikan & Kunci Perwalian Tahap 2
+     */
+        /**
+     * AJAX Endpoint: Finalisasi & Penguncian Evaluasi Tahap 2 KHS
+     * 
+     * Mengesahkan seluruh hasil studi semester mahasiswa, mengunci kontrak bimbingan,
+     * dan memperbarui status_tahap2 menjadi Disetujui / Selesai.
+     * 
+     * @return void Output JSON status finalisasi Tahap 2
      */
     public function perwalian_submit_tahap2() {
         $this->output->set_content_type('application/json');

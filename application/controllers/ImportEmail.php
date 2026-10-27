@@ -1,8 +1,33 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Controller ImportEmail
+ * 
+ * Modul Pengelolaan Data Akun Pengguna, Impor Berkas Spreadsheet, & Dispatcher Token Aktivasi.
+ * Mengelola siklus penyediaan akun baru di lingkungan Fakultas Industri Kreatif (IFIK):
+ * 1. Client-Side In-Memory Parsing file Excel (.xlsx/.xls via SheetJS) & CSV (.csv via PapaParse)
+ * 2. Pembersihan & validasi data (format email @telkomuniversity.ac.id, NIM/NIP, pencegahan duplikasi)
+ * 3. Batch insert pengguna baru dengan penetapan password default terenkripsi bcrypt
+ * 4. Pembuatan token aktivasi unik 8-karakter alfanumerik bebas ambiguitas (Unambiguous Cryptography)
+ * 5. Pengiriman undangan aktivasi massal via protokol SMTP resmi Telkom University
+ * 6. Kustomisasi template surel HTML korporat berlatar oranye-putih modern dengan tag dinamis
+ * 7. Hak akses berbasis peran (RBAC) dan pemisahan cakupan peran (Role Scoping Policy)
+ * 8. Fitur proteksi akun aktif (Protected Account Shield) dan reset darurat Super Admin
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Controllers
+ * @category   Admin_Tools
+ * @author     Muhammad Alif Muzakky
+ */
 class ImportEmail extends CI_Controller {
 
+        /**
+     * Konstruktor ImportEmail
+     * 
+     * Mengatur zona waktu default ke Asia/Jakarta (WIB), memuat helper url, form, html,
+     * pustaka session, dan model User_model. Memeriksa autentikasi login dan otorisasi peran.
+     */
     public function __construct() {
         parent::__construct();
         date_default_timezone_set('Asia/Jakarta');
@@ -15,6 +40,21 @@ class ImportEmail extends CI_Controller {
     /**
      * Strict Authentication & Role Check
      * Allowed Roles: Admin (1), Kepala Urusan (2), Admin LAA (5), Koordinator TA (6), Admin Prodi (16), Laboran (21), Super Admin (22)
+     */
+        /**
+     * Verifikasi Autentikasi Sesi & Pemeriksaan Peran (RBAC)
+     * 
+     * Memastikan pengguna memiliki sesi login aktif dan termasuk dalam peran yang berwenang:
+     * - Role 1: Administrator
+     * - Role 2: Kepala Urusan (Ka. Ur)
+     * - Role 5: Admin Layanan Akademik (LAA)
+     * - Role 6: Koordinator Tugas Akhir
+     * - Role 16: Admin Program Studi
+     * - Role 21: Laboran / Pengelola Lab
+     * - Role 22: Super Administrator
+     * Mengembalikan status HTTP 401/403 jika request via AJAX, atau mengalihkan ke halaman login.
+     * 
+     * @return bool True jika otentikasi dan otorisasi terpenuhi
      */
     private function _check_auth() {
         if (!$this->session->userdata('logged_in')) {
@@ -65,6 +105,18 @@ class ImportEmail extends CI_Controller {
     /**
      * Helper: Allowed import role IDs per user role
      */
+        /**
+     * Mendapatkan Daftar ID Peran yang Boleh Diimpor (Role Scoping Policy)
+     * 
+     * Menerapkan prinsip least privilege berdasarkan peran aktor yang sedang masuk:
+     * - Laboran (Role 21) hanya boleh mengelola: Dosen (3), Mahasiswa (4), Laboran (21)
+     * - Koordinator TA (Role 6) hanya boleh mengelola: Koordinator TA (6)
+     * - Admin LAA (Role 5) hanya boleh mengelola: Mahasiswa (4) & Admin LAA (5)
+     * - Super Admin, Admin, Ka.Ur, dan Admin Prodi memiliki wewenang mengelola seluruh peran
+     * 
+     * @param int $userRoleId Role ID aktor yang sedang login
+     * @return array Kumpulan ID peran yang dizinkan untuk diimpor/dikelola
+     */
     private function _get_allowed_import_roles($userRoleId) {
         $userRoleId = (int)$userRoleId;
         if ($userRoleId === 21) {
@@ -83,6 +135,15 @@ class ImportEmail extends CI_Controller {
 
     /**
      * Display the Admin / Laboran / LAA / Koordinator TA Email Import & Token Generator Dashboard
+     */
+        /**
+     * Menampilkan Halaman Utama Dashboard Import Email & Token Dispatcher
+     * 
+     * Mengambil data seluruh pengguna yang relevan dengan cakupan peran aktor,
+     * menghitung ringkasan statistik (total pengguna, akun ber-token, pengguna aktif),
+     * dan merender tampilan antarmuka admin/import_email dengan penyesuaian judul dinamis.
+     * 
+     * @return void Render view admin/import_email
      */
     public function index() {
         $roleId = (int)$this->session->userdata('role_id');
@@ -152,6 +213,14 @@ class ImportEmail extends CI_Controller {
     /**
      * AJAX: Get all users in formatted JSON structure
      */
+        /**
+     * AJAX Endpoint: Pemuatan Data Pengguna Format JSON
+     * 
+     * Digunakan oleh antarmuka klien untuk memperbarui tabel data pengguna secara real-time
+     * tanpa memerlukan muat ulang halaman penuh setelah operasi impor atau tokenisasi.
+     * 
+     * @return void Output JSON format: {status: 'success', data: array}
+     */
     public function get_users_json() {
         $this->output
             ->set_content_type('application/json')
@@ -163,6 +232,16 @@ class ImportEmail extends CI_Controller {
 
     /**
      * AJAX: Import bulk accounts from parsed Excel/CSV JSON
+     */
+        /**
+     * AJAX Endpoint: Eksekusi Batch Impor Akun Pengguna Baru
+     * 
+     * Menerima payload JSON hasil ekstraksi SheetJS/PapaParse dari sisi klien.
+     * Memvalidasi format email, kelayakan NIM/NIP, mencegah duplikasi terhadap akun yang ada,
+     * menghasilkan ID pengguna unik, menetapkan hash kata sandi default (bcrypt),
+     * dan menyisipkan data secara massal ke tabel user dalam transaksi basis data.
+     * 
+     * @return void Output JSON format: {status: 'success'|'error', inserted: int, skipped: int}
      */
     public function import_data() {
         @set_time_limit(300);
@@ -236,6 +315,15 @@ class ImportEmail extends CI_Controller {
 
     /**
      * AJAX: Generate 8-character token for selected users
+     */
+        /**
+     * AJAX Endpoint: Pembuatan Token Aktivasi Massal
+     * 
+     * Menerima kumpulan ID pengguna yang dipilih, menghasilkan token unik 8-karakter
+     * alfanumerik bebas ambiguitas untuk setiap akun, dan memperbaruinya ke tabel user_token
+     * melalui User_model::update_user_tokens_bulk() dengan perlindungan Protected Account Shield.
+     * 
+     * @return void Output JSON status pembuatan token dan data akun terbaru
      */
     public function generate_tokens() {
         @set_time_limit(300);
@@ -316,6 +404,15 @@ class ImportEmail extends CI_Controller {
 
     /**
      * AJAX: Dispatch email for selected users (Bulk / Multi Email)
+     */
+        /**
+     * AJAX Endpoint: Transmisi Surat Elektronik Undangan Aktivasi Massal via SMTP
+     * 
+     * Mengambil daftar ID akun sasaran, memverifikasi ketersediaan token aktivasi di user_token,
+     * mengompilasi template HTML surel dengan tag dinamis ({NAME}, {NIM}, {TOKEN}, {LOGIN_LINK}),
+     * dan mengirimkan pesan melalui protokol SMTP resmi Telkom University dengan pencatatan log toleransi error.
+     * 
+     * @return void Output JSON format: {status: 'success', sent: int, failed: int, errors: array}
      */
     public function send_emails() {
         @set_time_limit(300);
@@ -408,6 +505,13 @@ class ImportEmail extends CI_Controller {
     /**
      * AJAX: Dispatch email for a single user
      */
+        /**
+     * AJAX Endpoint: Pengiriman Surat Elektronik Aktivasi Satuan
+     * 
+     * Mengirimkan surel aktivasi secara instan untuk 1 akun pengguna tertentu berdasarkan ID.
+     * 
+     * @return void Output JSON status pengiriman surel satuan
+     */
     public function send_single_email() {
         $rawInput = file_get_contents('php://input');
         $json = json_decode($rawInput, true);
@@ -498,6 +602,14 @@ class ImportEmail extends CI_Controller {
      *
      * @return json Response status berhasil/gagal dan data akun terformat
      * @affected_table user
+     */
+        /**
+     * AJAX Endpoint: Tambah / Edit Data Akun Pengguna Secara Mandiri
+     * 
+     * Menangani formulir modal penambahan akun manual atau pengeditan biodata (Nama, NIM/NIP, Email, Peran).
+     * Melakukan sanitasi input, validasi kelengkapan kolom, dan menjalankan operasi INSERT atau UPDATE.
+     * 
+     * @return void Output JSON konfirmasi penyimpanan akun
      */
     public function save_user() {
         $rawInput = file_get_contents('php://input');
@@ -713,6 +825,14 @@ class ImportEmail extends CI_Controller {
     /**
      * AJAX: Delete selected users (STRICTLY SUPER ADMIN ONLY)
      */
+        /**
+     * AJAX Endpoint: Penghapusan Akun Pengguna Terpilih (Bulk Delete)
+     * 
+     * Menerima array ID pengguna sasaran, menghapus token terkait dari tabel user_token,
+     * dan menghapus rekaman akun dari tabel user dalam satu transaksi basis data terpadu.
+     * 
+     * @return void Output JSON jumlah akun yang berhasil dihapus
+     */
     public function delete_users() {
         $currentRoleId = (int)$this->session->userdata('role_id');
         if ($currentRoleId !== 22) {
@@ -754,6 +874,15 @@ class ImportEmail extends CI_Controller {
 
     /**
      * AJAX: Reset imported testing accounts (Super Admin only)
+     */
+        /**
+     * AJAX Endpoint: Reset Basis Data Pengguna ke Kondisi Master Awal (Khusus Super Admin)
+     * 
+     * Fitur pemulihan darurat yang hanya diizinkan untuk Role ID 22 (Super Administrator).
+     * Memanggil User_model::reset_imported_users() untuk membersihkan akun impor dan memulihkan
+     * basis data ke 6 akun master inti fakultas.
+     * 
+     * @return void Output JSON konfirmasi pemulihan basis data
      */
     public function reset_data() {
         $currentRoleId = (int)$this->session->userdata('role_id');
@@ -887,6 +1016,19 @@ class ImportEmail extends CI_Controller {
     /**
      * Helper: Build branded responsive HTML email template (1-Click Direct Activation)
      */
+        /**
+     * Kompiler Template Surat Elektronik HTML Korporat Telkom University
+     * 
+     * Menyusun naskah surel responsif berlatar oranye-putih modern dengan kartu kredensial akun,
+     * token aktivasi berformat monospace tebal, tombol CTA langsung, instruksi keamanan,
+     * serta penggantian tag dinamis ({NAME}, {NIM}, {TOKEN}, {ROLE}, {LOGIN_LINK}).
+     * 
+     * @param object $user Objek rekaman data pengguna
+     * @param string $token Kode token aktivasi 8 karakter
+     * @param string $subject Judul subjek surat
+     * @param string $bodyTemplate Kerangka naskah kustom (opsional)
+     * @return string Dokumen HTML lengkap siap transmisi
+     */
     private function _build_html_email($user, $token, $subject, $bodyTemplate = '') {
         $activationUrl = site_url('login/activate?email=' . urlencode($user->email) . '&token=' . urlencode($token));
         $name = htmlspecialchars($user->name);
@@ -958,6 +1100,17 @@ class ImportEmail extends CI_Controller {
     /**
      * Private helper: Send email via CodeIgniter SMTP Library
      */
+        /**
+     * Pengirim Surel via Protokol SMTP Resmi Menggunakan Konfigurasi email.php
+     * 
+     * Mengirimkan surel HTML melalui pustaka CodeIgniter Email dengan parameter SMTP
+     * (Host, Port, Crypto SSL/TLS, User, Password). Menyediakan rincian debugger jika transmisi gagal.
+     * 
+     * @param string $toEmail Alamat email tujuan
+     * @param string $subject Judul subjek surat
+     * @param string $htmlMessage Dokumen surat format HTML
+     * @return array Status keberhasilan format: ['status' => bool, 'error' => string|null]
+     */
     private function _send_smtp_email($to, $subject, $htmlMessage) {
         try {
             $this->load->library('email');
@@ -996,6 +1149,15 @@ class ImportEmail extends CI_Controller {
 
     /**
      * Private helper: Generate secure Bcrypt hash token ($2y$10$...)
+     */
+        /**
+     * Generator Token Aktivasi 8 Karakter Alfanumerik Bebas Ambiguitas
+     * 
+     * Menggunakan alfabet kriptografis '23456789ABCDEFGHJKLMNPQRSTUVWXYZ' yang meniadakan
+     * karakter membingungkan (angka 0 dengan huruf O, angka 1 dengan huruf I atau L)
+     * guna menjamin kemudahan entri token oleh pengguna saat proses Onboarding 3D.
+     * 
+     * @return string Token acak 8 karakter huruf kapital dan angka
      */
     private function _generate_8char_token() {
         // Generate secure 8-character mixed random token as plaintext

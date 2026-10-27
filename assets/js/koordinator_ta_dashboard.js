@@ -1,14 +1,23 @@
 /**
- * =========================================================
- * KOORDINATOR TA - DASHBOARD ENGINE
- * Complete Modular JavaScript Engine for:
- * 1. Multi-Search (+ 1/4 criteria rows, quick filters, custom dropdowns)
- * 2. Table Pagination & Rendering
- * 3. Table Multi-Select (Batch Checkbox Selection)
- * 4. Floating Action Bar (Slide up when items selected)
- * 5. Batch Approval Modal with Dosen Autocomplete (Pembimbing 1 & 2)
- * 6. AJAX Batch Approval Execution
- * =========================================================
+ * ============================================================================
+ * KOORDINATOR TUGAS AKHIR - FRONTEND DASHBOARD & BATCH ACTION ENGINE
+ * ============================================================================
+ * Arsitektur Front-End Modular Single Page Application (SPA) Terintegrasi:
+ * 1. Multi-Criteria Dynamic Search & Universal Filtering Engine (Debounce 150ms)
+ * 2. Client-Side Virtual Pagination & Table Rendering untuk Tab 1, Tab 2, dan Tab 3
+ * 3. Batch Checkbox Selection & Persistent State Synchronization
+ * 4. Floating Action Bar & Responsive Bottom Drawer Toolbar
+ * 5. Batch Approval Modal dengan Autocomplete Dosen Pembimbing 1 & 2
+ * 6. Conflict of Interest Validator (Pencegahan bentrok Pembimbing vs Penguji)
+ * 7. Master Rubrik Dinamis: Cascading Prodi -> Peminatan dari master_prodi & master_peminatan
+ * 8. Real-Time Weight Validator (Memvalidasi total bobot kriteria tepat 100.0%)
+ * 9. Multi-Version Archiving Switcher (Beralih antara versi aktif & riwayat kurikulum)
+ * 10. Background Polling Synchronization Engine (Zero-Flicker DOM Updates)
+ * 
+ * @package    IFIK_Portal
+ * @subpackage JavaScript
+ * @author     Muhammad Alif Muzakky
+ * ============================================================================
  */
 
 (function () {
@@ -8931,6 +8940,14 @@
         }
     };
 
+    /**
+     * Sinkronisasi Opsi Dropdown Peminatan Master Rubrik Dinamis Berdasarkan Kode Prodi
+     * Mengambil daftar peminatan aktif dari database (state.masterPeminatanList)
+     * dan merender opsi <option> yang bersesuaian dengan program studi yang dipilih.
+     * 
+     * @param {string} prodiKey Kode prodi resmi (DKV, DI, DP, KTF, SR, FA, MD, IF)
+     * @param {string} selectedPem Nilai peminatan yang sedang aktif/terpilih
+     */
     function setupMasterRubrikPeminatanOptions(prodiKey, selectedPem) {
         const pemSelect = document.getElementById('masterRubrikPeminatanSelect');
         if (!pemSelect) return;

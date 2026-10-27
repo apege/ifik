@@ -1,6 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Model KoordinatorTA_model
+ * 
+ * Pusat logika bisnis dan interaksi basis data untuk modul Koordinator Tugas Akhir.
+ * Mengelola siklus tugas akhir dari pendaftaran hingga yudisium:
+ * - Manajemen pendaftaran TA dan persetujuan dosen pembimbing (single & batch)
+ * - Plotting dan validasi netralitas dosen penguji evaluasi Preview 2
+ * - Penjadwalan sidang komprehensif dan pencegahan bentrok master ruangan
+ * - Perhitungan rata-rata tertimbang nilai rubrik dan penetapan status kelulusan
+ * - Pemetaan pipeline 9 tahapan progres mahasiswa (SSOT guidance & thesis)
+ * - Pemulihan dan penurunan tahapan (downgrade/reset) dengan sanitasi berkas multi-path
+ * - Pengelolaan master rubrik multi-versi berbasis prodi & konsentrasi peminatan dinamis
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Models
+ * @category   Koordinator_TA
+ * @author     Muhammad Alif Muzakky
+ */
 class KoordinatorTA_model extends CI_Model {
 
     public function __construct() {
@@ -183,6 +201,15 @@ class KoordinatorTA_model extends CI_Model {
 
     /**
      * TAHAP 1: Ambil semua mahasiswa pendaftar TA dari tabel guidance + user + file_pendaftaran
+     */
+        /**
+     * Mengambil Semua Data Mahasiswa Pendaftar Tugas Akhir (Tab 1)
+     * 
+     * Melakukan kueri relasional antara tabel guidance, user, dan file_pendaftaran
+     * untuk menampilkan antrean pendaftaran mahasiswa, usulan judul tugas akhir,
+     * status approval Dosen Wali dan Admin LAA, serta penugasan Pembimbing 1 dan 2.
+     * 
+     * @return array Daftar mahasiswa terurut dari pengajuan terbaru (ORDER BY created_at DESC)
      */
     public function get_all_mahasiswa_ta() {
         $this->db->select('
@@ -392,6 +419,20 @@ class KoordinatorTA_model extends CI_Model {
 
     /**
      * Simpan persetujuan / penolakan pendaftaran TA oleh Koordinator TA
+     */
+        /**
+     * Pembaruan Status Approval Satuan Pendaftaran Tugas Akhir (Tab 1)
+     * 
+     * Memperbarui status persetujuan Koordinator TA (status_approval_koor),
+     * menetapkan Pembimbing 1 dan Pembimbing 2, mencatat catatan revisi,
+     * serta merekam jejak kronologis ke tabel history_ta.
+     * 
+     * @param string $nim NIM mahasiswa yang bersangkutan
+     * @param string $status Keputusan ('Disetujui' / 'Ditolak' / 'Pending')
+     * @param string $pembimbing1 NIP Dosen Pembimbing 1
+     * @param string $pembimbing2 NIP Dosen Pembimbing 2
+     * @param string $catatan Catatan rekomendasi atau revisi
+     * @return array Status eksekusi dan pesan konfirmasi
      */
     public function update_approval_koor_ajax($nim, $status, $catatan = '', $pembimbing_1 = null, $pembimbing_2 = null) {
         $this->db->where('nim', $nim);
@@ -709,6 +750,16 @@ class KoordinatorTA_model extends CI_Model {
     /**
      * TAHAP 2: Ambil mahasiswa untuk Tahap Preview 2 (Siap diplot Penguji & Jadwal Sidang Preview 2)
      */
+        /**
+     * Mengambil Mahasiswa yang Siap Mengikuti Evaluasi Tahap Preview 2 (Tab 2)
+     * 
+     * Menerapkan aturan penegakan batasan tahapan (Stage Boundary Enforcement):
+     * Mahasiswa HANYA akan muncul di antrean Tab 2 apabila:
+     * 1. Telah disetujui oleh Ketua KK (status_plotting == 'selesai' dan status_kk == 'Disetujui')
+     * 2. Telah lulus seminar proposal Preview 1 (status_preview != 'preview1')
+     * 
+     * @return array Daftar mahasiswa yang memenuhi syarat plotting penguji Preview 2
+     */
     public function get_all_mahasiswa_preview2() {
         $all = $this->get_all_mahasiswa_ta();
         if (empty($all)) {
@@ -804,6 +855,18 @@ class KoordinatorTA_model extends CI_Model {
 
     /**
      * Update Dosen Penguji & Jadwal Sidang Preview 2
+     */
+        /**
+     * Menetapkan Dosen Penguji Evaluasi Preview 2 (Tab 2)
+     * 
+     * Memvalidasi aturan bebas benturan kepentingan (Conflict of Interest Protection):
+     * Dosen Pembimbing 1 maupun 2 mahasiswa bersangkutan dilarang keras menjadi Dosen Penguji.
+     * Memperbarui kolom dosen_penguji_1 dan dosen_penguji_2 pada tabel guidance.
+     * 
+     * @param string $nim NIM mahasiswa target
+     * @param string $penguji1 NIP Dosen Penguji 1
+     * @param string $penguji2 NIP Dosen Penguji 2
+     * @return array Status keberhasilan plotting
      */
     public function update_penguji_jadwal_preview2($nim, $penguji_1, $penguji_2, $tgl_sidang = null, $jam_mulai = null, $jam_selesai = null, $ruangan = null, $catatan = '') {
         $this->db->where('nim', $nim);
@@ -980,6 +1043,14 @@ class KoordinatorTA_model extends CI_Model {
 
     /**
      * TAHAP 3: Ambil mahasiswa untuk Jadwal Sidang TA & Rekapitulasi Penilaian Sidang
+     */
+        /**
+     * Mengambil Antrean Mahasiswa Siap Sidang Komprehensif (Tab 3)
+     * 
+     * Mengambil data mahasiswa yang telah menyelesaikan evaluasi Preview 2 dan berkas
+     * administrasinya telah dinyatakan valid oleh Admin LAA (draf naskah, turnitin, bebas lab).
+     * 
+     * @return array Daftar mahasiswa beserta jadwal sidang, ruangan, dan skor penilaian
      */
     public function get_all_mahasiswa_sidang() {
         $all = $this->get_all_mahasiswa_preview2();
@@ -1218,6 +1289,19 @@ class KoordinatorTA_model extends CI_Model {
     /**
      * Update Jadwal Sidang TA Single Mahasiswa
      */
+        /**
+     * Menetapkan Tanggal, Jam, dan Ruangan Sidang Komprehensif (Tab 3)
+     * 
+     * Menerapkan algoritma deteksi bentrok ruangan (Room Conflict Detection):
+     * Memastikan ruangan sidang yang dipilih pada tanggal dan jam tersebut belum dialokasikan
+     * untuk mahasiswa lain sebelum menyimpan jadwal ke tabel guidance.
+     * 
+     * @param string $nim NIM mahasiswa
+     * @param string $tanggal Tanggal pelaksanaan sidang (YYYY-MM-DD)
+     * @param string $jam Waktu mulai sidang (HH:MM)
+     * @param string $ruangan Kode/Nama ruangan resmi dari master_ruangan
+     * @return array Status konfirmasi jadwal sidang
+     */
     public function update_jadwal_sidang_ajax($nim, $tanggal_sidang, $waktu_sidang, $ruang_sidang, $link_sidang = '', $jam_selesai = null) {
         $this->db->where('nim', $nim);
         $this->db->or_where('id', $nim);
@@ -1299,6 +1383,18 @@ class KoordinatorTA_model extends CI_Model {
 
     /**
      * Simpan penilaian sidang dari penguji / pembimbing
+     */
+        /**
+     * Menyimpan Input Skor Penilaian Sidang Komprehensif (Tab 3)
+     * 
+     * Menerima rincian skor per butir indikator kriteria dari majelis dewan penguji dan pembimbing,
+     * mengkalkulasi Nilai Akhir Tertimbang (35% Penguji 1 + 35% Penguji 2 + 30% Pembimbing),
+     * mengonversikannya ke huruf mutu (A s/d E), dan menetapkan status kelulusan (Lulus jika >= 50).
+     * 
+     * @param string $nim NIM mahasiswa
+     * @param array $scores Matriks skor nilai komponen
+     * @param string $catatan Komentar / catatan perbaikan dewan penguji
+     * @return array Hasil kalkulasi nilai akhir, grade, dan status kelulusan
      */
     public function simpan_penilaian_sidang_ajax($nim, $nilai_p1, $nilai_p2, $nilai_penguji1, $nilai_penguji2, $catatan = '') {
         $this->db->where('nim', $nim);
@@ -1587,6 +1683,16 @@ class KoordinatorTA_model extends CI_Model {
 
     /**
      * Publikasi Nilai Sidang Mahasiswa Tunggal dengan Validasi Kelengkapan Nilai
+     */
+        /**
+     * Mempublikasikan Nilai Sidang / Rilis Yudisium Resmi (Tab 3)
+     * 
+     * Mengubah status_publish_nilai menjadi 1, mengesahkan kelulusan akhir, dan mencatat
+     * log audit ke tabel log_approval_history agar nilai dapat dilihat mahasiswa di transkrip portal.
+     * 
+     * @param string $nim NIM mahasiswa
+     * @param string $tglPublish Tanggal rilis publikasi
+     * @return array Status konfirmasi publikasi
      */
     public function publish_penilaian_sidang_ajax($nim, $status_publish = 'Published', $tgl_publish = null, $catatan = '') {
         $allSidang = $this->get_all_mahasiswa_sidang();
@@ -2052,6 +2158,14 @@ class KoordinatorTA_model extends CI_Model {
         return true;
     }
 
+        /**
+     * Mengambil Referensi Master Program Studi Aktif
+     * 
+     * Mengambil daftar seluruh program studi resmi di lingkungan Fakultas Industri Kreatif
+     * dari tabel master_prodi untuk dropdown antarmuka dashboard dan master rubrik.
+     * 
+     * @return array Daftar program studi aktif terurut berdasarkan kolom urutan ASC
+     */
     public function get_master_prodi_list() {
         if (!$this->db->table_exists('master_prodi')) {
             return array();
@@ -2063,6 +2177,14 @@ class KoordinatorTA_model extends CI_Model {
                         ->result_array();
     }
 
+        /**
+     * Mengambil Referensi Master Peminatan Berdasarkan Kode Prodi
+     * 
+     * Mendukung sinkronisasi dropdown bertingkat (cascading dropdown) dari tabel master_peminatan.
+     * 
+     * @param string|null $kode_prodi Filter spesifik kode prodi (opsional)
+     * @return array Daftar peminatan konsentrasi keilmuan aktif
+     */
     public function get_master_peminatan_list($kode_prodi = null) {
         if (!$this->db->table_exists('master_peminatan')) {
             return array();
@@ -2168,6 +2290,22 @@ class KoordinatorTA_model extends CI_Model {
         return array_values($grouped);
     }
 
+        /**
+     * Menyimpan dan Mengarsipkan Master Rubrik Penilaian Sidang (Multi-Version Archiving)
+     * 
+     * Memvalidasi bahwa total persentase bobot butir kriteria wajib tepat bernilai 100.0%.
+     * Jika parameter as_new_version bernilai true, versi aktif lama diarsipkan (status = 'archived')
+     * dan versi baru diterbitkan dengan nomor versi bertambah (versi + 1).
+     * 
+     * @param string $prodi Kode Program Studi
+     * @param string $peminatan Nama Peminatan / Konsentrasi
+     * @param string $judul Judul instrumen rubrik
+     * @param array $kriteria Butir kriteria indikator dan persentase bobot
+     * @param float $total_bobot Akumulasi total bobot (harus 100.0)
+     * @param string $status Status publikasi ('published' / 'draft')
+     * @param bool $as_new_version Apakah disimpan sebagai versi kurikulum baru
+     * @return array Data rubrik tersimpan dan ID referensi
+     */
     public function simpan_master_rubrik($prodi, $peminatan, $judul_rubrik, $kriteria = array(), $total_bobot = 100, $status = 'published', $is_publish = false, $custom_tanggal_publish = null, $as_new_version = false) {
         $this->_ensure_master_rubrik_tables();
 
@@ -2476,6 +2614,17 @@ class KoordinatorTA_model extends CI_Model {
     /**
      * Ambil data lengkap seluruh peserta TA untuk Halaman Monitoring Status Peserta TA
      * Mencakup semua tahapan: Dosen Wali -> Admin Layanan -> Koordinator TA -> Ketua KK -> Preview 1 -> Preview 2 -> Preview 3 -> Sidang -> Lulus
+     */
+        /**
+     * Agregator Utama Monitoring Status Peserta Tugas Akhir (Pipeline 1 s/d 9)
+     * 
+     * Mengumpulkan data komprehensif mahasiswa dari awal pendaftaran hingga yudisium.
+     * Menjalankan query batch efisien ke tabel guidance, thesis, log_approval_history,
+     * dan AdminLayanan_model untuk memetakan posisi tahapan mahasiswa:
+     * (1. Dosen Wali -> 2. Admin LAA -> 3. Koordinator TA -> 4. Ketua KK -> 5. Preview 1 ->
+     *  6. Preview 2 -> 7. Preview 3 -> 8. Sidang TA -> 9. Lulus Sidang)
+     * 
+     * @return array Daftar seluruh peserta tugas akhir dengan metadata tahapan dan status berkas
      */
     public function get_monitoring_peserta_ta() {
         $all = $this->get_all_mahasiswa_ta();
@@ -2930,6 +3079,17 @@ class KoordinatorTA_model extends CI_Model {
      * Ambil daftar mahasiswa yang eligible untuk di-downgrade atau di-reset tahapannya
      * (Semua mahasiswa aktif yang memiliki bimbingan/progres TA)
      */
+        /**
+     * Mengambil Daftar Kandidat Mahasiswa untuk Downgrade / Reset Tahapan
+     * 
+     * Menerapkan Aturan Visibilitas: Mahasiswa tahap awal (dosen wali) HANYA ditampilkan
+     * jika sudah memiliki berkas unggahan bimbingan. Mahasiswa yang sudah direset total ke titik nol
+     * tidak ditampilkan pada tabel kandidat.
+     * 
+     * @param string $stageFilter Filter tahapan bimbingan aktif ('all' atau stage key)
+     * @param string $search Kueri pencarian teks (NIM, Nama, Judul)
+     * @return array Daftar kandidat yang memenuhi syarat penurunan tahap
+     */
     public function get_candidates_for_downgrade($stageFilter = 'all', $search = '') {
         $monitoring = $this->get_monitoring_peserta_ta();
         if (empty($monitoring)) return array();
@@ -3049,6 +3209,23 @@ class KoordinatorTA_model extends CI_Model {
     /**
      * Eksekusi downgrade atau reset tahap bimbingan mahasiswa
      * Menghapus seluruh berkas, draf, nilai, dan evaluasi permanen tanpa backup
+     */
+        /**
+     * Eksekusi Transaksional Penurunan / Reset Tahapan Mahasiswa
+     * 
+     * Menegakkan aturan hierarki peringkat tahapan: Target tahapan penurunan wajib
+     * berada di bawah peringkat posisi tahapan aktif mahasiswa (targetRank < currRank).
+     * Menjalankan prosedur sanitasi multi-storage:
+     * 1. Menghapus rekaman naskah tidak relevan di tabel thesis
+     * 2. Meng-unlink berkas fisik dari 16 direktori upload server (mencegah orphaned files)
+     * 3. Mereset kolom tanggal, jam, ruangan, dan skor pada tabel guidance
+     * 4. Mencatat rekam jejak audit ke tabel downgrade_audit_logs dalam trans_start()
+     * 
+     * @param string $nim NIM mahasiswa target
+     * @param string $targetStage Tahapan target ('reset_total', 'koordinator_ta', 'ketua_kk', 'preview1', 'preview2', 'preview3', 'sidang')
+     * @param string $alasan Justifikasi resmi penurunan tahapan (min 5 karakter)
+     * @param array $actorData Metadata aktor eksekutor (id, name, nip)
+     * @return array Status transaksi basis data dan pesan konfirmasi
      */
     public function execute_downgrade_stage($nim, $targetStage, $alasan, $actorData = array()) {
         $nim = trim((string)$nim);

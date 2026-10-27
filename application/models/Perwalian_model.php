@@ -1,6 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Model Perwalian_model
+ * 
+ * Pusat logika bisnis dan pengelolaan data akademik bimbingan perwalian Dosen Wali:
+ * - Pengelolaan katalog kurikulum master mata kuliah (CRUD & multiple delete)
+ * - Kontrak studi mahasiswa (KRS) dan penetapan Dosen Pembina Akademik
+ * - Agregasi data bimbingan perwalian multi-identifier dosen (NIP, Kode Dosen, Username, ID)
+ * - Alur persetujuan dua tahap: Tahap 1 Kontrak KRS & Tahap 2 Evaluasi Hasil Belajar KHS
+ * - Sistem penilaian interaktif mata kuliah (angka, huruf mutu, kalkulasi indeks kelulusan)
+ * - Persetujuan nilai per mata kuliah (Multiple MK Approval) dan sinkronisasi status otomatis
+ * - Ekstraksi dan impor nilai massal mahasiswa via pustaka Excel SheetJS
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Models
+ * @category   Perwalian_Dosen_Wali
+ * @author     Muhammad Alif Muzakky
+ */
 class Perwalian_model extends CI_Model {
 
     public function __construct() {
@@ -922,6 +939,17 @@ class Perwalian_model extends CI_Model {
      * Dapatkan daftar perwalian mahasiswa bimbingan dari dosen tertentu.
      * Mendukung multi-identifier (NIP, Kode Dosen, Username, ID) dan filter dinamis.
      */
+        /**
+     * Mengambil Daftar Mahasiswa Bimbingan Perwalian Berdasarkan Identitas Dosen Wali
+     * 
+     * Mendukung multi-identifier dosen (NIP, Kode Dosen 3 Huruf, Username akun, atau ID User).
+     * Melakukan kueri agregasi komprehensif ke tabel perwalian, user, dan perwalian_detail
+     * guna menghitung total SKS, total MK diambil, total MK dinilai, serta total kelulusan mata kuliah.
+     * 
+     * @param string|array $dosen_identifiers Identitas tunggal atau himpunan identifier dosen wali
+     * @param array $filters Filter tambahan (tahap, status, search, limit, offset)
+     * @return array Daftar mahasiswa bimbingan dengan metrik akademik lengkap
+     */
     public function get_perwalian_by_dosen($dosen_identifiers, $filters = []) {
         $ids = is_array($dosen_identifiers) ? array_filter(array_unique($dosen_identifiers)) : [trim((string)$dosen_identifiers)];
         $ids = array_values(array_filter($ids, fn($v) => !empty($v)));
@@ -1028,6 +1056,18 @@ class Perwalian_model extends CI_Model {
 
     /**
      * Dapatkan ringkasan statistik perwalian untuk dosen wali
+     */
+        /**
+     * Menghitung Statistik Ringkasan 4 Kartu Metrik Bimbingan Perwalian
+     * 
+     * Mengagregasi metrik bimbingan mahasiswa per dosen wali:
+     * 1. Total Mahasiswa Binaan
+     * 2. Mahasiswa Menunggu Persetujuan Tahap 1
+     * 3. Mahasiswa Selesai Tahap 1 (Siap Tahap 2)
+     * 4. Mahasiswa dengan Permintaan Revisi / Perlu Perhatian
+     * 
+     * @param string|array $dosen_identifiers Kumpulan identifier dosen wali
+     * @return array Matriks statistik kuantitatif bimbingan
      */
     public function get_dosen_perwalian_stats($dosen_identifiers, $tahun = null, $semester = null) {
         $ids = is_array($dosen_identifiers) ? array_filter(array_unique($dosen_identifiers)) : [trim((string)$dosen_identifiers)];
@@ -1184,6 +1224,16 @@ class Perwalian_model extends CI_Model {
 
     /**
      * Approve / Unapprove Mata Kuliah pada Tahap 2 oleh Dosen Wali (Satu-satu per MK atau Multiple sekaligus)
+     */
+        /**
+     * Pengesahan / Approval Nilai Per Mata Kuliah (Multiple MK Approval)
+     * 
+     * Mengunci nilai mata kuliah tertentu yang telah diisi dosen, menetapkan flag is_approved_wali = 1,
+     * dan menyinkronkan status_tahap2 kontrak perwalian secara proporsional.
+     * 
+     * @param int|array $id_details ID tunggal atau array ID baris perwalian_detail
+     * @param string $nip_dosen NIP Dosen Wali
+     * @return array Status konfirmasi pengesahan nilai
      */
     public function approve_mk_tahap2($id_perwalian, $detail_ids = [], $approve = 1) {
         $id_perwalian = (int)$id_perwalian;
@@ -1364,6 +1414,18 @@ class Perwalian_model extends CI_Model {
     /**
      * Approval / Penolakan KRS Tahap 1 oleh Dosen Wali
      */
+        /**
+     * Memproses Keputusan Persetujuan Kontrak KRS Tahap 1 oleh Dosen Wali
+     * 
+     * Memperbarui kolom status_tahap1 ('Disetujui' / 'Revisi'), mencatat catatan bimbingan,
+     * stempel waktu verifikasi, dan identitas dosen wali eksekutor pada tabel perwalian.
+     * 
+     * @param int $id_perwalian ID referensi sesi perwalian
+     * @param string $status Keputusan ('Disetujui' atau 'Revisi')
+     * @param string $catatan Catatan rekomendasi / arahan revisi
+     * @param string $nip_dosen NIP Dosen Wali eksekutor
+     * @return array Status keberhasilan operasi
+     */
     public function approve_tahap1($id_perwalian, $status = 'Disetujui', $catatan = '') {
         $now = date('Y-m-d H:i:s');
         $status = in_array($status, ['Disetujui', 'Revisi', 'Diajukan', 'Draft'], true) ? $status : 'Disetujui';
@@ -1467,6 +1529,18 @@ class Perwalian_model extends CI_Model {
      * A, AB, B, BC, C -> Otomatis Lulus (Hijau)
      * D, E -> Otomatis Tidak Lulus (Merah)
      * Juga memperbarui status_tahap2 parent menjadi 'Proses Penilaian' jika belum dinilai.
+     */
+        /**
+     * Menyimpan Pembaruan Nilai Hasil Belajar Per Mata Kuliah (Tahap 2 KHS)
+     * 
+     * Memvalidasi format nilai angka (0-100) dan mengonversikannya secara otomatis ke huruf mutu
+     * (A, AB, B, BC, C, D, E) serta menentukan kelulusan mata kuliah (Lulus jika nilai >= C / 50).
+     * Memicu sinkronisasi kemajuan kelulusan Tahap 2 mahasiswa bersangkutan.
+     * 
+     * @param int $id_detail ID baris mata kuliah pada tabel perwalian_detail
+     * @param float $nilai_angka Skor angka hasil belajar
+     * @param string $nilai_huruf Huruf mutu nilai
+     * @return array Data pembaruan nilai dan status kelulusan MK
      */
     public function update_nilai_detail($id_detail, $nilai_huruf, $status_kelulusan = null) {
         $id_detail = (int)$id_detail;
@@ -1577,6 +1651,17 @@ class Perwalian_model extends CI_Model {
     /**
      * Import Nilai Bulk dari Excel oleh Dosen Wali
      * Baris bisa berupa: [nim, kode_mk, nilai_huruf] atau [kode_mk, nilai_huruf] jika id_perwalian sudah ditentukan
+     */
+        /**
+     * Batch Impor Nilai Mata Kuliah dari Berkas Excel via SheetJS
+     * 
+     * Memproses baris data nilai hasil unggahan berkas spreadsheet secara massal.
+     * Mencocokkan kode mata kuliah, memvalidasi rentang nilai, mengonversikan grade,
+     * dan memperbarui tabel perwalian_detail dalam satu transaksi basis data.
+     * 
+     * @param int $id_perwalian ID sesi perwalian mahasiswa target
+     * @param array $rows Kumpulan baris nilai mata kuliah hasil parsing
+     * @return array Ringkasan jumlah baris berhasil dan gagal diimpor
      */
     public function import_nilai_bulk_dosen($dosen_identifiers, $rows, $specific_id_perwalian = null) {
         if (empty($rows)) {

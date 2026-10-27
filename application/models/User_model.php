@@ -1,6 +1,23 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Model User_model
+ * 
+ * Pusat pengelolaan identitas akun pengguna, autentikasi, dan otorisasi sistem IFIK:
+ * - Normalisasi objek akun pengguna antar pengendali (controllers) dan tampilan (views)
+ * - Autentikasi kredensial login dan verifikasi hash kata sandi Bcrypt
+ * - Reset kata sandi mandiri via token keamanan berbasis waktu
+ * - Penyediaan data akun lengkap terintegrasi peran (user_role) dan token aktivasi (user_token)
+ * - Batch upsert impor pengguna baru dan pemetaan jabatan resmi
+ * - Pembaruan token massal dengan proteksi akun aktif (Protected Account Shield)
+ * - Pembersihan dan pemulihan darurat basis data akun (Super Admin Master Reset)
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Models
+ * @category   Authentication_User
+ * @author     Muhammad Alif Muzakky
+ */
 class User_model extends CI_Model {
 
     protected $tbl_user = 'user';
@@ -17,6 +34,16 @@ class User_model extends CI_Model {
 
     /**
      * Standardize user object so all CI controllers/views work consistently
+     */
+        /**
+     * Menstandarisasi Properti Objek Pengguna Lintas Modul
+     * 
+     * Memastikan seluruh atribut pengguna (nim, nip, nidn_nim, status, role_name, token)
+     * terisi secara konsisten baik untuk peran mahasiswa maupun staf/dosen, serta
+     * mengidentifikasi akun master bawaan sistem guna mencegah penguncian akun.
+     * 
+     * @param object $user Objek mentah baris pengguna dari tabel user
+     * @return object|null Objek pengguna ternormalisasi atau null jika data tidak ditemukan
      */
     private function _normalize_user($user)
     {
@@ -317,6 +344,14 @@ class User_model extends CI_Model {
      * Get all users joined with roles table and user_token table
      * @return array
      */
+        /**
+     * Mengambil Seluruh Akun Pengguna Terintegrasi Peran dan Token Aktivasi
+     * 
+     * Menjalankan kueri LEFT JOIN antara tabel user, user_role, dan user_token
+     * untuk menyajikan dataset komprehensif pada antarmuka Import Email & Token Dispatcher.
+     * 
+     * @return array Kumpulan seluruh data pengguna dalam format array terurut dari yang terbaru
+     */
     public function get_all_users_with_roles()
     {
         $roleField = $this->db->field_exists('role', $this->tbl_role) ? 'role' : 'name';
@@ -431,6 +466,16 @@ class User_model extends CI_Model {
         return null;
     }
 
+        /**
+     * Batch UPSERT Akun Pengguna Baru Hasil Ekstraksi Berkas Impor
+     * 
+     * Memeriksa keberadaan pengguna berdasarkan alamat email.
+     * Jika pengguna belum ada: Melakukan INSERT akun baru dengan password default terenkripsi.
+     * Jika pengguna sudah ada: Melakukan UPDATE data biodata tanpa menimpa kata sandi aktif.
+     * 
+     * @param array $users Kumpulan baris data akun pengguna baru
+     * @return array Ringkasan jumlah baris yang berhasil di-insert dan di-update
+     */
     public function upsert_users_bulk($accounts)
     {
         if (empty($accounts)) {
@@ -945,6 +990,15 @@ class User_model extends CI_Model {
      * Bulk delete users by array of IDs
      * @param array $ids
      * @return bool
+     */
+        /**
+     * Menghapus Sejumlah Akun Pengguna Terpilih Secara Massal
+     * 
+     * Menghapus token terkait di tabel user_token dan menghapus data akun di tabel user
+     * dalam satu transaksi basis data trans_start() terproteksi.
+     * 
+     * @param array $userIds Kumpulan ID pengguna yang akan dihapus
+     * @return int Jumlah akun yang berhasil dimusnahkan
      */
     public function delete_users_batch($ids)
     {

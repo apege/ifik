@@ -1,8 +1,33 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Controller Onboarding
+ * 
+ * Modul Aktivasi Akun Pengguna Baru & Profiling Mandiri Berbasis 3D WebGL (Three.js) & Leaflet GPS.
+ * Menangani tahapan transisi pengguna dari undangan surel menuju akun aktif penuh di portal IFIK:
+ * 1. Verifikasi token aktivasi dari tautan surat elektronik atau entri token manual
+ * 2. Pembuatan sesi sementara untuk mengamankan alur pengisian profil
+ * 3. Pembaruan kata sandi awal dengan algoritma hashing aman Bcrypt
+ * 4. Pengisian biodata lengkap (NIP/NIM, NIDN, Kontak, Alamat Domisili GPS Leaflet, Program Studi)
+ * 5. Khusus Dosen: Validasi kode inisial dosen 3 huruf unik dan pemilihan Kelompok Keahlian (KK)
+ * 6. Khusus Mahasiswa: Pemilihan Dosen Wali dengan resolusi otomatis ke user_id dan sinkronisasi ke tabel mahasiswa
+ * 7. Penghapusan token aktivasi sekali pakai di tabel user_token dan pengaktifan akun (password_changed = 1)
+ * 8. Proksi API data wilayah administratif Indonesia (Provinsi, Kota, Kecamatan, Kelurahan)
+ * 
+ * @package    IFIK_Portal
+ * @subpackage Controllers
+ * @category   Authentication_Onboarding
+ * @author     Muhammad Alif Muzakky
+ */
 class Onboarding extends CI_Controller {
 
+        /**
+     * Konstruktor Onboarding
+     * 
+     * Mengatur zona waktu Asia/Jakarta (WIB), memuat pustaka form validation, session,
+     * helper keamanan, dan model User_model.
+     */
     public function __construct()
     {
         parent::__construct();
@@ -14,6 +39,16 @@ class Onboarding extends CI_Controller {
 
     /**
      * Endpoint aktivasi dari tautan email
+     */
+        /**
+     * Endpoint Verifikasi Tautan Aktivasi Surel
+     * 
+     * Menerima parameter email dan token via URL query string.
+     * Memverifikasi kecocokan token terhadap tabel user_token (mendukung plaintext dan hash).
+     * Jika valid, sistem membuat sesi login sementara khusus proses onboarding dan mengalihkan
+     * pengguna langsung ke layar wizard onboarding.
+     * 
+     * @return void Redirect ke controller onboarding atau auth jika tidak valid
      */
     public function activate()
     {
@@ -79,6 +114,16 @@ class Onboarding extends CI_Controller {
 
     /**
      * Display the 2-step onboarding page (Change Password & Biodata)
+     */
+        /**
+     * Menampilkan Halaman Formulir Interaktif Onboarding 3D Profiling
+     * 
+     * Menyiapkan data profil awal, membedakan antarmuka spesifik (Dosen vs Mahasiswa),
+     * memuat daftar Program Studi dari master_prodi, Kelompok Keahlian dari kelompok_keahlian,
+     * dan daftar Dosen Wali aktif untuk formulir mahasiswa.
+     * Mencegah pengguna yang telah selesai onboarding (password_changed = 1) mengakses ulang halaman ini.
+     * 
+     * @return void Render view auth/onboarding
      */
     public function index()
     {
@@ -246,6 +291,18 @@ class Onboarding extends CI_Controller {
 
     /**
      * Process Onboarding Submission (Password Change + Biodata)
+     */
+        /**
+     * AJAX Endpoint: Pemrosesan Akhir Data Onboarding & Penggantian Kata Sandi
+     * 
+     * Menangani transmisi data langkah Step 1 s/d Step 4:
+     * - Mengenkripsi kata sandi baru menggunakan password_hash() Bcrypt
+     * - Menyimpan biodata lengkap ke tabel user
+     * - Jika aktor mahasiswa: Memetakan dosen_wali terpilih ke user_id dosen dan melakukan UPSERT ke tabel mahasiswa
+     * - Menghapus token aktivasi dari tabel user_token (Single-use Token Policy)
+     * - Mengubah flag password_changed = 1 dan memperbarui sesi pengguna menjadi akun aktif resmi
+     * 
+     * @return void Output JSON status aktivasi dan URL pengalihan dashboard
      */
     public function process_biodata()
     {
@@ -606,6 +663,15 @@ class Onboarding extends CI_Controller {
     /**
      * Proxy endpoint for Wilayah.id API to eliminate browser CORS restrictions
      */
+        /**
+     * Proksi Data Wilayah Administratif Indonesia
+     * 
+     * Menjembatani request antarmuka Leaflet/wilayah untuk memuat daftar Provinsi,
+     * Kota/Kabupaten, Kecamatan, dan Kelurahan guna menghindari kendala CORS pada peramban klien.
+     * 
+     * @param string $type Jenis wilayah ('provinsi', 'kota', 'kecamatan', 'kelurahan')
+     * @return void Output JSON data wilayah
+     */
     public function wilayah_proxy()
     {
         $endpoint = $this->input->get('endpoint', TRUE);
@@ -673,6 +739,13 @@ class Onboarding extends CI_Controller {
 
     /**
      * AJAX endpoint to check if kode_dosen is already taken
+     */
+        /**
+     * AJAX Endpoint: Validasi Keunikan Kode Dosen 3 Huruf
+     * 
+     * Mengecek apakah kode inisial dosen yang diketikkan sudah terpakai oleh dosen lain di tabel user.
+     * 
+     * @return void Output JSON format: {status: 'available'|'taken', message: string}
      */
     public function check_kode_dosen()
     {
