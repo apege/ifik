@@ -1,3 +1,8 @@
+<?php
+/**
+ * Pengaturan Master Syarat Berkas Dinamis Pendaftaran Sidang - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

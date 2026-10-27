@@ -1,3 +1,8 @@
+<?php
+/**
+ * Pengaturan Master Syarat Berkas Kerja Praktik (KP) - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

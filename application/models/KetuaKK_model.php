@@ -8,7 +8,7 @@ class KetuaKK_model extends CI_Model {
     }
 
     /**
-     * Helper internal: Cek apakah tabel legacy pendaftaran_ta tersedia dan berisi data
+     * Helper internal: Cek ketersediaan sumber data pendaftaran
      */
     private function _use_pendaftaran_ta() {
         return ($this->db->table_exists('pendaftaran_ta') && $this->db->count_all('pendaftaran_ta') > 0);
@@ -234,11 +234,11 @@ class KetuaKK_model extends CI_Model {
                 }
             }
 
-            // Resolve Koordinator TA Approval Status
+            // Tentukan status persetujuan Koordinator TA
             $s_koor_raw = strtolower(trim($row['status_approval_koor'] ?? ($row['status_file'] ?? '')));
             $status_koor = (in_array($s_koor_raw, array('approved', 'disetujui', 'valid', '1', 'ok'))) ? 'Approved' : 'Pending';
 
-            // Resolve Status Approval Ketua KK (check thesis_lecturers.status first, fallback to file_pendaftaran.status_kk)
+            // Tentukan status approval Ketua KK (cek thesis_lecturers lalu file_pendaftaran)
             $status_kk = 'Pending';
             $s_tl_raw = strtolower(trim($row['status_tl_kk'] ?? ''));
             if (in_array($s_tl_raw, array('approved', 'disetujui', 'valid', '1', 'ok'))) {
@@ -349,10 +349,10 @@ class KetuaKK_model extends CI_Model {
     }
 
     /**
-     * Update Approval Ketua KK & Unlock Tahap Bimbingan
+     * Update approval Ketua KK, sync ke thesis_lecturers & buka akses modul bimbingan
      */
     public function update_approval_kk($nim, $status, $catatan = '') {
-        // 1. Update legacy pendaftaran_ta dynamically if table & fields exist
+        // 1. Sinkronisasi data pendaftaran jika tabel terhubung
         if ($this->db->table_exists('pendaftaran_ta')) {
             $data = array();
             if ($this->db->field_exists('status_approval_kk', 'pendaftaran_ta')) {
@@ -374,7 +374,7 @@ class KetuaKK_model extends CI_Model {
             }
         }
 
-        // 2. Resolve target student IDs (NIM, usr_mhs_NIM, mhs_NIM, user.id)
+        // 2. Kumpulkan semua format ID mahasiswa (NIM, usr_mhs, user id)
         $target_mhs_ids = array($nim, 'usr_mhs_' . $nim, 'mhs_' . $nim, 'usr_' . $nim);
         if ($this->db->table_exists('user')) {
             $u = $this->db->group_start()
@@ -391,7 +391,7 @@ class KetuaKK_model extends CI_Model {
         }
         $target_mhs_ids = array_unique(array_filter($target_mhs_ids));
 
-        // 3. Resolve guidance record(s)
+        // 3. Ambil data bimbingan mahasiswa dari tabel guidance
         $guidance_ids = array();
         if ($this->db->table_exists('guidance')) {
             $g_rows = $this->db->select('id')

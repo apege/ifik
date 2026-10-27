@@ -1,3 +1,8 @@
+<?php
+/**
+ * Pengaturan Master Jalur Tugas Akhir (Reguler, MBKM, Capstone) - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

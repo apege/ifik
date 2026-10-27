@@ -1,3 +1,8 @@
+<?php
+/**
+ * Template Cetak PDF Berita Acara Sidang - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

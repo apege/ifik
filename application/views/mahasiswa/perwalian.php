@@ -1,3 +1,9 @@
+<?php
+/**
+ * Modul Perwalian Mahasiswa (Tahap 1 Rencana Studi & Tahap 2 Realisasi Nilai)
+ * Dilengkapi validasi anti-duplikasi pada impor nilai Excel.
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -1283,6 +1289,7 @@
             let validCount = 0;
             let invalidCount = 0;
 
+            // Mapping kode MK aktif mahasiswa untuk validasi anti-duplikasi file Excel
             const mkMap = {};
             const list = currentPerwalian2.mata_kuliah || currentPerwalian2.details || [];
             list.forEach(m => {
@@ -1309,6 +1316,7 @@
                 }
 
                 // Validasi Kode MK & NIM
+                // Validasi kesesuaian NIM agar tidak salah upload file milik orang lain
                 if (targetNim && rowNim && rowNim !== targetNim) {
                     isRowValid = false;
                     errorReason = `NIM tidak sesuai (Harus: ${targetNim})`;

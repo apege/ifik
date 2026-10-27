@@ -1,3 +1,8 @@
+<?php
+/**
+ * Newsroom Admin - Kelola Berita & Pengumuman
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

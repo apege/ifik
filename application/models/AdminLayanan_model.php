@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Model Admin Layanan Akademik & Administrasi (LAA)
+ * Query antrean berkas TA & sidang, evaluasi syarat dinamis, statistik, dan rollback tahap.
+ */
 class AdminLayanan_model extends CI_Model {
 
     private $_memoized_legacy_pengajuan = null;
@@ -161,7 +165,7 @@ class AdminLayanan_model extends CI_Model {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
             }
 
-            // Check if empty, seed defaults
+            // Cek jika kosong, isi data bawaan awal
             $count = $this->db->count_all('master_jenis_ta');
             if ($count === 0) {
                 $default_jenis = [
@@ -175,7 +179,7 @@ class AdminLayanan_model extends CI_Model {
                 $this->db->insert_batch('master_jenis_ta', $default_jenis);
             }
         } catch (Throwable $e) {
-            // Silently fallback if db connection issues
+            // Cadangan otomatis jika ada kendala koneksi database
         }
         $this->db->db_debug = $prev_debug;
     }
@@ -271,7 +275,7 @@ class AdminLayanan_model extends CI_Model {
     public function get_student_berkas_map($nim) {
         $map = array();
 
-        // 1. Fetch from file_pendaftaran
+        // 1. Ambil dari tabel file_pendaftaran
         if ($this->db->table_exists('file_pendaftaran')) {
             $target_ids = $this->get_student_target_ids($nim);
             $fp_rows = $this->db->group_start()
@@ -312,7 +316,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // 2. Fetch from pendaftaran_berkas (overrides if explicitly set in LAA module)
+        // 2. Ambil dari pendaftaran_berkas (menimpa jika diatur khusus di modul LAA)
         if ($this->db->table_exists('pendaftaran_berkas')) {
             $prev_debug = $this->db->db_debug;
             $this->db->db_debug = FALSE;
@@ -345,7 +349,7 @@ class AdminLayanan_model extends CI_Model {
     }
 
     /**
-     * Resolve all possible ID formats for a student in legacy tables (e.g. file_pendaftaran, guidance)
+     * Dapatkan semua format ID mahasiswa yang cocok di tabel (NIM, usr_mhs, user id)
      */
     public function get_student_target_ids($nim) {
         $clean_nim = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', (string)$nim);
@@ -391,7 +395,7 @@ class AdminLayanan_model extends CI_Model {
                     }
                 }
             } catch (Throwable $e) {
-                // ignore
+                // Abaikan jika ada kendala database
             }
             $this->db->db_debug = $prev_debug;
         }
@@ -421,7 +425,7 @@ class AdminLayanan_model extends CI_Model {
             $overall_status = 'Approved';
         }
 
-        // When all files are Approved, ensure all rows in file_pendaftaran are set to Approved and view_adminlaa = 1
+        // Saat semua berkas disetujui, pastikan status di file_pendaftaran menjadi Approved dan view_adminlaa = 1
         if ($overall_status === 'Approved' && $this->db->table_exists('file_pendaftaran')) {
             $target_ids = $this->get_student_target_ids($nim);
             $fp_update = array();
@@ -479,7 +483,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // Standardize status
+        // Standarisasi status
         $enum_status = 'Pending';
         $st_lower = strtolower($status);
         if ($st_lower === 'valid' || strpos($st_lower, 'setuju') !== false || strpos($st_lower, 'approved') !== false || $st_lower === 'acc') {
@@ -489,7 +493,7 @@ class AdminLayanan_model extends CI_Model {
         }
         $fp_status = ($enum_status === 'Valid') ? 'Approved' : (($enum_status === 'Invalid') ? 'Rejected' : 'Pending');
 
-        // PRIMARY: Update file_pendaftaran table directly (matching DosenWali logic)
+        // Utama: Perbarui tabel file_pendaftaran langsung
         if ($this->db->table_exists('file_pendaftaran')) {
             $target_ids = $this->get_student_target_ids($nim);
             $clean_nim  = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', (string)$nim);
@@ -708,8 +712,8 @@ class AdminLayanan_model extends CI_Model {
     }
 
     /**
-     * Helper: Resolve student names & details from user/users, guidance, or file_pendaftaran tables
-     * when student names are missing or set to fallback "Mahasiswa" in table `mahasiswa`.
+     * Bantu cari nama lengkap dan data mahasiswa dari tabel user, guidance, atau file_pendaftaran
+     * saat nama mahasiswa kosong atau masih bertuliskan "Mahasiswa"
      */
     private function _resolve_student_names(&$list) {
         if (empty($list)) return;
@@ -731,7 +735,7 @@ class AdminLayanan_model extends CI_Model {
             $target_ids[] = 'usr_mhs_' . $n;
         }
 
-        // 1. Fetch from user / users table
+        // 1. Ambil dari tabel user / users
         $user_map = array();
         if ($user_tbl) {
             $name_col = $this->db->field_exists('name', $user_tbl) ? 'name' : ($this->db->field_exists('nama', $user_tbl) ? 'nama' : ($this->db->field_exists('nama_depan', $user_tbl) ? 'nama_depan' : null));
@@ -756,7 +760,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // 2. Fetch from guidance table
+        // 2. Ambil dari tabel guidance
         $guidance_map = array();
         if ($has_guid) {
             $g_cols = array('id_mhs');
@@ -777,7 +781,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // 3. Fetch from file_pendaftaran table
+        // 3. Ambil dari tabel file_pendaftaran
         $fp_map = array();
         if ($has_fp && $this->db->field_exists('nama', 'file_pendaftaran')) {
             $fp_rows = $this->db->select('id_mhs, nama')
@@ -792,7 +796,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // 4. Fetch status_doswal from file_pendaftaran to resolve Dosen Wali approval status directly
+        // 4. Ambil status_doswal dari file_pendaftaran untuk status approval Dosen Wali
         if ($has_fp && $this->db->field_exists('status_doswal', 'file_pendaftaran')) {
             $fp_dos_rows = $this->db->select('id_mhs, status_doswal')
                 ->where_in('id_mhs', $target_ids)
@@ -814,7 +818,7 @@ class AdminLayanan_model extends CI_Model {
             unset($r);
         }
 
-        // Apply resolved names & guidance details
+        // Terapkan nama lengkap dan detail bimbingan
         foreach ($list as &$r) {
             $nim = $r['nim'] ?? '';
             $nd  = $r['nama_depan'] ?? '';
@@ -853,12 +857,12 @@ class AdminLayanan_model extends CI_Model {
     }
 
     /**
-     * Helper: Constructs fallback pengajuan array directly from legacy tables (file_pendaftaran & guidance)
-     * when pendaftaran_ta table has 0 rows (e.g. NAS production database).
+     * Bantu susun data pengajuan cadangan langsung dari file_pendaftaran dan guidance
+     * saat data pendaftaran mahasiswa dimuat dari arsitektur decoupled (file_pendaftaran & guidance).
      */
     /**
-     * Helper: Constructs fallback pengajuan array directly from legacy tables (file_pendaftaran & guidance)
-     * when pendaftaran_ta table has 0 rows (e.g. NAS production database).
+     * Bantu susun data pengajuan cadangan langsung dari file_pendaftaran dan guidance
+     * saat data pendaftaran mahasiswa dimuat dari arsitektur decoupled (file_pendaftaran & guidance).
      * Fully batch-loaded & memoized in memory for ultra-fast performance.
      */
     private function _get_fallback_pengajuan_from_legacy($force_refresh = false) {
@@ -958,7 +962,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // Batch load pendaftaran_berkas (if table exists)
+        // Muat data pendaftaran_berkas sekaligus
         $pb_map = array();
         if ($has_pb) {
             $prev_debug = $this->db->db_debug;
@@ -1071,7 +1075,7 @@ class AdminLayanan_model extends CI_Model {
             $has_mhs_rec  = !empty($m_rec);
             $has_g_rec    = !empty($info['guidance']);
 
-            // Ignore orphan dummy test rows in file_pendaftaran
+            // Abaikan baris data uji coba di file_pendaftaran
             if (!$has_user_rec && !$has_mhs_rec && !$has_g_rec) {
                 continue;
             }
@@ -1096,7 +1100,7 @@ class AdminLayanan_model extends CI_Model {
             $nama_depan = array_shift($parts) ?: 'Mahasiswa';
             $nama_belakang = implode(' ', $parts);
 
-            // Construct student's document map in memory without repeated DB queries
+            // Susun pemetaan berkas mahasiswa di memori tanpa query berulang
             $p_berkas_map = $info['docs'] ?? array();
             $nim_key_str  = (string)$nim_key;
             $real_nim_str = (string)$real_nim;
@@ -1220,7 +1224,7 @@ class AdminLayanan_model extends CI_Model {
     }
 
     /**
-     * Helper: Filter & sort legacy fallback pengajuan items
+     * Bantu filter dan urutkan data pengajuan cadangan
      */
     private function _filter_and_sort_legacy_pengajuan($filter_status = null, $search = null, $cat = null) {
         $list = $this->_get_fallback_pengajuan_from_legacy();
@@ -1354,7 +1358,7 @@ class AdminLayanan_model extends CI_Model {
     }
 
     /**
-     * Resolve URL file PDF untuk preview modal (aman dari simbol %, #, spasi, dsb)
+     * Format tautan berkas PDF untuk pratinjau modal (aman dari simbol %, #, spasi, dsb)
      */
     public function resolve_pdf_url($filename) {
         $encode_path = function($path) {
@@ -1400,7 +1404,7 @@ class AdminLayanan_model extends CI_Model {
         $items         = array();
         $processed_kodes = array();
 
-        // 1. Process student's existing recorded files in file_pendaftaran
+        // 1. Proses berkas mahasiswa yang sudah ada di file_pendaftaran
         foreach ($map as $kode => $record) {
             $processed_kodes[$kode] = true;
             $st = $record['status_verifikasi'] ?? 'Pending';
@@ -1432,7 +1436,7 @@ class AdminLayanan_model extends CI_Model {
             );
         }
 
-        // 2. Append active requirements if student hasn't uploaded them yet
+        // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
         foreach ($active_syarat as $sb) {
             $kode = $sb['kode_berkas'];
             if (isset($processed_kodes[$kode])) continue;
@@ -1508,7 +1512,7 @@ class AdminLayanan_model extends CI_Model {
 
         $student_maps = array();
 
-        // 1. Fetch from file_pendaftaran table
+        // 1. Ambil dari tabel file_pendaftaran table
         if ($this->db->table_exists('file_pendaftaran')) {
             $target_ids = array();
             foreach ($nims as $n) {
@@ -1549,7 +1553,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // 2. Fetch from pendaftaran_berkas table
+        // 2. Ambil dari tabel pendaftaran_berkas
         if ($this->db->table_exists('pendaftaran_berkas')) {
             $pb_rows = $this->db->where_in('nim', $nims)->get('pendaftaran_berkas')->result_array();
             if (!empty($pb_rows)) {
@@ -1575,7 +1579,7 @@ class AdminLayanan_model extends CI_Model {
             $items         = array();
             $processed_kodes = array();
 
-            // 1. Process student's existing recorded files in file_pendaftaran
+            // 1. Proses berkas mahasiswa yang sudah ada di file_pendaftaran
             foreach ($map as $kode => $record) {
                 $processed_kodes[$kode] = true;
                 $st = $record['status_verifikasi'] ?? 'Pending';
@@ -1607,7 +1611,7 @@ class AdminLayanan_model extends CI_Model {
                 );
             }
 
-            // 2. Append active requirements if student hasn't uploaded them yet
+            // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
             foreach ($active_syarat as $sb) {
                 $kode = $sb['kode_berkas'];
                 if (isset($processed_kodes[$kode])) continue;
@@ -1917,7 +1921,7 @@ class AdminLayanan_model extends CI_Model {
                 $r['nama_lengkap'] = 'Mahasiswa';
             }
 
-            // Map stage name to Bimbingan TA evaluation display tag (Preview 1, Preview 2, Preview 3, Pendaftaran Sidang)
+            // Petakan nama tahap ke label evaluasi Bimbingan TA (Preview 1, Preview 2, Preview 3, Pendaftaran Sidang)
             $stg = strtolower($r['current_stage'] ?? '');
             if (strpos($stg, 'preview 3') !== false || strpos($stg, 'preview3') !== false || strpos($stg, 'pra-sidang') !== false) {
                 $r['tahapan_display'] = 'Preview 3';
@@ -1930,12 +1934,12 @@ class AdminLayanan_model extends CI_Model {
             } elseif (strpos($stg, 'lulus') !== false || strpos($stg, 'selesai') !== false) {
                 $r['tahapan_display'] = 'Lulus Sidang';
             } else {
-                // Fallback for document verification stages (Mahasiswa, Dosen Wali, Admin Layanan, etc.)
+                // Cadangan untuk tahap verifikasi berkas (Mahasiswa, Dosen Wali, Admin Layanan, dll.)
                 // Bimbingan TA evaluation stage starts at Preview 1
                 $r['tahapan_display'] = 'Preview 1';
             }
 
-            // Dosen wali display
+            // Tampilan dosen wali
             if (empty($r['nama_dosen_wali'])) {
                 $r['nama_dosen_wali'] = $r['dosen_wali'] ?? 'Dosen Wali LAA';
             }
@@ -1943,7 +1947,7 @@ class AdminLayanan_model extends CI_Model {
             // Status bimbingan
             $r['status_bimbingan_display'] = (($r['status_approval_wali'] ?? '') === 'Approved') ? 'Disetujui wali' : ((($r['status_approval_wali'] ?? '') === 'Rejected') ? 'Ditolak wali' : 'Pending');
             
-            // File TA summary map
+            // Ringkasan pemetaan berkas TA
             $r['file_summary'] = $berkas_summaries[$nim] ?? null;
         }
         unset($r);
@@ -2087,7 +2091,7 @@ class AdminLayanan_model extends CI_Model {
             $this->db->order_by('g.id', 'DESC');
             $rows = $this->db->get()->result_array();
 
-            // Deduplicate rows by guidance_id in PHP (safe for sql_mode=only_full_group_by)
+            // Bersihkan duplikasi baris berdasarkan guidance_id di PHP
             $uniqueRows = array();
             $seenGid = array();
             foreach ($rows as $rItem) {
@@ -2321,7 +2325,7 @@ class AdminLayanan_model extends CI_Model {
             return $query->result_array();
         }
 
-        // Fallback default 7 berkas jika tabel belum ada / kosong
+        // Cadangan 7 berkas bawaan jika tabel belum ada atau kosong
         return [
             ['id' => 1, 'kode_berkas' => 'surat_izin_wali', 'nama_berkas' => 'Surat Izin Sidang yang Telah Ditandatangani Dosen Wali', 'deskripsi' => 'Surat rekomendasi izin pendaftaran sidang dari dosen wali akademik', 'is_required' => 1, 'is_active' => 1, 'urutan' => 1],
             ['id' => 2, 'kode_berkas' => 'formulir_sidang', 'nama_berkas' => 'Formulir Pendaftaran Sidang',                             'deskripsi' => 'Formulir bukti pendaftaran sidang tugas akhir lengkap', 'is_required' => 1, 'is_active' => 1, 'urutan' => 2],
@@ -2384,7 +2388,7 @@ class AdminLayanan_model extends CI_Model {
             $syarat_codes_map[preg_replace('/[^a-z0-9_]/', '_', $kc)] = true;
         }
 
-        // Check if student is already fully approved directly from guidance
+        // Cek apakah mahasiswa sudah disetujui penuh langsung dari data guidance
         $is_fully_approved = false;
         $should_purge_all_ps = false;
         $should_purge_pre_downgrade_ps = false;
@@ -2487,7 +2491,7 @@ class AdminLayanan_model extends CI_Model {
             $is_uploaded = ($found !== null && !$is_dummy_name);
             $file_name = $is_uploaded ? $raw_file : '';
 
-            // Parse status from status_adminlaa / status_admin / status_laa
+            // Ekstrak status dari status_adminlaa / status_admin / status_laa
             $raw_status = '';
             if ($found) {
                 if (!empty($found['status_adminlaa'])) {
@@ -2546,7 +2550,7 @@ class AdminLayanan_model extends CI_Model {
         $nim_clean = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', (string)$nim);
         $target_ids = $this->get_student_target_ids($nim);
 
-        // Standardize status representation
+        // Standarisasi format status
         $st_lower = strtolower(trim($status));
         if ($st_lower === 'valid' || strpos($st_lower, 'setuju') !== false || strpos($st_lower, 'approved') !== false || $st_lower === 'acc') {
             $disp_status = 'Disetujui Admin LAA';
@@ -2608,7 +2612,7 @@ class AdminLayanan_model extends CI_Model {
             }
         }
 
-        // Auto-evaluate overall guidance status for defense registration
+        // Evaluasi otomatis status kelayakan bimbingan untuk pendaftaran sidang
         $overall_status = 'Pending Verifikasi';
         if ($this->db->table_exists('guidance')) {
             $all_berkas = $this->get_berkas_pendaftaran_sidang($nim_clean);
@@ -3084,7 +3088,7 @@ class AdminLayanan_model extends CI_Model {
         $this->db->order_by('g.id', 'DESC');
         $results = $this->db->get()->result_array();
 
-        // Process distinct per nim (keep latest recommendation if duplicates)
+        // Saring data unik per NIM (ambil rekomendasi terbaru jika ada yang dobel)
         $unique = [];
         foreach ($results as $row) {
             $nim = !empty($row['nim']) ? $row['nim'] : ($row['id_guidance'] ?? '');
@@ -3096,7 +3100,7 @@ class AdminLayanan_model extends CI_Model {
             $row['penguji_1']    = !empty($row['nama_penguji1']) ? $row['nama_penguji1'] : '-';
             $row['penguji_2']    = !empty($row['nama_penguji2']) ? $row['nama_penguji2'] : '-';
 
-            // Decode form_data_json if available
+            // Urai data form_data_json jika tersedia
             $row['files_uploaded'] = [];
             if (!empty($row['form_data_json'])) {
                 $dec = json_decode($row['form_data_json'], true);

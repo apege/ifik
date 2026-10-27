@@ -1,3 +1,8 @@
+<?php
+/**
+ * Verifikasi Berkas Pendaftaran Sidang Sarjana - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

@@ -1,8 +1,8 @@
 <?php
 /**
- * Dedicated Sidebar Component for Admin Layanan (LAA)
+ * Komponen Sidebar Khusus Admin Layanan (LAA)
  * Path: application/views/admin_layanan/sidebar.php
- * Fully aligned with Curved Sidebar Layout (curved_sidebar.css & curved_sidebar.js)
+ * Selaras dengan tata letak Curved Sidebar (curved_sidebar.css & curved_sidebar.js)
  */
 
 $isLoggedIn       = (bool)$this->session->userdata('logged_in');
@@ -18,66 +18,77 @@ $laaNavGroups = [
         'category' => 'Pengelolaan Tugas Akhir',
         'items' => [
             [
+                // Cek dan verifikasi berkas pendaftaran proposal tugas akhir mahasiswa
                 'heading' => 'Pendaftaran TA',
                 'href'    => site_url('adminlayanan'),
                 'icon_3d' => 'assets/images/icons_3d/daftar.png',
                 'is_active' => ($curr_uri === 'adminlayanan' || $curr_uri === 'adminlayanan/index')
             ],
             [
+// Verifikasi berkas pengajuan dan laporan kerja praktik mahasiswa
                 'heading' => 'Verifikasi Berkas KP',
                 'href'    => site_url('adminlayanan/verifikasi_kp'),
                 'icon_3d' => 'assets/images/icons_3d/approval.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/verifikasi_kp') === 0 || strpos($curr_uri, 'adminlayanan/kp') === 0)
             ],
             [
+                // Berikan rekomendasi sidang atau kembalikan (rollback) tahap mahasiswa jika butuh revisi
                 'heading' => 'Rekomendasi & Downgrade',
                 'href'    => site_url('adminlayanan/rekomendasi'),
                 'icon_3d' => 'assets/images/icons_3d/approval.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/rekomendasi') === 0)
             ],
             [
+                // Cek berkas kelayakan sidang, seperti bebas lab, bebas perpus, dan transkrip
                 'heading' => 'Pendaftaran Sidang',
                 'href'    => site_url('adminlayanan/pendaftaran_sidang'),
                 'icon_3d' => 'assets/images/icons_3d/sidang.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/pendaftaran_sidang') === 0)
             ],
             [
+                // Pantau daftar mahasiswa yang sudah lulus sidang dan sedang melengkapi revisi
                 'heading' => 'Sudah Lulus Sidang',
                 'href'    => site_url('adminlayanan/lulus_sidang'),
                 'icon_3d' => 'assets/images/icons_3d/preview2.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/lulus_sidang') === 0)
             ],
             [
+                // Rekap status seluruh peserta tugas akhir yang sedang aktif di fakultas
                 'heading' => 'Status Peserta TA',
                 'href'    => site_url('adminlayanan/status_peserta_ta'),
                 'icon_3d' => 'assets/images/icons_3d/approval.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/status_peserta_ta') === 0)
             ],
             [
+                // Daftar dosen pembimbing beserta kuota dan jumlah bimbingan aktifnya
                 'heading' => 'Lihat Pembimbing',
                 'href'    => site_url('adminlayanan/lihat_pembimbing'),
                 'icon_3d' => 'assets/images/icons_3d/preview.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/lihat_pembimbing') === 0)
             ],
             [
+                // Data kelulusan akhir dan persiapan berkas peserta yudisium fakultas
                 'heading' => 'Yudisium',
                 'href'    => site_url('adminlayanan/yudisium'),
                 'icon_3d' => 'assets/images/icons_3d/approval.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/yudisium') === 0)
             ],
             [
+                // Atur jadwal pelaksanaan sidang, ruang yang dipakai, dan susunan dosen penguji
                 'heading' => 'Jadwal Sidang',
                 'href'    => site_url('adminlayanan/jadwal_sidang'),
                 'icon_3d' => 'assets/images/icons_3d/kalender.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/jadwal_sidang') === 0)
             ],
             [
+                // Buat dan cetak Berita Acara Sidang (BAP) versi Fakultas maupun sinkronisasi iGracias
                 'heading' => 'BAP Sidang',
                 'href'    => site_url('adminlayanan/bap_sidang'),
                 'icon_3d' => 'assets/images/icons_3d/tanda_tangan.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/bap_sidang') === 0)
             ],
             [
+                // Reset berkas unggahan mahasiswa jika filenya rusak atau salah upload
                 'heading' => 'Reset File TA',
                 'href'    => site_url('adminlayanan/reset_file_ta'),
                 'icon_3d' => 'assets/images/icons_3d/daftar.png',
@@ -90,12 +101,14 @@ $laaNavGroups = [
         'has_divider' => true,
         'items' => [
             [
+                // Obrolan langsung (live chat) untuk membantu mahasiswa atau dosen yang mengalami kendala
                 'heading' => 'Bantuan & Live Chat',
                 'href'    => site_url('adminlayanan/help'),
                 'icon_3d' => 'assets/images/icons_3d/help_chat.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/help') === 0)
             ],
             [
+                // Pengelolaan tiket bantuan dan laporan kendala administrasi akademik
                 'heading' => 'Kelola Tiket LAA',
                 'href'    => site_url('adminlayanan/ticketing'),
                 'icon_3d' => 'assets/images/icons_3d/unit_ticketing.png',
@@ -108,30 +121,35 @@ $laaNavGroups = [
         'has_divider' => true,
         'items' => [
             [
+                // Atur syarat berkas pendaftaran TA secara fleksibel (tipe file, wajib/opsional, template)
                 'heading' => 'Pengaturan Syarat Berkas',
                 'href'    => site_url('adminlayanan/pengaturan_berkas'),
                 'icon_3d' => 'assets/images/icons_3d/settings.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/pengaturan_berkas') === 0 && strpos($curr_uri, 'adminlayanan/pengaturan_berkas_sidang') === false)
             ],
             [
+                // Atur daftar syarat dokumen yang wajib dikumpulkan saat mahasiswa mendaftar sidang
                 'heading' => 'Syarat Berkas Sidang',
                 'href'    => site_url('adminlayanan/pengaturan_berkas_sidang'),
                 'icon_3d' => 'assets/images/icons_3d/sidang.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/pengaturan_berkas_sidang') === 0)
             ],
             [
+                // Kelola jalur tugas akhir di fakultas, seperti Reguler, Capstone, MBKM, atau Fast Track
                 'heading' => 'Pengaturan Jalur TA',
                 'href'    => site_url('adminlayanan/pengaturan_jalur'),
                 'icon_3d' => 'assets/images/icons_3d/daftar.png',
                 'is_active' => (strpos($curr_uri, 'adminlayanan/pengaturan_jalur') === 0)
             ],
             [
+                // Pendaftaran akun baru dan impor email civitas akademika
                 'heading' => 'Pendaftaran Akun Baru',
                 'href'    => site_url('import-email'),
                 'icon_3d' => 'assets/images/icons_3d/email_token.png',
                 'is_active' => (strpos($curr_uri, 'import-email') === 0 || strpos($curr_uri, 'importemail') === 0)
             ],
             [
+                // Tulis, edit, dan kelola publikasi berita atau pengumuman fakultas
                 'heading' => 'Kelola Berita',
                 'href'    => site_url('adminlayanan/berita'),
                 'icon_3d' => 'assets/images/icons_3d/email_token.png',
@@ -144,6 +162,7 @@ $laaNavGroups = [
         'has_divider' => true,
         'items' => [
             [
+                // Keluar dari sistem dan hapus sesi login akun
                 'heading' => 'Keluar',
                 'href'    => site_url('login/logout'),
                 'icon_3d' => 'assets/images/icons_3d/logout.png',

@@ -1,3 +1,8 @@
+<?php
+/**
+ * Template Berita Acara Pelaksanaan Sidang Versi Fakultas - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

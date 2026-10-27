@@ -56,6 +56,9 @@ class AdminProdi extends CI_Controller {
     /**
      * Halaman Utama: Dashboard & Manajemen Perwalian Prodi
      */
+    /**
+     * Dashboard monitoring perwalian mahasiswa & data kurikulum prodi
+     */
     public function index() {
         $userProdi     = $this->session->userdata('prodi') ?: '';
         $selectedProdi = $this->input->get('prodi', true) ?: 'all';
@@ -124,6 +127,9 @@ class AdminProdi extends CI_Controller {
     // AJAX: CRUD & IMPORT MATA KULIAH
     // =========================================================================
 
+    /**
+     * Simpan atau update data master mata kuliah
+     */
     public function simpan_mata_kuliah() {
         $this->output->set_content_type('application/json');
 
@@ -207,6 +213,9 @@ class AdminProdi extends CI_Controller {
     /**
      * AJAX: Import Bulk Mata Kuliah dari Excel JSON
      */
+    /**
+     * Impor kurikulum mata kuliah dari file Excel
+     */
     public function import_mata_kuliah() {
         @set_time_limit(300);
         $this->output->set_content_type('application/json');
@@ -249,6 +258,9 @@ class AdminProdi extends CI_Controller {
     // AJAX: ASSIGN DOSEN WALI & IMPORT MAHASISWA
     // =========================================================================
 
+    /**
+     * Plotting dosen wali ke mahasiswa terpilih
+     */
     public function update_dosen_wali() {
         $this->output->set_content_type('application/json');
         $nim      = trim($this->input->post('nim', true));
@@ -270,6 +282,9 @@ class AdminProdi extends CI_Controller {
     // AJAX: IMPORT REKAP KRS KOLEKTIF DARI SIAKAD / I-GRACIAS
     // =========================================================================
 
+    /**
+     * Impor kolektif kontrak KRS mahasiswa dari Excel
+     */
     public function import_krs_kolektif() {
         @set_time_limit(300);
         $this->output->set_content_type('application/json');
@@ -315,6 +330,9 @@ class AdminProdi extends CI_Controller {
     // AJAX: RESET / BUKA KUNCI PERWALIAN MAHASISWA
     // =========================================================================
 
+    /**
+     * Reset status perwalian mahasiswa ke kondisi awal (Draft)
+     */
     public function reset_perwalian() {
         $this->output->set_content_type('application/json');
         $id_perwalian = (int)$this->input->post('id_perwalian', true);

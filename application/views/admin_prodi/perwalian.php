@@ -1,3 +1,9 @@
+<?php
+/**
+ * Modul Perwalian & Kurikulum Admin Prodi
+ * Monitoring perwalian, plotting dosen wali, dan master mata kuliah.
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Model Berita Fakultas
+ * Mengelola tabel berita, query publik vs admin, dan status publikasi.
+ */
 class News_model extends CI_Model {
 
     public function __construct()

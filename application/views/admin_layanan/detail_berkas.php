@@ -1,3 +1,8 @@
+<?php
+/**
+ * Detail Berkas Pendaftaran TA & Riwayat Peninjauan Dokumen - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

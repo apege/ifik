@@ -11,14 +11,14 @@ class AdminLayanan extends CI_Controller {
     }
 
     /**
-     * Dashboard Admin Layanan: Daftar pengajuan berkas pendaftaran TA mahasiswa
+     * Dashboard verifikasi berkas pendaftaran tugas akhir mahasiswa
      */
     public function index() {
         $filter_status = $this->input->get('status') ?: 'all';
         $search        = trim($this->input->get('q') ?? '');
         $cat           = trim($this->input->get('cat') ?? 'query');
 
-        // Paging Parameters
+        // Parameter Halaman (Paging)
         $per_page = (int)($this->input->get('per_page') ?: 5);
         if ($per_page < 1) $per_page = 5;
 
@@ -41,7 +41,7 @@ class AdminLayanan extends CI_Controller {
         $data['search']         = $search;
         $data['cat']            = $cat;
 
-        // Paging Data
+        // Data Paging
         $data['per_page']       = $per_page;
         $data['page']           = $page;
         $data['total_rows']     = $total_rows;
@@ -87,7 +87,7 @@ class AdminLayanan extends CI_Controller {
 
         $summaries     = $this->AdminLayanan_model->get_batch_student_berkas_summaries($list, $syarat_berkas);
 
-        // Sanitize & format output for JSON
+        // Bersihkan dan format data keluaran untuk JSON
         $formatted_list = array();
         foreach ($list as $r) {
             $nim = $r['nim'] ?? '';
@@ -190,7 +190,7 @@ class AdminLayanan extends CI_Controller {
             return;
         }
 
-        // Standardize status ('Valid', 'Invalid', or 'Pending')
+        // Standarisasi status ('Valid', 'Invalid', atau 'Pending')
         $sLower = strtolower($status);
         if ($status === 'Valid' || $status === 'Approved' || $sLower === 'setujui' || $sLower === 'acc') {
             $status = 'Valid';
@@ -201,18 +201,18 @@ class AdminLayanan extends CI_Controller {
         }
 
 
-        // Get file name
+        // Ambil nama berkas
         $student_berkas_map = $this->AdminLayanan_model->get_student_berkas_map($nim);
         $file_name = $student_berkas_map[$kode_berkas]['file_name'] ?? ($detail['file_' . $kode_berkas] ?? ($kode_berkas . '_' . $nim . '.pdf'));
 
-        // Save status directly to file_pendaftaran
+        // Simpan status langsung ke file_pendaftaran
         $this->AdminLayanan_model->save_student_berkas($nim, $kode_berkas, $file_name, $status, $catatan);
 
-        // Recompute all berkas summary and sync overall status
+        // Hitung ulang ringkasan berkas dan sinkronisasi status keseluruhan
         $sync_res = $this->AdminLayanan_model->sync_overall_status($nim, $catatan);
         $summary = $sync_res['summary'];
 
-        // Log action
+        // Catat riwayat aksi
         $this->load->model('Approval_log_model');
         $mhs_name = trim(($detail['nama_depan'] ?? '') . ' ' . ($detail['nama_belakang'] ?? ''));
         $this->Approval_log_model->log(array(
@@ -223,7 +223,7 @@ class AdminLayanan extends CI_Controller {
             'catatan'     => $catatan ?: 'Verifikasi langsung dari Pop-up Preview'
         ));
 
-        // Get updated stats and berkas summary
+        // Ambil statistik terbaru dan ringkasan berkas
         $stats = $this->AdminLayanan_model->get_stats();
 
         $this->output
@@ -240,6 +240,9 @@ class AdminLayanan extends CI_Controller {
     /**
      * Halaman Pengaturan Master Syarat Berkas TA oleh LAA
      */
+    /**
+     * Pengaturan syarat berkas dinamis pendaftaran TA
+     */
     public function pengaturan_berkas() {
         $data['title']         = 'Pengaturan Syarat Berkas & Jenis TA - Admin Layanan';
         $data['syarat_berkas'] = $this->AdminLayanan_model->get_all_syarat_berkas();
@@ -251,6 +254,9 @@ class AdminLayanan extends CI_Controller {
     /**
      * Halaman Pengaturan Master Syarat Berkas Sidang (Dinamis Persyaratan Sidang)
      */
+    /**
+     * Pengaturan syarat berkas dinamis pendaftaran sidang
+     */
     public function pengaturan_berkas_sidang() {
         $data['title']         = 'Pengaturan Syarat Berkas Sidang - Admin Layanan';
         $data['syarat_sidang'] = $this->AdminLayanan_model->get_all_master_syarat_sidang();
@@ -260,6 +266,9 @@ class AdminLayanan extends CI_Controller {
 
     /**
      * Halaman Pengaturan Master Jalur Sidang & Non-Sidang (Dinamis)
+     */
+    /**
+     * Master data pengaturan jalur tugas akhir (Reguler, MBKM, Capstone, dll.)
      */
     public function pengaturan_jalur() {
         $data['title'] = 'Pengaturan Jalur Sidang & Non-Sidang (Dinamis)';
@@ -399,7 +408,7 @@ class AdminLayanan extends CI_Controller {
             $kode_berkas = strtolower(preg_replace('/[^a-zA-Z0-9_]+/', '_', trim($nama_berkas)));
         }
 
-        // Handle File Template jika ada diunggah
+        // Proses berkas template jika ada yang diunggah
         $uploaded_template = null;
         if (!empty($_FILES['file_template']['name'])) {
             $upload_dir = FCPATH . 'uploads/templates/';
@@ -558,7 +567,7 @@ class AdminLayanan extends CI_Controller {
             return;
         }
 
-        // Handle Upload File Template jika ada
+        // Proses unggahan berkas template jika ada
         $uploaded_template = null;
         if (!empty($_FILES['file_template']['name'])) {
             $upload_dir = FCPATH . 'uploads/templates/';
@@ -714,7 +723,7 @@ class AdminLayanan extends CI_Controller {
             return;
         }
 
-        // Mark view_adminlaa = 1 in file_pendaftaran when Admin LAA views student's berkas
+        // Tandai view_adminlaa = 1 di file_pendaftaran saat Admin LAA membuka berkas mahasiswa
         if ($this->db->table_exists('file_pendaftaran')) {
             $target_ids = $this->AdminLayanan_model->get_student_target_ids($nim);
             if ($this->db->field_exists('view_adminlaa', 'file_pendaftaran') && !empty($target_ids)) {
@@ -758,7 +767,7 @@ class AdminLayanan extends CI_Controller {
 
         $res = $this->AdminLayanan_model->get_detail_pengajuan($nim);
 
-        // Record Approval History Log
+        // Catat riwayat log persetujuan
         $this->load->model('Approval_log_model');
         $mhs_name = trim(($detail['nama_depan'] ?? '') . ' ' . ($detail['nama_belakang'] ?? ''));
         $this->Approval_log_model->log(array(
@@ -818,7 +827,7 @@ class AdminLayanan extends CI_Controller {
                 );
             }
 
-            // Parse berkas_kurang
+            // Urai daftar berkas yang masih kurang
             $raw_bk = $r['berkas_kurang'] ?? '';
             $berkas_kurang_arr = array();
             if (!empty($raw_bk)) {
@@ -926,6 +935,9 @@ class AdminLayanan extends CI_Controller {
     // TICKETING MODULE ENDPOINTS
     // ==========================================
 
+    /**
+     * Meja bantuan tiket (ticketing system) layanan akademik
+     */
     public function ticketing() {
         $tab = $this->input->get('tab') ?: 'input';
         $data['title']      = 'Manajemen Ticketing LAA';
@@ -1063,9 +1075,9 @@ class AdminLayanan extends CI_Controller {
         $berkas = [];
 
         if (!empty($search)) {
-            // Try exact NIM first
+            // Cari berdasarkan kecocokan NIM persis terlebih dahulu
             $detail = $this->AdminLayanan_model->get_detail_pengajuan($search);
-            // If not found by NIM, search by name/query
+            // Jika tidak ditemukan via NIM, cari lewat nama atau kata kunci
             if (!$detail) {
                 $matches = $this->AdminLayanan_model->get_all_pengajuan('all', $search, 1, 0, $cat);
                 if (!empty($matches)) {
@@ -1392,7 +1404,7 @@ class AdminLayanan extends CI_Controller {
                     }
                 }
 
-                // E. Hapus / Reset tabel pendaftaran_ta jika ada
+                // E. Hapus / Reset data pendaftaran jika ada
                 if ($this->db->table_exists('pendaftaran_ta')) {
                     $this->db->where('nim', $clean_nim)->or_where_in('nim', $target_ids)->delete('pendaftaran_ta');
                 }
@@ -1428,6 +1440,9 @@ class AdminLayanan extends CI_Controller {
 
     /**
      * Halaman List Pendaftar Sidang
+     */
+    /**
+     * Verifikasi berkas kelayakan pendaftaran sidang sarjana
      */
     public function pendaftaran_sidang() {
         if ($this->input->get('manage_syarat') == '1') {
@@ -1616,7 +1631,7 @@ class AdminLayanan extends CI_Controller {
         header('Content-Disposition: attachment; filename=' . $filename);
 
         $output = fopen('php://output', 'w');
-        // Add UTF-8 BOM for Excel compatibility
+        // Tambahkan UTF-8 BOM agar terbaca rapi di Excel
         fputs($output, "\xEF\xBB\xBF");
 
         // Header
@@ -1650,6 +1665,9 @@ class AdminLayanan extends CI_Controller {
 
     /**
      * Halaman Rekapitulasi Yudisium
+     */
+    /**
+     * Monitoring peserta yudisium & verifikasi kelulusan akhir
      */
     public function yudisium() {
         $search  = trim($this->input->get('q') ?? '');
@@ -1768,6 +1786,9 @@ class AdminLayanan extends CI_Controller {
     /**
      * Halaman Tabel Pengajuan BAP Sidang
      */
+    /**
+     * Pembuatan & cetak Berita Acara Pelaksanaan Sidang (BAP Fakultas & iGracias)
+     */
     public function bap_sidang() {
         $search        = trim($this->input->get('q') ?? '');
         $cat           = trim($this->input->get('cat') ?? 'query');
@@ -1851,6 +1872,9 @@ class AdminLayanan extends CI_Controller {
     /**
      * Halaman Review Rekomendasi Pembimbing 1 & Downgrade Tahap Preview
      */
+    /**
+     * Daftar rekomendasi sidang & modal aksi rollback tahap
+     */
     public function rekomendasi() {
         $filter_type = $this->input->get('filter') ?: 'all';
         $search      = trim($this->input->get('q') ?? '');
@@ -1902,6 +1926,9 @@ class AdminLayanan extends CI_Controller {
 
     /**
      * AJAX Endpoint: Downgrade Tahap Preview Mahasiswa
+     */
+    /**
+     * Eksekusi rollback tahap mahasiswa ke tahap sebelumnya
      */
     public function downgrade_preview_ajax() {
         header('Content-Type: application/json');

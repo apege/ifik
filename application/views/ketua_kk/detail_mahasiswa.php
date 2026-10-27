@@ -1,3 +1,8 @@
+<?php
+/**
+ * Detail Usulan Proposal & Approval Ketua KK
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

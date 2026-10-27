@@ -1,3 +1,8 @@
+<?php
+/**
+ * Dashboard Verifikasi Berkas Pendaftaran TA - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

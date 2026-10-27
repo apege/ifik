@@ -1,3 +1,8 @@
+<?php
+/**
+ * Komponen Berita Dashboard (3D Fan & Card Deck Mobile)
+ */
+?>
 <style>
     /* ===== SESI 3: BERITA ===== */
     #section-contact {

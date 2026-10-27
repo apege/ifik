@@ -25,7 +25,7 @@ class News extends CI_Controller {
         }
     }
 
-    // ─── PUBLIC: Halaman detail berita ─────────────────────────────────────
+    // Halaman detail artikel berita publik
     public function detail($id = null)
     {
         if ($id === null) {
@@ -35,7 +35,7 @@ class News extends CI_Controller {
         $berita = $this->News_model->get_by_id($id);
 
         if (!$berita) {
-            // Fallback sample news mapping matching sample items from berita.php
+            // Data berita cadangan jika database belum terisi
             $sample_news = array(
                 1 => array(
                     'id'           => 1,
@@ -121,7 +121,7 @@ class News extends CI_Controller {
         $this->load->view('news/detail', $data);
     }
 
-    // ─── ADMIN: Halaman Newsroom ────────────────────────────────────────────
+    // Halaman Newsroom untuk kelola berita (admin)
     public function index()
     {
         $this->_require_admin();
@@ -134,7 +134,7 @@ class News extends CI_Controller {
         $this->index();
     }
 
-    // ─── ADMIN: Save (Insert / Update) ─────────────────────────────────────
+    // Simpan berita (tambah baru atau update) beserta upload cover
     public function save()
     {
         header('Content-Type: application/json');
@@ -215,7 +215,7 @@ class News extends CI_Controller {
         }
     }
 
-    // ─── ADMIN: Delete ─────────────────────────────────────────────────────
+    // Hapus artikel berita
     public function delete($id)
     {
         header('Content-Type: application/json');
@@ -224,7 +224,7 @@ class News extends CI_Controller {
         echo json_encode(['status' => $ok ? 'success' : 'error', 'message' => $ok ? 'Berita berhasil dihapus!' : 'Gagal menghapus berita.']);
     }
 
-    // ─── ADMIN: Toggle publish ─────────────────────────────────────
+    // Toggle status publikasi berita (publish / draft) via AJAX
     public function toggle($id)
     {
         header('Content-Type: application/json');
@@ -239,7 +239,7 @@ class News extends CI_Controller {
         }
     }
 
-    // ─── PUBLIC API: JSON untuk dashboard ──────────────────────────────────
+    // Endpoint API JSON berita terbit untuk widget kartu 3D dashboard
     public function get_all_json()
     {
         header('Content-Type: application/json');

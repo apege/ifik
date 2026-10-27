@@ -1,3 +1,8 @@
+<?php
+/**
+ * Pengaturan Master Syarat Berkas Dinamis Pendaftaran TA - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

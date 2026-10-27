@@ -1,3 +1,8 @@
+<?php
+/**
+ * Template Berita Acara Pelaksanaan Sidang Format iGracias - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

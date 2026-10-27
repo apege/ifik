@@ -846,6 +846,9 @@ class Perwalian_model extends CI_Model {
     // MONITORING PERWALIAN (ADMIN PRODI & STATISTIK)
     // =========================================================================
 
+    /**
+     * Pemantauan kemajuan perwalian mahasiswa tingkat Program Studi
+     */
     public function get_monitoring_list($filters = []) {
         $this->db->select('p.*, MAX(u.name) as nama_lengkap, MAX(u.email) as email, MAX(u.prodi) as user_prodi, COUNT(pd.id) as total_mk, COALESCE(SUM(pd.sks), 0) as total_sks')
                  ->from('perwalian p')
@@ -1683,7 +1686,7 @@ class Perwalian_model extends CI_Model {
      * Tidak ada yang di-hardcode!
      */
     /**
-     * Import Nilai Khusus 1 Mahasiswa (Tahap 2)
+     * Impor nilai mahasiswa (Tahap 2) dengan proteksi anti-duplikasi: murni operasi UPDATE berbasis (id_perwalian + kode_mk)
      */
     public function import_nilai_single($id_perwalian, $rows) {
         $id_perwalian = (int)$id_perwalian;

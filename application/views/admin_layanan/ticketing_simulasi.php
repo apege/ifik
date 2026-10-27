@@ -1,3 +1,8 @@
+<?php
+/**
+ * Simulasi Alur Penanganan Tiket Layanan Akademik - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

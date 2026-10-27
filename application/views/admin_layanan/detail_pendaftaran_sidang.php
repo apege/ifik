@@ -1,3 +1,8 @@
+<?php
+/**
+ * Detail Berkas Pendaftaran Sidang & Validasi Dokumen - Admin LAA
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

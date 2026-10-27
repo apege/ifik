@@ -11,14 +11,14 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
-     * Dashboard Ketua Kelompok Keahlian (KK)
+     * Dashboard Utama Ketua KK - pemantauan statistik dan daftar mahasiswa pendaftar TA
      */
     public function index() {
         $id_kk         = $this->input->get('kk') ?: 'all';
         $filter_status = $this->input->get('status') ?: 'all';
         $search        = trim($this->input->get('q') ?? '');
 
-        // Paging Parameters
+        // Parameter Halaman (Paging)
         $per_page = (int)($this->input->get('per_page') ?: 5);
         if ($per_page < 1) $per_page = 5;
 
@@ -41,7 +41,7 @@ class KetuaKK extends CI_Controller {
         $data['search']         = $search;
         $data['stats']          = $this->KetuaKK_model->get_stats($id_kk);
         
-        // Paging Data
+        // Data Paging
         $data['per_page']       = $per_page;
         $data['page']           = $page;
         $data['total_rows']     = $total_rows;
@@ -52,7 +52,7 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
-     * AJAX Endpoint: Get realtime table data & stats for Ketua KK
+     * Endpoint data tabel & statistik realtime via AJAX
      */
     public function ajax_get_table() {
         $id_kk         = $this->input->get('kk') ?: 'all';
@@ -76,7 +76,7 @@ class KetuaKK extends CI_Controller {
         $stats = $this->KetuaKK_model->get_stats($id_kk);
         $list  = $this->KetuaKK_model->get_mahasiswa_by_kk($id_kk, $filter_status, $search, $per_page, $offset);
 
-        // Sanitize & format output for JSON
+        // Bersihkan dan format data keluaran untuk JSON
         $formatted_list = array();
         foreach ($list as $r) {
             $full_name = trim(($r['nama_depan'] ?? '') . ' ' . ($r['nama_belakang'] ?? ''));
@@ -120,7 +120,7 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
-     * Endpoint Autocomplete Search JSON
+     * Autocomplete pencarian cepat mahasiswa (NIM & nama)
      */
     public function autocomplete() {
         $term  = trim($this->input->get('q') ?? '');
@@ -146,7 +146,7 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
-     * Detail Mahasiswa & Approval Ketua KK
+     * Detail proposal mahasiswa dan form approval Ketua KK
      */
     public function detail($nim) {
         $detail = $this->KetuaKK_model->get_detail_mahasiswa($nim);
@@ -176,7 +176,7 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
-     * Proses Simpan Approval Ketua KK & Unlock Tahap Bimbingan
+     * Simpan status approval Ketua KK & buka akses modul bimbingan TA jika disetujui
      */
     public function submit_approval($nim) {
         $detail = $this->KetuaKK_model->get_detail_mahasiswa($nim);
@@ -207,7 +207,7 @@ class KetuaKK extends CI_Controller {
 
         $this->KetuaKK_model->update_approval_kk($nim, $status, $catatan);
 
-        // Record Approval History Log
+        // Catat riwayat log persetujuan
         $this->load->model('Approval_log_model');
         $mhs_name = trim(($detail['nama_depan'] ?? '') . ' ' . ($detail['nama_belakang'] ?? ''));
         $log_action = ($status === 'Approved') ? 'Approved' : (($status === 'Pending') ? 'Reset' : 'Rejected');
@@ -244,7 +244,7 @@ class KetuaKK extends CI_Controller {
     }
 
     /**
-     * Bulk / Batch Approval sekaligus beberapa mahasiswa oleh Ketua KK
+     * Bulk approval untuk mahasiswa yang sudah memenuhi prasyarat
      */
     public function submit_bulk_approval() {
         $nim_list = $this->input->post('nim_list');
