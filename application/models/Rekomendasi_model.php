@@ -1,6 +1,19 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * =========================================================================================
+ * MODEL: REKOMENDASI JALUR KELULUSAN TA (SIDANG & NON-SIDANG EKUIVALENSI)
+ * Path: application/models/Rekomendasi_model.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Model ini mengelola master konfigurasi dinamis jalur kelulusan Tugas Akhir (TA):
+ * 1. Master Opsi Jalur (rekomen_jalur_options): Jalur Sidang Reguler vs Jalur Non-Sidang (Prestasi, HKI, Proyek, dll).
+ * 2. Master Form Field Persyaratan (rekomen_jalur_fields): Berkas wajib dan teks input per jalur non-sidang.
+ * 3. Submission Rekomendasi (rekomen_submission): Hasil input form rekomendasi Dosen Pembimbing 1 beserta bukti eviden.
+ */
 class Rekomendasi_model extends CI_Model {
 
     public function __construct() {

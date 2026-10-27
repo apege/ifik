@@ -1,8 +1,30 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Class Dashboard
+ * 
+ * Controller utama untuk mengelola halaman publik / landing page portal IFIK (Integrated Faculty Information & Facilities).
+ * Menangani rendering halaman beranda yang mengintegrasikan bilah navigasi (Navbar Publik), hero slider,
+ * informasi jadwal peminjaman ruangan laboratorium, serta layanan fakultas.
+ * 
+ * @package     IFIK Telkom University
+ * @subpackage  Controllers
+ * @category    Public Dashboard & Navigation
+ * @author      Nazril Rizki
+ */
 class Dashboard extends CI_Controller {
 
+	/**
+	 * Halaman Utama (Landing Page / Beranda Publik)
+	 * 
+	 * Menyiapkan data header/slide banner, memuat jadwal peminjaman ruangan yang telah disetujui,
+	 * data kategori lab, serta me-render view 'dashboard/index' yang secara modular mengikutsertakan
+	 * partial navigasi utama: application/views/partials/navbar.php.
+	 * 
+	 * @access public
+	 * @return void
+	 */
 	public function index()
 	{
         // Cegah Chrome meng-cache halaman landing page saat status login berubah

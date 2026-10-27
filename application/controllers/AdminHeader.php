@@ -1,6 +1,21 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * =========================================================================================
+ * CONTROLLER: ADMIN HEADER & FASILITAS SLIDER SETTINGS
+ * Path: application/controllers/AdminHeader.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Controller ini menangani konfigurasi dinamis bagian header/navbar dan hero slider landing page.
+ * Memungkinkan administrator untuk memperbarui teks dekanat, gambar hero, video profil, durasi slide,
+ * serta mengelola slide banner fasilitas fakultas (tambah, edit via AJAX, hapus, dan upload berkas).
+ * 
+ * Otorisasi:
+ * Khusus Role 1 (Admin System), Role 2 (Kaur), Role 21 (Laboran), dan Role 22 (Super Admin).
+ */
 class AdminHeader extends CI_Controller {
 
     public function __construct()
@@ -17,6 +32,15 @@ class AdminHeader extends CI_Controller {
          }
     }
 
+    /**
+     * Halaman Pengaturan Header & Fasilitas
+     * 
+     * Mengambil konfigurasi header (teks & video/gambar dekanat), daftar slide aktif,
+     * serta daftar kategori ruangan laboratorium dari Booking_model, lalu me-render view admin/header_settings.
+     * 
+     * @access public
+     * @return void
+     */
     public function index()
     {
         $this->load->model('Booking_model');
@@ -32,6 +56,16 @@ class AdminHeader extends CI_Controller {
         $this->load->view('admin/header_settings', $data);
     }
 
+    /**
+     * Proses Pembaruan Konfigurasi Header Landing Page
+     * 
+     * Menangani input judul, deskripsi fakultas, durasi transisi slide, serta unggahan berkas
+     * gambar dekanat (PNG/JPG) dan video profil fakultas (MP4/WebM). Berkas lama otomatis dibersihkan
+     * dari folder uploads/header/ saat berkas baru diunggah.
+     * 
+     * @access public
+     * @return void Redirect kembali ke adminheader dengan flashdata status
+     */
     public function update_settings()
     {
         $title = $this->input->post('title', true);
@@ -72,6 +106,15 @@ class AdminHeader extends CI_Controller {
         redirect('adminheader');
     }
 
+    /**
+     * Proses Penambahan Slide Banner Fasilitas Baru
+     * 
+     * Menerima input judul slide, deskripsi singkat, kategori fasilitas lab, serta unggahan berkas
+     * media (gambar atau video). Menghitung nomor urut otomatis dan menyimpannya melalui Header_model.
+     * 
+     * @access public
+     * @return void Redirect kembali ke adminheader?tab=fasilitas
+     */
     public function add_slide()
     {
         $label = $this->input->post('label', true);
@@ -155,6 +198,15 @@ class AdminHeader extends CI_Controller {
     /**
      * Edit Slide — versi AJAX (tanpa reload)
      * Menerima POST: id, label, overlay_title, overlay_description
+     */
+    /**
+     * AJAX Endpoint: Pembaruan Data Slide Banner Fasilitas
+     * 
+     * Memperbarui informasi slide banner (judul, deskripsi, kategori ruangan, dan berkas media opsional)
+     * secara asinkron tanpa me-reload halaman penuh. Mengembalikan respon JSON {status, message}.
+     * 
+     * @access public
+     * @return void Output JSON response
      */
     public function edit_slide_ajax()
     {
@@ -266,6 +318,13 @@ class AdminHeader extends CI_Controller {
     /**
      * Edit Slide — versi lama (fallback, tidak dipakai oleh AJAX)
      */
+    /**
+     * Fallback Standar: Edit Data Slide Banner Berdasarkan ID
+     * 
+     * @access public
+     * @param  int $id ID slide yang akan diperbarui
+     * @return void Redirect kembali ke halaman pengaturan header
+     */
     public function edit_slide($id)
     {
         $slide = $this->Header_model->get_slide($id);
@@ -295,6 +354,16 @@ class AdminHeader extends CI_Controller {
         redirect('adminheader');
     }
 
+    /**
+     * Menghapus Slide Banner Fasilitas
+     * 
+     * Menghapus berkas fisik media (gambar/video) dari folder uploads/header/ dan menghapus
+     * rekaman slide dari database melalui Header_model->delete_slide($id).
+     * 
+     * @access public
+     * @param  int $id ID slide yang akan dihapus
+     * @return void Redirect kembali ke adminheader?tab=fasilitas
+     */
     public function delete_slide($id)
     {
         $slide = $this->Header_model->get_slide($id);

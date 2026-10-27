@@ -2163,6 +2163,32 @@ class Mahasiswa_model extends CI_Model {
         ];
     }
 
+    /**
+     * =========================================================================
+     * BISNIS LOGIKA UTAMA: PENURUNAN TAHAP PREVIEW & SIDANG (DOWNGRADE STAGE)
+     * =========================================================================
+     * Menjalankan proses rollback tahapan bimbingan akademik mahasiswa secara komprehensif:
+     * 1. Validasi Hierarki: Memastikan tahap tujuan (ke_tahap) memiliki level lebih rendah dari tahap asal (dari_tahap).
+     * 2. Penghapusan Berkas Fisik: Menghapus file naskah naskah/bab di uploads/preview_ta/, uploads/sidang/,
+     *    uploads/persyaratan_ta/, uploads/bap/, dan uploads/rekomendasi_ta/ untuk level >= target_rank.
+     * 3. Pembersihan Database: Menghapus baris terkait di tabel thesis, bimbingan_preview, file_pendaftaran,
+     *    pendaftaran_berkas, dan rekomen_submission.
+     * 4. Reset Nilai & Jadwal:
+     *    - Jika target_rank < 5: Reset nilai sidang 4 dosen, jadwal/ruang sidang, dan berkas/akses BAP.
+     *    - Jika target_rank <= 4: Hapus berkas persyaratan pendaftaran sidang.
+     *    - Jika target_rank <= 3: Hapus rekomendasi P1 dan bukti eviden non-sidang.
+     *    - Jika target_rank <= 2: Reset nilai Desk Evaluation (DE) Preview 2 dan jadwal presentasi.
+     * 5. Sinkronisasi Flag Kelulusan: Mengatur ulang lulus_preview1..3 dan lulus_sidang sesuai target level.
+     * 6. Audit Trail: Mencatat riwayat penurunan tahap ke guidance.downgrade_log dan log_approval_history.
+     * 
+     * @access public
+     * @param  string $nim NIM mahasiswa target
+     * @param  string $dari_tahap Tahap asal mahasiswa saat ini
+     * @param  string $ke_tahap Tahap tujuan penurunan
+     * @param  string $role Peran aktor pelaksana ('Admin LAA' / 'Koordinator TA')
+     * @param  string $alasan Alasan resmi penurunan tahap
+     * @return array Status keberhasilan operasi ['status' => bool, 'message' => string]
+     */
     public function downgrade_stage($nim, $dari_tahap, $ke_tahap, $role = null, $alasan = '') {
         if (!$this->db->table_exists('guidance')) {
             return ['status' => false, 'message' => 'Tabel guidance tidak ditemukan.'];

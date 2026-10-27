@@ -1,5 +1,24 @@
 <?php
 /**
+ * =========================================================================================
+ * VIEW: DASHBOARD EVALUASI & BIMBINGAN DOSEN (4 ROLE: P1, P2, U1, U2)
+ * Path: application/views/mahasiswa/dosen_bimbingan.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Antarmuka terpadu bagi Dosen Pembimbing (P1 & P2) dan Dosen Penguji (U1 & U2) untuk memantau,
+ * mereview naskah bab, memberikan ACC/revisi, menilai kelayakan Desk Evaluation (Preview 2),
+ * menilai Majelis Sidang Akhir, dan menetapkan rekomendasi jalur kelulusan Tugas Akhir.
+ * 
+ * Fitur Utama:
+ * 1. Multi-Criteria Filter Bar (Pencarian fleksibel hingga 4 kriteria dengan filter kolom dinamis).
+ * 2. Rotating Border Table dengan badge status tahapan akademik real-time.
+ * 3. Dynamic Multi-File Preview: Pratinjau dokumen PDF multi-kartu (hingga 6 dokumen berdampingan).
+ * 4. Modal Penilaian Rubrik DE (Desk Evaluation) & Penilaian Sidang Akhir 4 Dosen.
+ * 5. Floating Batch Actions & SSE (Server-Sent Events) untuk sinkronisasi bimbingan real-time.
+ */
+/**
  * DASHBOARD UNIFIED — 4 Role: P1, P2, U1, U2
  *
  * Changelog (2026-10-09 r3):

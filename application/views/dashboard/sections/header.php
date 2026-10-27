@@ -1,3 +1,15 @@
+<!-- =========================================================================================
+ * VIEW COMPONENT: HERO SLIDER CAROUSEL SECTION & DEKANAT SHOWCASE
+ * Path: application/views/dashboard/sections/header.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Bagian hero banner utama pada halaman beranda publik (Dashboard) website IFIK.
+ * Menampilkan slider carousel interaktif dengan transisi mulus, video profil kampus,
+ * showcase dekanat Fakultas Industri Kreatif, serta katalog fasilitas laboratorium unggulan.
+ * Terintegrasi langsung dengan pengaturan dinamis AdminHeader dan Header_model.
+ * ========================================================================================= -->
 <style>
     #section-carousel {
         position: relative;
