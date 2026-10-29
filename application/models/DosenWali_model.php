@@ -130,7 +130,8 @@ class DosenWali_model extends CI_Model {
                     ->or_like('kode_berkas', $file_type)
                 ->group_end()
                 ->update('pendaftaran_berkas', [
-                    'status_verifikasi' => $pb_ver,
+                    // status_verifikasi khusus Admin LAA:
+                    // 'status_verifikasi' => $pb_ver,
                     'catatan'           => $comment,
                     'updated_at'        => date('Y-m-d H:i:s')
                 ]);
@@ -166,7 +167,8 @@ class DosenWali_model extends CI_Model {
         // Sync ke pendaftaran_berkas jika ada
         if ($this->db->table_exists('pendaftaran_berkas')) {
             $this->db->where('nim', $nim)->update('pendaftaran_berkas', [
-                'status_verifikasi' => $pb_ver,
+                // status_verifikasi khusus Admin LAA:
+                // 'status_verifikasi' => $pb_ver,
                 'updated_at'        => date('Y-m-d H:i:s')
             ]);
         }

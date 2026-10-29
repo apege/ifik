@@ -761,7 +761,11 @@ class AdminLayanan extends CI_Controller {
         if ($action_submit === 'reject') {
             $this->AdminLayanan_model->update_verifikasi($nim, 'reject', $catatan_admin, null, $berkas_valid, $berkas_kurang);
         } else {
-            $this->AdminLayanan_model->update_verifikasi($nim, $action_submit ?: 'approve', $catatan_admin, null, $berkas_valid, $berkas_kurang);
+            if ($action_submit === 'cancel_reject' || $action_submit === 'reset') {
+                $this->AdminLayanan_model->reset_verifikasi_pending($nim);
+            } else {
+                $this->AdminLayanan_model->update_verifikasi($nim, $action_submit ?: 'approve', $catatan_admin, null, $berkas_valid, $berkas_kurang);
+            }
         }
 
 
@@ -781,7 +785,11 @@ class AdminLayanan extends CI_Controller {
         if ($res['status_approval_admin'] === 'Approved') {
             $this->session->set_flashdata('success', 'Pengajuan berkas mahasiswa NIM ' . $nim . ' berhasil DISETUJUI! Berkas diteruskan ke Koordinator TA.');
         } else {
-            $this->session->set_flashdata('error', 'Pengajuan berkas mahasiswa NIM ' . $nim . ' DIKEMBALIKAN UNTUK REVISI. Catatan & rincian berkas kurang telah dikirim.');
+            if ($res['status_approval_admin'] === 'Rejected') {
+                $this->session->set_flashdata('error', 'Pengajuan berkas mahasiswa NIM ' . $nim . ' DIKEMBALIKAN UNTUK REVISI. Catatan & rincian berkas kurang telah dikirim.');
+            } else {
+                $this->session->set_flashdata('success', 'Status verifikasi berkas mahasiswa NIM ' . $nim . ' berhasil dikembalikan ke status PENDING.');
+            }
         }
 
         redirect('adminlayanan');

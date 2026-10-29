@@ -127,6 +127,17 @@ class Mahasiswa extends CI_Controller {
         $data['syarat_berkas']  = $this->AdminLayanan_model->get_active_syarat_berkas();
         $data['student_berkas'] = $this->AdminLayanan_model->get_student_berkas_map($nim);
 
+        // Jika pendaftaran mahasiswa sudah disetujui penuh, filter syarat_berkas agar hanya menampilkan berkas yang memang disubmit
+        // dan tidak memunculkan syarat baru yang baru ditambahkan setelah mahasiswa lulus pendaftaran
+        if (($data['pendaftaran']['status_approval_wali'] ?? '') === 'Approved' && ($data['pendaftaran']['status_approval_admin'] ?? '') === 'Approved') {
+            if (!empty($data['syarat_berkas']) && is_array($data['syarat_berkas'])) {
+                $data['syarat_berkas'] = array_values(array_filter($data['syarat_berkas'], function($sb) use ($data) {
+                    $k = $sb['kode_berkas'] ?? '';
+                    return !empty($data['student_berkas'][$k]) || !empty($data['pendaftaran']['file_' . $k]);
+                }));
+            }
+        }
+
         $this->load->view('mahasiswa/dashboard', $data);
     }
 

@@ -136,16 +136,16 @@ class KoordinatorTA_model extends CI_Model {
 
                     if (strpos($namaJenis, 'ksm') !== false) {
                         $files_map[$k]['file_ksm'] = $f['file'];
-                        $files_map[$k]['status_ksm'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : ($st_doswal ?: 'Pending'));
+                        $files_map[$k]['status_ksm'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : 'Pending');
                     } elseif (strpos($namaJenis, 'transkrip') !== false) {
                         $files_map[$k]['file_transkrip'] = $f['file'];
-                        $files_map[$k]['status_transkrip'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : ($st_doswal ?: 'Pending'));
+                        $files_map[$k]['status_transkrip'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : 'Pending');
                     } elseif (strpos($namaJenis, 'pernyataan') !== false) {
                         $files_map[$k]['file_pernyataan'] = $f['file'];
-                        $files_map[$k]['status_pernyataan'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : ($st_doswal ?: 'Pending'));
+                        $files_map[$k]['status_pernyataan'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : 'Pending');
                     } elseif (strpos($namaJenis, 'bebas') !== false || strpos($namaJenis, 'lab') !== false) {
                         $files_map[$k]['file_bebas_lab'] = $f['file'];
-                        $files_map[$k]['status_bebas_lab'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : ($st_doswal ?: 'Pending'));
+                        $files_map[$k]['status_bebas_lab'] = $isAdminValid ? 'Valid' : ($isAdminInvalid ? 'Invalid' : 'Pending');
                     }
 
                     if ($isAdminValid) {
@@ -168,7 +168,9 @@ class KoordinatorTA_model extends CI_Model {
 
                     if (!empty($f['komentar'])) {
                         $files_map[$k]['catatan_wali'] = $f['komentar'];
-                        $files_map[$k]['catatan_admin'] = $f['komentar'];
+                        if ($isAdminValid || $isAdminInvalid) {
+                            $files_map[$k]['catatan_admin'] = $f['komentar'];
+                        }
                     }
                 }
             }
@@ -383,13 +385,13 @@ class KoordinatorTA_model extends CI_Model {
                 'catatan_koor'          => $row['catatan_koor'] ?? '',
                 'current_stage'         => $stage,
                 'file_ksm'              => $fData['file_ksm'] ?? null,
-                'status_ksm'            => $fData['status_ksm'] ?? 'Valid',
+                'status_ksm'            => $fData['status_ksm'] ?? 'Pending',
                 'file_transkrip'        => $fData['file_transkrip'] ?? null,
-                'status_transkrip'      => $fData['status_transkrip'] ?? 'Valid',
+                'status_transkrip'      => $fData['status_transkrip'] ?? 'Pending',
                 'file_pernyataan'       => $fData['file_pernyataan'] ?? null,
-                'status_pernyataan'     => $fData['status_pernyataan'] ?? 'Valid',
+                'status_pernyataan'     => $fData['status_pernyataan'] ?? 'Pending',
                 'file_bebas_lab'        => $fData['file_bebas_lab'] ?? null,
-                'status_bebas_lab'      => $fData['status_bebas_lab'] ?? 'Valid',
+                'status_bebas_lab'      => $fData['status_bebas_lab'] ?? 'Pending',
                 'ipk'                   => $row['ipk'] ?? '3.50',
                 'totalsks'              => $row['totalsks'] ?? '120',
                 'scoretak'              => $row['scoretak'] ?? '45',

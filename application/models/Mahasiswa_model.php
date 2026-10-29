@@ -524,12 +524,29 @@ class Mahasiswa_model extends CI_Model {
             }
         }
 
+        // Cek apakah berkas yang diunggah mahasiswa ini sebenarnya sudah pernah disetujui penuh sebelumnya
+        $has_uploaded_files = !empty($files);
+        $all_uploaded_files_app_admin = $has_uploaded_files;
+        $all_uploaded_files_app_wali = $has_uploaded_files;
+        foreach ($files as $f_k => $f_v) {
+            $st_laa_v = strtolower(trim((string)($f_v['status_adminlaa'] ?? '')));
+            if ($st_laa_v !== 'valid' && strpos($st_laa_v, 'approved') === false && strpos($st_laa_v, 'setuju') === false && $st_laa_v !== 'acc') {
+                $all_uploaded_files_app_admin = false;
+            }
+            $st_dw_v = strtolower(trim((string)($f_v['status_doswal'] ?? '')));
+            if ($st_dw_v !== 'approved' && $st_dw_v !== 'valid') {
+                $all_uploaded_files_app_wali = false;
+            }
+        }
+        $is_student_approved_admin = ($has_uploaded_files && $all_uploaded_files_app_admin && !$has_any_file_rej_admin);
+        $is_student_approved_wali  = ($has_uploaded_files && $all_uploaded_files_app_wali && !$has_any_file_rej_wali && $status_judul === 'Approved');
+
         if (!empty($pt_data['status_approval_wali'])) {
             $status_doswal = $pt_data['status_approval_wali'];
         } else {
             if ($has_any_file_rej_wali || $status_judul === 'Rejected' || $status_jenis_ta === 'Rejected') {
                 $status_doswal = 'Rejected';
-            } elseif ($all_files_app_wali && $file_count > 0 && $status_judul === 'Approved') {
+            } elseif ($is_student_approved_wali || ($all_files_app_wali && $file_count > 0 && $status_judul === 'Approved')) {
                 $status_doswal = 'Approved';
             } else {
                 $status_doswal = 'Pending';
@@ -541,10 +558,24 @@ class Mahasiswa_model extends CI_Model {
         } else {
             if ($has_any_file_rej_admin) {
                 $status_laa = 'Rejected';
-            } elseif ($all_files_app_admin && $file_count > 0 && $has_any_file_app_admin) {
+            } elseif ($is_student_approved_admin || ($all_files_app_admin && $file_count > 0 && $has_any_file_app_admin)) {
                 $status_laa = 'Approved';
             } else {
                 $status_laa = 'Pending';
+            }
+        }
+
+        // Jika mahasiswa sudah di-ACC penuh oleh Doswal & Admin LAA, bersihkan syarat berkas baru yang belum pernah diminta
+        // agar tidak muncul sebagai berkas pending / belum upload di antarmuka mahasiswa
+        if ($status_doswal === 'Approved' && $status_laa === 'Approved') {
+            foreach ($active_keys as $k) {
+                if (empty($files[$k]) && empty($berkas_rows[$k]) && empty($pt_data['file_' . $k])) {
+                    unset($files_result['file_' . $k]);
+                    unset($files_result['status_file_' . $k]);
+                    unset($files_result['catatan_file_' . $k]);
+                    unset($files_result['status_' . $k]);
+                    unset($files_result['catatan_admin_' . $k]);
+                }
             }
         }
 

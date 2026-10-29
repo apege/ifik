@@ -191,12 +191,12 @@ class KetuaKK_model extends CI_Model {
                     }
 
                     $s_dos = strtolower(trim($f['status_doswal'] ?? ''));
-                    if (in_array($s_dos, array('approved', 'valid', '1')) || (!empty($f['view_doswal']) && $f['view_doswal'] == 1)) {
+                    if (in_array($s_dos, array('approved', 'valid', '1'))) {
                         $fp_map[$k]['status_doswal'] = 'Approved';
                     }
 
                     $s_adm = strtolower(trim($f['status_adminlaa'] ?? ''));
-                    if (in_array($s_adm, array('approved', 'valid', '1')) || (!empty($f['view_adminlaa']) && $f['view_adminlaa'] == 1)) {
+                    if (in_array($s_adm, array('approved', 'valid', '1'))) {
                         $fp_map[$k]['status_adminlaa'] = 'Approved';
                     }
 

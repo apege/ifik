@@ -603,7 +603,7 @@ class AdminLayanan_model extends CI_Model {
                     'date_edit'       => date('Y-m-d H:i:s'),
                     'view_adminlaa'   => $view_val,
                     'view_doswal'     => $view_val,
-                    'status_doswal'   => ($status === 'Valid' || $status === 'Approved') ? 'Approved' : 'Pending'
+                    'status_doswal'   => 'Pending'
                 );
                 $this->db->insert('file_pendaftaran', $ins_fp);
             }
@@ -1129,16 +1129,19 @@ class AdminLayanan_model extends CI_Model {
                 }
             }
 
-            if ($pb_invalid_count > 0) {
+            $admin_st_list = $info['status_admin'] ?? array();
+            $has_admin_reject = ($pb_invalid_count > 0 || in_array('Rejected', $admin_st_list) || in_array('Invalid', $admin_st_list));
+            $is_already_approved_admin = (!empty($admin_st_list) && !$has_admin_reject && count(array_filter($admin_st_list, function($s) { return $s === 'Approved' || $s === 'Valid'; })) === count($admin_st_list));
+
+            if ($has_admin_reject) {
                 $st_admin = 'Rejected';
+            } elseif ($is_already_approved_admin) {
+                $st_admin = 'Approved';
             } elseif ($pb_valid_count === $total_required && $total_required > 0) {
                 $st_admin = 'Approved';
             } else {
-                $admin_st_list = $info['status_admin'];
                 $st_admin = 'Pending';
-                if (in_array('Rejected', $admin_st_list) || in_array('Invalid', $admin_st_list)) {
-                    $st_admin = 'Rejected';
-                } elseif (!empty($admin_st_list) && count(array_filter($admin_st_list, function($s) { return $s === 'Approved' || $s === 'Valid'; })) === count($admin_st_list)) {
+                if (!empty($admin_st_list) && count(array_filter($admin_st_list, function($s) { return $s === 'Approved' || $s === 'Valid'; })) === count($admin_st_list)) {
                     $st_admin = 'Approved';
                 }
             }
@@ -1167,9 +1170,13 @@ class AdminLayanan_model extends CI_Model {
                 }
             }
 
+            // Mahasiswa yang sudah pernah di-ACC oleh Dosen Wali (semua berkas yang diunggahnya valid/approved dan judul approved)
+            // tidak boleh turun menjadi pending hanya karena admin menambahkan syarat berkas baru di master.
+            $is_already_approved_wali = ($g_ket === 'Approved' && !$has_file_rejected && !empty($fp_doswal_map) && count(array_filter($fp_doswal_map, function($s) { return $s === 'Approved' || $s === 'Valid'; })) === count($fp_doswal_map));
+
             if ($g_ket === 'Rejected' || $has_file_rejected) {
                 $st_wali = 'Rejected';
-            } elseif ($all_files_approved && !empty($required_kodes) && $g_ket === 'Approved') {
+            } elseif ($is_already_approved_wali || ($all_files_approved && !empty($required_kodes) && $g_ket === 'Approved')) {
                 $st_wali = 'Approved';
             } else {
                 $st_wali = 'Pending';
@@ -1204,18 +1211,18 @@ class AdminLayanan_model extends CI_Model {
                 'is_submitted'          => 1,
                 'created_at'            => $created_at,
                 'updated_at'            => $created_at,
-                'status_ksm'            => $p_berkas_map['ksm']['status_verifikasi'] ?? ($fp_doswal_map['ksm'] ?? 'Pending'),
-                'status_transkrip'      => $p_berkas_map['transkrip']['status_verifikasi'] ?? ($fp_doswal_map['transkrip'] ?? 'Pending'),
-                'status_pernyataan'     => $p_berkas_map['pernyataan']['status_verifikasi'] ?? ($fp_doswal_map['pernyataan'] ?? 'Pending'),
-                'status_bebas_lab'      => $p_berkas_map['bebas_lab']['status_verifikasi'] ?? ($fp_doswal_map['bebas_lab'] ?? 'Pending'),
+                'status_ksm'            => $p_berkas_map['ksm']['status_verifikasi'] ?? 'Pending',
+                'status_transkrip'      => $p_berkas_map['transkrip']['status_verifikasi'] ?? 'Pending',
+                'status_pernyataan'     => $p_berkas_map['pernyataan']['status_verifikasi'] ?? 'Pending',
+                'status_bebas_lab'      => $p_berkas_map['bebas_lab']['status_verifikasi'] ?? 'Pending',
                 'file_ksm'              => $p_berkas_map['ksm']['file_name'] ?? ($fp_files_map['ksm'] ?? ($info['files'][0] ?? '')),
                 'file_transkrip'        => $p_berkas_map['transkrip']['file_name'] ?? ($fp_files_map['transkrip'] ?? ($info['files'][1] ?? '')),
                 'file_pernyataan'       => $p_berkas_map['pernyataan']['file_name'] ?? ($fp_files_map['pernyataan'] ?? ($info['files'][2] ?? '')),
                 'file_bebas_lab'        => $p_berkas_map['bebas_lab']['file_name'] ?? ($fp_files_map['bebas_lab'] ?? ($info['files'][3] ?? '')),
-                'total_berkas'          => $total_required,
+                'total_berkas'          => ($st_admin === 'Approved' && $st_wali === 'Approved') ? max($pb_valid_count, count($fp_doswal_map)) : $total_required,
                 'berkas_valid_count'    => $pb_valid_count,
                 'berkas_invalid_count'  => $pb_invalid_count,
-                'berkas_pending_count'  => max(0, $total_required - $pb_valid_count - $pb_invalid_count),
+                'berkas_pending_count'  => ($st_admin === 'Approved' && $st_wali === 'Approved') ? 0 : max(0, $total_required - $pb_valid_count - $pb_invalid_count),
             );
         }
 
@@ -1437,9 +1444,16 @@ class AdminLayanan_model extends CI_Model {
         }
 
         // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
-        foreach ($active_syarat as $sb) {
-            $kode = $sb['kode_berkas'];
-            if (isset($processed_kodes[$kode])) continue;
+        // KECUALI jika mahasiswa sudah di-ACC / Approved (agar penambahan syarat baru di master tidak memaksa mahasiswa lama yang sudah di-ACC menjadi pending/berkas kurang)
+        $is_student_fully_approved = ($valid_count > 0 && $invalid_count === 0 && $pending_count === 0);
+        if (isset($row['status_approval_admin']) && $row['status_approval_admin'] === 'Approved') {
+            $is_student_fully_approved = true;
+        }
+
+        if (!$is_student_fully_approved) {
+            foreach ($active_syarat as $sb) {
+                $kode = $sb['kode_berkas'];
+                if (isset($processed_kodes[$kode])) continue;
 
             $st = 'Pending';
             if (isset($row['status_' . $kode]) && !empty($row['status_' . $kode])) {
@@ -1473,6 +1487,7 @@ class AdminLayanan_model extends CI_Model {
                 'file_name' => $file_name,
                 'file_url'  => $file_url
             );
+        }
         }
 
         return array(
@@ -1612,9 +1627,15 @@ class AdminLayanan_model extends CI_Model {
             }
 
             // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
-            foreach ($active_syarat as $sb) {
-                $kode = $sb['kode_berkas'];
-                if (isset($processed_kodes[$kode])) continue;
+            $is_student_fully_approved = ($valid_count > 0 && $invalid_count === 0 && $pending_count === 0);
+            if (isset($s_row['status_approval_admin']) && $s_row['status_approval_admin'] === 'Approved') {
+                $is_student_fully_approved = true;
+            }
+
+            if (!$is_student_fully_approved) {
+                foreach ($active_syarat as $sb) {
+                    $kode = $sb['kode_berkas'];
+                    if (isset($processed_kodes[$kode])) continue;
 
                 $st = 'Pending';
                 if (isset($s_row['status_' . $kode]) && !empty($s_row['status_' . $kode])) {
@@ -1649,6 +1670,7 @@ class AdminLayanan_model extends CI_Model {
                     'file_url'  => $file_url
                 );
             }
+        }
 
             $summaries[$nim] = array(
                 'valid_count'   => $valid_count,
@@ -2606,7 +2628,7 @@ class AdminLayanan_model extends CI_Model {
                     'file'          => $kode_berkas . '_' . $nim_clean . '.pdf',
                     'date'          => date('Y-m-d H:i:s'),
                     'view_doswal'   => 1,
-                    'status_doswal' => 'Approved'
+                    'status_doswal' => 'Pending'
                 ], $fp_upd);
                 $this->db->insert('file_pendaftaran', $ins_fp);
             }

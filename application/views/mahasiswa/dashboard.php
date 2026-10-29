@@ -112,7 +112,7 @@
                 $file_rej_by = 'wali';
             } elseif ($is_laa_app) {
                 $status = 'Approved';
-            } elseif ($st_dw === 'Approved') {
+            } elseif ($st_dw === 'Approved' && $is_laa_app) {
                 $status = 'Approved';
             } else {
                 $status = 'Pending';
