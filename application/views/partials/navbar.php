@@ -1,3 +1,22 @@
+<!-- =========================================================================================
+ * PARTIAL VIEW: MAIN PUBLIC NAVBAR (BILAH NAVIGASI UTAMA PUBLIK & DASHBOARD)
+ * Path: application/views/partials/navbar.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Komponen bilah navigasi utama website IFIK yang tampil pada halaman depan (Beranda Publik).
+ * Dirancang dengan desain modern Glassmorphism (efek kaca kabur / blur), responsivitas penuh
+ * (desktop horizontal bar dan mobile frosted glass sidebar drawer), serta adaptasi menu berbasis role sesi pengguna.
+ * 
+ * Fitur & Komponen Utama:
+ * 1. Desktop Navigation Bar: Melayang di bagian atas dengan efek backdrop-blur dan border oranye.
+ * 2. Mobile Responsive Drawer: Hamburger menu yang membuka sidebar drawer kaca dengan backdrop overlay.
+ * 3. Smooth Scroll Navigation: Integrasi dengan Lenis Smooth Scroll untuk navigasi ke seksi Beranda & Berita.
+ * 4. Dropdown Layanan Interaktif: Center of Excellent (Mikro Credential, Study Club, Workshop) dengan animasi hover.
+ * 5. Dynamic Role Redirection: Menghubungkan pengguna login langsung ke panel kerjanya masing-masing.
+ * 6. User Profile & Authentication Pill: Menampilkan profil dan opsi logout untuk pengguna terotentikasi, atau tombol login untuk tamu.
+ * ========================================================================================= -->
     <!-- ==================== NAVBAR (FULL) ==================== -->
     <style>
         @media (pointer: fine) {
@@ -438,6 +457,11 @@
             </div>
         </li> -->
 
+        <!-- =========================================================================================
+             DETEKSI PERAN (ROLE) & STATUS AUTENTIKASI PENGGUNA DARI SESI CODEIGNITER
+             Mengidentifikasi apakah pengguna adalah Mahasiswa atau Dosen/Staf untuk mengatur
+             visibilitas menu khusus seperti 'Peminjaman Barang' serta rute tujuan panel kerja.
+             ========================================================================================= -->
         <?php
             $role_id       = (int)($this->session->userdata('role_id') ?? 0);
             $user_email    = $this->session->userdata('email') ?? '';
@@ -457,6 +481,21 @@
         </li>
 
         <?php
+            // =========================================================================================
+            // PEMETAAN LABEL & URL TUJUAN PANEL KERJA SIVITAS AKADEMIKA BERDASARKAN ROLE ID
+            // Role 1  : Pusat Kendali Admin (Admin System)
+            // Role 2  : Panel Kaur (Kepala Urusan Laboratorium)
+            // Role 3  : Panel Dosen / Ka. Ur / Kaprodi / Wadek (Berdasarkan Jabatan Struktural)
+            // Role 5  : Panel Admin Layanan Akademik (LAA)
+            // Role 6  : Panel Koordinator Tugas Akhir (Koor TA)
+            // Role 9  : Panel Ketua Kelompok Keahlian (Ketua KK)
+            // Role 11 : Panel Sekretariat
+            // Role 15 : Panel SDM & Keuangan
+            // Role 16 : Panel Program Studi
+            // Role 17 : Panel Kemahasiswaan
+            // Role 21 : Panel Laboran
+            // Role 22 : Panel Super Administrator
+            // =========================================================================================
             // ====== Tentukan label & URL panel berdasarkan role ======
             $panel_label = 'Panel Admin';
             $panel_url   = base_url('adminheader');
@@ -600,6 +639,13 @@
     <div class="nav-overlay" id="navOverlay" onclick="closeMobileNav()"></div>
 
     <script>
+        /**
+         * Menggulirkan tampilan halaman secara halus (smooth scroll) menuju posisi teratas (Dashboard/Hero Section).
+         * Mengutamakan library Lenis Smooth Scroll jika tersedia, atau native smooth scrolling pada container.
+         * Juga mereset slider hero ke slide pertama (index 0) dan menutup sidebar drawer mobile.
+         * 
+         * @param {Event} e Event klik tautan untuk dicegah default reload halamannya
+         */
         function scrollToDashboard(e) {
             if (e) e.preventDefault();
             if (window.lenis) window.lenis.scrollTo(0, { duration: 1.2 });
@@ -611,6 +657,13 @@
             closeMobileNav();
         }
 
+        /**
+         * Menggulirkan halaman secara otomatis menuju seksi konten 'Berita' (#berita atau #section-contact).
+         * Memanggil fungsi global scrollToSection jika tersedia, atau native scrollIntoView.
+         * Menutup sidebar drawer mobile setelah navigasi diaktifkan.
+         * 
+         * @param {Event} e Event klik tautan
+         */
         function scrollToBeritaNav(e) {
             if (e) e.preventDefault();
             if (typeof window.scrollToSection === 'function') {
@@ -622,6 +675,11 @@
             closeMobileNav();
         }
 
+        /**
+         * Membuka atau menutup sidebar drawer navigasi pada perangkat mobile.
+         * Mengubah class .nav-open pada daftar menu, menampilkan overlay latar belakang gelap (.active),
+         * mengunci scrolling halaman (body.no-scroll), serta memperbarui atribut aria-expanded untuk aksesibilitas.
+         */
         function toggleMobileNav() {
             var navList = document.getElementById('navList');
             var overlay = document.getElementById('navOverlay');
@@ -632,6 +690,10 @@
             burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
 
+        /**
+         * Menutup sidebar drawer navigasi mobile secara eksplisit.
+         * Dipanggil saat pengguna mengeklik overlay latar belakang gelap atau mengeklik tautan navigasi.
+         */
         function closeMobileNav() {
             document.getElementById('navList').classList.remove('nav-open');
             document.getElementById('navOverlay').classList.remove('active');
@@ -639,6 +701,12 @@
             document.getElementById('navbarBurger').setAttribute('aria-expanded', 'false');
         }
 
+        /**
+         * Inisialisasi Event Listener Navigasi saat Dokumen Selesai Dimuat:
+         * 1. Mendeteksi breakpoint media query mobile (maksimal 992px).
+         * 2. Mengaktifkan perilaku akordion (accordion toggle) pada sub-menu dropdown di perangkat layar sentuh.
+         * 3. Menambahkan listener klik pada setiap tautan dropdown untuk otomatis menutup sidebar drawer mobile.
+         */
         document.addEventListener('DOMContentLoaded', function () {
             var mq = window.matchMedia('(max-width: 992px)');
             document.querySelectorAll('#navList > .nav-item').forEach(function (item) {

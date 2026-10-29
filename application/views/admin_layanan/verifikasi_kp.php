@@ -1936,6 +1936,17 @@ $total_laporan   = count($laporan ?? []);
         });
 
         // Helper Aksi dari Preview Card
+        /**
+         * Konfirmasi Persetujuan (ACC) Berkas Persyaratan Tunggal dari Panel Preview
+         * 
+         * Mengirimkan request AJAX POST ke /adminlayanan/ajax_acc_berkas_kp.
+         * Jika seluruh berkas wajib telah berstatus Approved, status mahasiswa di tb_kp otomatis
+         * naik menjadi 'Disetujui LAA' dan siap di-plotting oleh Koordinator KP.
+         * 
+         * @param {string} nim NIM mahasiswa
+         * @param {string} fileCode Kode berkas (formulir_kp, krs, transkrip, surat_perusahaan)
+         * @param {string} idFile ID baris pada tabel file_pendaftaran_kp
+         */
         function confirmAccBerkasFromPreview(nim, fileCode, idFile) {
             const mhs = RAW_DATA.belum_acc.concat(RAW_DATA.sudah_acc).find(m => m.nim === nim);
             const fileObj = mhs ? (mhs.files || []).find(f => f.kode_berkas === fileCode) : null;
@@ -1957,6 +1968,16 @@ $total_laporan   = count($laporan ?? []);
             });
         }
 
+        /**
+         * Tolak / Minta Revisi Berkas Persyaratan Tunggal Beserta Catatan Kekurangan
+         * 
+         * Menampilkan prompt modal SweetAlert2 untuk menginput alasan penolakan/catatan revisi,
+         * lalu mengirimkan request AJAX POST ke /adminlayanan/ajax_reject_berkas_kp.
+         * 
+         * @param {string} nim NIM mahasiswa
+         * @param {string} fileCode Kode berkas
+         * @param {string} idFile ID baris berkas di database
+         */
         function promptRejectBerkasFromPreview(nim, fileCode, idFile) {
             const mhs = RAW_DATA.belum_acc.concat(RAW_DATA.sudah_acc).find(m => m.nim === nim);
             const fileObj = mhs ? (mhs.files || []).find(f => f.kode_berkas === fileCode) : null;
@@ -1986,6 +2007,14 @@ $total_laporan   = count($laporan ?? []);
             });
         }
 
+        /**
+         * Konfirmasi Persetujuan (ACC) Naskah Laporan Akhir Kerja Praktik (Tab 2)
+         * 
+         * Mengirimkan request AJAX POST ke /adminlayanan/ajax_acc_laporan_kp.
+         * Memperbarui status laporan menjadi 'Approved' dan status pengajuan di tb_kp menjadi 'Selesai'.
+         * 
+         * @param {string} nim NIM mahasiswa
+         */
         function confirmAccLaporanPreview(nim) {
             const mhs = RAW_DATA.laporan.find(m => m.nim === nim);
             Swal.fire({
@@ -2004,6 +2033,14 @@ $total_laporan   = count($laporan ?? []);
             });
         }
 
+        /**
+         * Tolak / Minta Revisi Naskah Laporan Akhir KP Beserta Catatan Evaluasi (Tab 2)
+         * 
+         * Menampilkan modal input catatan revisi, lalu POST ke /adminlayanan/ajax_reject_laporan_kp.
+         * Mengubah status_file di tb_kp menjadi 'Revisi Laporan'.
+         * 
+         * @param {string} nim NIM mahasiswa
+         */
         function promptRejectLaporanPreview(nim) {
             const mhs = RAW_DATA.laporan.find(m => m.nim === nim);
             Swal.fire({
@@ -2154,6 +2191,12 @@ $total_laporan   = count($laporan ?? []);
                 });
         }
 
+        /**
+         * Sinkronisasi Realtime Data Verifikasi KP (Tanpa Reload Halaman Penuh)
+         * 
+         * Mengambil payload JSON terbaru dari /adminlayanan/ajax_get_verifikasi_kp_data,
+         * memperbarui cache lokal RAW_DATA, dan me-render ulang tabel pada tab aktif.
+         */
         function reloadVerifikasiData() {
             fetch(SITE_URL + 'adminlayanan/ajax_get_verifikasi_kp_data')
                 .then(r => r.json())

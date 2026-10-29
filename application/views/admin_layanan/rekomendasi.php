@@ -981,6 +981,20 @@
         }
 
         // Logic dampak data yang dihapus / di-reset berdasarkan tahap asal & tujuan
+        /**
+         * Kalkulasi Logika Dampak Data Terhapus Berdasarkan Tahap Asal dan Tahap Tujuan
+         * 
+         * Mengembalikan daftar string peringatan data apa saja yang akan dihapus permanen atau di-reset:
+         * - Sidang -> Persyaratan Sidang / Preview: Naskah sidang, nilai 4 dosen, jadwal/ruang sidang, dan berkas BAP dihapus.
+         * - Turun ke Persyaratan Sidang / ke bawahnya: Seluruh berkas persyaratan pendaftaran sidang dihapus.
+         * - Turun ke Preview 3 / ke bawahnya: Naskah Preview 3, form rekomendasi P1, dan eviden luaran dihapus.
+         * - Turun ke Preview 2 / ke bawahnya: Nilai Desk Evaluation (DE) Preview 2 dan jadwal DE di-reset.
+         * - Turun ke Preview 1: Naskah Preview 1 dan status kelulusan Preview 1 dicabut.
+         * 
+         * @param {string} fromKey Kunci tahap asal ('sidang' | 'persyaratan_sidang' | 'preview3' | 'preview2' | 'preview1')
+         * @param {string} toKey Kunci tahap tujuan yang dipilih
+         * @returns {string[]} Array daftar dampak penghapusan data
+         */
         function getDowngradeImpacts(fromKey, toKey) {
             const impacts = [];
             const from = (fromKey || '').toLowerCase();
@@ -1043,6 +1057,18 @@
             });
         }
 
+        /**
+         * Membuka Modal Konfigurasi Penurunan Tahap (Downgrade Tahap) Mahasiswa
+         * 
+         * Mengisi informasi identitas mahasiswa target, memfilter opsi tahap tujuan
+         * (hanya menampilkan tahap yang level hierarkinya lebih rendah dari tahap saat ini),
+         * menghitung daftar dampak data terhapus, dan menampilkan modal form.
+         * 
+         * @param {string} nim NIM mahasiswa
+         * @param {string} nama Nama lengkap mahasiswa
+         * @param {string} tahapKey Kunci tahap aktif
+         * @param {string} tahapDisplay Nama label tampilan tahap aktif
+         */
         function openModalDowngrade(nim, nama, tahapKey, tahapDisplay) {
             document.getElementById('dgNim').value = nim;
             document.getElementById('dgNimText').innerText = nim;
@@ -1093,6 +1119,15 @@
             document.getElementById('modalDowngrade').classList.add('hidden');
         }
 
+        /**
+         * Eksekusi Form Penurunan Tahap Mahasiswa
+         * 
+         * Memvalidasi input catatan/alasan downgrade, menampilkan modal konfirmasi bahaya SweetAlert2
+         * yang merinci seluruh data yang akan dihapus, lalu mengirimkan request AJAX POST ke
+         * /adminlayanan/downgrade_preview_ajax. Saat sukses, halaman otomatis me-reload status terbaru.
+         * 
+         * @param {Event} e Form submit event
+         */
         function submitDowngrade(e) {
             e.preventDefault();
 
@@ -1184,6 +1219,19 @@
             });
         }
 
+        /**
+         * Membuka Modal Rincian Rekomendasi P1 & Daftar Dokumen Eviden
+         * 
+         * Menampilkan jalur kelulusan rekomendasi yang diajukan Pembimbing 1, catatan/alasan dosen,
+         * serta daftar dokumen bukti eviden (Prestasi, HKI, Kebijakan, Proyek Industri) yang dapat
+         * dibuka langsung pada sistem pratinjau multi-dokumen interaktif (Dynamic Multi-File Preview).
+         * 
+         * @param {string} nim NIM mahasiswa
+         * @param {string} nama Nama mahasiswa
+         * @param {string} jalur Nama jalur rekomendasi
+         * @param {string} catatan Catatan rekomendasi dosen
+         * @param {object} files Objek berkas eviden yang diunggah
+         */
         function openModalDetailBerkas(nim, nama, jalur, catatan, files) {
             document.getElementById('detailMhsSub').innerText = `${nama} (${nim})`;
             document.getElementById('detailJalurTitle').innerText = jalur || 'Non-Sidang';

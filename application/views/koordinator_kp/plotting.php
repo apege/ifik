@@ -958,7 +958,14 @@ $total_semua        = $total_belum_diplot + $total_sudah_diplot;
             updateBatchActionBarPlotting();
         }
 
-        function openModalPlottingMassal() {
+        /**
+     * Membuka Modal Penetapan Dosen Pembimbing 1 Secara Massal (Bulk Plotting)
+     * 
+     * Mengumpulkan seluruh mahasiswa yang sedang dicentang pada Set selectedNimsPlotting,
+     * menampilkan ringkasan chips nama mahasiswa di modal, me-reset pencarian dosen,
+     * serta menyiapkan form untuk menetapkan satu Dosen Pembimbing 1 untuk seluruh mahasiswa terpilih.
+     */
+    function openModalPlottingMassal() {
             if (window.selectedPlottingNims.size === 0) return;
             currentActiveNimsToPlot = Array.from(window.selectedPlottingNims);
 
@@ -1451,7 +1458,15 @@ $total_semua        = $total_belum_diplot + $total_sudah_diplot;
         // =========================================================================
         // MODAL PLOTTING LOGIC
         // =========================================================================
-        function openModalPlotting(nim) {
+        /**
+     * Membuka Modal Penetapan Dosen Pembimbing 1 untuk Mahasiswa Tunggal
+     * 
+     * Menampilkan informasi nama & NIM mahasiswa, menyorot dosen yang sedang aktif membimbing
+     * (jika sedang dalam mode ubah pembimbing), dan menampilkan modal pilihan dosen.
+     * 
+     * @param {string} nim NIM mahasiswa target
+     */
+    function openModalPlotting(nim) {
             const allList = RAW_DATA.belum_diplot.concat(RAW_DATA.sudah_diplot);
             const mhs = allList.find(m => m.nim === nim);
             if (!mhs) return;
@@ -1504,7 +1519,13 @@ $total_semua        = $total_belum_diplot + $total_sudah_diplot;
             renderDosenOptions(filtered, null);
         }
 
-        function submitPlotting() {
+        /**
+     * Validasi & Eksekusi Simpan Plotting Dosen Pembimbing 1
+     * 
+     * Memvalidasi bahwa Koordinator KP telah memilih salah satu dosen dari daftar radio card dosen,
+     * lalu memanggil doAjaxSubmitPlotting() untuk mengirimkan data ke server secara asinkron.
+     */
+    function submitPlotting() {
             if (!currentActiveNimToPlot) return;
 
             const select = document.getElementById('plotDosenSelect');
@@ -1576,7 +1597,13 @@ $total_semua        = $total_belum_diplot + $total_sudah_diplot;
             });
         }
 
-        function reloadPlottingData() {
+        /**
+     * Sinkronisasi Realtime Data Plotting KP (Tanpa Reload Halaman Penuh)
+     * 
+     * Mengambil payload JSON terbaru dari /koordinatorkp/ajax_get_plotting_data,
+     * memperbarui dataset lokal JavaScript (currentDataPlotting), dan me-render ulang tabel secara instan.
+     */
+    function reloadPlottingData() {
             fetch(SITE_URL + 'koordinatorkp/ajax_get_plotting_data')
                 .then(r => r.json())
                 .then(res => {

@@ -1,6 +1,20 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * =========================================================================================
+ * MODEL: MANAJEMEN KERJA PRAKTIK (KP) — WORKFLOW LAA & KOORDINATOR KP
+ * Path: application/models/Kp_model.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Model sentral yang menangani seluruh transaksi database dan alur kerja Kerja Praktik (KP):
+ * 1. Pendaftaran Berkas Persyaratan KP (tb_kp, file_pendaftaran_kp, syarat_berkas_kp).
+ * 2. Verifikasi Berkas Persyaratan & Laporan Akhir oleh Admin Layanan (LAA).
+ * 3. Plotting Dosen Pembimbing 1 KP oleh Koordinator KP.
+ * 4. Pengecekan prasyarat alur kerja terpadu (workflow summary).
+ */
 class Kp_model extends CI_Model {
 
     public function __construct() {
@@ -856,6 +870,16 @@ class Kp_model extends CI_Model {
      * - 'belum_acc': Mahasiswa yang belum seluruh berkasnya disetujui (Pending / Revisi / Belum Lengkap)
      * - 'sudah_acc': Mahasiswa yang seluruh berkas persyaratannya sudah di-ACC
      */
+    /**
+     * Mengambil Seluruh Pengajuan KP untuk Antarmuka Admin Layanan (LAA) - Tab 1
+     * 
+     * Mengambil data pendaftaran dari tabel tb_kp, memuat status per berkas di file_pendaftaran_kp,
+     * serta mengelompokkan mahasiswa ke dalam sub-tab 'belum_acc' (memiliki berkas Pending/Ditolak)
+     * dan 'sudah_acc' (seluruh berkas wajib berstatus Approved atau tb_kp.status_file = 'Disetujui LAA').
+     * 
+     * @access public
+     * @return array Array terstruktur ['belum_acc' => [], 'sudah_acc' => [], 'total' => int]
+     */
     public function get_all_pengajuan_kp_admin() {
         if (!$this->db->table_exists('tb_kp')) {
             return ['belum_acc' => [], 'sudah_acc' => [], 'total' => 0];
@@ -1003,6 +1027,15 @@ class Kp_model extends CI_Model {
     /**
      * Ambil seluruh data Laporan KP untuk Admin LAA (Tab 2).
      */
+    /**
+     * Mengambil Seluruh Laporan Akhir KP untuk Antarmuka Admin LAA - Tab 2
+     * 
+     * Mengambil berkas naskah laporan akhir yang telah diunggah mahasiswa dari file_laporan_kp,
+     * memuat informasi dosen pembimbing yang telah di-plot, serta status verifikasi laporan (Pending/Approved/Rejected).
+     * 
+     * @access public
+     * @return array Array daftar mahasiswa beserta naskah laporan akhir
+     */
     public function get_all_laporan_kp_admin() {
         if (!$this->db->table_exists('tb_kp')) return [];
 
@@ -1119,6 +1152,20 @@ class Kp_model extends CI_Model {
     /**
      * Update status satu berkas persyaratan KP oleh Admin LAA
      */
+    /**
+     * Memperbarui Status Persetujuan Satu Berkas Persyaratan KP
+     * 
+     * Memperbarui kolom status_adminlaa ('Approved' atau 'Rejected') beserta catatan komentar di tabel file_pendaftaran_kp.
+     * Jika seluruh berkas wajib telah Approved, tb_kp.status_file otomatis naik menjadi 'Disetujui LAA'.
+     * Jika ada yang ditolak, status_file otomatis berubah menjadi 'Revisi Persyaratan'.
+     * 
+     * @access public
+     * @param  string $id_file ID berkas pendaftaran
+     * @param  string $nim NIM mahasiswa pemilik berkas
+     * @param  string $status Status verifikasi ('Approved' | 'Rejected')
+     * @param  string $komentar Catatan kekurangan berkas (opsional)
+     * @return bool
+     */
     public function update_berkas_persyaratan_status($id_file, $nim, $status, $komentar = '') {
         if (!$this->db->table_exists('file_pendaftaran_kp')) return false;
 
@@ -1155,6 +1202,16 @@ class Kp_model extends CI_Model {
     /**
      * ACC seluruh berkas persyaratan mahasiswa secara instan (Bulk ACC)
      */
+    /**
+     * Persetujuan Instan Seluruh Berkas Persyaratan Seorang Mahasiswa (Bulk ACC)
+     * 
+     * Menyetujui seluruh dokumen persyaratan milik mahasiswa di file_pendaftaran_kp secara sekaligus
+     * dan mengubah status pengajuan tb_kp menjadi 'Disetujui LAA' agar siap di-plot oleh Koordinator KP.
+     * 
+     * @access public
+     * @param  string $nim NIM mahasiswa target
+     * @return bool
+     */
     public function acc_semua_persyaratan_mhs($nim) {
         if (!$this->db->table_exists('file_pendaftaran_kp')) return false;
 
@@ -1179,6 +1236,18 @@ class Kp_model extends CI_Model {
 
     /**
      * Update status berkas Laporan KP mahasiswa oleh Admin LAA
+     */
+    /**
+     * Memperbarui Status Verifikasi Naskah Laporan Akhir KP
+     * 
+     * Mengubah status verifikasi naskah di file_laporan_kp ('Approved' / 'Rejected') serta
+     * memperbarui status pengajuan tb_kp menjadi 'Selesai' (jika ACC) atau 'Revisi Laporan' (jika ditolak).
+     * 
+     * @access public
+     * @param  string $nim NIM mahasiswa
+     * @param  string $status 'Approved' atau 'Rejected'
+     * @param  string $komentar Catatan kekurangan revisi
+     * @return bool
      */
     public function update_laporan_kp_status($nim, $status, $komentar = '') {
         if (!$this->db->table_exists('file_laporan_kp')) return false;

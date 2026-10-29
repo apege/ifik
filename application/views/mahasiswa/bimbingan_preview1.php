@@ -1,3 +1,15 @@
+<!-- =========================================================================================
+ * VIEW: PORTAL BIMBINGAN & EVALUASI PREVIEW 1 MAHASISWA
+ * Path: application/views/mahasiswa/bimbingan_preview1.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Antarmuka bimbingan akademik Tugas Akhir untuk mahasiswa pada tahapan Preview 1 (Bab 1, 2, dan 3).
+ * Memfasilitasi mahasiswa untuk mengunggah naskah naskah TA, mencatat logbook konsultasi bimbingan,
+ * memantau status persetujuan (ACC / Revisi) dari Dosen Pembimbing 1 dan Dosen Pembimbing 2,
+ * serta melihat riwayat catatan evaluasi dosen pembimbing secara interaktif.
+ * ========================================================================================= -->
 <!DOCTYPE html>
 <html lang="id">
 <head>

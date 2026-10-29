@@ -1,6 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * =========================================================================================
+ * CONTROLLER: DOSEN BIMBINGAN & EVALUASI TUGAS AKHIR (PREVIEW 1, 2, 3 & SIDANG)
+ * Path: application/controllers/Dosen_bimbingan.php
+ * Pengembang: Nazril Rizki
+ * =========================================================================================
+ * 
+ * Deskripsi:
+ * Controller sentral untuk seluruh proses bimbingan dan evaluasi akademik Tugas Akhir (TA).
+ * Menghubungkan interaksi antara Mahasiswa bimbingan dengan 4 Tim Dosen (Pembimbing 1, Pembimbing 2,
+ * Penguji 1, dan Penguji 2) sepanjang tahapan Preview 1, Preview 2 (Desk Evaluation), Preview 3,
+ * Persyaratan Sidang, dan Majelis Sidang Akhir.
+ * 
+ * Fitur & Tanggung Jawab Utama:
+ * 1. Portal Bimbingan Mahasiswa: Upload naskah bab, catatan bimbingan logbook, dan pengajuan revisi.
+ * 2. Portal Evaluasi Dosen: Review berkas, persetujuan bab (ACC), pemberian catatan revisi, dan form rekomendasi.
+ * 3. Evaluasi Tahap Preview 2 (Desk Evaluation / DE): Plotting jadwal presentasi dan penilaian kelayakan 4 dosen.
+ * 4. Penilaian Sidang Akhir: Pengisian rubrik nilai sidang oleh 4 dosen, perhitungan skor akhir, dan status kelulusan.
+ * 5. Realtime Sync (SSE): Server-Sent Events untuk pembaruan logbook bimbingan secara instan tanpa reload.
+ */
 class Dosen_bimbingan extends CI_Controller {
 
     /** Peta role UI => posisi model (1=P1, 2=P2, 3=U1, 4=U2) */
@@ -238,6 +258,15 @@ class Dosen_bimbingan extends CI_Controller {
         $this->load->view('mahasiswa/bimbingan_preview1', $data);
     }
 
+    /**
+     * Halaman Utama Bimbingan Preview 1 Mahasiswa
+     * 
+     * Menampilkan riwayat logbook bimbingan Bab 1-3, status persetujuan Dosen Pembimbing 1 & 2,
+     * form unggah naskah naskah preview 1, serta kartu konsultasi bimbingan.
+     * 
+     * @access public
+     * @return void
+     */
     public function preview1() {
         $this->bimbingan();
     }
@@ -1002,14 +1031,41 @@ class Dosen_bimbingan extends CI_Controller {
         $this->load->view('mahasiswa/dosen_bimbingan', $data);
     }
 
+    /**
+     * Halaman Dashboard Bimbingan Dosen (Sebagai Pembimbing)
+     * 
+     * Menampilkan daftar seluruh mahasiswa bimbingan yang dibimbing oleh dosen yang sedang login
+     * (baik sebagai Pembimbing 1 maupun Pembimbing 2) lengkap dengan status tahapan dan berkas naskah.
+     * 
+     * @access public
+     * @return void
+     */
     public function dosen_bimbingan() {
         $this->_render_dosen_dashboard('p1');
     }
 
+    /**
+     * Halaman Dashboard Pengujian Dosen (Sebagai Penguji)
+     * 
+     * Menampilkan daftar mahasiswa yang diuji oleh dosen yang sedang login (sebagai Penguji 1 atau Penguji 2)
+     * untuk keperluan penilaian Desk Evaluation Preview 2 maupun Ujian Sidang Akhir.
+     * 
+     * @access public
+     * @return void
+     */
     public function dosen_penguji() {
         $this->_render_dosen_dashboard('u1');
     }
 
+    /**
+     * AJAX Endpoint: Ambil Data Mahasiswa Bimbingan & Pengujian Dosen
+     * 
+     * Mengambil daftar mahasiswa bimbingan/pengujian secara asinkron lengkap dengan normalisasi status tahapan,
+     * status kelulusan bab, berkas naskah terbaru, nilai DE/Sidang, serta rekomendasi jalur kelulusan P1.
+     * 
+     * @access public
+     * @return void Output JSON {status, data, stats, total}
+     */
     public function ajax_get_dosen_bimbingan() {
         header('Content-Type: application/json');
 
@@ -1307,6 +1363,15 @@ class Dosen_bimbingan extends CI_Controller {
      *  - Tambah dukungan action='Reset' → reset status_file_* ke 'Pending'.
      *  - Tambah dukungan action='Comment' → update catatan_file_* tanpa ubah status.
      */
+    /**
+     * AJAX Endpoint: Review & Validasi Berkas Naskah oleh Dosen
+     * 
+     * Menyimpan persetujuan (Approved) atau penolakan/revisi (Rejected) pada berkas naskah bab mahasiswa
+     * beserta catatan evaluasi dari dosen pembimbing yang bersangkutan.
+     * 
+     * @access public
+     * @return void Output JSON {status, message}
+     */
     public function review_file_ajax() {
         header('Content-Type: application/json');
 
@@ -1380,6 +1445,15 @@ class Dosen_bimbingan extends CI_Controller {
         echo json_encode($res);
     }
 
+    /**
+     * AJAX Endpoint: Penetapan Kelulusan Tahap Preview (Lulus Preview 1 / 2 / 3)
+     * 
+     * Menetapkan status lulus pada tahap preview mahasiswa di tabel guidance, mengaktifkan akses tahap berikutnya,
+     * serta mencatat riwayat kelulusan lengkap dengan identitas dosen dan peran PIC.
+     * 
+     * @access public
+     * @return void Output JSON {status, message}
+     */
     public function lulus_stage_ajax() {
         header('Content-Type: application/json');
 
@@ -1495,6 +1569,15 @@ class Dosen_bimbingan extends CI_Controller {
         echo json_encode($res);
     }
 
+    /**
+     * AJAX Endpoint: Simpan Nilai Desk Evaluation (DE) Preview 2
+     * 
+     * Menyimpan nilai evaluasi kelayakan dan catatan penilaian naskah Preview 2 dari salah satu dosen
+     * (Pembimbing 1, Pembimbing 2, Penguji 1, Penguji 2) ke tabel guidance.
+     * 
+     * @access public
+     * @return void Output JSON {status, message}
+     */
     public function simpan_nilai_de_ajax() {
         header('Content-Type: application/json');
 
@@ -1576,6 +1659,15 @@ class Dosen_bimbingan extends CI_Controller {
 
     /**
      * AJAX Endpoint: Simpan / Edit Penilaian Sidang Mahasiswa
+     */
+    /**
+     * AJAX Endpoint: Simpan Penilaian Majelis Ujian Sidang Akhir TA
+     * 
+     * Menyimpan skor evaluasi sidang dari dosen pembimbing/penguji, menghitung rata-rata skor akhir sidang,
+     * menentukan status kelulusan sidang ('Lulus' / 'Tidak Lulus' / 'Lulus Bersyarat'), dan menyimpan ke database.
+     * 
+     * @access public
+     * @return void Output JSON {status, message, nilai_akhir, kelulusan}
      */
     public function simpan_nilai_sidang_ajax() {
         header('Content-Type: application/json');

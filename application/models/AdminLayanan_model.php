@@ -3014,7 +3014,23 @@ class AdminLayanan_model extends CI_Model {
     }
 
     /**
-     * Ambil daftar submission rekomendasi bimbingan TA dan status tahap mahasiswa untuk Admin LAA
+     * =========================================================================
+     * REVIEW REKOMENDASI PEMBIMBING 1 & DOWNGRADE TAHAP PREVIEW (LAA)
+     * =========================================================================
+     * Mengambil daftar lengkap mahasiswa bimbingan TA dan pengajuan rekomendasi kelulusan
+     * dari Dosen Pembimbing 1 (Jalur Sidang Reguler vs Jalur Non-Sidang Ekuivalensi).
+     * 
+     * Mekanisme Logika:
+     * 1. Query JOIN komprehensif antara tabel guidance, user, mahasiswa, thesis_lecturers, dan rekomen_submission.
+     * 2. Auto-heal: Memulihkan kolom status_preview jika sebelumnya terpotong menjadi kosong akibat batasan ENUM lawas.
+     * 3. Decode JSON Berkas: Mengurai form_data_json menjadi array berkas eviden bukti luaran (Prestasi, HKI, Proyek, dll).
+     * 4. Normalisasi Tahapan: Menghitung posisi tahap_terkini (Preview 1, Preview 2, Preview 3, Persyaratan Sidang, Sidang).
+     * 5. Multi-Column Filter: Mendukung pencarian teks pada NIM, Nama, Judul TA, Nama Dosen, dan Jalur Rekomendasi.
+     * 
+     * @access public
+     * @param  string $search Kata kunci pencarian
+     * @param  string $filter_type Tipe filter rekomendasi ('all' | 'sidang' | 'non_sidang' | 'pending')
+     * @return array Array daftar mahasiswa bimbingan unik per NIM
      */
     public function get_rekomendasi_submissions_list($search = '', $filter_type = 'all') {
         $prev_dbg = $this->db->db_debug;
