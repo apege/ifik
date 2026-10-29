@@ -617,7 +617,7 @@
                                     </td>
 
                                     <!-- Status Berkas Persyaratan Dinamis dengan Ringkasan Angka & Indikator Warna -->
-                                    <td class="py-3.5 px-2 text-center whitespace-nowrap">
+                                    <td class="py-3.5 px-2 text-center">
                                         <?php 
                                             $b_summary = $berkas_summaries[$row['nim']] ?? null;
                                             if (!$b_summary) {
@@ -661,7 +661,7 @@
                                             </div>
 
                                             <!-- Status Berkas Persyaratan Dinamis per Item (Klik untuk Pop-up Multi-Card / Preview PDF) -->
-                                            <div class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[9px] font-mono shadow-2xs flex-wrap justify-center max-w-[240px]">
+                                            <div class="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[9px] font-mono shadow-2xs flex-wrap justify-center max-w-[190px] mx-auto leading-tight">
                                                 <?php foreach ($b_items as $s_idx => $item): ?>
                                                     <?php 
                                                         $st = $item['status'];

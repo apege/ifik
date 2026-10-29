@@ -272,6 +272,56 @@ class AdminLayanan_model extends CI_Model {
         return $fp_row['status_admin_laa'] ?? ($fp_row['status_adminlaa'] ?? ($fp_row['status_admin'] ?? ($fp_row['status_laa'] ?? 'Pending')));
     }
 
+    /**
+     * Cek apakah status string bernilai Disetujui / Valid / Approved
+     */
+    public function is_approved_status($st) {
+        if (empty($st)) return false;
+        $s = strtolower(trim((string)$st));
+        return in_array($s, [
+            'valid', 'approved', 'acc', 'disetujui', 'setuju', '1', 
+            'disetujui admin laa', 'disetujui laa', 'disetujui dosen wali', 'disetujui wali'
+        ], true) || strpos($s, 'disetujui') !== false || strpos($s, 'setuju') !== false;
+    }
+
+    /**
+     * Cek apakah status string bernilai Ditolak / Invalid / Rejected
+     */
+    public function is_rejected_status($st) {
+        if (empty($st)) return false;
+        $s = strtolower(trim((string)$st));
+        return in_array($s, [
+            'invalid', 'rejected', 'ditolak', 'tolak', 'revisi', 'kurang', '0'
+        ], true) || strpos($s, 'revisi') !== false || strpos($s, 'tolak') !== false || strpos($s, 'kurang') !== false;
+    }
+
+    /**
+     * Normalisasi status berkas menjadi 'Valid', 'Invalid', atau 'Pending'
+     */
+    public function clean_doc_status($st) {
+        if ($this->is_rejected_status($st)) return 'Invalid';
+        if ($this->is_approved_status($st)) return 'Valid';
+        return 'Pending';
+    }
+
+    /**
+     * Cek apakah nama / kode berkas adalah berkas sidang (agar tidak tercampur ke Pendaftaran TA)
+     */
+    public function is_sidang_doc($doc_name) {
+        if (empty($doc_name)) return false;
+        $s = strtolower(trim((string)$doc_name));
+        $sidang_keys = [
+            'surat_izin_wali', 'formulir_sidang', 'daftar_nilai', 'sertifikat_eprt', 
+            'sertifikat_tak', 'bukti_bimbingan', 'bukti_skpi', 'bap', 'bap2', 
+            'bap_sidang', 'revisi_sidang', 'draft_artikel', 'skpi', 'eprt', 'tak',
+            'izin_wali', 'izin_sidang', 'logbook'
+        ];
+        foreach ($sidang_keys as $sk) {
+            if ($s === $sk || strpos($s, $sk) !== false) return true;
+        }
+        return false;
+    }
+
     public function get_student_berkas_map($nim) {
         $map = array();
 
@@ -285,24 +335,35 @@ class AdminLayanan_model extends CI_Model {
                                 ->get('file_pendaftaran')
                                 ->result_array();
             if (!empty($fp_rows)) {
+                $unassigned_fps = array();
                 foreach ($fp_rows as $fp) {
-                    $namaDoc = strtolower($fp['nama'] ?? '');
-                    $kode = null;
-                    if (strpos($namaDoc, 'ksm') !== false) {
-                        $kode = 'ksm';
-                    } elseif (strpos($namaDoc, 'transkrip') !== false) {
-                        $kode = 'transkrip';
-                    } elseif (strpos($namaDoc, 'pernyataan') !== false) {
-                        $kode = 'pernyataan';
-                    } elseif (strpos($namaDoc, 'bebas_lab') !== false || strpos($namaDoc, 'lab') !== false) {
-                        $kode = 'bebas_lab';
-                    } else {
-                        $kode = preg_replace('/[^a-z0-9_]/', '_', trim($namaDoc));
+                    $namaDoc = strtolower(trim($fp['nama'] ?? ''));
+                    $fileRaw = strtolower(trim($fp['file'] ?? ''));
+                    // Abaikan dokumen pendaftaran sidang dari pendaftaran TA
+                    if ($this->is_sidang_doc($namaDoc) || $this->is_sidang_doc($fileRaw)) {
+                        continue;
                     }
 
+                    $kode = null;
+                    if (strpos($namaDoc, 'ksm') !== false || strpos($fileRaw, 'ksm') !== false) {
+                        $kode = 'ksm';
+                    } elseif (strpos($namaDoc, 'transkrip') !== false || strpos($fileRaw, 'transkrip') !== false) {
+                        $kode = 'transkrip';
+                    } elseif (strpos($namaDoc, 'pernyataan') !== false || strpos($fileRaw, 'pernyataan') !== false) {
+                        $kode = 'pernyataan';
+                    } elseif (strpos($namaDoc, 'bebas_lab') !== false || strpos($namaDoc, 'lab') !== false || strpos($fileRaw, 'bebas_lab') !== false || strpos($fileRaw, 'lab') !== false) {
+                        $kode = 'bebas_lab';
+                    } else {
+                        $clean_k = preg_replace('/[^a-z0-9_]/', '_', trim($namaDoc));
+                        if (!empty($clean_k) && !in_array($clean_k, ['mahasiswa', 'na', 'null', 'none', 'berkas', 'file'])) {
+                            $kode = $clean_k;
+                        }
+                    }
+
+                    $st = $this->_parse_fp_admin_status($fp);
+                    $cleanSt = $this->clean_doc_status($st);
+
                     if ($kode) {
-                        $st = $this->_parse_fp_admin_status($fp);
-                        $cleanSt = ($st === 'Approved' || $st === 'Valid') ? 'Valid' : (($st === 'Rejected' || $st === 'Invalid') ? 'Invalid' : 'Pending');
                         $map[$kode] = array(
                             'nim'               => $nim,
                             'kode_berkas'       => $kode,
@@ -311,6 +372,27 @@ class AdminLayanan_model extends CI_Model {
                             'status_verifikasi' => $cleanSt,
                             'catatan'           => $fp['komentar'] ?? ''
                         );
+                    } else if (!empty($fp['file'])) {
+                        $unassigned_fps[] = array('fp' => $fp, 'cleanSt' => $cleanSt);
+                    }
+                }
+
+                // Fallback: Jika ada file terunggah tetapi nama dokumennya 'na' atau generik,
+                // petakan secara berurutan ke syarat berkas standar yang belum memiliki file
+                if (!empty($unassigned_fps)) {
+                    $ta_keys = ['ksm', 'transkrip', 'pernyataan', 'bebas_lab'];
+                    foreach ($ta_keys as $tk) {
+                        if (empty($map[$tk]) && !empty($unassigned_fps)) {
+                            $u = array_shift($unassigned_fps);
+                            $map[$tk] = array(
+                                'nim'               => $nim,
+                                'kode_berkas'       => $tk,
+                                'file_name'         => $u['fp']['file'] ?? '',
+                                'status'            => $u['cleanSt'],
+                                'status_verifikasi' => $u['cleanSt'],
+                                'catatan'           => $u['fp']['komentar'] ?? ''
+                            );
+                        }
                     }
                 }
             }
@@ -919,21 +1001,30 @@ class AdminLayanan_model extends CI_Model {
                 $st_adm = $this->_parse_fp_admin_status($fp);
                 $student_map[$nim]['status_admin'][] = $st_adm;
 
-                $kode = null;
-                if (strpos($doc_name_raw, 'ksm') !== false) {
-                    $kode = 'ksm';
-                } elseif (strpos($doc_name_raw, 'transkrip') !== false) {
-                    $kode = 'transkrip';
-                } elseif (strpos($doc_name_raw, 'pernyataan') !== false) {
-                    $kode = 'pernyataan';
-                } elseif (strpos($doc_name_raw, 'bebas_lab') !== false || strpos($doc_name_raw, 'lab') !== false) {
-                    $kode = 'bebas_lab';
-                } else {
-                    $kode = preg_replace('/[^a-z0-9_]/', '_', trim($doc_name_raw));
+                $file_raw = strtolower(trim($fp['file'] ?? ''));
+                // Jangan campurkan berkas sidang ke pendaftaran TA
+                if ($this->is_sidang_doc($doc_name_raw) || $this->is_sidang_doc($file_raw)) {
+                    continue;
                 }
 
+                $kode = null;
+                if (strpos($doc_name_raw, 'ksm') !== false || strpos($file_raw, 'ksm') !== false) {
+                    $kode = 'ksm';
+                } elseif (strpos($doc_name_raw, 'transkrip') !== false || strpos($file_raw, 'transkrip') !== false) {
+                    $kode = 'transkrip';
+                } elseif (strpos($doc_name_raw, 'pernyataan') !== false || strpos($file_raw, 'pernyataan') !== false) {
+                    $kode = 'pernyataan';
+                } elseif (strpos($doc_name_raw, 'bebas_lab') !== false || strpos($doc_name_raw, 'lab') !== false || strpos($file_raw, 'bebas_lab') !== false || strpos($file_raw, 'lab') !== false) {
+                    $kode = 'bebas_lab';
+                } else {
+                    $clean_k = preg_replace('/[^a-z0-9_]/', '_', trim($doc_name_raw));
+                    if (!empty($clean_k) && !in_array($clean_k, ['mahasiswa', 'na', 'null', 'none', 'berkas', 'file'])) {
+                        $kode = $clean_k;
+                    }
+                }
+
+                $cleanSt = $this->clean_doc_status($st_adm);
                 if ($kode) {
-                    $cleanSt = ($st_adm === 'Approved' || $st_adm === 'Valid') ? 'Valid' : (($st_adm === 'Rejected' || $st_adm === 'Invalid') ? 'Invalid' : 'Pending');
                     $student_map[$nim]['docs'][$kode] = array(
                         'nim'               => $nim,
                         'kode_berkas'       => $kode,
@@ -1180,6 +1271,18 @@ class AdminLayanan_model extends CI_Model {
                 $st_wali = 'Approved';
             } else {
                 $st_wali = 'Pending';
+            }
+
+            // Jika mahasiswa sudah berstatus Approved oleh Admin LAA, pastikan seluruh berkas terdaftar berstatus Valid
+            // agar tidak memunculkan inkonsistensi 'Approved' namun bertuliskan 'Menunggu' / 'Belum Dicek'.
+            if ($st_admin === 'Approved') {
+                foreach ($p_berkas_map as $kb_code => &$b_rec) {
+                    $b_rec['status'] = 'Valid';
+                    $b_rec['status_verifikasi'] = 'Valid';
+                }
+                unset($b_rec);
+                $pb_valid_count = max($pb_valid_count, count($p_berkas_map));
+                $pb_invalid_count = 0;
             }
 
             $current_stage = ($st_wali === 'Approved') ? (($st_admin === 'Approved') ? 'Koordinator TA' : 'Admin Layanan') : (($st_wali === 'Rejected') ? 'Dosen Wali (Ditolak)' : 'Dosen Wali');
@@ -1443,12 +1546,23 @@ class AdminLayanan_model extends CI_Model {
             );
         }
 
+        // Jika mahasiswa sudah di-ACC penuh oleh Admin LAA, seluruh berkas miliknya pasti Valid
+        $is_admin_approved = (isset($row['status_approval_admin']) && $row['status_approval_admin'] === 'Approved');
+        if ($is_admin_approved && !empty($items)) {
+            foreach ($items as &$it) {
+                if ($it['status'] !== 'Invalid') {
+                    $it['status'] = 'Valid';
+                }
+            }
+            unset($it);
+            $valid_count = count($items);
+            $pending_count = 0;
+            $invalid_count = 0;
+        }
+
         // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
         // KECUALI jika mahasiswa sudah di-ACC / Approved (agar penambahan syarat baru di master tidak memaksa mahasiswa lama yang sudah di-ACC menjadi pending/berkas kurang)
-        $is_student_fully_approved = ($valid_count > 0 && $invalid_count === 0 && $pending_count === 0);
-        if (isset($row['status_approval_admin']) && $row['status_approval_admin'] === 'Approved') {
-            $is_student_fully_approved = true;
-        }
+        $is_student_fully_approved = ($valid_count > 0 && $invalid_count === 0 && $pending_count === 0) || $is_admin_approved;
 
         if (!$is_student_fully_approved) {
             foreach ($active_syarat as $sb) {
@@ -1539,23 +1653,32 @@ class AdminLayanan_model extends CI_Model {
             if (!empty($fp_rows)) {
                 foreach ($fp_rows as $fp) {
                     $c_nim = preg_replace('/^usr_mhs_|^mhs_|^usr_/', '', $fp['id_mhs']);
-                    $namaDoc = strtolower($fp['nama'] ?? '');
+                    $namaDoc = strtolower(trim($fp['nama'] ?? ''));
+                    $fileRaw = strtolower(trim($fp['file'] ?? ''));
+                    // Jangan campurkan berkas sidang ke pendaftaran TA
+                    if ($this->is_sidang_doc($namaDoc) || $this->is_sidang_doc($fileRaw)) {
+                        continue;
+                    }
+
                     $kode = null;
-                    if (strpos($namaDoc, 'ksm') !== false) {
+                    if (strpos($namaDoc, 'ksm') !== false || strpos($fileRaw, 'ksm') !== false) {
                         $kode = 'ksm';
-                    } elseif (strpos($namaDoc, 'transkrip') !== false) {
+                    } elseif (strpos($namaDoc, 'transkrip') !== false || strpos($fileRaw, 'transkrip') !== false) {
                         $kode = 'transkrip';
-                    } elseif (strpos($namaDoc, 'pernyataan') !== false) {
+                    } elseif (strpos($namaDoc, 'pernyataan') !== false || strpos($fileRaw, 'pernyataan') !== false) {
                         $kode = 'pernyataan';
-                    } elseif (strpos($namaDoc, 'bebas_lab') !== false || strpos($namaDoc, 'lab') !== false) {
+                    } elseif (strpos($namaDoc, 'bebas_lab') !== false || strpos($namaDoc, 'lab') !== false || strpos($fileRaw, 'bebas_lab') !== false || strpos($fileRaw, 'lab') !== false) {
                         $kode = 'bebas_lab';
                     } else {
-                        $kode = preg_replace('/[^a-z0-9_]/', '_', trim($namaDoc));
+                        $clean_k = preg_replace('/[^a-z0-9_]/', '_', trim($namaDoc));
+                        if (!empty($clean_k) && !in_array($clean_k, ['mahasiswa', 'na', 'null', 'none', 'berkas', 'file'])) {
+                            $kode = $clean_k;
+                        }
                     }
 
                     if ($kode) {
                         $st = $fp['status_adminlaa'] ?? ($fp['status_admin'] ?? ($fp['status_laa'] ?? 'Pending'));
-                        $cleanSt = ($st === 'Approved' || $st === 'Valid') ? 'Valid' : (($st === 'Rejected' || $st === 'Invalid') ? 'Invalid' : 'Pending');
+                        $cleanSt = $this->clean_doc_status($st);
                         $student_maps[$c_nim][$kode] = array(
                             'nim'               => $c_nim,
                             'kode_berkas'       => $kode,
@@ -1626,11 +1749,22 @@ class AdminLayanan_model extends CI_Model {
                 );
             }
 
-            // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
-            $is_student_fully_approved = ($valid_count > 0 && $invalid_count === 0 && $pending_count === 0);
-            if (isset($s_row['status_approval_admin']) && $s_row['status_approval_admin'] === 'Approved') {
-                $is_student_fully_approved = true;
+            // Jika mahasiswa sudah di-ACC penuh oleh Admin LAA, seluruh berkas miliknya pasti Valid
+            $is_admin_approved = (isset($s_row['status_approval_admin']) && $s_row['status_approval_admin'] === 'Approved');
+            if ($is_admin_approved && !empty($items)) {
+                foreach ($items as &$it) {
+                    if ($it['status'] !== 'Invalid') {
+                        $it['status'] = 'Valid';
+                    }
+                }
+                unset($it);
+                $valid_count = count($items);
+                $pending_count = 0;
+                $invalid_count = 0;
             }
+
+            // 2. Tambahkan syarat aktif jika mahasiswa belum mengunggahnya
+            $is_student_fully_approved = ($valid_count > 0 && $invalid_count === 0 && $pending_count === 0) || $is_admin_approved;
 
             if (!$is_student_fully_approved) {
                 foreach ($active_syarat as $sb) {

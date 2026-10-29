@@ -314,8 +314,11 @@
                     <div id="docGridContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                         <?php foreach($berkas_items as $b): ?>
                             <?php
-                                $is_invalid = ($b['status'] === 'Invalid') || in_array($b['key'], $berkas_kurang_selected);
-                                $is_valid = ($b['status'] === 'Valid') && !$is_invalid;
+                                $st_raw = strtolower(trim((string)($b['status'] ?? '')));
+                                $is_app_st = in_array($st_raw, ['valid', 'approved', 'acc', 'disetujui', 'setuju'], true) || strpos($st_raw, 'setuju') !== false;
+                                $is_rej_st = in_array($st_raw, ['invalid', 'rejected', 'ditolak', 'tolak', 'revisi', 'kurang'], true) || strpos($st_raw, 'revisi') !== false || strpos($st_raw, 'tolak') !== false;
+                                $is_invalid = $is_rej_st || in_array($b['key'], $berkas_kurang_selected);
+                                $is_valid = ($is_app_st || (($detail['status_approval_admin'] ?? '') === 'Approved')) && !$is_invalid;
                                 $card_border = $is_valid ? 'border-emerald-200 bg-emerald-50/20' : ($is_invalid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200 bg-white');
                             ?>
                             <div id="doc_card_<?= $b['key']; ?>" class="clean-card doc-card rounded-2xl p-5 border <?= $card_border; ?> flex flex-col space-y-4 transition-all duration-300 min-w-0 overflow-hidden" data-key="<?= $b['key']; ?>">
