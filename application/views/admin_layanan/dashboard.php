@@ -2834,10 +2834,41 @@
                     if (item) {
                         item.status = status;
                     }
+                    let vc = 0, ic = 0, pc = 0;
+                    mhs.berkas_summary.items.forEach(it => {
+                        const s = String(it.status || '').toLowerCase();
+                        if (s === 'valid' || s === 'approved') vc++;
+                        else if (s === 'invalid' || s === 'rejected') ic++;
+                        else pc++;
+                    });
+                    mhs.berkas_summary.valid_count = vc;
+                    mhs.berkas_summary.invalid_count = ic;
+                    mhs.berkas_summary.pending_count = pc;
                 }
 
                 mhs[`status_file_${keyStr}`] = status;
                 mhs[`status_${keyStr}`] = status;
+
+                const docList = (window.SYARAT_BERKAS && window.SYARAT_BERKAS.length > 0)
+                    ? window.SYARAT_BERKAS.map(sb => sb.kode_berkas)
+                    : ['ksm', 'transkrip', 'pernyataan', 'bebas_lab'];
+                
+                let hasInvalid = false;
+                let hasPending = false;
+                docList.forEach(k => {
+                    const info = getMhsDocInfo(mhs, k, nimStr);
+                    const st = String(info.status || '').toLowerCase();
+                    if (st === 'invalid' || st === 'rejected') hasInvalid = true;
+                    else if (st !== 'valid' && st !== 'approved') hasPending = true;
+                });
+
+                if (hasInvalid) {
+                    mhs.status_approval_admin = 'Rejected';
+                } else if (!hasPending && docList.length > 0) {
+                    mhs.status_approval_admin = 'Approved';
+                } else {
+                    mhs.status_approval_admin = 'Pending';
+                }
             });
         }
 
@@ -2862,6 +2893,11 @@
                     const normStatus = res.status || status;
                     
                     updateMhsDataDocStatus(nim, kode_berkas, normStatus);
+
+                    if (res.summary && window.mhsDataMap && (window.mhsDataMap[nim] || window.mhsDataMap[Number(nim)])) {
+                        const mTarget = window.mhsDataMap[nim] || window.mhsDataMap[Number(nim)];
+                        mTarget.berkas_summary = res.summary;
+                    }
 
                     const mhsCheck = window.mhsDataMap ? (window.mhsDataMap[nim] || window.mhsDataMap[Number(nim)]) : null;
                     const allApprovedNow = mhsCheck ? isStudentAllApproved(mhsCheck, nim) : false;
@@ -3169,11 +3205,6 @@
         function isStudentAllApproved(mhs, nim) {
             if (!mhs) return false;
             nim = String(nim).trim();
-
-            const overallStatus = String(mhs.status_approval_admin || mhs.status_verifikasi || '').toLowerCase();
-            if (overallStatus === 'approved' || overallStatus === 'disetujui') {
-                return true;
-            }
 
             const docList = (window.SYARAT_BERKAS && window.SYARAT_BERKAS.length > 0)
                 ? window.SYARAT_BERKAS.map(sb => sb.kode_berkas)
