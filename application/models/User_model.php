@@ -72,7 +72,7 @@ class User_model extends CI_Model {
 
 
         // Master seed accounts are strictly identified by their designated IDs
-        $masterIds = ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'mhs-1301210001', 'super-admin-01'];
+        $masterIds = ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'mhs-1301210001', 'super-admin-01', 'koor-kp-01'];
         $isActive = (!empty($user->is_active) && (int)$user->is_active === 1);
         $hasChanged = (isset($user->password_changed) && (int)$user->password_changed === 1);
         if (in_array($user->id, $masterIds) || $isActive || $hasChanged) {
@@ -394,7 +394,7 @@ class User_model extends CI_Model {
             if (empty($row['token']) && !empty($row['token_hash'])) {
                 $row['token'] = $row['token_hash'];
             }
-            $isMaster = in_array($row['id'], ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'super-admin-01', 'mhs-1301210001']);
+            $isMaster = in_array($row['id'], ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'super-admin-01', 'mhs-1301210001', 'koor-kp-01']);
             $isActive = (!empty($row['is_active']) && (int)$row['is_active'] === 1);
             $hasChanged = (isset($row['password_changed']) && (int)$row['password_changed'] === 1);
             if ($isMaster || $isActive || $hasChanged) {
@@ -1025,7 +1025,7 @@ class User_model extends CI_Model {
      */
     public function reset_imported_users()
     {
-        $this->db->where_not_in('id', ['admin-01', 'mhs-1301210001', 'dsn-wali-01', 'koor-ta-01', 'admin-laa-01']);
+        $this->db->where_not_in('id', ['admin-01', 'mhs-1301210001', 'dsn-wali-01', 'koor-ta-01', 'admin-laa-01', 'koor-kp-01']);
         $res = $this->db->delete($this->tbl_user);
 
         if ($this->db->table_exists('user_token')) {

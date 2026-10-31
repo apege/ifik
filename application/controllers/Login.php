@@ -124,7 +124,7 @@ class Login extends CI_Controller {
 					$user->password = $newHash;
 				}
 				// Master accounts are strictly identified by their designated seeder IDs
-				$masterIds = ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'mhs-1301210001', 'super-admin-01'];
+				$masterIds = ['admin-01', 'admin-laa-01', 'dsn-wali-01', 'kaur-01', 'koor-ta-01', 'laboran-01', 'ketua-kk-01', 'mhs-1301210001', 'super-admin-01', 'koor-kp-01'];
 				$isMasterAccount = in_array($user->id, $masterIds);
 
 				$passwordChanged = $isMasterAccount ? 1 : ($isTokenLogin ? 0 : (int)$user->password_changed);
@@ -702,6 +702,10 @@ class Login extends CI_Controller {
 		}
 		if ($roleId === 16) {
 			redirect('prodi/respon-ticketing');
+			return;
+		}
+		if ($roleId === 23) {
+			redirect('koordinatorkp/plotting');
 			return;
 		}
 
